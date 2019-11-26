@@ -5,7 +5,7 @@ Camera sample application with realtime GPU processing
 
 <p>Currently the software is working with XIMEA cameras. Soon we are going to add support for JAI and Imperx cameras.</p>
 
-<h3>The software has the following architecture</h3>
+<h2>The software has the following architecture</h2>
 <ul>
   <li>Thread for GUI and visualization (app main thread)</li>
   <li>Thread for image acquisition from a camera</li>
@@ -14,7 +14,7 @@ Camera sample application with realtime GPU processing
   <li>Thread for async data writing to SSD or streaming</li>
 </ul>
 
-<h3>Image processing pipeline on GPU for machine vision applications</h3>
+<h2>Image processing pipeline on GPU for machine vision applications</h2>
 <ul>
   <li>Raw image capture (8-bit, 12-bit packed/unpacked, 16-bit)</li>
   <li>Import to GPU</li>
@@ -34,7 +34,7 @@ Camera sample application with realtime GPU processing
   <li>Storage of compressed data to SSD</li>    
 </ul>
 
-<h3>To accomplish the task we need the following</h3>
+<h2>To accomplish the task we need the following</h2>
 <ul>
   <li>Camera SDK (XIMEA, Basler, Baumer, JAI, Imperx, etc.) for Windows</li>
   <li>Fastvideo SDK (demo) ver.0.15.0.2 for Windows</li>
@@ -63,7 +63,7 @@ Camera sample application with realtime GPU processing
   <li>Interoparability with external FFmpeg and GStreamer</li>
 </ul>
 
-<h3>Links</h3>
+<h2>Links</h2>
 <ul>
   <li><a href="https://www.fastcompression.com/product/sdk.htm" target="_blank">Fastvideo SDK for Image & Video Processing</a></li>
   <li>Download Fastvideo SDK</li>
