@@ -5,6 +5,8 @@ Camera sample application with realtime GPU processing
 
 <p>Currently the software is working with XIMEA cameras. Soon we are going to add support for JAI and Imperx cameras.</p>
 
+<p>From the benchmarks on <strong>NVIDIA GeForce RTX 2080ti</strong> we can see that GPU-based raw image processing is very fast and it could offer very high quality at the same time. The total performane could reach <strong>2 GPix/s</strong> for color cameras and <strong>3 GPix/s</strong> for monochrome cameras. The performance strongly depends on complexity of that pipeline. Multiple GPU solutions could significanly improve the performance.</p>
+
 <h2>The software has the following architecture</h2>
 <ul>
   <li>Thread for GUI and visualization (app main thread)</li>
