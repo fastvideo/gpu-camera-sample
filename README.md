@@ -3,7 +3,7 @@ Camera sample application with realtime GPU processing
 
 <p>This is an implementation of standard image processing pipeline for camera applications. Processing is done on NVIDIA GPU to speedup the performance. The software could also work with raw images in PGM format and you can utilize these images for testing or if you don't have a camera.</p>
 
-<p>Currently the software is working with XIMEA cameras. Soon we are going to add support of JAI and Imperx cameras.</p>
+<p>Currently the software is working with XIMEA cameras. Soon we are going to add support for JAI and Imperx cameras.</p>
 
 <h3>The software has the following architecture</h3>
 <ul>
@@ -58,9 +58,15 @@ Camera sample application with realtime GPU processing
   <li>Color correction with 3x3 matrix</li>  
   <li>Other color spaces</li>
   <li>3D LUT for HSV and RGB</li>
-  <li>Defringe</li>
+  <li>Defringe module</li>
   <li>Special version for NVIDIA Jetson hardware</li>
   <li>Interoparability with external FFmpeg and GStreamer</li>
 </ul>
 
+<h3>Links</h3>
+<ul>
+  <li><a href="https://www.fastcompression.com/product/sdk.htm" target="_blank">Fastvideo SDK for Image & Video Processing</a></li>
+  <li>Download Fastvideo SDK</li>
+  <li><a href="https://www.fastcinemadng.com/download/download.html">Download Fast CinemaDNG Processor software</a></li>
+</ul>
 <p></p>
