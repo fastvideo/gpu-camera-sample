@@ -1,9 +1,9 @@
 # gpu-camera-sample
 Camera sample application with realtime GPU processing
 
-<p>This is an implementation of standard image processing pipeline for camera applications. Processing is done on NVIDIA GPU to speedup the performance. The software could also work with raw images in PGM format and you can utilize these images for testing or if you don't have a camera.</p>
+<p>That software is based on standard image processing pipeline for camera applications. Processing is done on NVIDIA GPU to speedup the performance. The software could also work with raw images in PGM format and you can utilize these images for testing or if you don't have a camera or if your camera is not supported.</p>
 
-<p>Currently the software is working with XIMEA cameras. Soon we are going to add support for JAI and Imperx cameras.</p>
+<p>Currently the software is working with <a href="https://www.ximea.com">XIMEA</a> cameras. Soon we are going to add support for JAI and Imperx cameras.</p>
 
 <p>From the benchmarks on <strong>NVIDIA GeForce RTX 2080ti</strong> we can see that GPU-based raw image processing is very fast and it could offer very high quality at the same time. The total performane could reach <strong>2 GPix/s</strong> for color cameras and <strong>3 GPix/s</strong> for monochrome cameras. The performance strongly depends on complexity of that pipeline. Multiple GPU solutions could significanly improve the performance.</p>
 
@@ -36,12 +36,12 @@ Camera sample application with realtime GPU processing
   <li>Storage of compressed data to SSD</li>    
 </ul>
 
-<h2>To accomplish the task we need the following</h2>
+<h2>To build the project we need the following software for Windows</h2>
 <ul>
-  <li>Camera SDK (XIMEA, Basler, Baumer, JAI, Imperx, etc.) for Windows</li>
-  <li>Fastvideo SDK (demo) ver.0.15.0.2 for Windows</li>
-  <li>NVIDIA CUDA-10.0 for Windows</li>
-  <li>Qt ver.5.13.1 for Windows</li>
+  <li>Camera SDK (XIMEA, Basler, Baumer, JAI, Imperx, etc.)</li>
+  <li>Fastvideo SDK (demo) ver.0.15.0.2</li>
+  <li>NVIDIA CUDA-10.0</li>
+  <li>Qt ver.5.13.1</li>
   <li>Compiler MSVC 2017</li>
 </ul>
 
@@ -67,8 +67,8 @@ Camera sample application with realtime GPU processing
 
 <h2>Links</h2>
 <ul>
-  <li><a href="https://www.fastcompression.com/product/sdk.htm" target="_blank">Fastvideo SDK for Image & Video Processing</a></li>
-  <li>Download Fastvideo SDK</li>
-  <li><a href="https://www.fastcinemadng.com/download/download.html">Download Fast CinemaDNG Processor software</a></li>
+  <li><a href="https://www.fastcompression.com/product/sdk.htm">Fastvideo SDK for Image & Video Processing</a></li>
+  <li>Download Fastvideo SDK for Windows</li>
+  <li><a href="https://www.fastcinemadng.com/download/download.html">Download Fast CinemaDNG Processor</a> software for Windows</li>
 </ul>
 <p></p>
