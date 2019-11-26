@@ -1,6 +1,10 @@
 # gpu-camera-sample
 Camera sample application with realtime GPU processing
 
+<p>This is an implementation of standard image processing pipeline for camera applications. Processing is done on NVIDIA GPU to speedup the performance. The software could also work with raw images in PGM format and you can utilize these images for testing or if you don't have a camera.</p>
+
+<p>Currently the software is working with XIMEA cameras. Soon we are going to add support of JAI and Imperx cameras.</p>
+
 <h3>The software has the following architecture</h3>
 <ul>
   <li>Thread for GUI and visualization (app main thread)</li>
