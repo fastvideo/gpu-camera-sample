@@ -15,6 +15,9 @@ Camera sample application with realtime GPU processing
   <li>Thread for OpenGL rendering</li>
   <li>Thread for async data writing to SSD or streaming</li>
 </ul>
+<p>We've implemented the simplest approach for camera application. Camera driver is writing raw data to memory ring buffer, then we copy data from ring buffer to GPU for computations. Full image processing pipeline is done on GPU, so we need just collect processed frames at the output.</p>
+<p>In general case, Fastvideo SDK can import/export data from/to SSD / CPU memory / GPU memory. This is done to ensure compatibility with third-party libraries on CPU and GPU.</p>
+<p>You can get more info at <a href="https://www.fastcompression.com/download/Fastvideo_SDK_manual.pdf">Fastvideo SDK Manual</a>.</p>
 
 <h2>Image processing pipeline on GPU for machine vision applications</h2>
 <ul>
@@ -90,8 +93,8 @@ Camera sample application with realtime GPU processing
 <h2>Links and Downloads</h2>
 <ul>
   <li><a href="https://www.fastcinemadng.com/download/download.html">Download Fast CinemaDNG Processor</a> software for Windows</li>
-  <li>Download Fastvideo SDK (demo) for Windows</li>
-  <li>Download Fastvideo SDK (demo) for Linux</li>
+  <li>Download Fastvideo SDK (demo) for Windows-7/10, 64-bit</li>
+  <li>Download Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</li>
   <li>Download Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</li>
+  <li>Download <a href="https://www.fastcompression.com/download/Fastvideo_SDK_manual.pdf">Fastvideo SDK Manual</a></li>
 </ul>
-<p></p>
