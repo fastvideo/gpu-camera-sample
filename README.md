@@ -20,7 +20,7 @@ Camera sample application with realtime GPU processing
 <ul>
   <li>Raw image capture (8-bit, 12-bit packed/unpacked, 16-bit)</li>
   <li>Import to GPU</li>
-  <li>Optional raw data convertion and unpacking</li>
+  <li>Raw data convert and unpack</li>
   <li>Linearization curve</li>
   <li>Bad Pixel Correction</li>  
   <li>Dark frame subtraction</li>  
