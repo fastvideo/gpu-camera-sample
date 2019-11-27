@@ -54,8 +54,8 @@ Camera sample application with realtime GPU processing
   <li>NVIDIA GPU with Kepler architecture, 6xx series minimum</li>
   <li>NVIDIA GPU with 4 GB memory or better</li>
   <li>Intel Core i5 or better</li>
-  <li>NVIDIA CUDA-10.0</li>
-  <li>Compiler MSVC 2017 (MSVC 2015 is not compatible with CUDA-10)</li>
+  <li>NVIDIA CUDA-10.1</li>
+  <li>Compiler MSVC 2017 (MSVC 2015 is not compatible with CUDA-10.1)</li>
 </ul>
 <p>We also recommend to check PCI-Express bandwidth for Host-to-Device and Device-to-Host transfers. For GPU with Gen3 x16 it should be in the range of 10-12 GB/s. GPU memory size could be a bottleneck for high resolution cameras, so please check GPU memory usage in the software.</p>
 <p>If you are working with images which reside on HDD, please place them on SSD or M2.</p>
