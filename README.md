@@ -96,7 +96,7 @@ Camera sample application with realtime GPU processing
 <h2>Downloads</h2>
 <ul>
   <li><a href="https://www.fastcinemadng.com/download/download.html" target="_blank">Download Fast CinemaDNG Processor</a> software for Windows</li>
-  <li><a href="https://yadi.sk/d/7D3C3yx9wMLVNA">Download Fastvideo SDK (demo) for Windows-7/10, 64-bit</a></li>
+  <li><a href="https://yadi.sk/d/7D3C3yx9wMLVNA">Download Fastvideo SDK (demo) for Windows-7/10, 64-bit</a> (valid till March 23, 2020)</li>
   <li>Download Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</li>
   <li>Download Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</li>
   <li>Download <a href="https://www.fastcompression.com/download/Fastvideo_SDK_manual.pdf" target="_blank">Fastvideo SDK Manual</a></li>
