@@ -1,7 +1,7 @@
 # gpu-camera-sample
 Camera sample application with realtime GPU processing
 
-<p>That software is based on standard image processing pipeline for camera applications. Processing is done on NVIDIA GPU to speedup the performance. The software could also work with raw images in PGM format and you can utilize these images for testing or if you don't have a camera or if your camera is not supported.</p>
+<p>That software is based on standard image processing pipeline for camera applications. Processing is done on NVIDIA GPU to speedup the performance. The software could also work with raw images in PGM format and you can utilize these images for testing or if you don't have a camera or if your camera is not supported. More info about that project you can find <a href="https://www.fastcompression.com/blog/gpu-software-machine-vision-cameras.htm">here</a>.</p>
 
 <p>Currently the software is working with <a href="https://www.ximea.com">XIMEA</a> cameras. Soon we are going to add support for JAI and Imperx cameras.</p>
 
@@ -28,7 +28,7 @@ Camera sample application with realtime GPU processing
   <li>White Balance</li>
   <li>Exposure Correction (brightness control)</li>  
   <li>Debayer with HQLI (5&times;5 window), DFPD (11&times;11), MG (23&times;23) algorithms</li>
-  <li>Wavelet-based denoising</li>  
+  <li>Wavelet-based denoiser</li>  
   <li>Gamma</li>
   <li>JPEG / MJPEG encoding</li>
   <li>Output to monitor</li>  
@@ -48,7 +48,7 @@ Camera sample application with realtime GPU processing
 <h2>Roadmap</h2>
 <ul>
   <li>GPU pipeline for monochrome cameras - in progress</li>
-  <li>H.264/H.265 encoders - in progress</li>  
+  <li>H.264/H.265 encoders on GPU - in progress</li>  
   <li>Linux version - in progress</li>
   <li>Resize</li>
   <li>UnSharp Mask</li>
@@ -58,17 +58,27 @@ Camera sample application with realtime GPU processing
   <li>Realtime raw compression (lossless and/or lossy)</li>
   <li>Curves and Levels via 1D LUT</li>
   <li>Color correction with 3x3 matrix</li>  
-  <li>Other color spaces</li>
+  <li>Support of other color spaces</li>
   <li>3D LUT for HSV and RGB</li>
   <li>Defringe module</li>
-  <li>Special version for NVIDIA Jetson hardware</li>
+  <li>DCP support</li>
+  <li>LCP support (remap)</li>
+  <li>Special version for NVIDIA Jetson hardware and L4T</li>
   <li>Interoparability with external FFmpeg and GStreamer</li>
 </ul>
 
-<h2>Links</h2>
+<h2>Fastvideo SDK Benchmarks</h2>
 <ul>
   <li><a href="https://www.fastcompression.com/product/sdk.htm">Fastvideo SDK for Image & Video Processing</a></li>
-  <li>Download Fastvideo SDK for Windows</li>
+  <li><a href="https://www.fastcompression.com/pub/2019/Fastvideo_SDK_benchmarks.pdf">Fastvideo SDK Benchmarks 2019</a></li>
+  <li><a href="https://www.fastcompression.com/blog/jetson-benchmark-comparison.htm">Jetson Benchmark Comparison: Nano vs TX1 vs TX2 vs Xavier</a></li>
+</ul>
+
+<h2>Links and Downloads</h2>
+<ul>
   <li><a href="https://www.fastcinemadng.com/download/download.html">Download Fast CinemaDNG Processor</a> software for Windows</li>
+  <li>Download Fastvideo SDK (demo) for Windows</li>
+  <li>Download Fastvideo SDK (demo) for Linux</li>
+  <li>Download Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</li>
 </ul>
 <p></p>
