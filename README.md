@@ -42,7 +42,7 @@ Camera sample application with realtime GPU processing
 <ul>
   <li>Camera SDK (XIMEA, Basler, Baumer, JAI, Imperx, etc.)</li>
   <li>Fastvideo SDK (demo) ver.0.15.0.2</li>
-  <li>NVIDIA CUDA-10.0</li>
+  <li>NVIDIA CUDA-10.1</li>
   <li>Qt ver.5.13.1</li>
   <li>Compiler MSVC 2017</li>
 </ul>
