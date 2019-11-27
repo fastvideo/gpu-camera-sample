@@ -3,9 +3,9 @@ Camera sample application with realtime GPU processing
 
 <p>That software is based on standard image processing pipeline for camera applications. Processing is done on NVIDIA GPU to speedup the performance. The software could also work with raw images in PGM format and you can utilize these images for testing or if you don't have a camera or if your camera is not supported. More info about that project you can find <a href="https://www.fastcompression.com/blog/gpu-software-machine-vision-cameras.htm" target="_blank">here</a>.</p>
 
-<p>Currently the software is working with <a href="https://www.ximea.com" target="_blank">XIMEA</a> cameras. Soon we are going to add support for JAI and Imperx cameras. You can add support for desired cameras by yourself. The software is working with demo version of Fastvideo SDK, that is why you can see a watermark on the screen. To get a license for the SDK, please contact <a href="https://www.fastcompression.com/"  target="_blank">Fastvideo company</a>.</p>
-
 <p>From the benchmarks on <strong>NVIDIA GeForce RTX 2080ti</strong> we can see that GPU-based raw image processing is very fast and it could offer very high quality at the same time. The total performane could reach <strong>2 GPix/s</strong> for color cameras and <strong>3 GPix/s</strong> for monochrome cameras. The performance strongly depends on complexity of that pipeline. Multiple GPU solutions could significanly improve the performance.</p>
+
+<p>Currently the software is working with <a href="https://www.ximea.com" target="_blank">XIMEA</a> cameras. Soon we are going to add support for JAI and Imperx cameras. You can add support for desired cameras by yourself. The software is working with demo version of Fastvideo SDK, that is why you can see a watermark on the screen. To get a license for the SDK, please contact <a href="https://www.fastcompression.com/"  target="_blank">Fastvideo company</a>.</p>
 
 <h2>The software has the following architecture</h2>
 <ul>
@@ -82,14 +82,18 @@ Camera sample application with realtime GPU processing
   <li>Interoparability with external FFmpeg and GStreamer</li>
 </ul>
 
-<h2>Fastvideo SDK Benchmarks</h2>
+<h2>Links</h2>
 <ul>
   <li><a href="https://www.fastcompression.com/product/sdk.htm" target="_blank">Fastvideo SDK for Image & Video Processing</a></li>
+</ul>
+
+<h2>Fastvideo SDK Benchmarks</h2>
+<ul>
   <li><a href="https://www.fastcompression.com/pub/2019/Fastvideo_SDK_benchmarks.pdf" target="_blank">Fastvideo SDK Benchmarks 2019</a></li>
   <li><a href="https://www.fastcompression.com/blog/jetson-benchmark-comparison.htm" target="_blank">Jetson Benchmark Comparison: Nano vs TX1 vs TX2 vs Xavier</a></li>
 </ul>
 
-<h2>Links and Downloads</h2>
+<h2>Downloads</h2>
 <ul>
   <li><a href="https://www.fastcinemadng.com/download/download.html" target="_blank">Download Fast CinemaDNG Processor</a> software for Windows</li>
   <li>Download Fastvideo SDK (demo) for Windows-7/10, 64-bit</li>
