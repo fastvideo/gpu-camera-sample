@@ -3,7 +3,7 @@ Camera sample application with realtime GPU processing
 
 <p>That software is based on standard image processing pipeline for camera applications. Processing is done on NVIDIA GPU to speedup the performance. The software could also work with raw images in PGM format and you can utilize these images for testing or if you don't have a camera or if your camera is not supported. More info about that project you can find <a href="https://www.fastcompression.com/blog/gpu-software-machine-vision-cameras.htm">here</a>.</p>
 
-<p>Currently the software is working with <a href="https://www.ximea.com">XIMEA</a> cameras. Soon we are going to add support for JAI and Imperx cameras.</p>
+<p>Currently the software is working with <a href="https://www.ximea.com">XIMEA</a> cameras. Soon we are going to add support for JAI and Imperx cameras. You can add support for desired cameras by yourself. The software is working with demo version of Fastvideo SDK, that is why you can see a watermark on the screen. To get a license for the SDK, please contact <a href="https://www.fastcompression.com/">Fastvideo company</a>.</p>
 
 <p>From the benchmarks on <strong>NVIDIA GeForce RTX 2080ti</strong> we can see that GPU-based raw image processing is very fast and it could offer very high quality at the same time. The total performane could reach <strong>2 GPix/s</strong> for color cameras and <strong>3 GPix/s</strong> for monochrome cameras. The performance strongly depends on complexity of that pipeline. Multiple GPU solutions could significanly improve the performance.</p>
 
@@ -44,6 +44,19 @@ Camera sample application with realtime GPU processing
   <li>Qt ver.5.13.1</li>
   <li>Compiler MSVC 2017</li>
 </ul>
+
+<h2>Minimum Hardware ans Software Requirements</h2>
+<ul>
+  <li>Windows7/10, 64-bit</li>
+  <li>The latest NVIDIA driver</li>
+  <li>NVIDIA GPU with Kepler architecture, 6xx series minimum</li>
+  <li>NVIDIA GPU with 4 GB memory or better</li>
+  <li>Intel Core i5 or better</li>
+  <li>NVIDIA CUDA-10.0</li>
+  <li>Compiler MSVC 2017 (MSVC 2015 is not compatible with CUDA-10)</li>
+</ul>
+<p>We also recommend to check PCI-Express bandwidth for Host-to-Device and Device-to-Host transfers. For GPU with Gen3 x16 it should be in the range of 10-12 GB/s. GPU memory size could be a bottleneck for high resolution cameras, so please check GPU memory usage in the software.</p>
+<p>If you are working with images which reside on HDD, please place them on SSD or M2.</p>
 
 <h2>Roadmap</h2>
 <ul>
