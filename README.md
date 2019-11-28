@@ -5,7 +5,7 @@ Camera sample application with realtime GPU processing
 
 <p>From the benchmarks on <strong>NVIDIA GeForce RTX 2080ti</strong> we can see that GPU-based raw image processing is very fast and it could offer very high quality at the same time. The total performane could reach <strong>2 GPix/s</strong> for color cameras and <strong>3 GPix/s</strong> for monochrome cameras. The performance strongly depends on complexity of that pipeline. Multiple GPU solutions could significanly improve the performance.</p>
 
-<p>Currently the software is working with <a href="https://www.ximea.com" target="_blank">XIMEA</a> cameras. Soon we are going to add support for JAI and Imperx cameras. You can add support for desired cameras by yourself. The software is working with demo version of Fastvideo SDK, that is why you can see a watermark on the screen. To get a license for the SDK, please contact <a href="https://www.fastcompression.com/"  target="_blank">Fastvideo company</a>.</p>
+<p>Currently the software is working with <a href="https://www.ximea.com" target="_blank">XIMEA</a> cameras. Soon we are going to add support for JAI and Imperx cameras. You can add support for desired cameras by yourself. The software is working with demo version of Fastvideo SDK, that is why you can see a watermark on the screen. To get a license for the SDK, please contact <a href="https://www.fastcompression.com/" target="_blank">Fastvideo company</a>.</p>
 
 <h2>The software has the following architecture</h2>
 <ul>
@@ -49,7 +49,7 @@ Camera sample application with realtime GPU processing
 
 <h2>Minimum Hardware ans Software Requirements</h2>
 <ul>
-  <li>Windows7/10, 64-bit</li>
+  <li>Windows-7/10, 64-bit</li>
   <li>The latest NVIDIA driver</li>
   <li>NVIDIA GPU with Kepler architecture, 6xx series minimum</li>
   <li>NVIDIA GPU with 4 GB memory or better</li>
@@ -59,6 +59,8 @@ Camera sample application with realtime GPU processing
 </ul>
 <p>We also recommend to check PCI-Express bandwidth for Host-to-Device and Device-to-Host transfers. For GPU with Gen3 x16 it should be in the range of 10-12 GB/s. GPU memory size could be a bottleneck for high resolution cameras, so please check GPU memory usage in the software.</p>
 <p>If you are working with images which reside on HDD, please place them on SSD or M2.</p>
+<p>For testing purposes you can utilize the latest NVIDIA GeForce RTX 2060, 2070, 2080ti</p>
+<p>For continuous high performance applications we recommend professional NVIDIA Quadro and Tesla GPUs</p>
 
 <h2>Roadmap</h2>
 <ul>
