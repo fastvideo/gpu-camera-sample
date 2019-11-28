@@ -74,7 +74,7 @@ Camera sample application with realtime GPU processing
   <li>JPEG2000 encoder</li>
   <li>Realtime raw compression (lossless and/or lossy)</li>
   <li>Curves and Levels via 1D LUT</li>
-  <li>Color correction with 3x3 matrix</li>  
+  <li>Color correction with 3&times;3 matrix</li>  
   <li>Support of other color spaces</li>
   <li>3D LUT for HSV and RGB</li>
   <li>Defringe module</li>
