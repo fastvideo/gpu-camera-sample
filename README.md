@@ -78,7 +78,7 @@ Camera sample application with realtime GPU processing
   <li>Defringe module</li>
   <li>DCP support</li>
   <li>LCP support (remap)</li>
-  <li>Special version for NVIDIA Jetson hardware and L4T</li>
+  <li>Special version for NVIDIA Jetson hardware and L4T for CUDA-10.0</li>
   <li>Interoparability with external FFmpeg and GStreamer</li>
 </ul>
 
@@ -93,12 +93,11 @@ Camera sample application with realtime GPU processing
   <li><a href="https://www.fastcompression.com/blog/jetson-benchmark-comparison.htm" target="_blank">Jetson Benchmark Comparison: Nano vs TX1 vs TX2 vs Xavier</a></li>
 </ul>
 
-
 <h2>Downloads</h2>
 <ul>
   <li>Download <a href="https://www.fastcinemadng.com/download/download.html" target="_blank">Fast CinemaDNG Processor</a> software for Windows</li>
   <li>Download <a href="https://yadi.sk/d/7D3C3yx9wMLVNA">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a> (valid till March 23, 2020)</li>
   <li>Download <a href="https://yadi.sk/d/7BADIJxdpBvz0A">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a> (valid till March 23, 2020)</li>
-  <li>Download Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</li>
+  <li>Download <a href="https://yadi.sk/d/sM27Hl0JTbakhQ">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> (valid till April 12, 2020)</li>
   <li>Download <a href="https://www.fastcompression.com/download/Fastvideo_SDK_manual.pdf" target="_blank">Fastvideo SDK Manual</a></li>
 </ul>
