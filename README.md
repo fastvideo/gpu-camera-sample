@@ -84,7 +84,7 @@ Camera sample application with realtime GPU processing
   <li>Interoparability with external FFmpeg and GStreamer</li>
 </ul>
 
-<h2>Links</h2>
+<h2>Info</h2>
 <ul>
   <li><a href="https://www.fastcompression.com/product/sdk.htm" target="_blank">Fastvideo SDK for Image & Video Processing</a></li>
 </ul>
