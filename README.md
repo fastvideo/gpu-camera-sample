@@ -40,7 +40,7 @@ Camera sample application with realtime GPU processing
 
 <h2>To build the project we need the following software for Windows</h2>
 <ul>
-  <li>Camera SDK (XIMEA, Basler, Baumer, JAI, Imperx, etc.)</li>
+  <li>Camera SDK (XIMEA, Flir, Baumer, JAI, Imperx, etc.)</li>
   <li>Fastvideo SDK (demo) ver.0.15.0.0</li>
   <li>NVIDIA CUDA-10.1</li>
   <li>Qt ver.5.13.1</li>
