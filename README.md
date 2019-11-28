@@ -59,8 +59,8 @@ Camera sample application with realtime GPU processing
 </ul>
 <p>We also recommend to check PCI-Express bandwidth for Host-to-Device and Device-to-Host transfers. For GPU with Gen3 x16 it should be in the range of 10-12 GB/s. GPU memory size could be a bottleneck for high resolution cameras, so please check GPU memory usage in the software.</p>
 <p>If you are working with images which reside on HDD, please place them on SSD or M2.</p>
-<p>For testing purposes you can utilize the latest NVIDIA GeForce RTX 2060, 2070, 2080ti</p>
-<p>For continuous high performance applications we recommend professional NVIDIA Quadro and Tesla GPUs</p>
+<p>For testing purposes you can utilize the latest NVIDIA GeForce RTX 2060, 2070, 2080ti.</p>
+<p>For continuous high performance applications we recommend professional NVIDIA Quadro and Tesla GPUs.</p>
 
 <h2>Roadmap</h2>
 <ul>
@@ -97,7 +97,7 @@ Camera sample application with realtime GPU processing
 
 <h2>Downloads</h2>
 <ul>
-  <li>Download <a href="https://www.fastcinemadng.com/download/download.html" target="_blank">Fast CinemaDNG Processor</a> software for Windows</li>
+  <li>Download <a href="https://www.fastcinemadng.com/download/download.html" target="_blank">Fast CinemaDNG Processor</a> software for Windows, manual and test DNG footages</li>
   <li>Download <a href="https://yadi.sk/d/7D3C3yx9wMLVNA">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a> (valid till March 23, 2020)</li>
   <li>Download <a href="https://yadi.sk/d/7BADIJxdpBvz0A">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a> (valid till March 23, 2020)</li>
   <li>Download <a href="https://yadi.sk/d/sM27Hl0JTbakhQ">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> (valid till April 12, 2020)</li>
