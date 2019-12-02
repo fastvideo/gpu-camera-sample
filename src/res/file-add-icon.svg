@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="128" height="128" id="svg2">
+    <metadata id="metadata3">
+        <rdf:RDF>
+            <cc:Work rdf:about="">
+                <dc:title>File Add Icon</dc:title>
+                <dc:description>Icon inspired by Awoken gtk icons theme</dc:description>
+                <dc:subject>
+                    <rdf:Bag>
+                        <rdf:li>icon</rdf:li>
+                        <rdf:li>grey</rdf:li>
+                        <rdf:li>monoshape</rdf:li>
+                        <rdf:li>shape</rdf:li>
+                        <rdf:li>mono</rdf:li>
+                        <rdf:li>add</rdf:li>
+                        <rdf:li>gradient</rdf:li>
+                        <rdf:li>AwOken</rdf:li>
+                    </rdf:Bag>
+                </dc:subject>
+                <dc:publisher>
+                    <cc:Agent rdf:about="http://www.openclipart.org">
+                        <dc:title>Open Clip Art Library</dc:title>
+                    </cc:Agent>
+                </dc:publisher>
+                <dc:creator>
+                    <cc:Agent>
+                        <dc:title>Jakub Jankiewicz</dc:title>
+                    </cc:Agent>
+                </dc:creator>
+                <dc:rights>
+                    <cc:Agent>
+                        <dc:title>Jakub Jankiewicz</dc:title>
+                    </cc:Agent>
+                </dc:rights>
+                <dc:date />
+                <dc:format>image/svg+xml</dc:format>
+                <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+                <cc:license rdf:resource="http://web.resource.org/cc/PublicDomain" />
+                <dc:language>pl</dc:language>
+            </cc:Work>
+            <cc:License rdf:about="http://web.resource.org/cc/PublicDomain">
+                <cc:permits rdf:resource="http://web.resource.org/cc/Reproduction" />
+                <cc:permits rdf:resource="http://web.resource.org/cc/Distribution" />
+                <cc:permits rdf:resource="http://web.resource.org/cc/DerivativeWorks" />
+            </cc:License>
+        </rdf:RDF>
+    </metadata>
+    <defs id="defs4">
+         <linearGradient id="grey_gradient">
+            <stop id="stop3630-72-7" style="stop-color:#dbdbdb;stop-opacity:1" offset="0" />
+            <stop id="stop3632-7-2" style="stop-color:#757575;stop-opacity:1" offset="1" />
+        </linearGradient>
+    </defs>
+    <path d="m 29.09375,11.235607 c -3.183804,0 -5.71875,2.566196 -5.71875,5.75 l 0,94.028783 c 0,3.1838 2.534946,5.75 5.71875,5.75 l 69.8125,0 c 3.1838,0 5.71875,-2.5662 5.71875,-5.75 l 0,-70.653783 -21.03125,0 c -4.306108,0 -8.0625,-3.141109 -8.0625,-7.3125 l 0,-21.812499 z m 50.4375,0 0,21.8125 c 0,1.714123 1.631968,3.3125 4.0625,3.3125 l 21.03125,0 z" id="rect3034" style="color:#000000;fill:url(#grey_gradient);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.96360266;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+    <path d="m 90.674777,82.564164 c -11.188565,0 -20.25,9.061444 -20.25,20.250006 0,11.18855 9.061435,20.28125 20.25,20.28125 11.188533,0 20.281253,-9.0927 20.281253,-20.28125 0,-11.188562 -9.09272,-20.250006 -20.281253,-20.250006 z m -3.5,7.03125 7,0 0,9.750001 9.750003,0 0,6.968755 -9.750003,0 0,9.78125 -6.96875,0 0,-9.75 -9.78125,0 0,-7.000005 9.75,0 0,-9.750001 z" id="path3035" style="color:#000000;fill:#008000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.96360266;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+</svg>

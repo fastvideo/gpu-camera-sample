@@ -1,0 +1,14 @@
+src/**/*.user*
+src/**/*.filters
+src/**/.vs
+src/**/x64
+
+FastMachineVision*
+OtherLibs
+build-*
+# bin/**/*.lib
+# bin/**/*.iobj
+# bin/**/*.ipdb
+# bin/**/*.pdb
+# bin/**/*.ilk
+# bin/**/*.exp

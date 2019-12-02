@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="48"
+   height="48"
+   version="1.1"
+   id="svg10"
+   sodipodi:docname="ShoppingCart.svg"
+   inkscape:version="0.92.1 r15371">
+  <defs
+     id="defs14" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="2482"
+     inkscape:window-height="1411"
+     id="namedview12"
+     showgrid="false"
+     inkscape:zoom="11.313709"
+     inkscape:cx="65.634726"
+     inkscape:cy="11.131198"
+     inkscape:window-x="69"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g8" />
+  <title
+     id="title2">shopping cart - hot pink</title>
+  <metadata
+     id="metadata7">image/svg+xmlshopping cartcartsupermarketshoppingshopping cartSergio Luiz Araujo Silva<rdf:RDF>
+  <cc:Work
+     rdf:about="">
+    <dc:format>image/svg+xml</dc:format>
+    <dc:type
+       rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+    <dc:title>shopping cart - hot pink</dc:title>
+  </cc:Work>
+</rdf:RDF>
+</metadata>
+  <g
+     id="g8"
+     transform="translate(0,-432)">
+    <path
+       style="fill:#51a0d8;fill-opacity:1;stroke-width:1.06466317"
+       d="M 3.4472656 7.4589844 C 2.8494376 7.4526044 2.4394819 8.1951464 2.3886719 8.9726562 C 2.3600519 9.7271565 2.9446291 10.335956 3.5332031 10.410156 C 3.5344031 10.410336 3.5359094 10.409976 3.5371094 10.410156 L 9.140625 11.158203 L 17.683594 27.765625 C 14.891817 28.246455 13.73426 29.134777 13.498047 31.279297 C 13.318305 32.911147 15.221755 34.346978 16.386719 34.392578 C 25.582722 34.752468 29.880417 34.770075 41.123047 34.734375 L 41.125 34.734375 C 41.75687 34.741475 42.386672 33.740141 42.388672 33.119141 C 42.422452 32.490451 41.864372 31.637625 41.232422 31.640625 C 35.30923 31.589325 28.271919 31.668734 21.158203 31.615234 C 20.133315 31.620534 18.506901 31.642214 18.457031 30.982422 C 18.540181 30.372852 19.840376 30.285815 22.048828 30.109375 C 28.227132 29.731085 40.267578 29.0625 40.267578 29.0625 C 40.811558 29.02923 41.179741 28.690925 41.244141 28.265625 L 43.056641 16.277344 C 43.096201 16.023024 42.992691 15.768452 42.78125 15.576172 C 42.56981 15.383912 42.264663 15.267719 41.939453 15.261719 L 17.21875 14.582031 L 14.322266 8.75 L 14.322266 8.7460938 C 14.17531 8.4515674 13.842483 8.239047 13.445312 8.1855469 L 3.640625 7.4726562 C 3.639425 7.4724762 3.6378187 7.4728364 3.6367188 7.4726562 C 3.5748798 7.4638563 3.5101556 7.4597144 3.4472656 7.4589844 z M 19.357422 18.919922 L 38.669922 19.185547 L 37.785156 24.841797 L 22.273438 25.285156 L 19.357422 18.919922 z "
+       transform="translate(0,432)"
+       id="path3847" />
+    <title
+       id="title6">Layer 1</title>
+    <ellipse
+       style="fill:#51a0d8;fill-opacity:1;stroke-width:0.08349895"
+       id="path4532"
+       cx="19.508566"
+       cy="470.22"
+       rx="4.5805774"
+       ry="4.1157446" />
+    <ellipse
+       style="fill:#51a0d8;fill-opacity:1;stroke-width:0.08178999"
+       id="path4532-3"
+       cx="37.162647"
+       cy="470.34506"
+       rx="4.4868274"
+       ry="4.0315084" />
+  </g>
+</svg>

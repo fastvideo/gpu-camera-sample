@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   width="128"
+   height="128"
+   id="svg2"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="Favorites.svg">
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="640"
+     inkscape:window-height="480"
+     id="namedview3436"
+     showgrid="true"
+     inkscape:zoom="1.84375"
+     inkscape:cx="64"
+     inkscape:cy="64"
+     inkscape:window-x="440"
+     inkscape:window-y="158"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg2">
+    <inkscape:grid
+       type="xygrid"
+       id="grid3523" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata3">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:title></dc:title>
+        <dc:description>Icon inspired by Awoken gtk icons theme</dc:description>
+        <dc:subject>
+          <rdf:Bag>
+            <rdf:li>icon</rdf:li>
+            <rdf:li>grey</rdf:li>
+            <rdf:li>monoshape</rdf:li>
+            <rdf:li>shape</rdf:li>
+            <rdf:li>mono</rdf:li>
+            <rdf:li>add</rdf:li>
+            <rdf:li>gradient</rdf:li>
+            <rdf:li>AwOken</rdf:li>
+          </rdf:Bag>
+        </dc:subject>
+        <dc:publisher>
+          <cc:Agent
+             rdf:about="http://www.openclipart.org">
+            <dc:title>Open Clip Art Library</dc:title>
+          </cc:Agent>
+        </dc:publisher>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Jakub Jankiewicz</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:rights>
+          <cc:Agent>
+            <dc:title>Jakub Jankiewicz</dc:title>
+          </cc:Agent>
+        </dc:rights>
+        <dc:date />
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <cc:license
+           rdf:resource="http://web.resource.org/cc/PublicDomain" />
+        <dc:language>pl</dc:language>
+      </cc:Work>
+      <cc:License
+         rdf:about="http://web.resource.org/cc/PublicDomain">
+        <cc:permits
+           rdf:resource="http://web.resource.org/cc/Reproduction" />
+        <cc:permits
+           rdf:resource="http://web.resource.org/cc/Distribution" />
+        <cc:permits
+           rdf:resource="http://web.resource.org/cc/DerivativeWorks" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs4">
+    <linearGradient
+       id="grey_gradient">
+      <stop
+         id="stop3630-72-7"
+         style="stop-color:#dbdbdb;stop-opacity:1"
+         offset="0" />
+      <stop
+         id="stop3632-7-2"
+         style="stop-color:#757575;stop-opacity:1"
+         offset="1" />
+    </linearGradient>
+  </defs>
+  <path
+     sodipodi:type="star"
+     style="fill:#ffcc00;stroke:#aa4400"
+     id="path3525"
+     sodipodi:sides="5"
+     sodipodi:cx="65"
+     sodipodi:cy="63"
+     sodipodi:r1="55.901699"
+     sodipodi:r2="27.95085"
+     sodipodi:arg1="1.1071487"
+     sodipodi:arg2="1.7354672"
+     inkscape:flatsided="false"
+     inkscape:rounded="0"
+     inkscape:randomized="0"
+     d="M 90.000001,113 60.418082,90.572741 25.1726,102.22726 37.360875,67.162783 15.385312,37.243783 52.499999,38.000001 74.163837,7.8545192 84.913699,43.386368 120.27825,54.674436 89.807344,75.878108 Z"
+     inkscape:transform-center-x="-2.8317816"
+     inkscape:transform-center-y="-2.5727405" />
+</svg>

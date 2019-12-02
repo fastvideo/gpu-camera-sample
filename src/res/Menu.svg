@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   id="svg1"
+   sodipodi:docname="Menu.svg"
+   viewBox="0 0 60 60"
+   sodipodi:version="0.32"
+   _SVGFile__filename="oldscale/actions/14_polyline.svg"
+   version="1.0"
+   y="0"
+   x="0"
+   inkscape:version="0.48.0 r9654"
+   width="100%"
+   height="100%">
+  <defs
+     id="defs16" />
+  <sodipodi:namedview
+     id="base"
+     bordercolor="#666666"
+     inkscape:pageshadow="2"
+     inkscape:window-y="-8"
+     pagecolor="#ffffff"
+     inkscape:window-height="1178"
+     inkscape:zoom="3.4732669"
+     inkscape:window-x="54"
+     borderopacity="1.0"
+     inkscape:current-layer="svg1"
+     inkscape:cx="75.136053"
+     inkscape:cy="34.039835"
+     inkscape:window-width="1858"
+     inkscape:pageopacity="0.0000000"
+     showgrid="false"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata14">
+    <rdf:RDF>
+      <cc:Work>
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/publicdomain/" />
+        <dc:publisher>
+          <cc:Agent
+             rdf:about="http://openclipart.org/">
+            <dc:title>Openclipart</dc:title>
+          </cc:Agent>
+        </dc:publisher>
+        <dc:title></dc:title>
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/publicdomain/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="g3781"
+     transform="translate(4.9314364,1.8683648)"
+     style="stroke:#808080">
+    <path
+       inkscape:connector-curvature="0"
+       d="M 5.6222171,47.221878 44.431382,47.137443"
+       style="stroke:#808080;stroke-width:6.14517926999999990;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       sodipodi:nodetypes="cc"
+       id="path830" />
+    <path
+       inkscape:connector-curvature="0"
+       d="M 5.7057443,28.173851 44.51491,28.089416"
+       style="stroke:#808080;stroke-width:6.14517926999999990;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       sodipodi:nodetypes="cc"
+       id="path830-1" />
+    <path
+       inkscape:connector-curvature="0"
+       d="M 5.7057442,9.1258274 44.51491,9.0413924"
+       style="stroke:#808080;stroke-width:6.14517926999999990;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       sodipodi:nodetypes="cc"
+       id="path830-7" />
+  </g>
+</svg>
