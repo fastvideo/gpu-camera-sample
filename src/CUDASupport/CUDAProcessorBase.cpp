@@ -866,7 +866,7 @@ QSize CUDAProcessorBase::getMaxInputSize()
     return {int(bufferInfo.maxWidth),int(bufferInfo.maxHeight)};
 }
 
-fastStatus_t CUDAProcessorBase::Transform(Image_t* image, CUDAProcessorOptions &opts)
+fastStatus_t CUDAProcessorBase::Transform(ImageT *image, CUDAProcessorOptions &opts)
 {
     QMutexLocker locker(&mut);
 
@@ -1129,8 +1129,6 @@ fastStatus_t CUDAProcessorBase::Transform(Image_t* image, CUDAProcessorOptions &
             stats[QStringLiteral("hWhiteBalance")] = elapsedTimeGpu;
         }
     }
-
-
 
     if(hBpc && hBpcMux)
     {

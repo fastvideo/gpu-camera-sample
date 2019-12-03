@@ -24,7 +24,10 @@ SOURCES += main.cpp\
     Camera/FrameBuffer.cpp \
     Camera/PGMCamera.cpp \
     RawProcessor.cpp \
-    AsyncFileWriter.cpp
+    AsyncFileWriter.cpp \
+    ../OtherLibs/fastvideoSDK/common/SurfaceTraits.cpp \
+    ../OtherLibs/fastvideoSDK/common/alignment.cpp \
+    ../OtherLibs/fastvideoSDK/core_samples/SurfaceTraitsInternal.cpp
 
 HEADERS  += MainWindow.h \
     Widgets/GLImageViewer.h \

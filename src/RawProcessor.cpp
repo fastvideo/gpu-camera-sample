@@ -124,7 +124,7 @@ void RawProcessor::startWorking()
         if(!mProcessorPtr || mCamera == nullptr)
             continue;
 
-        Image_t* img = mCamera->getFrameBuffer()->getLastImage();
+        ImageT* img = mCamera->getFrameBuffer()->getLastImage();
         mProcessorPtr->Transform(img, mOptions);
 
         if(mWriting)

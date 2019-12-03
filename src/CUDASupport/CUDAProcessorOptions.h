@@ -32,7 +32,6 @@
 #include "fastvideo_sdk.h"
 #include "fastvideo_nppGeometry.h"
 #include "fastvideo_denoise.h"
-#include "fastvideo_experimentalImageFilter.h"
 
 #include <memory.h>
 #include <QVector>

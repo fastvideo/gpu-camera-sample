@@ -37,7 +37,7 @@
 #include "Image.h"
 #include "FastAllocator.h"
 
-typedef Image<unsigned char, FastAllocator> Image_t;
+typedef Image<unsigned char, FastAllocator> ImageT;
 
 class CircularBuffer : public QObject
 {
@@ -49,7 +49,7 @@ public:
 
     bool allocate(int width, int height, fastSurfaceFormat_t format = FAST_I16);
     unsigned char* getBuffer();
-    Image_t* getLastImage();
+    ImageT* getLastImage();
     void release();
 
     int width();
@@ -68,7 +68,7 @@ private:
     int mCurrent = 0;
     int mLast = -1;
 
-    QVector<Image_t> mImages;
+    QVector<ImageT> mImages;
     QMutex mMutex;
     int mAllocated = 0;
 };

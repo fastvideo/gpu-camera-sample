@@ -38,8 +38,6 @@
 #include "fastvideo_sdk.h"
 #include "fastvideo_mjpeg.h"
 #include "fastvideo_denoise.h"
-#include "ExifInfo.hpp"
-#include "fastvideo_experimentalImageFilter.h"
 #include "fastvideo_nppFilter.h"
 #include "fastvideo_nppResize.h"
 #include "fastvideo_nppGeometry.h"
@@ -85,7 +83,7 @@ public:
     virtual fastStatus_t Init(CUDAProcessorOptions & options);
     virtual fastStatus_t InitFailed(const char *errStr, fastStatus_t ret);
 
-    virtual fastStatus_t Transform(Image_t *image, CUDAProcessorOptions& opts);
+    virtual fastStatus_t Transform(ImageT *image, CUDAProcessorOptions& opts);
     virtual fastStatus_t TransformFailed(const char *errStr, fastStatus_t ret, fastGpuTimerHandle_t profileTimer);
 
     virtual fastStatus_t Close();

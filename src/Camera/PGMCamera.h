@@ -47,7 +47,7 @@ private:
     void startStreaming();
 
     QString mFileName;
-    Image_t mInputImage;
+    ImageT mInputImage;
 
 
 };
