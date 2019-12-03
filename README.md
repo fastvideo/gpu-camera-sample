@@ -37,11 +37,9 @@ Currently the software is working with <a href="https://www.ximea.com" target="_
 
 ### Build instructions
 
-```bash
-* git clone https://github.com/fastvideo/gpu-camera-sample.git
-```
+* ```bash git clone https://github.com/fastvideo/gpu-camera-sample.git ```
 * Create OtherLibs folder in project root folder. This folder will contains external libraries, used in gpu-camera-sample application.
-* Download Fastvideo SDK from <a href="https://yadi.sk/d/7D3C3yx9wMLVNA">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a> (valid till March 23, 2020), unpack it into <Project root>\OtherLibs\fastvideoSDK folder.
+* Download Fastvideo SDK from <a href="https://drive.google.com/open?id=1p21TXXC7SCw5PdDVEhayRdMQEN6X11ge">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a> (valid till March 23, 2020), unpack it into <Project root>\OtherLibs\fastvideoSDK folder.
 * If you need Ximea camera support, download XiAPI from https://www.ximea.com/support/documents/4. Install downloaded package (by default into C:\XIMEA). Copy API folder from XIAPI installation folder into <Project root>\OtherLibs folder.
 * Open src\GPUCameraSample.pro into Qt Creator.
 * By default application will be built with no camera support. The only option is camera simulator based on pgm file. To enable Ximea camera suppoer open common_defs.pri and uncomment line DEFINES += SUPPORT_XIMEA.
@@ -61,6 +59,15 @@ gpu-camera-sample is a multy threaded application. It consists of the following 
 We've implemented the simplest approach for camera application. Camera driver is writing raw data to memory ring buffer, then we copy data from ring buffer to GPU for computations. Full image processing pipeline is done on GPU, so we need just to collect processed frames at the output.
 
 In general case, Fastvideo SDK can import/export data from/to SSD / CPU memory / GPU memory. This is done to ensure compatibility with third-party libraries on CPU and GPU. You can get more info at <a href="https://www.fastcompression.com/download/Fastvideo_SDK_manual.pdf"   target="_blank">Fastvideo SDK Manual</a>.
+
+## Using gpu-camera-sample
+
+* Run GPUCameraSample.exe
+* Press Open button on the toolbar. This will open first camera in the system or ask to open pgm file if application was built with no camera support.
+* Press Play button. This will start aquiring data from the camera and display it on the screen.
+* Adjust zoom with Zoom slider or toggle Fit check box if requires
+* Select appropriate output format in the Recording pane (insure that output folder exists in the file system, otherwise nothing will be  recorded) and press Record button to start recording to disk. 
+* Press Record button again when recording is done.
 
 ## Minimum Hardware ans Software Requirements
 
@@ -114,7 +121,7 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 ## Downloads
 
 * Download <a href="https://www.fastcinemadng.com/download/download.html" target="_blank">Fast CinemaDNG Processor</a> software for Windows, manual and test DNG footages
-* Download <a href="https://yadi.sk/d/7D3C3yx9wMLVNA">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a> (valid till March 23, 2020)
-* Download <a href="https://yadi.sk/d/7BADIJxdpBvz0A">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a> (valid till March 23, 2020)
-* Download <a href="https://yadi.sk/d/sM27Hl0JTbakhQ">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> (valid till April 12, 2020)
+* Download <a href="https://drive.google.com/open?id=1p21TXXC7SCw5PdDVEhayRdMQEN6X11ge">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a> (valid till March 23, 2020)
+* Download <a href="https://drive.google.com/open?id=1GNcQtGmz-FBrKqrsSnMENMCbg44xxWQn">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a> (valid till March 23, 2020)
+* Download <a href="https://drive.google.com/file/d/1gBfPkazCiHLHc4piPHSJA2_Rm52CnoKD/view?usp=sharing">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> (valid till April 12, 2020)
 * Download <a href="https://www.fastcompression.com/download/Fastvideo_SDK_manual.pdf" target="_blank">Fastvideo SDK Manual</a>
