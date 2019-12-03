@@ -105,6 +105,11 @@ public:
     int whiteLevel(){return mWhite;}
     int blackLevel(){return mBblack;}
 
+    ///Return camera info
+    QString model(){return mModel;}
+    QString manufacturer(){return mManufacturer;}
+    QString serial(){return mSerial;}
+
     CircularBuffer* getFrameBuffer(){return &mInputBuffer;}
 
     void setProcessor(RawProcessor* proc){QMutexLocker l(&mLock); mRawProc = proc;}

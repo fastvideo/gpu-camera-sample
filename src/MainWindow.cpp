@@ -142,8 +142,8 @@ MainWindow::MainWindow(QWidget *parent) :
     mStatusLabel = new QLabel(this);
     mFpsLabel = new QLabel(this);
 
-    ui->statusBar->addPermanentWidget(mFpsLabel);
-    ui->statusBar->addPermanentWidget(mStatusLabel);
+    ui->statusBar->addWidget(mStatusLabel);
+    ui->statusBar->addWidget(mFpsLabel);
 
     QTimer::singleShot(0, this, [this](){delayInit();});
 }
@@ -214,15 +214,16 @@ void MainWindow::initNewCamera(CameraBase* cmr, uint32_t devID)
 
     int bpp = GetBitsPerChannelFromSurface(mCameraPtr->surfaceFormat());
 
-    QString msg = QString(QStringLiteral("Width: %1, Height: %2, Pixel format: %3 bpp%4")).
+    QString msg = QString(QStringLiteral("%1 %2, s\\n: %3 Width: %4, Height: %5, Pixel format: %6 bpp%7")).
+            arg(mCameraPtr->manufacturer()).
+            arg(mCameraPtr->model()).
+            arg(mCameraPtr->serial()).
             arg(mOptions.Width).
             arg(mOptions.Height).
             arg(bpp).
             arg(mCameraPtr->isPacked() ? QStringLiteral(" packed") : QString());
 
     mStatusLabel->setText(msg);
-
-
 }
 
 void MainWindow::openCamera(uint32_t devID)

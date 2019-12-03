@@ -3,7 +3,7 @@ src/**/*.filters
 src/**/.vs
 src/**/x64
 
-FastMachineVision*
+GPUCameraSample*
 OtherLibs
 build-*
 # bin/**/*.lib

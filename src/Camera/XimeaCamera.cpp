@@ -50,12 +50,21 @@ bool XimeaCamera::open(uint32_t devID)
     XI_RETURN ret = XI_OK;
     try
     {
+        mManufacturer = QStringLiteral("Ximea");
+
         ret = xiOpenDevice(devID, &hDevice);
         if(ret != XI_OK)
         {
             qDebug("Cannot open camera %d, ret = %d", devID, ret);
             return false;
         }
+
+        char str[256] = {0};
+        ret = xiGetParamString(hDevice, XI_PRM_DEVICE_NAME, str, sizeof(str));
+        mModel = QString::fromLocal8Bit(str);
+
+        ret = xiGetParamString(hDevice, XI_PRM_DEVICE_SN, str, sizeof(str));
+        mSerial = QString::fromLocal8Bit(str);
 
         //Try to set 12 bit mode
         int image_data_bit_depth = 12;

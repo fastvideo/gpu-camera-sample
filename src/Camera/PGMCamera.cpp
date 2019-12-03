@@ -53,6 +53,10 @@ bool PGMCamera::open(uint32_t devID)
 
     mState = cstClosed;
 
+    mManufacturer = QStringLiteral("Fastvideo");
+    mModel = QStringLiteral("PGM camera simulator");
+    mSerial = QStringLiteral("0000");
+
     FastAllocator a;
     unsigned char* bits = nullptr;
     uint width = 0;
