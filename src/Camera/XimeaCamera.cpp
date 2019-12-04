@@ -59,6 +59,8 @@ bool XimeaCamera::open(uint32_t devID)
             return false;
         }
 
+        xiStopAcquisition(hDevice);
+
         char str[256] = {0};
         ret = xiGetParamString(hDevice, XI_PRM_DEVICE_NAME, str, sizeof(str));
         mModel = QString::fromLocal8Bit(str);
@@ -83,7 +85,7 @@ bool XimeaCamera::open(uint32_t devID)
         else
         {
             ret = xiSetParamInt(hDevice, XI_PRM_IMAGE_DATA_FORMAT, XI_RAW16);
-            ret = xiSetParamInt(hDevice, XI_PRM_OUTPUT_DATA_PACKING, XI_OFF);
+            ret = xiSetParamInt(hDevice, XI_PRM_OUTPUT_DATA_PACKING, XI_ON);
         }
 
         int pack;
@@ -99,7 +101,7 @@ bool XimeaCamera::open(uint32_t devID)
             mImageFormat = cif12bpp_p;
             mSurfaceFormat = FAST_I12;
         }
-        else if(image_data_bit_depth == XI_BPP_12 /*&& pack == XI_OFF*/)
+        else if(image_data_bit_depth == XI_BPP_12 && pack == XI_OFF)
         {
             mSurfaceFormat = FAST_I12;
             mImageFormat = cif12bpp;
@@ -113,18 +115,14 @@ bool XimeaCamera::open(uint32_t devID)
         mWhite = (1 << image_data_bit_depth) - 1;
 
         ret = xiSetParamInt(hDevice,XI_PRM_BUFFER_POLICY, XI_BP_SAFE);
-        //ret = xiSetParamInt(hDevice, XI_PRM_AEAG, XI_ON);
 
         int is_color = 0;
         ret = xiGetParamInt(hDevice, XI_PRM_IMAGE_IS_COLOR, &is_color);
-
-//        ret = xiSetParamInt(hDevice, XI_PRM_IMAGE_DATA_FORMAT, XI_FRM_TRANSPORT_DATA);
 
         ret = xiSetParamFloat(hDevice, XI_PRM_EXP_PRIORITY, 1);
 
         xiSetParamInt(hDevice, XI_PRM_ACQ_TIMING_MODE, XI_ACQ_TIMING_MODE_FREE_RUN);
         xiGetParamFloat(hDevice, XI_PRM_FRAMERATE, &mFPS);
-        ret = xiSetParamInt(hDevice, XI_PRM_EXPOSURE, 40000);
 
 
         // color camera
