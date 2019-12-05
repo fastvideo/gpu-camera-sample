@@ -71,9 +71,10 @@ void GLImageViewer::load(void* img, int width, int height)
         return;
     //mImageSize = QSize(width, height);
     //mShowImage = true;
-    //setViewMode(mViewMode);
+
 
     mRenderer->loadImage(img, width, height);
+    setViewMode(mViewMode);
     update();
 }
 
@@ -203,6 +204,10 @@ void GLImageViewer::setFitZoom(QSize szClient)
 
     szClient -=(QSize(6,6));
     QSize imageSize(mRenderer->imageSize());
+
+    if(imageSize.isEmpty())
+        return;
+
     qreal zoom = qMin((qreal)(szClient.height()) / (qreal)(imageSize.height()), (qreal)(szClient.width()) / (qreal)(imageSize.width()));
     setZoom(zoom);
 }
@@ -428,6 +433,8 @@ void GLRenderer::loadImageInternal(void* img, int width, int height)
 
     mImageSize = QSize(width, height);
 
+
+
     if(!pbo_buffer)
         initialize();
 
@@ -441,6 +448,9 @@ void GLRenderer::loadImageInternal(void* img, int width, int height)
     glBufferData(GL_PIXEL_UNPACK_BUFFER, 3 * sizeof(unsigned char) * width * height, NULL, GL_STREAM_COPY);
     glGetBufferParameteriv(GL_PIXEL_UNPACK_BUFFER, GL_BUFFER_SIZE, &bsize);
     struct cudaGraphicsResource* cuda_pbo_resource = 0;
+
+    if(img == nullptr)
+        return;
 
     error = cudaGraphicsGLRegisterBuffer(&cuda_pbo_resource, pbo_buffer, cudaGraphicsMapFlagsWriteDiscard);
     if ( error != cudaSuccess )

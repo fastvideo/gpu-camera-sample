@@ -93,6 +93,7 @@ private:
     float                mRenderFps = 30;
     QString              mOutputPath;
     QString              mFilePrefix;
+    unsigned             mFrameCnt = 0;
 
     void startWorking();
 };

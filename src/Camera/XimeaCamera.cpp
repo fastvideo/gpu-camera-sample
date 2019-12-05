@@ -84,7 +84,8 @@ bool XimeaCamera::open(uint32_t devID)
             ret = xiSetParamInt(hDevice, XI_PRM_IMAGE_DATA_FORMAT, XI_RAW8);
         else
         {
-            ret = xiSetParamInt(hDevice, XI_PRM_IMAGE_DATA_FORMAT, XI_RAW16);
+            ret = xiSetParamInt(hDevice, XI_PRM_IMAGE_DATA_FORMAT, XI_FRM_TRANSPORT_DATA);
+            ret = xiSetParamInt(hDevice, XI_PRM_OUTPUT_DATA_BIT_DEPTH, image_data_bit_depth);
             ret = xiSetParamInt(hDevice, XI_PRM_OUTPUT_DATA_PACKING, XI_ON);
         }
 

@@ -200,6 +200,10 @@ void MainWindow::initNewCamera(CameraBase* cmr, uint32_t devID)
     connect(mProcessorPtr.data(), SIGNAL(error()), this, SLOT(onGPUError()));
 
     mCameraPtr->setProcessor(mProcessorPtr.data());
+    {
+        QSignalBlocker b(ui->cboBayerPattern);
+        ui->cboBayerPattern->setCurrentIndex(ui->cboBayerPattern->findData(mCameraPtr->bayerPattern()));
+    }
 
     mOptions.Width = mCameraPtr->width();
     mOptions.Height = mCameraPtr->height();
@@ -224,6 +228,11 @@ void MainWindow::initNewCamera(CameraBase* cmr, uint32_t devID)
             arg(mCameraPtr->isPacked() ? QStringLiteral(" packed") : QString());
 
     mStatusLabel->setText(msg);
+
+    mRendererPtr->setImageSize(QSize(mOptions.Width, mOptions.Height));
+    on_chkZoomFit_toggled(ui->chkZoomFit->isChecked());
+
+    on_actionPlay_triggered();
 }
 
 void MainWindow::openCamera(uint32_t devID)

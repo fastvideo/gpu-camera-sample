@@ -32,6 +32,8 @@
 #include <QOpenGLWindow>
 #include <QOpenGLFunctions>
 #include <QOpenGLTexture>
+#include <QApplication>
+#include <QDesktopWidget>
 #include <QMouseEvent>
 #include <QThread>
 #include <QWaitCondition>
@@ -56,6 +58,7 @@ public:
     void showImage(bool show = true);
     void update();
     QSize imageSize(){return mImageSize;}
+    void setImageSize(const QSize& sz){mImageSize = sz;}
 
 private slots:
     void render();
@@ -105,6 +108,14 @@ public:
     void load(void *img, int width, int height);
     void clear();
     QPointF texTopLeft(){return mTexTopLeft;}
+
+    //Patch for high dpi display
+    inline int width() const { return QOpenGLWindow::geometry().width() * QApplication::desktop()->devicePixelRatio(); }
+    inline int height() const { return QOpenGLWindow::geometry().height() * QApplication::desktop()->devicePixelRatio(); }
+    QSize size() const  override { return QOpenGLWindow::geometry().size() * QApplication::desktop()->devicePixelRatio(); }
+    QRect geometry()const { return { QOpenGLWindow::geometry().topLeft() * QApplication::desktop()->devicePixelRatio(),
+                    QOpenGLWindow::geometry().size() * QApplication::desktop()->devicePixelRatio()}; }
+
 protected:
     void exposeEvent(QExposeEvent *event) Q_DECL_OVERRIDE;
     void wheelEvent(QWheelEvent *event) Q_DECL_OVERRIDE;

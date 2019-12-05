@@ -59,6 +59,33 @@ void AsyncFileWriter::start()
     });
 }
 
+void AsyncFileWriter::initBuffers(unsigned bufferSize)
+{
+    if(bufferSize <= mBufferSize)
+        return;
+
+    if(mBuffers.empty())
+        mBuffers.resize(maxQueuSize);
+    FastAllocator alloc;
+    for(int i = 0; i < mBuffers.size(); i++)
+    {
+        mBuffers[i].reset((unsigned char*)alloc.allocate(bufferSize));
+    }
+    mBufferSize = bufferSize;
+}
+
+unsigned char* AsyncFileWriter::getBuffer()
+{
+    if(mBuffers.empty())
+        return nullptr;
+
+    unsigned char* ret = mBuffers[mCurrentBuffer].get();
+
+    mCurrentBuffer = (mCurrentBuffer + 1) % maxQueuSize;
+
+    return ret;
+}
+
 void AsyncFileWriter::put(FileWriterTask* task)
 {
     if(mTasks.count() > maxQueuSize)
@@ -138,7 +165,7 @@ void AsyncFileWriter::processTask(FileWriterTask* task)
     QFile f(task->fileName);
     if(f.open(QFile::WriteOnly))
     {
-        f.write((char*)task->data.get(), task->size);
+        f.write((char*)task->data, task->size);
         f.close();
     }
 }

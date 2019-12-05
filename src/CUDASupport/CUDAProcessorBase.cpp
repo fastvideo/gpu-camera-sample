@@ -640,12 +640,12 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
                 );
 
     if(ret != FAST_OK)
-        return InitFailed("fastImageFilterCreate for RawCurve failed",ret);
+        return InitFailed("fastImageFilterCreate for Output lut failed",ret);
 
-    cudaMemoryInfo("Created rawLut");
+    cudaMemoryInfo("Created hOutLut");
     bufferPtr = &outLutBuffer;
 
-     //16 bit RGB data export
+    //16 bit RGB data export
     ret = fastExportToHostCreate(
                 &hDeviceToHost16Adapter,
                 &srcSurfaceFmt,
@@ -905,6 +905,7 @@ fastStatus_t CUDAProcessorBase::Transform(ImageT *image, CUDAProcessorOptions &o
     stats[QStringLiteral("hCrop")] = -1;
     stats[QStringLiteral("hDeviceToHostAdapter")] = -1;
     stats[QStringLiteral("hExportToDevice")] = -1;
+    stats[QStringLiteral("hMjpegEncoder")] = -1;
     stats[QStringLiteral("totalTime")] = -1;
     stats[QStringLiteral("totalFps")] = -1;
     stats[QStringLiteral("totalGPUTime")] = -1;

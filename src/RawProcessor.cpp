@@ -61,6 +61,10 @@ fastStatus_t RawProcessor::init()
     if(!mProcessorPtr)
         return FAST_INVALID_VALUE;
 
+    unsigned pitch = 3 *(((mOptions.Width + FAST_ALIGNMENT - 1) / FAST_ALIGNMENT ) * FAST_ALIGNMENT);
+    unsigned sz = pitch * mOptions.Height;
+    mFileWriter.initBuffers(sz);
+
     return mProcessorPtr->Init(mOptions);
 }
 
@@ -111,7 +115,6 @@ void RawProcessor::startWorking()
     QElapsedTimer tm;
     tm.start();
 
-    unsigned int cnt = 0;
     while(mWorking)
     {
         mWaitMutex.lock();
@@ -131,60 +134,62 @@ void RawProcessor::startWorking()
         {
             if(mOptions.Codec == CUDAProcessorOptions::vcJPG)
             {
-                unsigned pitch = 3 *(((mOptions.Width + FAST_ALIGNMENT - 1) / FAST_ALIGNMENT ) * FAST_ALIGNMENT);
-                unsigned sz = pitch * mOptions.Height;
-
-                FileWriterTask* task = new FileWriterTask();
-                task->fileName =  QStringLiteral("%1/%2%3.jpg").arg(mOutputPath).
-                        arg(mFilePrefix).arg(cnt);
-                task->size = sz;
-                FastAllocator alloc;
-                task->data.reset((unsigned char*)alloc.allocate(sz));
-                mProcessorPtr->exportJPEGData(task->data.get(), mOptions.JpegQuality, task->size);
-                mFileWriter.put(task);
-                mFileWriter.wake();
-                cnt++;
+                unsigned char* buf = mFileWriter.getBuffer();
+                if(buf != nullptr)
+                {
+                    FileWriterTask* task = new FileWriterTask();
+                    task->fileName =  QStringLiteral("%1/%2%3.jpg").arg(mOutputPath).
+                            arg(mFilePrefix).arg(mFrameCnt);
+                    task->size = mFileWriter.bufferSize();
+                    task->data = buf;
+                    mProcessorPtr->exportJPEGData(task->data, mOptions.JpegQuality, task->size);
+                    mFileWriter.put(task);
+                    mFileWriter.wake();
+                    mFrameCnt++;
+                }
             }
             else if(mOptions.Codec == CUDAProcessorOptions::vcPGM)
             {
                 int bpc = GetBitsPerChannelFromSurface(img->surfaceFmt);
                 int maxVal = (1 << bpc) - 1;
-
-                unsigned w = 0;
-                unsigned h = 0;
-                unsigned pitch = 0;
-                mProcessorPtr->exportRawData(nullptr, w, h, pitch);
-
-                QString header = QString("P5\n%1 %2\n%3\n").arg(w).arg(h).arg(maxVal);
-
-                int sz = header.size() + pitch * h;
-
-                FileWriterTask* task = new FileWriterTask();
-                task->fileName =  QStringLiteral("%1/%2%3.pgm").arg(mOutputPath).
-                        arg(mFilePrefix).arg(cnt);
-                task->size = sz;
-
-                FastAllocator alloc;
-                task->data.reset((unsigned char*)alloc.allocate(sz));
-                memcpy(task->data.get(), header.toStdString().c_str(), header.size());
-                unsigned char* data = task->data.get() + header.size();
-                mProcessorPtr->exportRawData((void*)data, w, h, pitch);
-
-                //Not 8 bit pgm requires big endian byte order
-                if(img->surfaceFmt != FAST_I8)
+                unsigned char* buf = mFileWriter.getBuffer();
+                if(buf != nullptr)
                 {
-                    unsigned short* data16 = (unsigned short*)data;
-                    for(unsigned i = 0; i < w * h; i++)
-                    {
-                        unsigned short val = *data16;
-                        *data16 = (val << 8) | (val >> 8);
-                        data16++;
-                    }
-                }
+                    unsigned w = 0;
+                    unsigned h = 0;
+                    unsigned pitch = 0;
+                    mProcessorPtr->exportRawData(nullptr, w, h, pitch);
 
-                mFileWriter.put(task);
-                mFileWriter.wake();
-                cnt++;
+                    QString header = QString("P5\n%1 %2\n%3\n").arg(w).arg(h).arg(maxVal);
+
+                    int sz = header.size() + pitch * h;
+
+                    FileWriterTask* task = new FileWriterTask();
+                    task->fileName =  QStringLiteral("%1/%2%3.pgm").arg(mOutputPath).
+                            arg(mFilePrefix).arg(mFrameCnt);
+                    task->size = sz;
+
+                    task->data = buf;
+                    memcpy(task->data, header.toStdString().c_str(), header.size());
+                    unsigned char* data = task->data + header.size();
+                    mProcessorPtr->exportRawData((void*)data, w, h, pitch);
+
+                    //Not 8 bit pgm requires big endian byte order
+                    if(img->surfaceFmt != FAST_I8)
+                    {
+                        unsigned short* data16 = (unsigned short*)data;
+                        for(unsigned i = 0; i < w * h; i++)
+                        {
+                            unsigned short val = *data16;
+                            *data16 = (val << 8) | (val >> 8);
+                            data16++;
+                        }
+                    }
+
+                    mFileWriter.put(task);
+                    mFileWriter.wake();
+                    mFrameCnt++;
+                }
 
             }
         }
@@ -260,6 +265,7 @@ void RawProcessor::startWriting()
     if(!QFileInfo(mOutputPath).isDir())
         return;
 
+    mFrameCnt = 0;
     mWriting = true;
 }
 

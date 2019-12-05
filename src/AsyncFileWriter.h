@@ -40,8 +40,7 @@
 
 struct FileWriterTask
 {
-    //QByteArray data;
-    std::unique_ptr<unsigned char, FastAllocator> data;
+    unsigned char* data;
     unsigned int size{};
     QString fileName;
 };
@@ -53,6 +52,8 @@ public:
     explicit AsyncFileWriter(int size = -1, QObject *parent = nullptr);
     ~AsyncFileWriter() override;
 
+    void initBuffers(unsigned bufferSize);
+    unsigned char* getBuffer();
     void start();
     void stop();
     void put(FileWriterTask* task);
@@ -63,6 +64,7 @@ public:
     int  queueSize(){return mTasks.count();}
     int  getProcessedFrames(){return mProcessed;}
     int  getDroppedFrames(){return mDropped;}
+    unsigned bufferSize() {return mBufferSize;}
 
 signals:
     void progress(int percent);
@@ -72,6 +74,10 @@ public slots:
 private:
     bool mCancel {false};
     bool mWriting {false};
+
+    unsigned mBufferSize {0};
+    unsigned mCurrentBuffer{0};
+    std::vector<std::unique_ptr<unsigned char, FastAllocator>> mBuffers;
 
     QMutex mLock;
     QWaitCondition mStart;
@@ -86,7 +92,7 @@ private:
     int mProcessed = 0;
     int mDropped = 0;
 
-    const uint maxQueuSize = 1024;
+    const uint maxQueuSize = 32;
 };
 
 #endif // ASYNCJPEGWRITER_H
