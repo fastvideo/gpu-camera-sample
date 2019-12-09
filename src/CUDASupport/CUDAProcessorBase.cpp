@@ -724,7 +724,7 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
     stats["totalViewportMemory"] = bufferSize;
     cudaMemoryInfo("Created hGLBuffer");
 
-    //JPEGStuff
+    //JPEG Stuff
     if(1)
     {
         bool haveEnoughGPUMem = false;
@@ -779,12 +779,24 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
         fastDebayerGetAllocatedGpuMemorySize( hDebayer, &tmp );
         requestedMemSpace += tmp;
     }
+    if( hHostToDeviceAdapter != nullptr )
+    {
+        fastImportFromHostGetAllocatedGpuMemorySize( hHostToDeviceAdapter, &tmp );
+        requestedMemSpace += tmp;
+    }
 
     if( hRawUnpacker != nullptr )
     {
         fastRawUnpackerGetAllocatedGpuMemorySize( hRawUnpacker, &tmp );
         requestedMemSpace += tmp;
     }
+
+    if( hBpc != nullptr )
+    {
+        fastImageFiltersGetAllocatedGpuMemorySize( hBpc, &tmp );
+        requestedMemSpace += tmp;
+    }
+
     if(hSam != nullptr)
     {
         fastImageFiltersGetAllocatedGpuMemorySize( hSam, &tmp );
@@ -806,11 +818,7 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
         fastSurfaceConverterGetAllocatedGpuMemorySize( h16to8Transform, &tmp );
         requestedMemSpace += tmp;
     }
-    if( hHostToDeviceAdapter != nullptr )
-    {
-        fastImportFromHostGetAllocatedGpuMemorySize( hHostToDeviceAdapter, &tmp );
-        requestedMemSpace += tmp;
-    }
+
 
     if(hJpegEncoder != nullptr)
     {
@@ -1511,8 +1519,10 @@ fastStatus_t CUDAProcessorBase::exportJPEGData(void* dstPtr, unsigned jpegQualit
 }
 
 
-fastStatus_t CUDAProcessorBase::export8bitData(void* dstPtr)
+fastStatus_t CUDAProcessorBase::export8bitData(void* dstPtr, bool forceRGB)
 {
+    Q_UNUSED(forceRGB)
+
     fastDeviceSurfaceBufferInfo_t bufferInfo;
     fastGetDeviceSurfaceBufferInfo(dstBuffer, &bufferInfo);
     unsigned int pitch = 3 * ( ( ( bufferInfo.width + FAST_ALIGNMENT - 1 ) / FAST_ALIGNMENT ) * FAST_ALIGNMENT ) * sizeof(unsigned char);

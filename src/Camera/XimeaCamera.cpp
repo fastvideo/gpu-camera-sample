@@ -119,6 +119,7 @@ bool XimeaCamera::open(uint32_t devID)
 
         int is_color = 0;
         ret = xiGetParamInt(hDevice, XI_PRM_IMAGE_IS_COLOR, &is_color);
+        mIsColor = is_color;
 
         ret = xiSetParamFloat(hDevice, XI_PRM_EXP_PRIORITY, 1);
 

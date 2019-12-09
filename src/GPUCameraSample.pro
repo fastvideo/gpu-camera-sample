@@ -27,7 +27,9 @@ SOURCES += main.cpp\
     AsyncFileWriter.cpp \
     ../OtherLibs/fastvideoSDK/common/SurfaceTraits.cpp \
     ../OtherLibs/fastvideoSDK/common/alignment.cpp \
-    ../OtherLibs/fastvideoSDK/core_samples/SurfaceTraitsInternal.cpp
+    ../OtherLibs/fastvideoSDK/core_samples/SurfaceTraitsInternal.cpp \
+    CUDASupport/CUDAProcessorGray.cpp \
+    MJPEGEncoder.cpp
 
 HEADERS  += MainWindow.h \
     Widgets/GLImageViewer.h \
@@ -46,7 +48,9 @@ HEADERS  += MainWindow.h \
     Camera/PGMCamera.h \
     RawProcessor.h \
     AsyncFileWriter.h \
-    AsyncQueue.h
+    AsyncQueue.h \
+    CUDASupport/CUDAProcessorGray.h \
+    MJPEGEncoder.h
 
 FORMS    += MainWindow.ui \
     Widgets/DenoiseController.ui
@@ -78,3 +82,6 @@ win32 {
 
 RESOURCES += \
     Resorces.qrc
+
+DISTFILES += \
+    res/camera.svg

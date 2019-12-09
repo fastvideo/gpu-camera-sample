@@ -89,11 +89,11 @@ public:
     virtual fastStatus_t Close();
     virtual void         freeFilters();
 
-    virtual fastStatus_t export8bitData(void* dstPtr);
+    virtual fastStatus_t export8bitData(void* dstPtr, bool forceRGB = true);
+    virtual fastStatus_t exportJPEGData(void* dstPtr, unsigned jpegQuality, unsigned &size);
 
     fastStatus_t exportRawData(void* dstPtr, unsigned int &w, unsigned int &h, unsigned int &pitch);
     fastStatus_t export16bitData(void* dstPtr, unsigned int &w, unsigned int &h, unsigned int &pitch);
-    fastStatus_t exportJPEGData(void* dstPtr, unsigned jpegQuality, unsigned &size);
 
     fastSurfaceFormat_t getInputSurfaceFmt();
     QSize        getMaxInputSize();

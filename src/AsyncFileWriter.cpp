@@ -27,13 +27,14 @@
 */
 
 #include "AsyncFileWriter.h"
+#include "MJPEGEncoder.h"
 
 #include <QTimer>
 #include <QFile>
 #include <QFileInfo>
 #include <QDir>
 
-AsyncFileWriter::AsyncFileWriter(int size, QObject *parent):
+AsyncWriter::AsyncWriter(int size, QObject *parent):
     QObject(parent),
     mMaxSize(size)
 {
@@ -44,7 +45,7 @@ AsyncFileWriter::AsyncFileWriter(int size, QObject *parent):
     start();
 }
 
-AsyncFileWriter::~AsyncFileWriter()
+AsyncWriter::~AsyncWriter()
 {
     stop();
     clear();
@@ -52,14 +53,14 @@ AsyncFileWriter::~AsyncFileWriter()
     mWorkThread.wait(3000);
 }
 
-void AsyncFileWriter::start()
+void AsyncWriter::start()
 {
     QTimer::singleShot(0, this, [this](){
         if(!this->mWriting) this->startWriting();
     });
 }
 
-void AsyncFileWriter::initBuffers(unsigned bufferSize)
+void AsyncWriter::initBuffers(unsigned bufferSize)
 {
     if(bufferSize <= mBufferSize)
         return;
@@ -74,7 +75,7 @@ void AsyncFileWriter::initBuffers(unsigned bufferSize)
     mBufferSize = bufferSize;
 }
 
-unsigned char* AsyncFileWriter::getBuffer()
+unsigned char* AsyncWriter::getBuffer()
 {
     if(mBuffers.empty())
         return nullptr;
@@ -86,7 +87,7 @@ unsigned char* AsyncFileWriter::getBuffer()
     return ret;
 }
 
-void AsyncFileWriter::put(FileWriterTask* task)
+void AsyncWriter::put(FileWriterTask* task)
 {
     if(mTasks.count() > maxQueuSize)
     {
@@ -97,7 +98,7 @@ void AsyncFileWriter::put(FileWriterTask* task)
         mTasks.push(task);
 }
 
-void AsyncFileWriter::setMaxSize(int sz)
+void AsyncWriter::setMaxSize(int sz)
 {
     if(sz <= 0)
         return;
@@ -105,7 +106,7 @@ void AsyncFileWriter::setMaxSize(int sz)
     mProcessed = 0;
 }
 
-void AsyncFileWriter::startWriting()
+void AsyncWriter::startWriting()
 {
     mWriting = true;
     QMutex mut;
@@ -139,7 +140,7 @@ void AsyncFileWriter::startWriting()
     mWriting = false;
 }
 
-void AsyncFileWriter::waitFinish()
+void AsyncWriter::waitFinish()
 {
     if(mTasks.isEmpty())
         return;
@@ -147,6 +148,31 @@ void AsyncFileWriter::waitFinish()
     QMutex lock;
     QMutexLocker l(&lock);
     mFinish.wait(&lock, 3000);
+}
+
+
+void AsyncWriter::stop()
+{
+    mCancel = true;
+    wake();
+}
+
+void AsyncWriter::clear()
+{
+    QMutexLocker lock(&mLock);
+    while(mTasks.count() > 0)
+        delete mTasks.pop();
+}
+
+AsyncFileWriter::AsyncFileWriter(int size, QObject *parent):
+    AsyncWriter(size, parent)
+{
+    mMaxSize = size;
+    mWorkThread.setObjectName(QStringLiteral("File Writer Thread"));
+    moveToThread(&mWorkThread);
+
+    mWorkThread.start();
+    start();
 }
 
 void AsyncFileWriter::processTask(FileWriterTask* task)
@@ -170,15 +196,46 @@ void AsyncFileWriter::processTask(FileWriterTask* task)
     }
 }
 
-void AsyncFileWriter::stop()
+
+AsyncMJPEGWriter::AsyncMJPEGWriter(int size, QObject *parent):
+    AsyncWriter(size, parent)
 {
-    mCancel = true;
-    wake();
+    mMaxSize = size;
+    mWorkThread.setObjectName(QStringLiteral("MJPEG Writer Thread"));
+    moveToThread(&mWorkThread);
+
+    mWorkThread.start();
+    start();
 }
 
-void AsyncFileWriter::clear()
+bool AsyncMJPEGWriter::open(int width, int height, int fps, fastJpegFormat_t fmt, const QString& outFileName)
 {
-    QMutexLocker lock(&mLock);
-    while(mTasks.count() > 0)
-        delete mTasks.pop();
+    if(!QFileInfo(QFileInfo(outFileName).path()).exists())
+        return false;
+
+    if(mEncoderPtr)
+        mEncoderPtr->close();
+
+    mEncoderPtr.reset(new MJPEGEncoder(width, height, fps, fmt, outFileName));
+    return mEncoderPtr->isOpened();
+
+}
+
+void AsyncMJPEGWriter::close()
+{
+    if(!mEncoderPtr)
+        return;
+
+    mEncoderPtr->close();
+}
+
+void AsyncMJPEGWriter::processTask(FileWriterTask* task)
+{
+    if(task == nullptr)
+        return;
+
+    if(!mEncoderPtr)
+        return;
+
+    mEncoderPtr->addJPEGFrame(task->data, task->size);
 }

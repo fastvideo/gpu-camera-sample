@@ -318,8 +318,11 @@ void GLRenderer::render()
         glClear(GL_COLOR_BUFFER_BIT);
         m_context->swapBuffers(mRenderWnd);
         m_context->doneCurrent();
+
         return;
     }
+
+    //qDebug("mImageSize.isEmpty() = %d, mShowImage = %d", mImageSize.isEmpty(), mShowImage);
 
     int w = mRenderWnd->width();
     int h = mRenderWnd->height();

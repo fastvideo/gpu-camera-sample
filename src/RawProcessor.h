@@ -57,12 +57,12 @@ public:
     void stop();
     void wake();
     void updateOptions(const CUDAProcessorOptions& opts);
-    CUDAProcessorBase* getCUDAProcessor() {return mProcessorPtr.data();}
-    fastStatus_t getLastError();
-    QString getLastErrorDescription();
+    CUDAProcessorBase*   getCUDAProcessor() {return mProcessorPtr.data();}
+    fastStatus_t         getLastError();
+    QString              getLastErrorDescription();
     QMap<QString, float> getStats();
     void startWriting();
-    void stopWriting(){mWriting = false;}
+    void stopWriting();
     void setOutputPath(const QString& path){mOutputPath = path;}
     void setFilePrefix(const QString& prefix){mFilePrefix = prefix;}
     void setSAM(const QString& fpnFileName, const QString& ffcFileName);
@@ -79,12 +79,13 @@ private:
     bool                 mWorking = false;
     bool                 mWriting = false;
     CUDAProcessorOptions mOptions;
+    CUDAProcessorOptions::VideoCodec mCodec = CUDAProcessorOptions::vcNone;
 
     QString mFPNFile;
     QString mFFCFile;
 
     QScopedPointer<CUDAProcessorBase> mProcessorPtr;
-    AsyncFileWriter      mFileWriter;
+    QScopedPointer<AsyncWriter>       mFileWriterPtr;
     QMutex               mWaitMutex;
     QWaitCondition       mWaitCond;
     CameraBase*          mCamera = nullptr;

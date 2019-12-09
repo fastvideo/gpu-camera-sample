@@ -145,6 +145,17 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->statusBar->addWidget(mStatusLabel);
     ui->statusBar->addWidget(mFpsLabel);
 
+    QToolButton* openButton=
+                dynamic_cast<QToolButton*>(ui->mainToolBar->widgetForAction(ui->actionOpenBayerPGM));
+    openButton->setPopupMode(QToolButton::MenuButtonPopup);
+    openButton->addAction(ui->actionOpenGrayPGM);
+
+    qRegisterMetaType<CameraBase::cmrCameraState>("cmrCameraState");
+
+#ifdef SUPPORT_XIMEA
+    ui->mainToolBar->insertAction(ui->actionOpenBayerPGM, ui->actionOpenCamera);
+    ui->menuCamera->insertAction(ui->actionOpenBayerPGM, ui->actionOpenCamera);
+#endif
     QTimer::singleShot(0, this, [this](){delayInit();});
 }
 
@@ -156,6 +167,7 @@ MainWindow::~MainWindow()
 void MainWindow::delayInit()
 {
     readSettings();
+    onCameraStateChanged(CameraBase::cstClosed);
     mRendererPtr->update();
 }
 
@@ -192,10 +204,16 @@ void MainWindow::initNewCamera(CameraBase* cmr, uint32_t devID)
     if(!mCameraPtr)
         return;
 
+    connect(mCameraPtr.data(),
+            SIGNAL(stateChanged(CameraBase::cmrCameraState)),
+            this,
+            SLOT(onCameraStateChanged(CameraBase::cmrCameraState)));
+
     if(!mCameraPtr->open(devID))
         return;
 
     mProcessorPtr.reset(new RawProcessor(mCameraPtr.data(), mRendererPtr.data()));
+
     connect(mProcessorPtr.data(), SIGNAL(finished()), this, SLOT(onGPUFinished()));
     connect(mProcessorPtr.data(), SIGNAL(error()), this, SLOT(onGPUError()));
 
@@ -232,21 +250,22 @@ void MainWindow::initNewCamera(CameraBase* cmr, uint32_t devID)
     mRendererPtr->setImageSize(QSize(mOptions.Width, mOptions.Height));
     on_chkZoomFit_toggled(ui->chkZoomFit->isChecked());
 
-    on_actionPlay_triggered();
+    ui->actionPlay->setChecked(true);
 }
 
 void MainWindow::openCamera(uint32_t devID)
 {
+#ifdef SUPPORT_XIMEA
     if(mCameraPtr)
         mCameraPtr->stop();
-#ifdef SUPPORT_XIMEA
+
     initNewCamera(new XimeaCamera(), devID);
 #else
     Q_UNUSED(devID)
 #endif
 }
 
-void MainWindow::openPGMFile()
+void MainWindow::openPGMFile(bool isBayer)
 {
     QString fileName = QFileDialog::getOpenFileName(this,
                                                     QStringLiteral("Select pgm file"),
@@ -261,7 +280,8 @@ void MainWindow::openPGMFile()
 
     initNewCamera(new PGMCamera(
                       fileName,
-                      (fastBayerPattern_t)ui->cboBayerPattern->currentData().toInt()),
+                      (fastBayerPattern_t)ui->cboBayerPattern->currentData().toInt(),
+                      isBayer),
                   0);
 
 }
@@ -588,33 +608,7 @@ void MainWindow::on_actionOpenCamera_triggered()
 {
 #ifdef SUPPORT_XIMEA
     openCamera(0);
-#else
-    openPGMFile();
 #endif
-}
-
-void MainWindow::on_actionPlay_triggered()
-{
-    if(!mCameraPtr || !mProcessorPtr)
-        return;
-
-    updateOptions(mOptions);
-    mProcessorPtr->updateOptions(mOptions);
-    mProcessorPtr->setSAM(ui->txtFPNFileName->text(),
-                          ui->txtFlatFieldFile->text());
-
-
-
-    mCameraPtr->start();
-    mProcessorPtr->start();
-}
-
-void MainWindow::on_actionStop_triggered()
-{
-    if(!mCameraPtr || !mProcessorPtr)
-        return;
-
-    mCameraPtr->stop();
 }
 
 void MainWindow::on_actionRecord_toggled(bool arg1)
@@ -624,7 +618,7 @@ void MainWindow::on_actionRecord_toggled(bool arg1)
 
     if(arg1)
     {
-        mOptions.Codec = (CUDAProcessorOptions::VideoCodec)(ui->cboOutFormat->currentData().toInt()); //CUDAProcessorOptions::vcJPG;
+        mOptions.Codec = (CUDAProcessorOptions::VideoCodec)(ui->cboOutFormat->currentData().toInt());
         mOptions.JpegQuality = ui->spnJpegQty->value();
         mOptions.JpegSamplingFmt = (fastJpegFormat_t)(ui->cboSamplingFmt->currentData().toInt());
 
@@ -913,4 +907,67 @@ void MainWindow::on_chkSAM_toggled(bool checked)
     mOptions.EnableSAM = checked;
     mProcessorPtr->updateOptions(mOptions);
     raw2Rgb();
+}
+
+void MainWindow::on_actionOpenBayerPGM_triggered()
+{
+    openPGMFile();
+}
+
+void MainWindow::on_actionOpenGrayPGM_triggered()
+{
+    openPGMFile(false);
+}
+
+void MainWindow::onCameraStateChanged(CameraBase::cmrCameraState newState)
+{
+    if(newState == CameraBase::cstClosed)
+    {
+        {
+            QSignalBlocker b(ui->actionPlay);
+            ui->actionPlay->setChecked(false);
+        }
+        ui->actionPlay->setEnabled(false);
+        ui->actionRecord->setEnabled(false);
+
+    }
+    else if(newState == CameraBase::cstStopped)
+    {
+        ui->actionPlay->setEnabled(true);
+        {
+            QSignalBlocker b(ui->actionPlay);
+            ui->actionPlay->setChecked(false);
+        }
+        ui->actionRecord->setEnabled(false);
+    }
+    else if(newState == CameraBase::cstStreaming)
+    {
+        ui->actionPlay->setEnabled(true);
+        {
+            QSignalBlocker b(ui->actionPlay);
+            ui->actionPlay->setChecked(true);
+        }
+        ui->actionRecord->setEnabled(true);
+    }
+}
+
+void MainWindow::on_actionPlay_toggled(bool arg1)
+{
+    if(!mCameraPtr || !mProcessorPtr)
+        return;
+    if(arg1)
+    {
+        updateOptions(mOptions);
+        mProcessorPtr->updateOptions(mOptions);
+        mProcessorPtr->setSAM(ui->txtFPNFileName->text(),
+                              ui->txtFlatFieldFile->text());
+        mRendererPtr->showImage();
+        mCameraPtr->start();
+        mProcessorPtr->start();
+
+    }
+    else
+    {
+        mCameraPtr->stop();
+    }
 }

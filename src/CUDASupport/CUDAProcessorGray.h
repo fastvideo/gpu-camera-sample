@@ -5,13 +5,14 @@
 class CUDAProcessorGray : public CUDAProcessorBase
 {
 public:
-    CUDAProcessorGray(bool info, QObject *parent = nullptr);
+    CUDAProcessorGray(QObject *parent = nullptr);
     ~CUDAProcessorGray() override;
     virtual fastStatus_t Init(CUDAProcessorOptions& options);
-    virtual fastStatus_t Transform(Image<unsigned char, FastAllocator> &image, void* dstPtr, CUDAProcessorOptions& opts) override;
+    virtual fastStatus_t Transform(ImageT *image, CUDAProcessorOptions& opts) override;
     virtual bool isGrayscale() override {return true;}
     virtual void freeFilters() override;
     virtual fastStatus_t export8bitData(void* dstPtr, bool forceRGB = true) override;
+//    virtual fastStatus_t exportJPEGData(void* dstPtr, unsigned jpegQuality, unsigned &size);
 
 private:
     fastSurfaceConverterHandle_t    hGrayToRGBTransform = nullptr;
