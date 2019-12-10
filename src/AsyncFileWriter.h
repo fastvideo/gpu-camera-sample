@@ -38,6 +38,8 @@
 #include "FastAllocator.h"
 #include <memory>
 
+class MJPEGEncoder;
+
 struct FileWriterTask
 {
     unsigned char* data;
@@ -45,12 +47,12 @@ struct FileWriterTask
     QString fileName;
 };
 
-class AsyncFileWriter : public QObject
+class AsyncWriter : public QObject
 {
     Q_OBJECT
 public:
-    explicit AsyncFileWriter(int size = -1, QObject *parent = nullptr);
-    ~AsyncFileWriter() override;
+    explicit AsyncWriter(int size = -1, QObject *parent = nullptr);
+    ~AsyncWriter();
 
     void initBuffers(unsigned bufferSize);
     unsigned char* getBuffer();
@@ -71,7 +73,11 @@ signals:
 
 public slots:
 
-private:
+protected:
+    virtual void processTask(FileWriterTask* task) = 0;
+
+    void startWriting();
+
     bool mCancel {false};
     bool mWriting {false};
 
@@ -85,9 +91,6 @@ private:
     QThread mWorkThread;
     AsyncQueue<FileWriterTask*> mTasks;
 
-    void startWriting();
-    void processTask(FileWriterTask* task);
-
     int mMaxSize = -1;
     int mProcessed = 0;
     int mDropped = 0;
@@ -95,4 +98,30 @@ private:
     const uint maxQueuSize = 32;
 };
 
+
+class AsyncFileWriter : public AsyncWriter
+{
+    Q_OBJECT
+public:
+    explicit AsyncFileWriter(int size = -1, QObject *parent = nullptr);
+
+protected:
+    virtual void processTask(FileWriterTask* task);
+};
+
+
+class AsyncMJPEGWriter : public AsyncWriter
+{
+    Q_OBJECT
+public:
+    explicit AsyncMJPEGWriter(int size = -1, QObject *parent = nullptr);
+    bool open(int width, int height, int fps, fastJpegFormat_t fmt, const QString& outFileName);
+    void close();
+
+protected:
+    virtual void processTask(FileWriterTask* task);
+
+private:
+    QScopedPointer<MJPEGEncoder> mEncoderPtr;
+};
 #endif // ASYNCJPEGWRITER_H

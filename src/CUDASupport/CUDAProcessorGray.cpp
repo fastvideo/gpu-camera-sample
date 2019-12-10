@@ -525,7 +525,7 @@ fastStatus_t CUDAProcessorGray::Init(CUDAProcessorOptions &options)
                     maxWidth,
                     maxHeight,
 
-                    dstBuffer
+                    dstGrayBuffer
                     );
 
         if(ret != FAST_OK)
@@ -615,7 +615,6 @@ fastStatus_t CUDAProcessorGray::Init(CUDAProcessorOptions &options)
 
     return FAST_OK;
 }
-
 
 fastStatus_t CUDAProcessorGray::Transform(ImageT *image, CUDAProcessorOptions &opts)
 {
@@ -1115,3 +1114,62 @@ fastStatus_t CUDAProcessorGray::export8bitData(void* dstPtr, bool forceRGB)
 
     return ret;
 }
+
+//fastStatus_t CUDAProcessorGray::exportJPEGData(void* dstPtr, unsigned jpegQuality, unsigned& size)
+//{
+//    stats[QStringLiteral("hMjpegEncoder")] = -1;
+
+//    if(!mInitialised || hJpegEncoder == nullptr)
+//    {
+//        size = 0;
+//        return FAST_INVALID_HANDLE;
+//    }
+
+//    fastStatus_t ret = FAST_OK;
+//    float elapsedTimeGpu = 0.;
+//    fastGpuTimerHandle_t profileTimer = nullptr;
+//    if(info)
+//        fastGpuTimerCreate(&profileTimer);
+
+//    fastDeviceSurfaceBufferInfo_t bufferInfo;
+//    fastGetDeviceSurfaceBufferInfo(dstGrayBuffer, &bufferInfo);
+
+//    jfifInfo.width = bufferInfo.width;
+//    jfifInfo.height = bufferInfo.height;
+
+//    if(info)
+//    {
+//        fastGpuTimerStart(profileTimer);
+//    }
+//    ret = fastJpegEncode(
+//                hJpegEncoder,
+
+//                jpegQuality,
+//                &jfifInfo
+//                );
+//    if(ret != FAST_OK)
+//        return TransformFailed("fastJpegEncode failed", ret, profileTimer);
+
+//    ret = fastJfifStoreToMemory(reinterpret_cast<unsigned char*>(dstPtr), &size, &jfifInfo);
+//    if(ret != FAST_OK)
+//        return TransformFailed("fastJpegEncode failed", ret, profileTimer);
+
+//    if(info)
+//    {
+//        fastGpuTimerStop(profileTimer);
+//        fastGpuTimerGetTime(profileTimer, &elapsedTimeGpu);
+//        stats[QStringLiteral("hMjpegEncoder")] = elapsedTimeGpu;
+//    }
+//    else
+//    {
+//        stats[QStringLiteral("hMjpegEncoder")] = -1;
+//    }
+
+//    if(profileTimer)
+//    {
+//        fastGpuTimerDestroy(profileTimer);
+//        profileTimer = nullptr;
+//    }
+
+//    return FAST_OK;
+//}

@@ -12,6 +12,7 @@ public:
     virtual bool isGrayscale() override {return true;}
     virtual void freeFilters() override;
     virtual fastStatus_t export8bitData(void* dstPtr, bool forceRGB = true) override;
+//    virtual fastStatus_t exportJPEGData(void* dstPtr, unsigned jpegQuality, unsigned &size);
 
 private:
     fastSurfaceConverterHandle_t    hGrayToRGBTransform = nullptr;

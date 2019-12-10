@@ -80,5 +80,7 @@
         <file>res/TrashBin.svg</file>
         <file>res/undock.png</file>
         <file>res/WBPicker.svg</file>
+        <file>res/imageGray.svg</file>
+        <file>res/camera.svg</file>
     </qresource>
 </RCC>

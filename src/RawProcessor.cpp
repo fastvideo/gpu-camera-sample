@@ -36,15 +36,17 @@
 #include "FFCReader.h"
 
 #include <QElapsedTimer>
+#include <QDateTime>
 
 RawProcessor::RawProcessor(CameraBase *camera, GLRenderer *renderer) :
     mCamera(camera),
     mRenderer(renderer),
     QObject(nullptr)
 {
-
-
-    mProcessorPtr.reset(new CUDAProcessorBase());
+    if(camera->isColor())
+        mProcessorPtr.reset(new CUDAProcessorBase());
+    else
+        mProcessorPtr.reset(new CUDAProcessorGray());
 
     connect(mProcessorPtr.data(), SIGNAL(error()), this, SIGNAL(error()));
 
@@ -65,10 +67,6 @@ fastStatus_t RawProcessor::init()
     if(!mProcessorPtr)
         return FAST_INVALID_VALUE;
 
-    unsigned pitch = 3 *(((mOptions.Width + FAST_ALIGNMENT - 1) / FAST_ALIGNMENT ) * FAST_ALIGNMENT);
-    unsigned sz = pitch * mOptions.Height;
-    mFileWriter.initBuffers(sz);
-
     return mProcessorPtr->Init(mOptions);
 }
 
@@ -85,8 +83,11 @@ void RawProcessor::stop()
     mWorking = false;
     mWaitCond.wakeAll();
 
-    mFileWriter.waitFinish();
-    mFileWriter.stop();
+    if(mFileWriterPtr)
+    {
+        mFileWriterPtr->waitFinish();
+        mFileWriterPtr->stop();
+    }
 
     //Wait up to 1 sec until mWorking == false
     QTime tm;
@@ -134,21 +135,22 @@ void RawProcessor::startWorking()
         ImageT* img = mCamera->getFrameBuffer()->getLastImage();
         mProcessorPtr->Transform(img, mOptions);
 
-        if(mWriting)
+        if(mWriting && mFileWriterPtr)
         {
-            if(mOptions.Codec == CUDAProcessorOptions::vcJPG)
+            if(mOptions.Codec == CUDAProcessorOptions::vcJPG ||
+               mOptions.Codec == CUDAProcessorOptions::vcMJPG)
             {
-                unsigned char* buf = mFileWriter.getBuffer();
+                unsigned char* buf = mFileWriterPtr->getBuffer();
                 if(buf != nullptr)
                 {
                     FileWriterTask* task = new FileWriterTask();
                     task->fileName =  QStringLiteral("%1/%2%3.jpg").arg(mOutputPath).
                             arg(mFilePrefix).arg(mFrameCnt);
-                    task->size = mFileWriter.bufferSize();
+                    task->size = mFileWriterPtr->bufferSize();
                     task->data = buf;
                     mProcessorPtr->exportJPEGData(task->data, mOptions.JpegQuality, task->size);
-                    mFileWriter.put(task);
-                    mFileWriter.wake();
+                    mFileWriterPtr->put(task);
+                    mFileWriterPtr->wake();
                     mFrameCnt++;
                 }
             }
@@ -156,7 +158,7 @@ void RawProcessor::startWorking()
             {
                 int bpc = GetBitsPerChannelFromSurface(img->surfaceFmt);
                 int maxVal = (1 << bpc) - 1;
-                unsigned char* buf = mFileWriter.getBuffer();
+                unsigned char* buf = mFileWriterPtr->getBuffer();
                 if(buf != nullptr)
                 {
                     unsigned w = 0;
@@ -190,8 +192,8 @@ void RawProcessor::startWorking()
                         }
                     }
 
-                    mFileWriter.put(task);
-                    mFileWriter.wake();
+                    mFileWriterPtr->put(task);
+                    mFileWriterPtr->wake();
                     mFrameCnt++;
                 }
 
@@ -242,8 +244,8 @@ QMap<QString, float> RawProcessor::getStats()
 
         if(mWriting)
         {
-            ret[QStringLiteral("procFrames")] = mFileWriter.getProcessedFrames();
-            ret[QStringLiteral("droppedFrames")] = mFileWriter.getDroppedFrames();
+            ret[QStringLiteral("procFrames")] = mFileWriterPtr->getProcessedFrames();
+            ret[QStringLiteral("droppedFrames")] = mFileWriterPtr->getDroppedFrames();
         }
         else
         {
@@ -258,6 +260,9 @@ QMap<QString, float> RawProcessor::getStats()
 
 void RawProcessor::startWriting()
 {
+    if(mCamera == nullptr)
+        return;
+
     mWriting = false;
     if(QFileInfo(mOutputPath).exists())
     {
@@ -269,8 +274,49 @@ void RawProcessor::startWriting()
     if(!QFileInfo(mOutputPath).isDir())
         return;
 
+    mCodec = mOptions.Codec;
+
+    if(mCodec == CUDAProcessorOptions::vcMJPG)
+    {
+        QString fileName = QDir::toNativeSeparators(
+                    QStringLiteral("%1/%2.avi").
+                    arg(mOutputPath).
+                    arg(QDateTime::currentDateTime().toString(QStringLiteral("dd_MM_yyyy_hh_mm_ss"))));
+        AsyncMJPEGWriter* writer = new AsyncMJPEGWriter();
+        writer->open(mCamera->width(),
+                     mCamera->height(),
+                     25,
+                     mCamera->isColor() ? mOptions.JpegSamplingFmt : JPEG_Y,
+                     fileName);
+        mFileWriterPtr.reset(writer);
+    }
+    else
+        mFileWriterPtr.reset(new AsyncFileWriter());
+
+    unsigned pitch = 3 *(((mOptions.Width + FAST_ALIGNMENT - 1) / FAST_ALIGNMENT ) * FAST_ALIGNMENT);
+    unsigned sz = pitch * mOptions.Height;
+    mFileWriterPtr->initBuffers(sz);
+
     mFrameCnt = 0;
     mWriting = true;
+}
+
+void RawProcessor::stopWriting()
+{
+    mWriting = false;
+    if(!mFileWriterPtr)
+    {
+        mCodec = CUDAProcessorOptions::vcNone;
+        return;
+    }
+
+    if(mCodec == CUDAProcessorOptions::vcMJPG)
+    {
+        AsyncMJPEGWriter* writer = static_cast<AsyncMJPEGWriter*>(mFileWriterPtr.data());
+        writer->close();
+    }
+
+    mCodec = CUDAProcessorOptions::vcNone;
 }
 
 void RawProcessor::setSAM(const QString& fpnFileName, const QString& ffcFileName)

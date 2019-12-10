@@ -31,11 +31,13 @@
 #include "RawProcessor.h"
 
 PGMCamera::PGMCamera(const QString &fileName,
-                     fastBayerPattern_t  pattern) :
+                     fastBayerPattern_t  pattern,
+                     bool isColor) :
     CameraBase(),
     mFileName(fileName)
 {
     mPattern = pattern;
+    mIsColor = isColor;
     mCameraThread.setObjectName(QStringLiteral("PGMCameraThread"));
     moveToThread(&mCameraThread);
     mCameraThread.start();
@@ -118,6 +120,7 @@ bool PGMCamera::open(uint32_t devID)
     mInputBuffer.allocate(mWidth, mHeight, mSurfaceFormat);
 
     mState = cstStopped;
+    emit stateChanged(cstStopped);
     return true;
 }
 

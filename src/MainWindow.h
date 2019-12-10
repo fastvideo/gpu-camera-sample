@@ -98,11 +98,10 @@ private slots:
 
     //Toolbar
     void on_actionOpenCamera_triggered();
-    void on_actionPlay_triggered();
-    void on_actionStop_triggered();
     void on_actionRecord_toggled(bool arg1);
     void on_actionExit_triggered();
     void on_actionWB_picker_toggled(bool arg1);
+    void on_actionPlay_toggled(bool arg1);
 
     //CUDA processor
     QString getErrDescription(fastStatus_t code);
@@ -112,17 +111,20 @@ private slots:
     //BPC
     void on_chkBPC_toggled(bool checked);
 
+    //Camera
     void openCamera(uint32_t devID);
-    void openPGMFile();
+    void openPGMFile(bool isBayer = true);
     void initNewCamera(CameraBase* cmr, uint32_t devID);
+    void onCameraStateChanged(CameraBase::cmrCameraState newState);
+    void on_actionOpenBayerPGM_triggered();
+    void on_actionOpenGrayPGM_triggered();
+
 
     void on_btnGetOutPath_clicked();
-
     void on_btnGetFPNFile_clicked();
-
     void on_btnGetGrayFile_clicked();
-
     void on_chkSAM_toggled(bool checked);
+
 
 private:
     Ui::MainWindow *ui;

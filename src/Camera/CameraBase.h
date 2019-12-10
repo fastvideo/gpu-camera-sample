@@ -98,6 +98,7 @@ public:
     fastSurfaceFormat_t surfaceFormat(){return mSurfaceFormat;}
 
     bool isPacked(){return mImageFormat == cif12bpp_p;}
+    bool isColor(){return mIsColor;}
 
     int width() {return mWidth;}
     int height(){return mHeight;}
@@ -115,7 +116,7 @@ public:
     void setProcessor(RawProcessor* proc){QMutexLocker l(&mLock); mRawProc = proc;}
 
 signals:
-    void stateChanged(cmrCameraState newState);
+    void stateChanged(CameraBase::cmrCameraState newState);
 
 protected:
     QString mModel;
@@ -132,6 +133,7 @@ protected:
 
     uint32_t mDevID = 0;
 
+    bool                mIsColor = true;
     cmrCameraState      mState = cstClosed;
     fastBayerPattern_t  mPattern = FAST_BAYER_NONE;
     fastSurfaceFormat_t mSurfaceFormat = FAST_I8;
