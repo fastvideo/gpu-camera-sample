@@ -164,7 +164,7 @@ void GLImageViewer::resizeEvent(QResizeEvent * event)
     QOpenGLWindow::resizeEvent(event);
 }
 
-void GLImageViewer::mouseMoveEvent(QMouseEvent * event)
+void GLImageViewer::mouseMoveEvent(QMouseEvent* event)
 {
     if(event->buttons() != Qt::LeftButton)
         return;
@@ -183,7 +183,7 @@ void GLImageViewer::mouseMoveEvent(QMouseEvent * event)
     mPtDown = event->pos();
 }
 
-void GLImageViewer::mousePressEvent(QMouseEvent * event)
+void GLImageViewer::mousePressEvent(QMouseEvent* event)
 {
     if(event->buttons() == Qt::LeftButton)
         mPtDown = event->pos();
@@ -191,10 +191,11 @@ void GLImageViewer::mousePressEvent(QMouseEvent * event)
         emit contextMenu(event->globalPos());
 }
 
-void GLImageViewer::mouseReleaseEvent(QMouseEvent *event)
+void GLImageViewer::mouseReleaseEvent(QMouseEvent* event)
 {
     Q_UNUSED(event)
     mPtDown = QPoint();
+    emit mouseClicked(event);
 }
 
 void GLImageViewer::setFitZoom(QSize szClient)
@@ -234,6 +235,57 @@ void GLImageViewer::exposeEvent(QExposeEvent *event)
     Q_UNUSED(event);
     update();
 }
+
+QPoint GLImageViewer::screenToBitmap(const QPoint& pt)
+{
+    if(!mRenderer)
+        return QPoint();
+
+    QSize imageSize(mRenderer->imageSize());
+
+    qreal w = width();
+    qreal h = height();
+
+    qreal iw = imageSize.width();
+    qreal ih = imageSize.height();
+
+    qreal dx = 0.;
+    qreal dy = 0.;
+    if(iw - w / mZoom < 0)
+        dx = (w / mZoom - iw) / 2;
+
+    if(ih - h / mZoom < 0)
+        dy = (h / mZoom - ih) / 2;
+
+    return QPoint(int(mTexTopLeft.x() + pt.x() / mZoom - dx),
+                  int(mTexTopLeft.y() + pt.y() / mZoom - dy));
+}
+
+QPoint GLImageViewer::bitmapToScreen(const QPoint& pt)
+{
+    if(!mRenderer)
+        return QPoint();
+
+    QSize imageSize(mRenderer->imageSize());
+
+    qreal w = width();
+    qreal h = height();
+
+    qreal iw = imageSize.width();
+    qreal ih = imageSize.height();
+
+    qreal dx = 0.;
+    qreal dy = 0.;
+    if(iw - w / mZoom < 0)
+        dx = (w - iw * mZoom) / 2;
+
+    if(ih - h / mZoom < 0)
+        dy = (h - ih * mZoom) / 2;
+
+    return QPoint(int((pt.x() - mTexTopLeft.x()) * mZoom + dx),
+                  int((pt.y() - mTexTopLeft.y()) * mZoom + dy));
+}
+
 
 GLRenderer::GLRenderer(QObject *parent):
     QObject(parent)

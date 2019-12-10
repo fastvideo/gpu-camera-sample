@@ -116,7 +116,7 @@ unsigned char* CircularBuffer::getBuffer()
     return mImages[mCurrent].data.get();
 }
 
-ImageT *CircularBuffer::getLastImage()
+ImageT* CircularBuffer::getLastImage()
 {
     if(mImages.isEmpty() || mLast < 0)
         return nullptr;

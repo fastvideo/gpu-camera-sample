@@ -89,7 +89,7 @@ public:
     virtual fastStatus_t Close();
     virtual void         freeFilters();
 
-    virtual fastStatus_t export8bitData(void* dstPtr);
+    virtual fastStatus_t export8bitData(void* dstPtr, bool forceRGB = true);
 
     fastStatus_t exportRawData(void* dstPtr, unsigned int &w, unsigned int &h, unsigned int &pitch);
     fastStatus_t export16bitData(void* dstPtr, unsigned int &w, unsigned int &h, unsigned int &pitch);

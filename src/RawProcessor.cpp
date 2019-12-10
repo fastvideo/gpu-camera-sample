@@ -28,6 +28,7 @@
 
 #include "RawProcessor.h"
 #include "CUDAProcessorBase.h"
+#include "CUDAProcessorGray.h"
 #include "FrameBuffer.h"
 #include "CameraBase.h"
 #include "MainWindow.h"
@@ -41,7 +42,10 @@ RawProcessor::RawProcessor(CameraBase *camera, GLRenderer *renderer) :
     mRenderer(renderer),
     QObject(nullptr)
 {
+
+
     mProcessorPtr.reset(new CUDAProcessorBase());
+
     connect(mProcessorPtr.data(), SIGNAL(error()), this, SIGNAL(error()));
 
     mCUDAThread.setObjectName(QStringLiteral("CUDAThread"));

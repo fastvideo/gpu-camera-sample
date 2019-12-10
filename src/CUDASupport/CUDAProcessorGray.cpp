@@ -6,7 +6,7 @@ extern "C"  fastStatus_t fastEnableWatermark(bool isEnabled);
 
 
 
-CUDAProcessorGray::CUDAProcessorGray(bool info, QObject* parent) : CUDAProcessorBase(info, parent)
+CUDAProcessorGray::CUDAProcessorGray(QObject* parent) : CUDAProcessorBase(parent)
 {
     hGrayToRGBTransform = nullptr;
     dstGrayBuffer = nullptr;
@@ -61,65 +61,147 @@ fastStatus_t CUDAProcessorGray::Init(CUDAProcessorOptions &options)
     fastSdkParametersHandle_t handle = nullptr;
     ret = fastGetSdkParametersHandle(&handle);
     ret = fastDenoiseLibraryInit(handle);
-    ret = fastExperimentalImageFilterLibraryInit(handle);
-    ret = fastNppGeometryLibraryInit(handle);
-
 
     if(Globals::gEnableLog)
     {
-        if(QDir().mkpath(Globals::getLogPath()))
-        {
-            fastTraceCreate(QDir::toNativeSeparators(
-                                QStringLiteral("%1%2.log").arg(Globals::getLogPath(),QDateTime::currentDateTime().
-                                                               toString(QStringLiteral("dd_MM_yyyy_hh_mm_ss")))).toStdString().c_str());
-            fastTraceEnableLUTDump(false);
-            fastTraceEnableFlush(true);
-            fastEnableInterfaceSynchronization(true);
-        }
+        fastTraceCreate(QDir::toNativeSeparators(
+                            QStringLiteral("%1.log").arg(
+                                QDateTime::currentDateTime().toString(
+                                QStringLiteral("dd_MM_yyyy_hh_mm_ss")))).
+                                toStdString().c_str());
+        fastTraceEnableLUTDump(false);
+        fastTraceEnableFlush(true);
+        fastEnableInterfaceSynchronization(true);
     }
 
     stats[QStringLiteral("inputWidth")] = -1;
     stats[QStringLiteral("inputHeight")] = -1;
-    lastWidth = 0;
-    lastHeight = 0;
-    lastScale = QSizeF(1., 1.);
 
     fastSurfaceFormat_t srcSurfaceFmt  = options.SurfaceFmt;
-    fastSurfaceFormat_t fmt;
 
     unsigned int maxWidth = options.MaxWidth;
     unsigned int maxHeight = options.MaxHeight;
 
-    fastDeviceSurfaceBufferHandle_t *bufferPtr = nullptr;
-    fastDeviceSurfaceBufferHandle_t *bypassbufferPtr = nullptr;
+    fastDeviceSurfaceBufferHandle_t* bufferPtr = nullptr;
 
+    if(options.Packed)
+    {
+        ret = fastRawUnpackerCreate(
+                    &hRawUnpacker,
 
-    ret = ( fastImportFromHostCreate(
-                &hHostToDeviceAdapter,
+                    FAST_RAW_XIMEA12,
 
-                srcSurfaceFmt,
-                maxWidth,
-                maxHeight,
+                    srcSurfaceFmt,
+                    maxWidth,
+                    maxHeight,
 
-                &srcBuffer
-                ) );
-    //
-    if(ret != FAST_OK)
-        return InitFailed("fastImportFromHostCreate failed",ret);
-    //
-    cudaMemoryInfo("Created hHostToDeviceAdapter");
+                    &srcBuffer
+                    );
+
+        if(ret != FAST_OK)
+            return InitFailed("fastRawUnpackerCreate failed",ret);
+
+        cudaMemoryInfo("Created fastRawUnpackerCreate");
+    }
+    else
+    {
+        ret = fastImportFromHostCreate(
+                    &hHostToDeviceAdapter,
+
+                    srcSurfaceFmt,
+                    maxWidth,
+                    maxHeight,
+
+                    &srcBuffer
+                    );
+        //
+        if(ret != FAST_OK)
+            return InitFailed("fastImportFromHostCreate failed",ret);
+        //
+        cudaMemoryInfo("Created hHostToDeviceAdapter");
+    }
     bufferPtr = &srcBuffer;
 
+    //Raw data export
+    ret = fastExportToHostCreate(
+                &hDeviceToHostRawAdapter,
+                &srcSurfaceFmt,
+                *bufferPtr
+                );
 
+    if(ret != FAST_OK)
+        return InitFailed("fastExportToHostCreate for Raw data failed",ret);
 
-    unsigned short whiteLevel = options.whiteLevel;
-    unsigned short blackLevel = options.blackLevel;
+    cudaMemoryInfo("Created hDeviceToHostRawAdapter");
+
+    //SAM
+    if(options.SurfaceFmt == FAST_I8)
+    {
+        fastSam_t samParameter;
+        samParameter.correctionMatrix = options.MatrixA;
+        samParameter.blackShiftMatrix = (char*)options.MatrixB;
+        ret = fastImageFilterCreate(
+               &hSam,
+
+               FAST_SAM,
+               &samParameter,
+
+               maxWidth,
+               maxHeight,
+
+               *bufferPtr,
+               &samBuffer
+               );
+    }
+    else
+    {
+        fastSam16_t samParameter;
+        samParameter.correctionMatrix = options.MatrixA;
+        samParameter.blackShiftMatrix = (short*)options.MatrixB;
+        ret = fastImageFilterCreate(
+               &hSam,
+
+               FAST_SAM16,
+               &samParameter,
+
+               maxWidth,
+               maxHeight,
+
+               *bufferPtr,
+               &samBuffer
+               );
+    }
+    if(ret != FAST_OK)
+        return InitFailed("fastImageFilterCreate for MAD failed",ret);
+
+    cudaMemoryInfo("Created SAM");
+
+    if(samBuffer)
+    {
+        fastDeviceSurfaceBufferHandle_t srcBuffers[2] = {*bufferPtr, samBuffer};
+
+        ret = fastMuxCreate(
+                    &hSamMux,
+                    srcBuffers,
+                    2,
+                    &samMuxBuffer
+                    );
+    }
+
+    bufferPtr = &samMuxBuffer;
+
+    if(ret != FAST_OK)
+        return InitFailed("fastMuxCreate hSamMux failed",ret);
+    cudaMemoryInfo("Created hSamMux");
+
+    unsigned short whiteLevel = options.WhiteLevel;
+    unsigned short blackLevel = options.BlackLevel;
     double scale = 1. / (double(whiteLevel - blackLevel));
     if(options.SurfaceFmt == FAST_I8)
     {
         fastLut_8_16_t lutParameter;
-        InitLut<fastLut_8_16_t>(lutParameter,blackLevel,scale,options.linearizationLut);
-        ret = ( fastImageFilterCreate(
+        InitLut<fastLut_8_16_t>(lutParameter, blackLevel, scale, options.LinearizationLut);
+        ret = fastImageFilterCreate(
                     &hLinearizationLut,
                     FAST_LUT_8_16,
                     &lutParameter,
@@ -129,13 +211,13 @@ fastStatus_t CUDAProcessorGray::Init(CUDAProcessorOptions &options)
 
                     *bufferPtr,
                     &linearizationLutBuffer
-                    ) );
+                    );
     }
     else if(options.SurfaceFmt == FAST_I10)
     {
         fastLut_10_t lutParameter;
-        InitLut<fastLut_10_t>(lutParameter,blackLevel,scale,options.linearizationLut);
-        ret = ( fastImageFilterCreate(
+        InitLut<fastLut_10_t>(lutParameter, blackLevel, scale, options.LinearizationLut);
+        ret = fastImageFilterCreate(
                     &hLinearizationLut,
                     FAST_LUT_10_16,
                     &lutParameter,
@@ -145,13 +227,13 @@ fastStatus_t CUDAProcessorGray::Init(CUDAProcessorOptions &options)
 
                     *bufferPtr,
                     &linearizationLutBuffer
-                    ) );
+                    );
     }
     else if(options.SurfaceFmt == FAST_I12)
     {
         fastLut_12_t lutParameter;
-        InitLut<fastLut_12_t>(lutParameter,blackLevel,scale,options.linearizationLut);
-        ret = ( fastImageFilterCreate(
+        InitLut<fastLut_12_t>(lutParameter, blackLevel, scale, options.LinearizationLut);
+        ret = fastImageFilterCreate(
                     &hLinearizationLut,
                     FAST_LUT_12_16,
                     &lutParameter,
@@ -161,13 +243,13 @@ fastStatus_t CUDAProcessorGray::Init(CUDAProcessorOptions &options)
 
                     *bufferPtr,
                     &linearizationLutBuffer
-                    ) );
+                    );
     }
     else if(options.SurfaceFmt == FAST_I14)
     {
         fastLut_16_t lutParameter;
-        InitLut<fastLut_16_t>(lutParameter,blackLevel,scale,options.linearizationLut);
-        ret = ( fastImageFilterCreate(
+        InitLut<fastLut_16_t>(lutParameter, blackLevel, scale, options.LinearizationLut);
+        ret = fastImageFilterCreate(
                     &hLinearizationLut,
                     FAST_LUT_14_16,
                     &lutParameter,
@@ -177,13 +259,13 @@ fastStatus_t CUDAProcessorGray::Init(CUDAProcessorOptions &options)
 
                     *bufferPtr,
                     &linearizationLutBuffer
-                    ) );
+                    );
     }
     else
     {
         fastLut_16_t lutParameter;
-        InitLut<fastLut_16_t>(lutParameter,blackLevel,scale,options.linearizationLut);
-        ret = ( fastImageFilterCreate(
+        InitLut<fastLut_16_t>(lutParameter,blackLevel,scale,options.LinearizationLut);
+        ret = fastImageFilterCreate(
                     &hLinearizationLut,
 
                     FAST_LUT_16_16,
@@ -194,7 +276,7 @@ fastStatus_t CUDAProcessorGray::Init(CUDAProcessorOptions &options)
 
                     *bufferPtr,
                     &linearizationLutBuffer
-                    ) );
+                    );
     }
     //
     if(ret != FAST_OK)
@@ -202,103 +284,55 @@ fastStatus_t CUDAProcessorGray::Init(CUDAProcessorOptions &options)
     //
     cudaMemoryInfo("Created hLinearizationLut");
     bufferPtr = &linearizationLutBuffer;
-    bypassbufferPtr = &linearizationLutBuffer;
 
     srcSurfaceFmt = FAST_I16;
 
-    if(procFlags.testFlag(psMAD))
+
+    //BPC
+    fastBadPixelCorrection_t bpcParameter;
+    bpcParameter.pattern = options.BayerFormat;
+
+    ret = fastImageFilterCreate(
+               &hBpc,
+
+               FAST_BAD_PIXEL_CORRECTION_5X5,
+               &bpcParameter,
+
+               maxWidth,
+               maxHeight,
+
+               *bufferPtr,
+               &bpcBuffer
+               );
+
+    if(ret != FAST_OK)
+        return InitFailed("fastImageFilterCreate for MAD failed",ret);
+
+    cudaMemoryInfo("Created BPC");
+
+    if(*bufferPtr && bpcBuffer)
     {
-        fastSam16_t samParameter;
-        samParameter.correctionMatrix = options.MatrixA;
-        samParameter.blackShiftMatrix = options.MatrixB;
+        fastDeviceSurfaceBufferHandle_t srcBuffers[2] = {*bufferPtr, bpcBuffer};
 
-        ret = (fastImageFilterCreate(
-                   &hSam,
-
-                   FAST_SAM16,
-                   &samParameter,
-
-                   maxWidth,
-                   maxHeight,
-
-                   linearizationLutBuffer,
-                   &samBuffer
-                   ) );
-
-        if(ret != FAST_OK)
-            return InitFailed("fastImageFilterCreate for MAD failed",ret);
-
-        cudaMemoryInfo("Created MAD");
-
-        if(linearizationLutBuffer && samBuffer)
-        {
-            fastDeviceSurfaceBufferHandle_t srcBuffers[2] = {linearizationLutBuffer, samBuffer};
-
-            ret = fastMuxCreate(
-                        &hSamMux,
-                        srcBuffers,
-                        2,
-                        &samMuxBuffer
-                        );
-        }
-
-        bufferPtr = &samMuxBuffer;
-
-        //if MAD is enabled get linearized data from MAD buffer
-        linearizationLutBuffer = samMuxBuffer;
-
-        if(ret != FAST_OK)
-            return InitFailed("fastMuxCreate hMadMux failed",ret);
-        cudaMemoryInfo("Created hMadMux");
-
-    }
-
-    //median filter
-    if(procFlags.testFlag(psMedianFilter))
-    {
-        ret = fastImageFilterCreate(
-                    &hColorMedian,
-
-                    FAST_MEDIAN,
-                    nullptr,
-
-                    maxWidth,
-                    maxHeight,
-
-                    *bufferPtr,
-                    &colorMedianBuffer
+        ret = fastMuxCreate(
+                    &hBpcMux,
+                    srcBuffers,
+                    2,
+                    &bpcMuxBuffer
                     );
-
-        if(ret != FAST_OK)
-            return InitFailed("fastImageFilterCreate for hColorMedian failed",ret);
-        cudaMemoryInfo("Created hColorMedian");
-        bufferPtr = &colorMedianBuffer;
-
-        if(hLinearizationLut && hColorMedian)
-        {
-            fastDeviceSurfaceBufferHandle_t srcBuffers[2] = {linearizationLutBuffer,colorMedianBuffer};
-            ret = fastMuxCreate(
-                        &hColorMedianMux,
-                        srcBuffers,
-                        2,
-                        &colorMedianMuxBuffer
-                        );
-
-            bufferPtr = &colorMedianMuxBuffer;
-            bypassbufferPtr = &colorMedianMuxBuffer;
-
-            if(ret != FAST_OK)
-                return InitFailed("fastMuxCreate hColorMedianMux failed",ret);
-            cudaMemoryInfo("Created hColorMedianMux");
-        }
-
     }
+
+    bufferPtr = &bpcMuxBuffer;
+
+    if(ret != FAST_OK)
+        return InitFailed("fastMuxCreate hBpcMux failed",ret);
+    cudaMemoryInfo("Created hBpcMux");
 
     //Denoise
-    if(procFlags.testFlag(psDenoise))
+    if(1)
     {
         denoise_static_parameters_t denoiseParameters;
-        memcpy(&denoiseParameters, &options.denoiseStaticParams, sizeof(denoise_static_parameters_t));
+        memcpy(&denoiseParameters, &options.DenoiseStaticParams, sizeof(denoise_static_parameters_t));
 
         ret = fastDenoiseCreate(
                     &hDenoise,
@@ -319,18 +353,18 @@ fastStatus_t CUDAProcessorGray::Init(CUDAProcessorOptions &options)
         cudaMemoryInfo("Created hDenoise");
 
         //Denoise mux
-        if(bypassbufferPtr && hDenoise)
+        if(bpcMuxBuffer && denoiseBuffer)
         {
-            fastDeviceSurfaceBufferHandle_t srcBuffers[2] = {*bypassbufferPtr,denoiseBuffer};
+            fastDeviceSurfaceBufferHandle_t srcBuffers[2] = {bpcMuxBuffer, denoiseBuffer};
 
             ret = fastMuxCreate(
                         &hDenoiseMux,
                         srcBuffers,
                         2,
-                        &muxBuffer
+                        &denoiseMuxBuffer
                         );
 
-            bufferPtr = &muxBuffer;
+            bufferPtr = &denoiseMuxBuffer;
 
             if(ret != FAST_OK)
                 return InitFailed("fastMuxCreate failed",ret);
@@ -339,247 +373,42 @@ fastStatus_t CUDAProcessorGray::Init(CUDAProcessorOptions &options)
     }
 
     //Output LUT
-    fastLut_16_t lutGray;
     for(int i = 0; i < 16384; i++)
-        lutGray.lut[i] = static_cast<unsigned short>(i * 4);//rgbLut[0][i];
-    //
-    ret = ( fastImageFilterCreate(
-                &hRawLut,
+        outLut.lut[i] = static_cast<unsigned short>(i * 4);//rgbLut[0][i];
+    ret = fastImageFilterCreate(
+                &hOutLut,
 
                 FAST_LUT_16_16,
-                &lutGray,
+                &outLut,
 
                 maxWidth,
                 maxHeight,
 
                 *bufferPtr,
-                &rawLutBuffer
-                ) );
-
-    if(ret != FAST_OK)
-        return InitFailed("fastImageFilterCreate for RawCurve failed",ret);
-
-    cudaMemoryInfo("Created rawLut");
-    bufferPtr = &rawLutBuffer;
-
-
-
-    if(procFlags.testFlag(psRemap))
-    {
-        fastNPPRemap_t remapData;
-        remapData.map = &(options.maps);
-        remapData.map->dstWidth = maxWidth;
-        remapData.map->dstHeight = maxHeight;
-        remapData.background = &(options.remapBackground);
-        ret = fastNppGeometryCreate(
-                    &hRemap,
-                    FAST_NPP_GEOMETRY_REMAP,
-                    NPP_INTER_CUBIC,
-                    &remapData,
-                    maxWidth,
-                    maxHeight,
-                    *bufferPtr,
-                    &remapBuffer
-                    );
-
-        if(ret != FAST_OK)
-            return InitFailed("fastNppGeometryCreate failed",ret);
-        cudaMemoryInfo("Created hRemap");
-        bufferPtr = &remapBuffer;
-
-        //Remap mux
-        if(hRawLut && hRemap)
-        {
-            fastDeviceSurfaceBufferHandle_t srcBuffers[2] = {rawLutBuffer,remapBuffer};
-
-            ret = fastMuxCreate(
-                        &hRemapMux,
-                        srcBuffers,
-                        2,
-                        &remapMuxBuffer
-                        );
-
-            bufferPtr = &remapMuxBuffer;
-            if(ret != FAST_OK)
-                return InitFailed("fastMuxCreate hRemapMux failed",ret);
-            cudaMemoryInfo("Created hRemapMux");
-        }
-    }
-
-    ret = ( fastCropCreate(
-                &hCrop,
-
-                maxWidth,
-                maxHeight,
-
-                maxWidth,
-                maxHeight,
-
-                *bufferPtr,
-                &cropBuffer
-                ) );
-    bufferPtr = &cropBuffer;
-
-    if(ret != FAST_OK)
-        return InitFailed("fastCropCreate failed",ret);
-
-    cudaMemoryInfo("Created hCrop");
-
-    unsigned maxOutWidth = options.maxOutWidth <= 0 ? Globals::getAppSettings()->maxOutWidth : options.maxOutWidth;
-    unsigned maxOutHeight = options.maxOutHeight <= 0 ? Globals::getAppSettings()->maxOutHeight : options.maxOutHeight;
-    bool maxSizeChanged = maxOutWidth < maxWidth || maxOutHeight < maxHeight;
-    if(maxSizeChanged)
-    {
-        if(maxOutWidth < maxWidth)
-            maxOutWidth = maxWidth;
-        if(maxOutHeight < maxHeight)
-            maxOutHeight = maxHeight;
-    }
-
-
-    ret = fastResizerCreate(
-                &hResizer,
-
-                maxWidth,
-                maxHeight,
-
-                maxOutWidth,
-                maxOutHeight,
-
-                10,
-
-                0.5,
-                0.5,
-
-                *bufferPtr,
-                &resizerBuffer
+                &outLutBuffer
                 );
 
     if(ret != FAST_OK)
-        return InitFailed("fastResizerCreate failed",ret);
+        return InitFailed("fastImageFilterCreate for Output lut failed",ret);
 
-    cudaMemoryInfo("Created hResizer");
-
-    maxWidth = maxOutWidth;
-    maxHeight = maxOutHeight;
-    bufferPtr = &resizerBuffer;
-
-    //USM
-    if(procFlags.testFlag(psUSM))
-    {
-        ret = fastNppFilterCreate(
-                    &hUSM,
-
-                    NPP_UNSHARP_MASK_SOFT,
-                    nullptr,
-
-                    maxWidth,
-                    maxHeight,
-
-                    *bufferPtr,
-                    &usmBuffer
-                    );
-        bufferPtr = &usmBuffer;
-
-        if(ret != FAST_OK && info)
-            return InitFailed("fastImageFilterCreate for USM failed",ret);
-
-        cudaMemoryInfo("Created hUSM");
-
-        //USM mux
-        if(hUSM && hResizer)
-        {
-            fastDeviceSurfaceBufferHandle_t srcBuffers[2] = {resizerBuffer,usmBuffer};
-
-            ret = fastMuxCreate(
-                        &hUSMMux,
-                        srcBuffers,
-                        2,
-                        &usmMuxBuffer
-                        );
-
-            bufferPtr = &usmMuxBuffer;
-
-            if(ret != FAST_OK && info)
-                return InitFailed("fastMuxCreate hUSMMux failed",ret);
-
-            cudaMemoryInfo("Created hUSMMux");
-        }
-    }
-
-    //16 bit RGB untransformed data export
-    ret = ( fastExportToHostCreate(
-                &hDeviceToHost16NoTransformAdapter,
-                &srcSurfaceFmt,
-                *bufferPtr
-                ) );
-
-    if(ret != FAST_OK)
-        return InitFailed("fastExportToHostCreate for 16 bit data failed",ret);
-
-    cudaMemoryInfo("Created hDeviceToHost16NoTransformAdapter");
-
-    if(srcSurfaceFmt != FAST_RGB16 && info)
-        qDebug("hDeviceToHost16NoTransformAdapter returned invalid format = %u", srcSurfaceFmt);
+    cudaMemoryInfo("Created hOutLut");
+    bufferPtr = &outLutBuffer;
 
 
-    ret = fastAffineCreate(
-                &hAffineTransform,
-
-                FAST_AFFINE_ALL,
-
-                maxWidth,
-                maxHeight,
-
-                *bufferPtr,
-                &affineTransformBuffer
-                );
-    bufferPtr = &affineTransformBuffer;
-
-    if(ret != FAST_OK && info)
-        return InitFailed("fastAffineCreate failed",ret);
-
-    maxWidth = maxHeight = qMax(maxWidth, maxHeight);
-    cudaMemoryInfo("Created hAffineTransform");
-
-    //16 bit affine transformed RGB data export
-    ret = ( fastExportToHostCreate(
+    //16 bit gray data export
+    ret = fastExportToHostCreate(
                 &hDeviceToHost16Adapter,
                 &srcSurfaceFmt,
                 *bufferPtr
-                ) );
+                );
 
     if(ret != FAST_OK)
         return InitFailed("fastExportToHostCreate for 16 bit data failed",ret);
 
     cudaMemoryInfo("Created hDeviceToHost16Adapter");
 
-    if(srcSurfaceFmt != FAST_RGB16 && info)
-        qDebug("hDeviceToHost16Adapter returned invalid format = %u", srcSurfaceFmt);
-
-    try
-    {
-        rgb16Bits.reset(static_cast<unsigned char*>(alloc.allocate(options.MaxWidth * options.MaxHeight * 3 * sizeof(unsigned short))));
-    }
-    catch(...)
-    {
-        return InitFailed("Cannot allocate memory for RGB 16 bitmap",ret);
-    }
-
-    //Linearized raw data export
-    ret = ( fastExportToHostCreate(
-                &hDeviceToHostLinRawAdapter,
-                &srcSurfaceFmt,
-                linearizationLutBuffer
-                ) );
-
-    if(ret != FAST_OK)
-        return InitFailed("fastExportToHostCreate for RAW linearized data failed",ret);
-
-    cudaMemoryInfo("Created hDeviceToHostLinRawAdapter");
-
     if(srcSurfaceFmt != FAST_I16 && info)
-        qDebug("hDeviceToHostLinRawAdapter returned invalid format = %u", srcSurfaceFmt);
+        qDebug("hDeviceToHost16Adapter returned invalid format = %u", srcSurfaceFmt);
 
 
     //16 to 8 bit transform
@@ -658,234 +487,86 @@ fastStatus_t CUDAProcessorGray::Init(CUDAProcessorOptions &options)
     if(srcSurfaceFmt != FAST_RGB8 && info)
         qDebug("fastExportToHostCreate returned invalid format = %u", srcSurfaceFmt);
 
-
-    fastBayerPatternParam_t histParams;
-
-    histParams.bayerPattern = FAST_BAYER_NONE;
-    ret = ( fastHistogramCreate(
-                &hHistogram,
-                FAST_HISTOGRAM_COMMON,
-                &histParams,
-                HIST_BINS,
-                maxWidth,
-                maxHeight,
-
-                dstGrayBuffer
-                ) );
-
-    try
-    {
-        histResults.reset(static_cast<unsigned int *>(alloc.allocate(3 * HIST_BINS * sizeof(unsigned int))));
-    }
-    catch(...)
-    {
-        return InitFailed("Cannot allocate memory for histogram",ret);
-    }
-
-    if(ret != FAST_OK)
-        return InitFailed("fastHistogramCreate for histogram failed",ret);
-
-    cudaMemoryInfo("Created hHistogram");
-
-    fastHistogramParade_t paradeParams;
-    paradeParams.stride = paradeStride;
-
-    ret = ( fastHistogramCreate(
-                &hRGBParade,
-                FAST_HISTOGRAM_PARADE,
-                &paradeParams,
-                HIST_BINS,
-                maxWidth,
-                maxHeight,
-
-                *bufferPtr
-                ) );
-
-    try
-    {
-        paradeResults.reset(static_cast<unsigned int *>(alloc.allocate(maxWidth * 3 * HIST_BINS * sizeof(unsigned int))));
-    }
-    catch(...)
-    {
-        return InitFailed("Cannot allocate memory for parade",ret);
-    }
-
-    if(ret != FAST_OK)
-    {
-        qDebug("fastHistogramsCreate hRGBParade failed, ret = %u", ret);
-        return InitFailed("fastHistogramsCreate for RGB Parade failed",ret);
-    }
-
-    cudaMemoryInfo("Created hRGBParade");
-
-    //OpenGL viewport bitmap
-    ret = fastCropCreate(
-                &hViewportCrop,
-
-                maxWidth,
-                maxHeight,
-
-                maxWidth,
-                maxHeight,
-
-                *bufferPtr,
-                &viewprtCropBuffer
-                );
-
-    if(ret != FAST_OK)
-        return InitFailed("fastCropCreate for viewport bitmap failed",ret);
-
-    cudaMemoryInfo("Created hViewportCrop");
-
-    ret = fastResizerCreate(
-                &hViewportResizer,
-
-                maxWidth,
-                maxHeight,
-
-                static_cast<unsigned int>(maxViewportSize.width()),
-                static_cast<unsigned int>(maxViewportSize.height()),
-
-                MAX_ZOOM,
-
-                0.5,
-                0.5,
-
-                viewprtCropBuffer,
-                &viewportResizerBuffer
-                );
-
-    if(ret != FAST_OK)
-        return InitFailed("fastResizerCreate for viewport bitmap failed",ret);
-
-    cudaMemoryInfo("Created hViewportResizer");
-
-    bufferPtr = &viewportResizerBuffer;
-
-    fmt = FAST_RGB8;
-    ret = ( fastExportToHostCreate(
-                &hBitmapExport,
-                &fmt,
-                *bufferPtr
-                ) );
-
+    //Open GL
+    ret = fastExportToDeviceCreate(
+        &hExportToDevice,
+        &srcSurfaceFmt,
+        *bufferPtr
+    );
     if(ret != FAST_OK)
         return InitFailed("fastExportToDeviceCreate for viewport bitmap failed",ret);
 
-    cudaMemoryInfo("Created hBitmapExport");
+    cudaMemoryInfo("Created hExportToDevice");
 
-    if(srcSurfaceFmt != FAST_I8 && info)
+    if(srcSurfaceFmt != FAST_RGB8 && info)
         qDebug("fastExportToDeviceCreate for viewport bitmap returned invalid format = %u", srcSurfaceFmt);
 
-    if(procFlags.testFlag(psJPEG))
+
+    unsigned maxPitch = 3 * ( ( ( options.MaxWidth + FAST_ALIGNMENT - 1 ) / FAST_ALIGNMENT ) * FAST_ALIGNMENT );
+    unsigned bufferSize = maxPitch * options.MaxHeight * sizeof(unsigned char);
+    if(cudaMalloc( &hGLBuffer, bufferSize ) != cudaSuccess)
     {
-        if(options.codec == CUDAProcessorOptions::vcMJPG)
-        {
-            //Check if videoFileName is not empty and its parent dir exists
-            if(!options.videoFileName.isEmpty())
-            {
-                if(QFileInfo(options.videoFileName).dir().exists())
-                {
-                    jfifInfo.restartInterval = options.jpegRestartInterval;
-                    jfifInfo.jpegFmt = options.jpegSamplingFmt;
-                    jfifInfo.jpegMode =  JPEG_SEQUENTIAL_DCT;
-                    ret = fastJpegEncoderCreate(
-                                &hMjpegEncoder,
-
-                                maxWidth,
-                                maxHeight,
-
-                                dstBuffer
-                                );
-
-                    if(ret != FAST_OK)
-                        return InitFailed("fastJpegEncoderCreate failed",ret);
-
-                    fastMJpegFileDescriptor_t fileDescriptor;
-
-                    QString str = QDir::toNativeSeparators(options.videoFileName);
-                    char filename[256];
-                    memset(filename, 0, 256);
-                    memcpy(filename, str.toStdString().c_str(), size_t(str.size()));
-
-                    fileDescriptor.fileName = filename;
-                    fileDescriptor.height = options.Height;
-                    fileDescriptor.width = options.Width;
-                    fileDescriptor.samplingFmt = options.jpegSamplingFmt;
-                    ret = fastMJpegWriterCreate(
-                                &hMjpegWriter,
-
-                                &fileDescriptor,
-                                int(options.videoFrameRate)
-                                );
-
-                    if(ret != FAST_OK)
-                        return InitFailed("fastMJpegWriterCreate failed",ret);
-
-                    unsigned pitch = 3 * ( ( ( maxWidth + FAST_ALIGNMENT - 1 ) / FAST_ALIGNMENT ) * FAST_ALIGNMENT );
-                    fastMalloc(reinterpret_cast<void**>(&jfifInfo.h_Bytestream), pitch * maxHeight * sizeof(unsigned char));
-
-                    try
-                    {
-                        hJpegStream.reset(static_cast<unsigned char *>(alloc.allocate(pitch * maxHeight + JPEG_HEADER_SIZE)));
-                    }
-                    catch(...)
-                    {
-                        return InitFailed("Cannot allocate memory for JPEG stream",ret);
-                    }
-
-                    jpegStreamSize = pitch * maxHeight + JPEG_HEADER_SIZE;
-                }
-            }
-        }
-
-        if(options.codec == CUDAProcessorOptions::vcJPG)
-        {
-
-            jfifInfo.restartInterval = options.jpegRestartInterval;
-            jfifInfo.jpegFmt = JPEG_Y;//options.jpegSamplingFmt;
-            jfifInfo.jpegMode =  JPEG_SEQUENTIAL_DCT;
-            ret = fastJpegEncoderCreate(
-                        &hMjpegEncoder,
-
-                        maxWidth,
-                        maxHeight,
-
-                        dstGrayBuffer
-                        );
-
-            if(ret != FAST_OK)
-                return InitFailed("fastJpegEncoderCreate failed",ret);
-
-            unsigned pitch = 3 * ( ( ( maxWidth + FAST_ALIGNMENT - 1 ) / FAST_ALIGNMENT ) * FAST_ALIGNMENT );
-
-            try
-            {
-                fastMalloc(reinterpret_cast<void**>(&jfifInfo.h_Bytestream), pitch * maxHeight * sizeof(unsigned char));
-                hJpegStream.reset(static_cast<unsigned char *>(alloc.allocate(pitch * maxHeight + JPEG_HEADER_SIZE)));
-            }
-            catch(...)
-            {
-                return InitFailed("Cannot allocate memory for JPEG stream",ret);
-            }
-
-            jpegStreamSize = pitch * maxHeight + JPEG_HEADER_SIZE;
-
-        }
+        hGLBuffer = nullptr;
+        return InitFailed("cudaMalloc failed",ret);
     }
 
-    if(maxSizeChanged)
+    stats["totalViewportMemory"] = bufferSize;
+    cudaMemoryInfo("Created hGLBuffer");
+
+    //JPEG Stuff
+    if(1)
     {
-        emit outputSizeChanged(QSize(int(maxOutWidth), int(maxOutHeight)));
+        jfifInfo.restartInterval = options.JpegRestartInterval;
+        jfifInfo.jpegFmt = JPEG_Y;
+        jfifInfo.jpegMode =  JPEG_SEQUENTIAL_DCT;
+        ret = fastJpegEncoderCreate(
+                    &hJpegEncoder,
+
+                    maxWidth,
+                    maxHeight,
+
+                    dstBuffer
+                    );
+
+        if(ret != FAST_OK)
+            return InitFailed("fastJpegEncoderCreate failed", ret);
+
+        unsigned pitch = 3 * (((maxWidth + FAST_ALIGNMENT - 1) / FAST_ALIGNMENT) * FAST_ALIGNMENT);
+
+        try
+        {
+            fastMalloc(reinterpret_cast<void**>(&jfifInfo.h_Bytestream), pitch * maxHeight * sizeof(unsigned char));
+            hJpegStream.reset(static_cast<unsigned char *>(alloc.allocate(pitch * maxHeight + JPEG_HEADER_SIZE)));
+        }
+        catch(...)
+        {
+            return InitFailed("Cannot allocate memory for JPEG stream",ret);
+        }
+
+        jpegStreamSize = pitch * maxHeight + JPEG_HEADER_SIZE;
+
     }
 
     size_t  requestedMemSpace = 0;
     unsigned tmp = 0;
+    if( hHostToDeviceAdapter != nullptr )
+    {
+        fastImportFromHostGetAllocatedGpuMemorySize( hHostToDeviceAdapter, &tmp );
+        requestedMemSpace += tmp;
+    }
+
     if( hRawUnpacker != nullptr )
     {
         fastRawUnpackerGetAllocatedGpuMemorySize( hRawUnpacker, &tmp );
         requestedMemSpace += tmp;
     }
+
+    if( hBpc != nullptr )
+    {
+        fastImageFiltersGetAllocatedGpuMemorySize( hBpc, &tmp );
+        requestedMemSpace += tmp;
+    }
+
     if( hLinearizationLut != nullptr )
     {
         fastImageFiltersGetAllocatedGpuMemorySize( hLinearizationLut, &tmp );
@@ -901,48 +582,22 @@ fastStatus_t CUDAProcessorGray::Init(CUDAProcessorOptions &options)
         fastDenoiseGetAllocatedGpuMemorySize( hDenoise, &tmp );
         requestedMemSpace += tmp;
     }
-    //    if( hTempDenoiser != NULL )
-    //    {
-    //        fastExperimentalImageFiltersGetAllocatedGpuMemorySize( hTempDenoiser, &tmp );
-    //        requestedMemSpace += tmp;
-    //    }
-    if( hRgbLut != nullptr )
-    {
-        fastImageFiltersGetAllocatedGpuMemorySize( hRgbLut, &tmp );
-        requestedMemSpace += tmp;
-    }
+
     if( h16to8Transform != nullptr )
     {
         fastSurfaceConverterGetAllocatedGpuMemorySize( h16to8Transform, &tmp );
         requestedMemSpace += tmp;
     }
-    if( hHostToDeviceAdapter != nullptr )
+
+    if( hGrayToRGBTransform != nullptr )
     {
-        fastImportFromHostGetAllocatedGpuMemorySize( hHostToDeviceAdapter, &tmp );
+        fastSurfaceConverterGetAllocatedGpuMemorySize( hGrayToRGBTransform, &tmp );
         requestedMemSpace += tmp;
     }
 
-    if(hCrop != nullptr )
+    if(hJpegEncoder != nullptr)
     {
-        fastCropGetAllocatedGpuMemorySize( hCrop, &tmp );
-        requestedMemSpace += tmp;
-    }
-
-    if(hHistogram != nullptr )
-    {
-        fastHistogramGetAllocatedGpuMemorySize( hHistogram, &tmp );
-        requestedMemSpace += tmp;
-    }
-
-    if(hRGBParade != nullptr )
-    {
-        fastHistogramGetAllocatedGpuMemorySize( hRGBParade, &tmp );
-        requestedMemSpace += tmp;
-    }
-
-    if(hMjpegEncoder != nullptr)
-    {
-        fastJpegEncoderGetAllocatedGpuMemorySize( hMjpegEncoder, &tmp );
+        fastJpegEncoderGetAllocatedGpuMemorySize(hJpegEncoder, &tmp);
         requestedMemSpace += tmp;
     }
 
@@ -962,16 +617,22 @@ fastStatus_t CUDAProcessorGray::Init(CUDAProcessorOptions &options)
 }
 
 
-fastStatus_t CUDAProcessorGray::Transform(Image<unsigned char, FastAllocator> &image, void *dstPtr, CUDAProcessorOptions &opts)
+fastStatus_t CUDAProcessorGray::Transform(ImageT *image, CUDAProcessorOptions &opts)
 {
-    Q_UNUSED(dstPtr)
     QMutexLocker locker(&mut);
+
+    if(image == nullptr)
+    {
+        mLastError = FAST_INVALID_VALUE;
+        mErrString = QStringLiteral("Got null pointer data");
+        return mLastError;
+    }
 
     float fullTime = 0.;
     float elapsedTimeGpu = 0.;
 
-    LARGE_INTEGER StartingTime, EndingTime, ElapsedMicroseconds;
-    QueryPerformanceCounter(&StartingTime);
+    QElapsedTimer cpuTimer;
+    cpuTimer.start();
 
     if(!mInitialised)
         return mLastError;
@@ -982,73 +643,67 @@ fastStatus_t CUDAProcessorGray::Transform(Image<unsigned char, FastAllocator> &i
     if(info)
         fastGpuTimerCreate(&profileTimer);
 
-
     stats[QStringLiteral("hHostToDeviceAdapter")] = -1;
+    stats[QStringLiteral("hRawUnpacker")] = -1;
+    stats[QStringLiteral("hSam")] = -1;
+    stats[QStringLiteral("hBpc")] = -1;
     stats[QStringLiteral("hWhiteBalance")] = -1;
-    stats[QStringLiteral("hRawLut")] = -1;
     stats[QStringLiteral("hDebayer")] = -1;
-    stats[QStringLiteral("hDebayerCPU")] = -1;
     stats[QStringLiteral("hDenoise")] = -1;
-    stats[QStringLiteral("hTempDenoiser")] = -1;
-    stats[QStringLiteral("hToneCurve")] = -1;
-    stats[QStringLiteral("hLookTable")] = -1;
-    stats[QStringLiteral("hHueSatMap")] = -1;
-    stats[QStringLiteral("hWideCSConverter")] = -1;
-    stats[QStringLiteral("hOutCSConverter")] = -1;
-    stats[QStringLiteral("hRgbLut")] = -1;
-    stats[QStringLiteral("hResizer")] = -1;
-    stats[QStringLiteral("hUSM")] = -1;
-    stats[QStringLiteral("hCubeLut")] = -1;
-    stats[QStringLiteral("hAffineTransform")] = -1;
-    stats[QStringLiteral("hLinearizationLut")] = -1;
-    stats[QStringLiteral("hGrayToRGBTransform")] = -1;
 
-    stats[QStringLiteral("hBayerDenoise")] = -1;
-    stats[QStringLiteral("hBayerSplitter")] = -1;
-    stats[QStringLiteral("hRemap")] = -1;
-
-    stats[QStringLiteral("hColorMedian")] = -1;
-
-    stats[QStringLiteral("hHSVLut")] = -1;
-    stats[QStringLiteral("hHistogram")] = -1;
-    stats[QStringLiteral("hRGBParade")] = -1;
-
+    stats[QStringLiteral("hOutLut")] = -1;
     stats[QStringLiteral("h16to8Transform")] = -1;
     stats[QStringLiteral("hCrop")] = -1;
-    stats[QStringLiteral("hMjpegEncoder")] = -1;
     stats[QStringLiteral("hDeviceToHostAdapter")] = -1;
+    stats[QStringLiteral("hExportToDevice")] = -1;
+    stats[QStringLiteral("hMjpegEncoder")] = -1;
     stats[QStringLiteral("totalTime")] = -1;
     stats[QStringLiteral("totalFps")] = -1;
     stats[QStringLiteral("totalGPUTime")] = -1;
     stats[QStringLiteral("totalGPUCPUTime")] = -1;
 
-    fastStatus_t ret;
+    fastStatus_t ret = FAST_OK;
+    unsigned imgWidth  = image->w;
+    unsigned imgHeight = image->h;
 
-    if( image.w > opts.MaxWidth || image.h > opts.MaxHeight )
+    if(imgWidth > opts.MaxWidth || imgHeight > opts.MaxHeight )
         return TransformFailed("Unsupported image size",FAST_INVALID_FORMAT,profileTimer);
 
-    stats[QStringLiteral("inputWidth")] = image.w;
-    stats[QStringLiteral("inputHeight")] = image.h;
-    lastWidth = image.w;
-    lastHeight = image.h;
-    lastScale = QSizeF(qreal(opts.scaleX), qreal(opts.scaleY));
+    stats[QStringLiteral("inputWidth")] = imgWidth;
+    stats[QStringLiteral("inputHeight")] = imgHeight;
 
-    if(info) {
+    if(info)
         fastGpuTimerStart(profileTimer);
+    QString key;
+    if(hHostToDeviceAdapter != nullptr)
+    {
+        key = QStringLiteral("hHostToDeviceAdapter");
+        ret = fastImportFromHostCopy(
+                    hHostToDeviceAdapter,
+
+                    image->data.get(),
+                    imgWidth,
+                    image->wPitch,
+                    imgHeight
+                    );
+
+        if(ret != FAST_OK)
+            return TransformFailed("fastImportFromHostCopy failed", ret, profileTimer);
     }
+    else if(hRawUnpacker != nullptr)
+    {
+        key = QStringLiteral("hRawUnpacker");
+        ret = fastRawUnpackerDecode(
+                    hRawUnpacker,
 
-    ret = ( fastImportFromHostCopy(
-                hHostToDeviceAdapter,
+                    image->data.get(),
+                    imgWidth,
+                    imgHeight
+                    );
 
-                image.data.get(),
-                image.w,
-                image.wPitch,
-                image.h
-                ) );
-
-    SYNC_PIPELINE("hHostToDeviceAdapter");
-    if(ret != FAST_OK)
-        return TransformFailed("fastImportFromHostCopy failed",ret,profileTimer);
+        if(ret != FAST_OK)
+            return TransformFailed("fastRawUnpackerDecode failed", ret, profileTimer);
+    }
 
     if(info)
     {
@@ -1056,82 +711,130 @@ fastStatus_t CUDAProcessorGray::Transform(Image<unsigned char, FastAllocator> &i
         fastGpuTimerGetTime(profileTimer, &elapsedTimeGpu);
 
         fullTime += elapsedTimeGpu;
-        stats[QStringLiteral("hHostToDeviceAdapter")] = elapsedTimeGpu;
-
-
+        stats[key] = elapsedTimeGpu;
     }
 
-    unsigned int imageWidth  = image.w;
-    unsigned int imageHeight = image.h;
-    unsigned int cropedWidth = lastWidth = image.w;
-    unsigned int cropedHeight = lastHeight = image.h;
+    if(hSam && hSamMux)
+    {
+        if(opts.EnableSAM)
+        {
+            if(info)
+            {
+                fastGpuTimerStart(profileTimer);
+            }
 
-    unsigned short whiteLevel = opts.whiteLevel;
-    unsigned short blackLevel = opts.blackLevel;
+            if(image->surfaceFmt == FAST_I8)
+            {
+                fastSam_t samParameter;
+                samParameter.correctionMatrix = nullptr;
+                samParameter.blackShiftMatrix = nullptr;
+                ret = fastImageFiltersTransform(
+                           hSam,
+                           &samParameter,
+                           imgWidth,
+                           imgHeight
+                           );
+            }
+            else
+            {
+                fastSam16_t samParameter;
+                samParameter.correctionMatrix = nullptr;
+                samParameter.blackShiftMatrix = nullptr;
+                ret = fastImageFiltersTransform(
+                           hSam,
+                           &samParameter,
+                           imgWidth,
+                           imgHeight
+                           );
+            }
+            if(ret != FAST_OK && info)
+                return TransformFailed("fastImageFiltersTransform for SAM failed",ret,profileTimer);
 
+            if(info)
+            {
+                fastGpuTimerStop(profileTimer);
+                fastGpuTimerGetTime(profileTimer, &elapsedTimeGpu);
+
+                fullTime += elapsedTimeGpu;
+                stats[QStringLiteral("hSAM")] = elapsedTimeGpu;
+            }
+
+            fastMuxSelect(hSamMux, 1);
+        }
+        else
+        {
+            stats[QStringLiteral("hSAM")] = -1;
+            fastMuxSelect(hSamMux, 0);
+        }
+    }
+
+    unsigned short whiteLevel = opts.WhiteLevel;
+    unsigned short blackLevel = opts.BlackLevel;
     if(hLinearizationLut)
     {
         if(info)
             fastGpuTimerStart(profileTimer);
-        double scale = double(opts.eV) / (double(whiteLevel - blackLevel));
-        if(image.surfaceFmt == FAST_I8)
+
+        double scale = 1. / (double(whiteLevel - blackLevel));
+        fastSurfaceFormat_t fmt = image->surfaceFmt;
+        if(fmt == FAST_I8)
         {
             fastLut_8_16_t lutParameter;
-            InitLut<fastLut_8_16_t>(lutParameter,blackLevel,scale,opts.linearizationLut);
-            ret = ( fastImageFiltersTransform(
+            InitLut<fastLut_8_16_t>(lutParameter, blackLevel, scale, opts.LinearizationLut);
+            ret = fastImageFiltersTransform(
                         hLinearizationLut,
                         &lutParameter,
 
-                        cropedWidth, cropedHeight
-                        ) );
+                        imgWidth, imgHeight
+                        );
 
         }
-        else if(image.surfaceFmt == FAST_I10)
+        else if(fmt == FAST_I10)
         {
             fastLut_10_t lutParameter;
-            InitLut<fastLut_10_t>(lutParameter,blackLevel,scale,opts.linearizationLut);
-            ret = ( fastImageFiltersTransform(
+            InitLut<fastLut_10_t>(lutParameter,blackLevel,scale,opts.LinearizationLut);
+            ret = fastImageFiltersTransform(
                         hLinearizationLut,
                         &lutParameter,
 
-                        cropedWidth, cropedHeight
-                        ) );
+                        imgWidth, imgHeight
+                        );
         }
 
-        else if(image.surfaceFmt == FAST_I12)
+        else if(fmt == FAST_I12)
         {
             fastLut_12_t lutParameter;
-            InitLut<fastLut_12_t>(lutParameter,blackLevel,scale,opts.linearizationLut);
-            ret = ( fastImageFiltersTransform(
+            InitLut<fastLut_12_t>(lutParameter,blackLevel,scale,opts.LinearizationLut);
+            ret = fastImageFiltersTransform(
                         hLinearizationLut,
                         &lutParameter,
 
-                        cropedWidth, cropedHeight
-                        ) );
+                        imgWidth, imgHeight
+                        );
+
         }
-        else if(image.surfaceFmt == FAST_I14)
+        else if(fmt == FAST_I14)
         {
             fastLut_16_t lutParameter;
-            InitLut<fastLut_16_t>(lutParameter,blackLevel,scale,opts.linearizationLut);
-            ret = ( fastImageFiltersTransform(
+            InitLut<fastLut_16_t>(lutParameter,blackLevel,scale,opts.LinearizationLut);
+            ret = fastImageFiltersTransform(
                         hLinearizationLut,
                         &lutParameter,
 
-                        cropedWidth, cropedHeight
-                        ) );
+                        imgWidth, imgHeight
+                        );
         }
         else
         {
             fastLut_16_t lutParameter;
-            InitLut<fastLut_16_t>(lutParameter,blackLevel,scale,opts.linearizationLut);
-            ret = ( fastImageFiltersTransform(
+            InitLut<fastLut_16_t>(lutParameter,blackLevel,scale,opts.LinearizationLut);
+            ret = fastImageFiltersTransform(
                         hLinearizationLut,
                         &lutParameter,
 
-                        cropedWidth, cropedHeight
-                        ) );
+                        imgWidth, imgHeight
+                        );
         }
-        SYNC_PIPELINE("hLinearizationLut");
         if(ret != FAST_OK && info)
             return TransformFailed("fastImageFiltersTransform for Linearization Lut failed",ret,profileTimer);
 
@@ -1145,45 +848,27 @@ fastStatus_t CUDAProcessorGray::Transform(Image<unsigned char, FastAllocator> &i
         }
     }
 
-    if(hSam && hSamMux)
+    if(hBpc && hBpcMux)
     {
-        if(opts.enableMad)
+        if(opts.EnableBPC)
         {
             if(info)
             {
                 fastGpuTimerStart(profileTimer);
             }
 
-            if(opts.SurfaceFmt == FAST_I8)
-            {
-                fastSam_t madParameter;
-                madParameter.correctionMatrix = opts.MatrixA;
-                madParameter.blackShiftMatrix = (char*)opts.MatrixB;
-                ret = (fastImageFiltersTransform(
-                           hSam,
-                           haveNewMad ? &madParameter : nullptr,
-                           cropedWidth,
-                           cropedHeight
-                           ));
-            }
-            else
-            {
-                fastSam16_t madParameter;
-                madParameter.correctionMatrix = opts.MatrixA;
-                madParameter.blackShiftMatrix = opts.MatrixB;
-                ret = (fastImageFiltersTransform(
-                           hSam,
-                           haveNewMad ? &madParameter : nullptr,
-                           cropedWidth,
-                           cropedHeight
-                           ));
-            }
+            fastBadPixelCorrection_t bpcParameter;
+            bpcParameter.pattern = opts.BayerFormat;
 
-            SYNC_PIPELINE("hMAD");
+            ret = fastImageFiltersTransform(
+                       hBpc,
+                       &bpcParameter,
+                       imgWidth,
+                       imgHeight
+                       );
+
             if(ret != FAST_OK && info)
-                return TransformFailed("fastImageFiltersTransform for MAD failed",ret,profileTimer);
-
-            haveNewMad = false;
+                return TransformFailed("fastImageFiltersTransform for BPC failed", ret, profileTimer);
 
             if(info)
             {
@@ -1191,66 +876,22 @@ fastStatus_t CUDAProcessorGray::Transform(Image<unsigned char, FastAllocator> &i
                 fastGpuTimerGetTime(profileTimer, &elapsedTimeGpu);
 
                 fullTime += elapsedTimeGpu;
-                stats[QStringLiteral("hMAD")] = elapsedTimeGpu;
+                stats[QStringLiteral("hBpc")] = elapsedTimeGpu;
             }
 
-            fastMuxSelect(hSamMux, 1);
-            SYNC_PIPELINE("hMadMux");
+            fastMuxSelect(hBpcMux, 1);
         }
         else
         {
-            stats[QStringLiteral("hMAD")] = -1;
-            fastMuxSelect(hSamMux, 0);
-            SYNC_PIPELINE("hMadMux");
-        }
-    }
-
-    //Color median filter
-    if(hColorMedian && hColorMedianMux)
-    {
-        if(opts.enableColorMedian)
-        {
-            if(info)
-            {
-                fastGpuTimerStart(profileTimer);;
-            }
-
-            ret = ( fastImageFiltersTransform(
-                        hColorMedian,
-                        nullptr,
-
-                        cropedWidth,
-                        cropedHeight
-                        ) );
-            SYNC_PIPELINE("hColorMedian");
-
-            fastMuxSelect(hColorMedianMux, 1);
-            SYNC_PIPELINE("hColorMedianMux");
-
-            if(info)
-            {
-                fastGpuTimerStop(profileTimer);
-                fastGpuTimerGetTime(profileTimer, &elapsedTimeGpu);
-
-                fullTime += elapsedTimeGpu;
-                stats[QStringLiteral("hColorMedian")] = elapsedTimeGpu;
-            }
-
-            if(ret != FAST_OK && info)
-                return TransformFailed("fastImageFiltersTransform hColorMedian failed",ret,profileTimer);
-        }
-        else
-        {
-            stats[QStringLiteral("hColorMedian")] = -1;
-            fastMuxSelect(hColorMedianMux, 0);
-            SYNC_PIPELINE("hColorMedianMux");
+            stats[QStringLiteral("hBpc")] = -1;
+            fastMuxSelect(hBpcMux, 0);
         }
     }
 
     //Denoise
     if(hDenoise && hDenoiseMux)
     {
-        if(opts.enableDenoise)
+        if(opts.EnableDenoise)
         {
             if(info)
             {
@@ -1260,16 +901,15 @@ fastStatus_t CUDAProcessorGray::Transform(Image<unsigned char, FastAllocator> &i
 
             ret = ( fastDenoiseTransform(
                         hDenoise,
-                        &opts.denoiseParams,
-                        cropedWidth,
-                        cropedHeight
+                        &opts.DenoiseParams,
+                        imgWidth,
+                        imgHeight
                         ) );
-            SYNC_PIPELINE("hDenoise");
+
             if(ret != FAST_OK && info)
                 return TransformFailed("fastDenoiseTransform failed",ret,profileTimer);
 
             fastMuxSelect(hDenoiseMux, 1);
-            SYNC_PIPELINE("hDenoiseMux");
 
             if(info)
             {
@@ -1284,30 +924,26 @@ fastStatus_t CUDAProcessorGray::Transform(Image<unsigned char, FastAllocator> &i
         {
             stats[QStringLiteral("hDenoise")] = -1;
             fastMuxSelect(hDenoiseMux, 0);
-            SYNC_PIPELINE("hDenoiseMux");
         }
     }
 
-    //RGB LUT
-    if(hRawLut)
+    //Output LUT (gamma)
+    if(hOutLut)
     {
         if(info)
         {
             fastGpuTimerStart(profileTimer);;
         }
-        fastLut_16_t lut;
-        copy(rgbLut[0].begin(),rgbLut[0].end(),begin(lut.lut));
-        ret = ( fastImageFiltersTransform(
-                    hRawLut,
-                    &lut,
+        ret = fastImageFiltersTransform(
+                    hOutLut,
+                    &outLut,
 
-                    cropedWidth,
-                    cropedHeight
-                    ) );
-        SYNC_PIPELINE("hRgbLut");
+                    imgWidth,
+                    imgHeight
+                    );
 
         if(ret != FAST_OK)
-            return TransformFailed("fastImageFiltersTransform for Rgb Lut failed",ret,profileTimer);
+            return TransformFailed("fastImageFiltersTransform for output Lut failed",ret,profileTimer);
 
         if(info)
         {
@@ -1315,255 +951,25 @@ fastStatus_t CUDAProcessorGray::Transform(Image<unsigned char, FastAllocator> &i
             fastGpuTimerGetTime(profileTimer, &elapsedTimeGpu);
 
             fullTime += elapsedTimeGpu;
-            stats[QStringLiteral("hRgbLut")] = elapsedTimeGpu;
+            stats[QStringLiteral("hOutLut")] = elapsedTimeGpu;
         }
     }
 
-    if(hRemap)
-    {
-        if(opts.enableRemap)
-        {
-            if(info)
-            {
-                fastGpuTimerStart(profileTimer);;
-            }
-            fastNPPRemap_t remapData;
-            remapData.map = &(opts.maps);
-            remapData.background = &(opts.remapBackground);
-            remapData.background->isEnabled = true;
-            remapData.map->dstWidth = cropedWidth;
-            remapData.map->dstHeight = cropedHeight;
-            ret = fastNppGeometryTransform(
-                        hRemap,
-                        &remapData,
-                        cropedWidth,
-                        cropedHeight
-                        );
-            SYNC_PIPELINE("hRemap");
-
-            if(ret != FAST_OK)
-                return TransformFailed("fastNppGeometryTransform failed",ret,profileTimer);
-
-            if(info)
-            {
-                fastGpuTimerStop(profileTimer);
-                fastGpuTimerGetTime(profileTimer, &elapsedTimeGpu);
-
-                fullTime += elapsedTimeGpu;
-                stats[QStringLiteral("hRemap")] = elapsedTimeGpu;
-            }
-            fastMuxSelect(hRemapMux, 1);
-            SYNC_PIPELINE("hRemapMux");
-
-        }
-        else
-        {
-            stats[QStringLiteral("hRemap")] = -1;
-            fastMuxSelect(hRemapMux, 0);
-            SYNC_PIPELINE("hRemapMux");
-        }
-    }
-
-    if(hCrop)
-    {
-        if(info)
-        {
-            fastGpuTimerStart(profileTimer);;
-        }
-        unsigned int x = 0;
-        unsigned int y = 0;
-        unsigned int w = 0;
-        unsigned int h = 0;
-        if(opts.cropRect.isValid())
-        {
-            x = unsigned(opts.cropRect.left());
-            y = unsigned(opts.cropRect.top());
-            w = unsigned(opts.cropRect.width());
-            h = unsigned(opts.cropRect.height());
-            imageWidth  = unsigned(opts.cropRect.width());
-            imageHeight = unsigned(opts.cropRect.height());
-        }
-        else
-        {
-            x = 0;
-            y = 0;
-            w = image.w;
-            h = image.h;
-        }
-
-        ret = fastCropTransform(
-                    hCrop,
-                    image.w,
-                    image.h,
-                    x,
-                    y,
-                    w,
-                    h
-                    );
-        SYNC_PIPELINE("hCrop");
-        if(ret != FAST_OK)
-            return TransformFailed("fastCropTransform failed",ret,profileTimer);
-
-        if(info)
-        {
-            fastGpuTimerStop(profileTimer);
-            fastGpuTimerGetTime(profileTimer, &elapsedTimeGpu);
-
-            fullTime += elapsedTimeGpu;
-            stats[QStringLiteral("hCrop")] = elapsedTimeGpu;
-        }
-    }
-    else
-    {
-        stats[QStringLiteral("hCrop")] = -1;
-    }
-
-    cropedWidth = lastWidth = imageWidth;
-    cropedHeight = lastHeight = imageHeight;
-
-    if(hResizer)
-    {
-        if(info)
-        {
-            fastGpuTimerStart(profileTimer);;
-        }
-        auto resizedWidth = unsigned(cropedWidth * opts.scaleX);
-        auto resizedHeight = unsigned(cropedHeight * opts.scaleY);
-        ret = fastResizerTransformStretch(
-                    hResizer,
-                    FAST_LANCZOS,
-
-                    cropedWidth,
-                    cropedHeight,
-
-                    resizedWidth,
-                    resizedHeight
-                    );
-        SYNC_PIPELINE("fastResizerTransform");
-
-        if( ret != FAST_OK )
-        {
-            qDebug("Resizing image failed width = %u, height = %u, ret = %u", resizedWidth, resizedHeight, ret);
-            return TransformFailed("Resizing image failed",ret,profileTimer);
-        }
-
-        if(info)
-        {
-            fastGpuTimerStop(profileTimer);
-            fastGpuTimerGetTime(profileTimer, &elapsedTimeGpu);
-
-            stats[QStringLiteral("hResizer")] = elapsedTimeGpu;
-            fullTime += elapsedTimeGpu;
-        }
-
-        cropedWidth = lastWidth = resizedWidth;
-        cropedHeight = lastHeight = resizedHeight;
-    }
-
-
-    //USM
-    if(hUSM && hUSMMux)
-    {
-        if(opts.enableUSM)
-        {
-            if(info)
-            {
-                fastGpuTimerStart(profileTimer);;
-            }
-            fastNPPUnsharpMaskFilter_t filterParameters;
-            filterParameters.sigma = opts.USMSigma;
-            filterParameters.amount = opts.USMValue;
-            filterParameters.envelopMedian = 0.5;
-            filterParameters.envelopSigma = 5;
-            filterParameters.envelopRank = 4;
-            filterParameters.envelopCoef = -2;
-            ret = fastNppFilterTransform(
-                        hUSM,
-                        cropedWidth,
-                        cropedHeight,
-
-                        &filterParameters
-                        );
-            SYNC_PIPELINE("hUSM");
-
-            if(ret != FAST_OK)
-                return TransformFailed("fastImageFiltersTransform for USM failed",ret,profileTimer);
-
-            fastMuxSelect(hUSMMux, 1);
-            SYNC_PIPELINE("hUSMMux");
-
-            if(info)
-            {
-                fastGpuTimerStop(profileTimer);
-                fastGpuTimerGetTime(profileTimer, &elapsedTimeGpu);
-
-                fullTime += elapsedTimeGpu;
-                stats[QStringLiteral("hUSM")] = elapsedTimeGpu;
-            }
-        }
-        else
-        {
-            stats[QStringLiteral("hUSM")] = -1;
-            fastMuxSelect(hUSMMux, 0);
-            SYNC_PIPELINE("hUSMMux");
-        }
-    }
-    if(hAffineTransform)
-    {
-        if(info)
-        {
-            fastGpuTimerStart(profileTimer);;
-        }
-        int affineType = Globals::getAffineType(opts.angle, opts.horFlip, opts.verFlip);
-        if(affineType >= 0)
-        {
-            ret = fastAffineTransform(
-                        hAffineTransform,
-                        fastAffineTransformations_t(affineType),
-                        cropedWidth,
-                        cropedHeight
-                        );
-            SYNC_PIPELINE("hAffineTransform");
-
-            if(ret != FAST_OK)
-                return TransformFailed("fastAffineTransform failed",ret,profileTimer);
-
-            if(info)
-            {
-                fastGpuTimerStop(profileTimer);
-                fastGpuTimerGetTime(profileTimer, &elapsedTimeGpu);
-
-                fullTime += elapsedTimeGpu;
-                stats[QStringLiteral("hAffineTransform")] = elapsedTimeGpu;
-            }
-        }
-    }
-
-    unsigned int w = 0;
-    unsigned int h = 0;
-    unsigned int pitch = 0;
-    export16bitData(nullptr, w, h, pitch);
-    cropedWidth = w;
-    cropedHeight = h;
-
-    //16 to 8 bit transform
+    //16-bit to 8 bit transform
     if(h16to8Transform)
     {
-        if(info) {
+        if(info)
             fastGpuTimerStart(profileTimer);
-        }
 
         fastBitDepthConverter_t conv;
         conv.bitsPerChannel = 8;
-        ret = ( fastSurfaceConverterTransform(
+        ret = fastSurfaceConverterTransform(
                     h16to8Transform,
                     &conv,
 
-                    cropedWidth,
-                    cropedHeight
-                    ) );
-
-        SYNC_PIPELINE("h16to8Transform");
+                    imgWidth,
+                    imgHeight
+                    );
 
         if(ret != FAST_OK)
             return TransformFailed("h16to8Transform transform failed",ret,profileTimer);
@@ -1578,6 +984,8 @@ fastStatus_t CUDAProcessorGray::Transform(Image<unsigned char, FastAllocator> &i
         }
     }
 
+
+
     //8 bit gray to 8 bit RGB transform
     if(hGrayToRGBTransform)
     {
@@ -1591,11 +999,9 @@ fastStatus_t CUDAProcessorGray::Transform(Image<unsigned char, FastAllocator> &i
                     hGrayToRGBTransform,
                     &conv,
 
-                    cropedWidth,
-                    cropedHeight
-                    ) );
-
-        SYNC_PIPELINE("hGrayToRGBTransform");
+                    imgWidth,
+                    imgHeight
+                    ));
 
         if(ret != FAST_OK)
             return TransformFailed("hGrayToRGBTransform transform failed",ret,profileTimer);
@@ -1610,28 +1016,27 @@ fastStatus_t CUDAProcessorGray::Transform(Image<unsigned char, FastAllocator> &i
         }
     }
 
-    if(hHistogram)
+    if(hExportToDevice)
     {
         if(info)
-        {
             fastGpuTimerStart(profileTimer);
-        }
 
-        fastBayerPatternParam_t histParams;
+        fastExportParameters_t p;
+        p.convert = FAST_CONVERT_NONE;
 
-        histParams.bayerPattern = FAST_BAYER_NONE;
-        ret = fastHistogramCalculate(hHistogram,
-                                     &histParams,
-                                     0,
-                                     0,
-                                     cropedWidth,
-                                     cropedHeight,
+        ret = fastExportToDeviceCopy(
+                    hExportToDevice,
 
-                                     histResults.get());
-        SYNC_PIPELINE("hHistogram");
+                    hGLBuffer,
+                    imgWidth,
+                    imgWidth * 3 * sizeof(char),
+                    imgHeight,
+                    &p
+                    );
 
-        if(ret != FAST_OK)
-            return TransformFailed("fastHistogramsCalculate for histogram failed",ret,profileTimer);
+        if(ret != FAST_OK && info)
+            qDebug("fastExportToDeviceCopy failed, ret = %d", ret);
+
 
         if(info)
         {
@@ -1639,108 +1044,19 @@ fastStatus_t CUDAProcessorGray::Transform(Image<unsigned char, FastAllocator> &i
             fastGpuTimerGetTime(profileTimer, &elapsedTimeGpu);
 
             fullTime += elapsedTimeGpu;
-            stats[QStringLiteral("hHistogram")] = elapsedTimeGpu;
+            stats[QStringLiteral("hExportToDevice")] = elapsedTimeGpu;
         }
-    }
-
-    calcRGBParade(cropedWidth, cropedHeight);
-    elapsedTimeGpu = stats[QStringLiteral("hRGBParade")];
-    if(elapsedTimeGpu > 0)
-        fullTime += elapsedTimeGpu;
-
-
-    //Encode into Motion Jpeg or JPEG (if any)
-    if(hMjpegEncoder)
-    {
-        jfifInfo.width = imageWidth;
-        jfifInfo.height = imageHeight;
-        unsigned jpegSize = jpegStreamSize;
-        if(info)
-        {
-            fastGpuTimerStart(profileTimer);
-        }
-        ret = fastJpegEncode(
-                    hMjpegEncoder,
-
-                    opts.jpegQuality,
-                    &jfifInfo
-                    );
-        if(ret != FAST_OK)
-        {
-            //qDebug("fastJpegEncode failed, ret = %u", ret);
-            return TransformFailed("fastJpegEncode failed",ret,profileTimer);
-        }
-
-        //write to MJPEG
-        if(hMjpegWriter)
-        {
-            ret = fastJfifStoreToMemory(
-                        hJpegStream.get(),
-                        &jpegSize,
-
-                        &jfifInfo
-                        );
-
-            if(ret != FAST_OK)
-            {
-                //qDebug("fastJfifStoreToMemory failed, ret = %u", ret);
-                return TransformFailed("fastJfifStoreToMemory failed",ret,profileTimer);
-            }
-
-            ret = fastMJpegWriteFrame(
-                        hMjpegWriter,
-
-                        hJpegStream.get(),
-                        int(jpegSize)
-                        );
-            if(ret != FAST_OK)
-            {
-                //qDebug("fastMJpegWriteFrame failed, ret = %u", ret);
-                return TransformFailed("fastMJpegWriteFrame failed",ret,profileTimer);
-            }
-
-            if( info )
-            {
-                fastGpuTimerStop(profileTimer);
-                fastGpuTimerGetTime(profileTimer, &elapsedTimeGpu);
-                stats[QStringLiteral("hMjpegEncoder")] = elapsedTimeGpu;
-                fullTime += elapsedTimeGpu;
-            }
-        }
-        //Write to Jpeg file
-        else
-        {
-            QString fileName = QString::fromStdString(image.inputFileName);
-            QString path(QDir::toNativeSeparators(QDir(QString::fromStdString(image.outputFileName)).path()));
-
-            if(path.endsWith(QDir::separator()))
-                fileName = QStringLiteral("%1%2.jpg").arg(path,QFileInfo(fileName).baseName());
-            else
-                fileName = QStringLiteral("%1%2%3.jpg").arg(path).arg(QDir::separator()).arg(QFileInfo(fileName).baseName());
-
-            ret = fastJfifStoreToFile(
-                        fileName.toStdString().c_str(),
-                        &jfifInfo
-                        );
-            if(ret != FAST_OK)
-                return TransformFailed("fastJfifStoreToFile failed",ret,profileTimer);
-        }
-
-    }
-    else
-    {
-        stats[QStringLiteral("hMjpegEncoder")] = -1;
     }
 
     if(info)
     {
         cudaDeviceSynchronize();
-        QueryPerformanceCounter(&EndingTime);
-        ElapsedMicroseconds = Globals::getMcs(StartingTime, EndingTime);
-        float mcs = ElapsedMicroseconds.QuadPart / 1000.f;
+
+        float mcs = float(cpuTimer.elapsed());
         stats[QStringLiteral("totalGPUCPUTime")] = mcs;
         stats[QStringLiteral("totalGPUTime")] = fullTime;
     }
+
     locker.unlock();
 
     if(profileTimer)
@@ -1749,14 +1065,13 @@ fastStatus_t CUDAProcessorGray::Transform(Image<unsigned char, FastAllocator> &i
         profileTimer = nullptr;
     }
 
-    emit finished(-1);
+    emit finished();
+
     return FAST_OK;
 }
 
 fastStatus_t CUDAProcessorGray::export8bitData(void* dstPtr, bool forceRGB)
 {
-    if(lastWidth <= 0 || lastHeight <= 0)
-        return FAST_INVALID_SIZE;
     fastDeviceSurfaceBufferInfo_t bufferInfo;
     fastGetDeviceSurfaceBufferInfo(dstBuffer, &bufferInfo);
 
@@ -1795,7 +1110,7 @@ fastStatus_t CUDAProcessorGray::export8bitData(void* dstPtr, bool forceRGB)
     {
         mErrString = QStringLiteral("fastExportToHostCopy for 8 bit data failed");
         mLastError = ret;
-        emit error(mLastError, mErrString);
+        emit error();
     }
 
     return ret;

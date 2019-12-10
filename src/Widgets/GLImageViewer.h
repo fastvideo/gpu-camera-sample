@@ -109,6 +109,9 @@ public:
     void clear();
     QPointF texTopLeft(){return mTexTopLeft;}
 
+    QPoint screenToBitmap(const QPoint &pt);
+    QPoint bitmapToScreen(const QPoint &pt);
+
     //Patch for high dpi display
     inline int width() const { return QOpenGLWindow::geometry().width() * QApplication::desktop()->devicePixelRatio(); }
     inline int height() const { return QOpenGLWindow::geometry().height() * QApplication::desktop()->devicePixelRatio(); }
@@ -129,6 +132,7 @@ signals:
     void zoomChanged(qreal);
     void sizeChanged(QSize& newSize);
     void contextMenu(QPoint pt);
+    void mouseClicked(QMouseEvent* event);
 public slots:
 
 private:

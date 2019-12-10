@@ -63,9 +63,12 @@ signals:
 public slots:
 
 private:
-
     const int numBuffers = 16;
+
+    //Currently written buffer
     int mCurrent = 0;
+
+    //Last written buffer
     int mLast = -1;
 
     QVector<ImageT> mImages;

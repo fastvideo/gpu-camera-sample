@@ -89,6 +89,7 @@ private:
     QWaitCondition       mWaitCond;
     CameraBase*          mCamera = nullptr;
     GLRenderer*          mRenderer = nullptr;
+//    QThread              mTransformThread;
     QThread              mCUDAThread;
     float                mRenderFps = 30;
     QString              mOutputPath;
@@ -97,5 +98,19 @@ private:
 
     void startWorking();
 };
+
+//class AsyncCUDATransformer : public QObject
+//{
+//    Q_OBJECT
+//public:
+//    explicit AsyncCUDATransformer(CUDAProcessorBase* proc);
+
+//    void start();
+//    void stop();
+//    void wake();
+//private:
+//    CUDAProcessorBase* mProcessor = nullptr;
+//    bool mWorking = false;
+//};
 
 #endif // RAWPROCESSOR_H
