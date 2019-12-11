@@ -73,6 +73,7 @@
    <addaction name="separator"/>
    <addaction name="actionPlay"/>
    <addaction name="actionRecord"/>
+   <addaction name="actionWB_picker"/>
    <addaction name="separator"/>
    <addaction name="actionExit"/>
    <addaction name="separator"/>

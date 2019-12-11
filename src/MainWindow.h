@@ -105,11 +105,14 @@ private slots:
 
     //CUDA processor
     QString getErrDescription(fastStatus_t code);
-    void onGPUError();
-    void onGPUFinished();
+    void    onGPUError();
+    void    onGPUFinished();
 
     //BPC
     void on_chkBPC_toggled(bool checked);
+
+    //WB
+    void onNewWBFromPoint(const QPoint& pt);
 
     //Camera
     void openCamera(uint32_t devID);

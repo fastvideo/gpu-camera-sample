@@ -94,6 +94,7 @@ public:
 
     fastStatus_t exportRawData(void* dstPtr, unsigned int &w, unsigned int &h, unsigned int &pitch);
     fastStatus_t export16bitData(void* dstPtr, unsigned int &w, unsigned int &h, unsigned int &pitch);
+    fastStatus_t exportLinearizedRaw(void* dstPtr, unsigned int &w, unsigned int &h, unsigned int &pitch);
 
     fastSurfaceFormat_t getInputSurfaceFmt();
     QSize        getMaxInputSize();
@@ -118,11 +119,11 @@ public:
     }
 
 
-    fastBayerPattern_t    BayerFormat;
-    QMutex mut;
-    QMap<QString, float> stats;
-    fastExportToHostHandle_t        hBitmapExport = nullptr;
-    fastLut_16_t outLut;
+    fastBayerPattern_t       BayerFormat;
+    QMutex                   mut;
+    QMap<QString, float>     stats;
+    fastExportToHostHandle_t hBitmapExport = nullptr;
+    fastLut_16_t             outLut;
 
 protected:
     bool         info = true;
@@ -183,12 +184,13 @@ protected:
 
 
     fastExportToHostHandle_t hDeviceToHostRawAdapter = nullptr;
+    fastExportToHostHandle_t hDeviceToHostLinRawAdapter = nullptr;
     fastExportToHostHandle_t hDeviceToHostAdapter = nullptr;
     fastExportToHostHandle_t hDeviceToHost16Adapter = nullptr;
 
 
     //OpenGL stuff
-    void *hGLBuffer = nullptr;
+    void*                      hGLBuffer = nullptr;
     fastExportToDeviceHandle_t hExportToDevice = nullptr;
 
     template<typename T>

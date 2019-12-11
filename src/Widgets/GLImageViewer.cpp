@@ -195,7 +195,13 @@ void GLImageViewer::mouseReleaseEvent(QMouseEvent* event)
 {
     Q_UNUSED(event)
     mPtDown = QPoint();
-    emit mouseClicked(event);
+
+    if(currentTool == tlWBPicker)
+    {
+        QPoint pt(screenToBitmap(event->pos() * QApplication::desktop()->devicePixelRatio()));
+            emit newWBFromPoint(pt);
+    }
+
 }
 
 void GLImageViewer::setFitZoom(QSize szClient)
@@ -211,6 +217,13 @@ void GLImageViewer::setFitZoom(QSize szClient)
 
     qreal zoom = qMin((qreal)(szClient.height()) / (qreal)(imageSize.height()), (qreal)(szClient.width()) / (qreal)(imageSize.width()));
     setZoom(zoom);
+}
+
+void GLImageViewer::setCurrentTool(const Tool &tool)
+{
+    currentTool = tool;
+    if(mRenderer)
+        mRenderer->update();
 }
 
 void GLImageViewer::wheelEvent(QWheelEvent * event)
@@ -251,14 +264,16 @@ QPoint GLImageViewer::screenToBitmap(const QPoint& pt)
 
     qreal dx = 0.;
     qreal dy = 0.;
-    if(iw - w / mZoom < 0)
+    if(iw < w / mZoom)
         dx = (w / mZoom - iw) / 2;
 
-    if(ih - h / mZoom < 0)
+    if(ih < h / mZoom)
         dy = (h / mZoom - ih) / 2;
 
-    return QPoint(int(mTexTopLeft.x() + pt.x() / mZoom - dx),
-                  int(mTexTopLeft.y() + pt.y() / mZoom - dy));
+    QPoint ret = QPoint(int(mTexTopLeft.x() + pt.x() / mZoom - dx),
+                        int((mTexTopLeft.y() - (h - pt.y()) / mZoom) + dy));
+
+    return ret;
 }
 
 QPoint GLImageViewer::bitmapToScreen(const QPoint& pt)

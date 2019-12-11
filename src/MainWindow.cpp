@@ -129,6 +129,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     mMediaViewer->setViewMode(ui->chkZoomFit->isChecked() ? GLImageViewer::vmZoomFit : GLImageViewer::vmPan);
     connect(mMediaViewer.data(), SIGNAL(zoomChanged(qreal)), this, SLOT(onZoomChanged(qreal)));
+    connect(mMediaViewer.data(), SIGNAL(newWBFromPoint(QPoint)), this, SLOT(onNewWBFromPoint(QPoint)));
 
     //Denoise
     connect(ui->denoiseCtlr, SIGNAL(stateChanged(bool)), this, SLOT(onDenoiseStateChanged(bool)));
@@ -158,6 +159,7 @@ MainWindow::MainWindow(QWidget *parent) :
 #endif
     QTimer::singleShot(0, this, [this](){delayInit();});
 }
+
 
 MainWindow::~MainWindow()
 {
@@ -642,7 +644,14 @@ void MainWindow::on_actionExit_triggered()
 
 void MainWindow::on_actionWB_picker_toggled(bool arg1)
 {
-    Q_UNUSED(arg1)
+    if(arg1)
+    {
+        mMediaViewer->setCurrentTool(GLImageViewer::tlWBPicker);
+    }
+    else
+    {
+        mMediaViewer->setCurrentTool(GLImageViewer::tlNone);
+    }
 }
 
 void MainWindow::onGPUError()
@@ -970,4 +979,37 @@ void MainWindow::on_actionPlay_toggled(bool arg1)
     {
         mCameraPtr->stop();
     }
+}
+
+
+void MainWindow::onNewWBFromPoint(const QPoint& pt)
+{
+    if(!mCameraPtr || !mProcessorPtr)
+        return;
+
+    QColor clr = mProcessorPtr->getAvgRawColor(pt);
+
+
+    float r = clr.greenF() / clr.redF();
+    float g = 1.f;
+    float b = clr.greenF() / clr.blueF();
+
+    {
+        QSignalBlocker b(ui->sldRed);
+        ui->sldRed->setValue(r * 100);
+    }
+    {
+        QSignalBlocker b(ui->sldGreen);
+        ui->sldGreen->setValue(g * 100);
+    }
+    {
+        QSignalBlocker b1(ui->sldBlue);
+        ui->sldBlue->setValue(b * 100);
+    }
+
+    mOptions.Red = r;
+    mOptions.Green = g;
+    mOptions.Blue = b;
+
+    mProcessorPtr->updateOptions(mOptions);
 }

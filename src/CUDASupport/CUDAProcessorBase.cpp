@@ -159,18 +159,25 @@ void CUDAProcessorBase::freeFilters()
         cudaMemoryInfo("Destroyed hDenoiseMux");
     }
 
-    if( hDeviceToHost16Adapter != nullptr )
+    if(hDeviceToHost16Adapter != nullptr)
     {
-        fastExportToHostDestroy( hDeviceToHost16Adapter );
+        fastExportToHostDestroy(hDeviceToHost16Adapter);
         hDeviceToHost16Adapter = nullptr;
         cudaMemoryInfo("Destroyed hDeviceToHost16Adapter");
     }
 
-    if( hDeviceToHostRawAdapter != nullptr )
+    if(hDeviceToHostRawAdapter != nullptr)
     {
-        fastExportToHostDestroy( hDeviceToHostRawAdapter );
+        fastExportToHostDestroy(hDeviceToHostRawAdapter);
         hDeviceToHostRawAdapter = nullptr;
         cudaMemoryInfo("Destroyed hDeviceToHostRawAdapter");
+    }
+
+    if(hDeviceToHostLinRawAdapter != nullptr)
+    {
+        fastExportToHostDestroy(hDeviceToHostLinRawAdapter);
+        hDeviceToHostLinRawAdapter = nullptr;
+        cudaMemoryInfo("Destroyed hDeviceToHostLinRawAdapter");
     }
 
     if(hOutLut != nullptr)
@@ -488,6 +495,21 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
     //
     cudaMemoryInfo("Created hLinearizationLut");
     bufferPtr = &linearizationLutBuffer;
+
+    //Linearized raw data export
+    ret = (fastExportToHostCreate(
+               &hDeviceToHostLinRawAdapter,
+               &srcSurfaceFmt,
+               linearizationLutBuffer
+               ));
+
+    if(ret != FAST_OK)
+        return InitFailed("fastExportToHostCreate for RAW linearized data failed",ret);
+
+    cudaMemoryInfo("Created hDeviceToHostLinRawAdapter");
+
+    if(srcSurfaceFmt != FAST_I16 && info)
+        qDebug("hDeviceToHostLinRawAdapter returned invalid format = %u", srcSurfaceFmt);
 
     srcSurfaceFmt = FAST_I16;
 
@@ -1419,6 +1441,41 @@ fastStatus_t CUDAProcessorBase::exportRawData(void* dstPtr, unsigned int &w, uns
     return ret;
 }
 
+fastStatus_t CUDAProcessorBase::exportLinearizedRaw(void* dstPtr, unsigned int& w, unsigned int& h, unsigned int& pitch)
+{
+
+    fastDeviceSurfaceBufferInfo_t bufferInfo;
+    fastGetDeviceSurfaceBufferInfo(linearizationLutBuffer, &bufferInfo);
+
+    w = bufferInfo.width;
+    h = bufferInfo.height;
+    pitch = bufferInfo.pitch;
+
+    if(dstPtr == nullptr)
+        return FAST_OK;
+
+    fastExportParameters_t p;
+    p.convert = FAST_CONVERT_NONE;
+
+    fastStatus_t ret = ( fastExportToHostCopy(
+                             hDeviceToHostLinRawAdapter,
+                             dstPtr,
+                             bufferInfo.width,
+                             bufferInfo.pitch,
+                             bufferInfo.height,
+                             &p
+                             ) );
+
+    if(ret != FAST_OK)
+    {
+        mErrString = QStringLiteral("fastExportToHostCopy for 16 bit data failed");
+        mLastError = ret;
+        emit error();
+    }
+
+    return ret;
+}
+
 fastStatus_t  CUDAProcessorBase::export16bitData(void* dstPtr, unsigned int &w, unsigned int &h, unsigned int &pitch)
 {
     fastDeviceSurfaceBufferInfo_t bufferInfo;
@@ -1573,3 +1630,5 @@ void CUDAProcessorBase::clearExifSections()
     }
     jfifInfo.exifSectionsCount = 0;
 }
+
+

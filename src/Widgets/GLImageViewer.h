@@ -97,6 +97,15 @@ public:
         vmZoom,
         vmZoomFit
     };
+
+    enum Tool
+    {
+        tlNone = 0,
+        tlColorPicker,
+        tlWBPicker,
+        tlRotate
+    };
+
     explicit GLImageViewer(GLRenderer* renderer);
     ~GLImageViewer();
 
@@ -111,6 +120,9 @@ public:
 
     QPoint screenToBitmap(const QPoint &pt);
     QPoint bitmapToScreen(const QPoint &pt);
+
+    Tool getCurrentTool() const{return currentTool;}
+    void setCurrentTool(const Tool &tool);
 
     //Patch for high dpi display
     inline int width() const { return QOpenGLWindow::geometry().width() * QApplication::desktop()->devicePixelRatio(); }
@@ -133,6 +145,8 @@ signals:
     void sizeChanged(QSize& newSize);
     void contextMenu(QPoint pt);
     void mouseClicked(QMouseEvent* event);
+    void newWBFromPoint(const QPoint& pt);
+
 public slots:
 
 private:
@@ -146,9 +160,10 @@ private:
             mRenderer->update();
     }
 
-    ViewMode    mViewMode;
-    bool        mShowImage;
-    qreal       mZoom;
+    ViewMode    mViewMode = vmNone;
+    Tool        currentTool = tlNone;
+    bool        mShowImage = true;
+    qreal       mZoom = 1.f;
     QSize       mSzHint;
     QPoint      mPtDown;
     QPointF     mTexTopLeft;

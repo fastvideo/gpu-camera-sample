@@ -35,6 +35,7 @@
 #include <QWaitCondition>
 #include <QScopedPointer>
 #include <QDir>
+#include <QColor>
 
 #include "CUDAProcessorOptions.h"
 #include "AsyncFileWriter.h"
@@ -66,6 +67,8 @@ public:
     void setOutputPath(const QString& path){mOutputPath = path;}
     void setFilePrefix(const QString& prefix){mFilePrefix = prefix;}
     void setSAM(const QString& fpnFileName, const QString& ffcFileName);
+
+    QColor getAvgRawColor(QPoint rawPoint);
 
     float acqTimeNsec = -1.;
 

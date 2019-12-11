@@ -37,6 +37,8 @@
 
 #include <QElapsedTimer>
 #include <QDateTime>
+#include <QDebug>
+#include <QPoint>
 
 RawProcessor::RawProcessor(CameraBase *camera, GLRenderer *renderer) :
     mCamera(camera),
@@ -358,4 +360,137 @@ void RawProcessor::setSAM(const QString& fpnFileName, const QString& ffcFileName
         mOptions.MatrixA = nullptr;
 
     init();
+}
+
+QColor RawProcessor::getAvgRawColor(QPoint rawPoint)
+{
+    QColor retClr = QColor(Qt::white);
+
+    if(!mProcessorPtr)
+        return retClr;
+
+    qDebug() << rawPoint;
+
+    unsigned int w = 0;
+    unsigned int h = 0;
+    unsigned int pitch = 0;
+    fastStatus_t ret = FAST_OK;
+
+    {
+        QMutexLocker locker(&(mProcessorPtr->mut));
+        ret =  mProcessorPtr->exportLinearizedRaw(nullptr, w, h, pitch);
+    }
+
+    std::unique_ptr<unsigned char, FastAllocator> linearBits16;
+    FastAllocator allocator;
+    size_t sz = pitch * h * sizeof(unsigned short);
+
+    try
+    {
+        linearBits16.reset(static_cast<unsigned char*>(allocator.allocate(sz)));
+    }
+    catch(...)
+    {
+        return retClr;
+    }
+
+    {
+        QMutexLocker locker(&(mProcessorPtr->mut));
+        ret =  mProcessorPtr->exportLinearizedRaw(linearBits16.get(), w, h, pitch);
+    }
+    if(ret != FAST_OK)
+        return retClr;
+
+    int pickerSize = 4;
+
+    if(rawPoint.x() % 2 != 0)
+        rawPoint.rx()--;
+
+    if(rawPoint.x() < pickerSize)
+        rawPoint.setX(pickerSize);
+    if(rawPoint.x() >= int(w) - pickerSize)
+        rawPoint.setX(int(w) - pickerSize);
+
+    if(rawPoint.y() % 2 != 0)
+        rawPoint.ry()--;
+    if(rawPoint.y() < pickerSize)
+        rawPoint.setY(pickerSize);
+    if(rawPoint.y() >= int(h) - pickerSize)
+        rawPoint.setY(int(h) - pickerSize);
+
+    int rOffset = 0;
+    int g1Offset = 0;
+    int g2Offset = 0;
+    int bOffset = 0;
+
+    int rowWidth = pitch / sizeof(unsigned short);
+
+    if(mOptions.BayerFormat == FAST_BAYER_RGGB)
+    {
+        rOffset = 0;
+        g1Offset = 1;
+        g2Offset = rowWidth;
+        bOffset = rowWidth + 1;
+    }
+    else if(mOptions.BayerFormat == FAST_BAYER_BGGR)
+    {
+        bOffset = 0;
+        g1Offset = 1;
+        g2Offset = rowWidth;
+        rOffset = rowWidth + 1;
+    }
+    else if(mOptions.BayerFormat == FAST_BAYER_GBRG)
+    {
+        g1Offset = 0;
+        bOffset = 1;
+        rOffset = rowWidth;
+        g2Offset = rowWidth + 1;
+    }
+    else if(mOptions.BayerFormat == FAST_BAYER_GRBG)
+    {
+        g1Offset = 0;
+        rOffset = 1;
+        bOffset = rowWidth;
+        g2Offset = rowWidth + 1;
+    }
+    else
+        return {};
+
+    int x = rawPoint.x();
+    int y = rawPoint.y();
+    auto * rawBits = reinterpret_cast<unsigned short*>(linearBits16.get());
+
+    int r = 0;
+    int g = 0;
+    int b = 0;
+    int cnt = 0;
+
+    for(x = rawPoint.x() - pickerSize; x < rawPoint.x() + pickerSize; x += 2)
+    {
+        for(y = rawPoint.y() - pickerSize; y < rawPoint.y() + pickerSize; y += 2)
+        {
+            unsigned short* pixelPtr = rawBits + y * rowWidth + x;
+
+            unsigned int val = pixelPtr[rOffset];
+            r += val;
+
+            val = pixelPtr[g1Offset] + pixelPtr[g2Offset];
+            g += val;
+
+            val = pixelPtr[bOffset];
+            b += val;
+
+            cnt++;
+        }
+    }
+
+    if(cnt > 1)
+    {
+        r /= cnt;
+        g /= 2 * cnt;
+        b /= cnt;
+    }
+
+    return {qRgba64(quint16(r), quint16(g), quint16(b), 0)};
+
 }
