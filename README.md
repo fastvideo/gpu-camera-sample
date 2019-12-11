@@ -37,7 +37,10 @@ Currently the software is working with <a href="https://www.ximea.com" target="_
 
 ### Build instructions
 
-* ```bash git clone https://github.com/fastvideo/gpu-camera-sample.git ```
+* Obtain source code: 
+``` console 
+git clone https://github.com/fastvideo/gpu-camera-sample.git 
+```
 * Create OtherLibs folder in project root folder. This folder will contains external libraries, used in gpu-camera-sample application.
 * Download Fastvideo SDK from <a href="https://drive.google.com/open?id=1p21TXXC7SCw5PdDVEhayRdMQEN6X11ge">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a> (valid till March 23, 2020), unpack it into <Project root>\OtherLibs\fastvideoSDK folder.
 * If you need XIMEA camera support, download XiAPI from https://www.ximea.com/support/documents/4. Install downloaded package (by default into C:\XIMEA). Copy API folder from XIAPI installation folder into <Project root>\OtherLibs folder.
