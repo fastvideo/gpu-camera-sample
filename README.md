@@ -53,23 +53,23 @@ git clone https://github.com/fastvideo/gpu-camera-sample.git
 
 gpu-camera-sample is a multithreaded application. It consists of the following threads:
 
-* Main application thread controls application GUI and other threads
+* Main application thread to control application GUI and other threads
 * Image acquisition from a camera thread which controls camera data acquisition and CUDA-based image processing thread
 * CUDA-based image processing thread. Controls RAW data processing as well as async data writing thread and OpenGL renderer thread.
 * OpenGL rendering thread. Renders processed data into OpenGL surface.
 * Async data writing thread. Writes processed JPEG data to SSD or streams processed video.
 
-We've implemented the simplest approach for camera application. Camera driver is writing raw data to memory ring buffer, then we copy data from ring buffer to GPU for computations. Full image processing pipeline is done on GPU, so we need just to collect processed frames at the output.
+We've implemented the simplest approach for camera application. Camera driver is writing raw data to memory ring buffer, then we copy data from that ring buffer to GPU for computations. Full image processing pipeline is done on GPU, so we need just to collect processed frames at the output.
 
 In general case, Fastvideo SDK can import/export data from/to SSD / CPU memory / GPU memory. This is done to ensure compatibility with third-party libraries on CPU and GPU. You can get more info at <a href="https://www.fastcompression.com/download/Fastvideo_SDK_manual.pdf" target="_blank">Fastvideo SDK Manual</a>.
 
 ## Using gpu-camera-sample
 
 * Run GPUCameraSample.exe
-* Press Open button on the toolbar. This will open the first camera in the system or ask to open PGM file if application was built with no camera support.
+* Press Open button on the toolbar. This will open the first camera in the system or ask to open PGM file (bayer or grayscale) if application was built with no camera support.
 * Press Play button. This will start aquiring data from the camera and display it on the screen.
-* Adjust zoom with Zoom slider or toggle Fit check box if requires
-* Select appropriate output format in the Recording pane (please check that output folder exists in the file system, otherwise nothing will be recorded) and press Record button to start recording to disk. 
+* Adjust zoom with Zoom slider or toggle Fit check box if requires.
+* Select appropriate output format in the Recording pane (please check that output folder exists in the file system, otherwise nothing will be recorded) and press Record button to start recording to disk.
 * Press Record button again when recording is done.
 
 ## Minimum Hardware ans Software Requirements
@@ -92,7 +92,7 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 
 ## Roadmap
 
-* GPU pipeline for monochrome cameras - in progress
+* GPU pipeline for monochrome cameras - done
 * H.264/H.265 encoders on GPU - in progress 
 * Linux version - in progress
 * Resize
@@ -104,16 +104,17 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 * Curves and Levels via 1D LUT
 * Color correction with 3&times;3 matrix
 * Support of other color spaces
+* Transforms to Rec.601 (SD), Rec.709 (HD), Rec.2020 (4K)
 * 3D LUT for HSV and RGB
 * Defringe module
 * DCP support
 * LCP support (remap)
 * Special version for NVIDIA Jetson hardware and L4T for CUDA-10.0
-* Interoparability with external FFmpeg and GStreamer
+* Interoperability with external FFmpeg and GStreamer
 
 ## Info
 
-  * <a href="https://www.fastcompression.com/product/sdk.htm" target="_blank">Fastvideo SDK for Image & Video Processing</a>
+  * <a href="https://www.fastcompression.com/products/sdk.htm" target="_blank">Fastvideo SDK for Image & Video Processing</a>
 
 ## Fastvideo SDK Benchmarks
 
