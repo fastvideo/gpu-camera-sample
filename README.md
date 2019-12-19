@@ -44,6 +44,12 @@ git clone https://github.com/fastvideo/gpu-camera-sample.git
 * Create OtherLibs folder in project root folder. This folder will contains external libraries, used in gpu-camera-sample application.
 * Download Fastvideo SDK from <a href="https://drive.google.com/open?id=1p21TXXC7SCw5PdDVEhayRdMQEN6X11ge">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a> (valid till March 23, 2020), unpack it into <Project root>\OtherLibs\fastvideoSDK folder.
 * If you need XIMEA camera support, download XiAPI from https://www.ximea.com/support/documents/4. Install downloaded package (by default into C:\XIMEA). Copy API folder from XIAPI installation folder into <Project root>\OtherLibs folder.
+* If you need GeniCam support
+   * Download GenICamTM Package Version 2019.11 (https://www.emva.org/wp-content/uploads/GenICam_Package_2019.11.zip)
+   * Unpack it to temporary folder and cd to Reference Implementation folder
+   * Create <Project root>\OtherLibs\GeniCam folder.
+   * Unpack GenICam_V3_2_0-Win64_x64_VC141-Release-SDK.zip into <Project root>\OtherLibs\GeniCam folder.
+   * Unpack GenICam_V3_2_0-Win64_x64_VC141-Release-Runtime.zip into <Project root>\OtherLibs\GeniCam\library\CPP
 * Open src\GPUCameraSample.pro into Qt Creator.
 * By default application will be built with no camera support. The only option is camera simulator based on pgm file. To enable Ximea camera suppoer open common_defs.pri and uncomment line DEFINES += SUPPORT_XIMEA.
 * Build project.
