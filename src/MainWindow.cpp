@@ -45,6 +45,10 @@
 #include "XimeaCamera.h"
 #endif
 
+#ifdef SUPPORT_GENICAM
+#include "GeniCamCamera.h"
+#endif
+
 QVector<unsigned short> gammaLin(16384);
 QVector<unsigned short> gammaSRGB(16384);
 
@@ -153,7 +157,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     qRegisterMetaType<CameraBase::cmrCameraState>("cmrCameraState");
 
-#ifdef SUPPORT_XIMEA
+#if defined SUPPORT_XIMEA || defined SUPPORT_GENICAM
+
     ui->mainToolBar->insertAction(ui->actionOpenBayerPGM, ui->actionOpenCamera);
     ui->menuCamera->insertAction(ui->actionOpenBayerPGM, ui->actionOpenCamera);
 #endif
@@ -262,6 +267,11 @@ void MainWindow::openCamera(uint32_t devID)
         mCameraPtr->stop();
 
     initNewCamera(new XimeaCamera(), devID);
+#elif SUPPORT_GENICAM
+    if(mCameraPtr)
+        mCameraPtr->stop();
+
+    initNewCamera(new GeniCamCamera(), devID);
 #else
     Q_UNUSED(devID)
 #endif
@@ -608,7 +618,7 @@ void MainWindow::on_cboBayerType_currentIndexChanged(int index)
 
 void MainWindow::on_actionOpenCamera_triggered()
 {
-#ifdef SUPPORT_XIMEA
+#if defined SUPPORT_XIMEA || defined SUPPORT_GENICAM
     openCamera(0);
 #endif
 }

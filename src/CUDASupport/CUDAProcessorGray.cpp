@@ -469,7 +469,7 @@ fastStatus_t CUDAProcessorGray::Init(CUDAProcessorOptions &options)
 
     cudaMemoryInfo("Created h16to8Transform");
 
-    if(srcSurfaceFmt != FAST_RGB8 && info)
+    if(srcSurfaceFmt != FAST_I8 && info)
         qDebug("fastExportToHostCreate returned invalid format = %u", srcSurfaceFmt);
 
     //Export to host rgb image
@@ -774,7 +774,7 @@ fastStatus_t CUDAProcessorGray::Transform(ImageT *image, CUDAProcessorOptions &o
         if(info)
             fastGpuTimerStart(profileTimer);
 
-        double scale = 1. / (double(whiteLevel - blackLevel));
+        double scale = opts.eV / (double(whiteLevel - blackLevel));
         fastSurfaceFormat_t fmt = image->surfaceFmt;
         if(fmt == FAST_I8)
         {

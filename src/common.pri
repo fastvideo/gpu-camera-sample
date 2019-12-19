@@ -108,13 +108,28 @@ contains( DEFINES, SUPPORT_XIMEA ){
     FASTVIDEO_EXTRA_DLLS += $$XI_API_PATH/x64/xiapi64.dll
 }
 
+contains( DEFINES, SUPPORT_GENICAM ){
+    DEFINES -= UNICODE
+    DEFINES += GENICAM_NO_AUTO_IMPLIB
+
+    GANAPIPATH = $$PWD/../OtherLibs/GeniCam/library/CPP
+
+    FASTVIDEO_EXTRA_DLLS += $$GANAPIPATH/bin/Win64_x64/GCBase_MD_VC141_v3_2.dll
+    FASTVIDEO_EXTRA_DLLS += $$GANAPIPATH/bin/Win64_x64/GenApi_MD_VC141_v3_2.dll
+    FASTVIDEO_EXTRA_DLLS += $$GANAPIPATH/bin/Win64_x64/GenCP_MD_VC141_v3_2.dll
+    FASTVIDEO_EXTRA_DLLS += $$GANAPIPATH/bin/Win64_x64/log4cpp_MD_VC141_v3_2.dll
+    FASTVIDEO_EXTRA_DLLS += $$GANAPIPATH/bin/Win64_x64/Log_MD_VC141_v3_2.dll
+    FASTVIDEO_EXTRA_DLLS += $$GANAPIPATH/bin/Win64_x64/XmlParser_MD_VC141_v3_2.dll
+    FASTVIDEO_EXTRA_DLLS += $$GANAPIPATH/bin/Win64_x64/MathParser_MD_VC141_v3_2.dll
+    FASTVIDEO_EXTRA_DLLS += $$GANAPIPATH/bin/Win64_x64/NodeMapData_MD_VC141_v3_2.dll
+
+    INCLUDEPATH += $$GANAPIPATH/include
+    LIBS += -L$$GANAPIPATH/lib/Win64_x64 -lGCBase_MD_VC141_v3_2 -lGenApi_MD_VC141_v3_2 -lGenCP_MD_VC141_v3_2
+    LIBS += -llog4cpp_MD_VC141_v3_2 -lLog_MD_VC141_v3_2 -lXmlParser_MD_VC141_v3_2
+}
 
 contains( DEFINES, USE_NV_API ){
     NVAPI_PATH = "C:/Program Files (x86)/NVIDIA Corporation/Nsight Visual Studio Edition 5.6/Monitor/nvapi"
     INCLUDEPATH += $$NVAPI_PATH
     LIBS += -L$$NVAPI_PATH/amd64 -lnvapi64
 }
-
-HEADERS += \
-    $$PWD/version.h
-
