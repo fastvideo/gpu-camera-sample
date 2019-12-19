@@ -1,7 +1,7 @@
 # gpu-camera-sample
 Camera sample application with realtime GPU image processing
 
-That software is based on minimal image processing pipeline for camera applications that includes:
+That software is based on simple image processing pipeline for camera applications that includes:
 * Raw image capture (8-bit, 12-bit packed/unpacked, 16-bit)
 * Import to GPU
 * Raw data convert and unpack
@@ -23,7 +23,7 @@ Processing is done on NVIDIA GPU to speedup the performance. The software could 
 
 From the benchmarks on <strong>NVIDIA GeForce RTX 2080ti</strong> we can see that GPU-based raw image processing is very fast and it could offer very high quality at the same time. The total performane could reach <strong>4 GPix/s</strong> for color cameras. The performance strongly depends on complexity of that pipeline. Multiple GPU solutions could significanly improve the performance.
 
-Currently the software is working with <a href="https://www.ximea.com" target="_blank">XIMEA</a> cameras. Soon we are going to add support for <a href="https://www.jai.com" target="_blank">JAI</a> and <a href="https://www.imperx.com" target="_blank">Imperx</a> cameras. You can add support for desired cameras by yourself. The software is working with demo version of Fastvideo SDK, that is why you can see a watermark on the screen. To get a license for the SDK, please contact <a href="https://www.fastcompression.com/" target="_blank">Fastvideo company</a>.
+Currently the software is working with <a href="https://www.ximea.com" target="_blank">XIMEA</a> cameras. Via GenICam the software can work wih XIMEA and Basler cameras. Soon we are going to add support for <a href="https://www.jai.com" target="_blank">JAI</a> and <a href="https://www.imperx.com" target="_blank">Imperx</a> cameras. You can add support for desired cameras by yourself. The software is working with demo version of Fastvideo SDK, that is why you can see a watermark on the screen. To get a Fastvideo SDK license, please contact <a href="https://www.fastcompression.com/" target="_blank">Fastvideo company</a>.
 
 ## How to build gpu-camera-sample
 
@@ -41,17 +41,17 @@ Currently the software is working with <a href="https://www.ximea.com" target="_
 ``` console 
 git clone https://github.com/fastvideo/gpu-camera-sample.git 
 ```
-* Create OtherLibs folder in project root folder. This folder will contains external libraries, used in gpu-camera-sample application.
+* Create OtherLibs folder in the project root folder. This folder will contains external libraries, used in gpu-camera-sample application.
 * Download Fastvideo SDK from <a href="https://drive.google.com/open?id=1p21TXXC7SCw5PdDVEhayRdMQEN6X11ge">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a> (valid till March 23, 2020), unpack it into \<Project root\>\OtherLibs\fastvideoSDK folder.
 * If you need XIMEA camera support, download XiAPI from https://www.ximea.com/support/documents/4. Install downloaded package (by default into C:\XIMEA). Copy API folder from XIAPI installation folder into \<Project root\>\OtherLibs folder.
 * If you need GenICam support
-   * Download GenICamTM Package Version 2019.11 (https://www.emva.org/wp-content/uploads/GenICam_Package_2019.11.zip)
-   * Unpack it to temporary folder and cd to Reference Implementation folder
+   * Download GenICamTM Package Version 2019.11 (https://www.emva.org/wp-content/uploads/GenICam_Package_2019.11.zip).
+   * Unpack it to temporary folder and cd to Reference Implementation folder.
    * Create \<Project root\>\OtherLibs\GenICam folder.
    * Unpack GenICam_V3_2_0-Win64_x64_VC141-Release-SDK.zip into \<Project root\>\OtherLibs\GeniCam folder.
    * Unpack GenICam_V3_2_0-Win64_x64_VC141-Release-Runtime.zip into \<Project root\>\OtherLibs\GeniCam\library\CPP
 * Open src\GPUCameraSample.pro into Qt Creator.
-* By default application will be built with no camera support. The only option is camera simulator based on pgm file. To enable Ximea camera suppoer open common_defs.pri and uncomment line DEFINES += SUPPORT_XIMEA.
+* By default the application will be built with no camera support. The only option is camera simulator based on PGM file. To enable XIMEA camera suppoer open common_defs.pri and uncomment line DEFINES += SUPPORT_XIMEA.
 * Build project.
 * Binaries will be placed into \<Project root\>\GPUCameraSample_x64 folder.
 
