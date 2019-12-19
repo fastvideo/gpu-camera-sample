@@ -29,7 +29,7 @@ Currently the software is working with <a href="https://www.ximea.com" target="_
 
 ### Requirements for Windows
 
-* Camera SDK for XIMEA, Flir, Baumer, JAI, Imperx, etc. (currently only XIMEA is supported)
+* Camera SDK or GenICam package + camera vendor GenTL producer (.cti) for XIMEA, Basler, Flir, Baumer, JAI, Imperx, etc. (currently XIMEA and Basler are supported)
 * Fastvideo SDK (demo) ver.0.15.0.0
 * NVIDIA CUDA-10.1
 * Qt ver.5.13.1
@@ -93,12 +93,14 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 ## Roadmap
 
 * GPU pipeline for monochrome cameras - done
-* H.264/H.265 encoders on GPU - in progress 
+* GenICam Standard support - done
+* Support for XIMEA, Basler, Imperx, JAI, Baumer, Flir cameras - in progress
 * Linux version - in progress
 * Resize
 * UnSharp Mask
 * Rotation to an arbitrary angle
 * Support for JAI and Imperx cameras
+* H.264/H.265 encoders (NVENC/NVDEC)
 * JPEG2000 encoder
 * Realtime raw compression (lossless and/or lossy)
 * Curves and Levels via 1D LUT
