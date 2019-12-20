@@ -106,8 +106,7 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 * Resize
 * UnSharp Mask
 * Rotation to an arbitrary angle
-* Support for JAI and Imperx cameras
-* H.264/H.265 encoders (NVENC/NVDEC)
+* H.264/H.265 encoders (NVIDIA NVENC)
 * JPEG2000 encoder
 * Realtime raw compression (lossless and/or lossy)
 * Curves and Levels via 1D LUT
