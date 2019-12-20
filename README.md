@@ -100,7 +100,8 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 
 * GPU pipeline for monochrome cameras - done
 * GenICam Standard support - done
-* Support for XIMEA, Basler, Imperx, JAI, Baumer, Flir cameras - in progress
+* Support for XIMEA and Basler cameras - done
+* Support for Imperx, JAI, Baumer, Flir cameras - in progress
 * Linux version - in progress
 * Resize
 * UnSharp Mask
