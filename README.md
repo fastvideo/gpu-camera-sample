@@ -23,7 +23,7 @@ Processing is done on NVIDIA GPU to speedup the performance. The software could 
 
 From the benchmarks on <strong>NVIDIA GeForce RTX 2080ti</strong> we can see that GPU-based raw image processing is very fast and it could offer very high quality at the same time. The total performane could reach <strong>4 GPix/s</strong> for color cameras. The performance strongly depends on complexity of that pipeline. Multiple GPU solutions could significanly improve the performance.
 
-Currently the software is working with <a href="https://www.ximea.com" target="_blank">XIMEA</a> cameras. Via GenICam the software can work wih XIMEA and Basler cameras. Soon we are going to add support for <a href="https://www.jai.com" target="_blank">JAI</a> and <a href="https://www.imperx.com" target="_blank">Imperx</a> cameras. You can add support for desired cameras by yourself. The software is working with demo version of Fastvideo SDK, that is why you can see a watermark on the screen. To get a Fastvideo SDK license, please contact <a href="https://www.fastcompression.com/" target="_blank">Fastvideo company</a>.
+Currently the software is working with <a href="https://www.ximea.com" target="_blank">XIMEA</a> cameras. Via GenICam the software can work with XIMEA and Basler cameras. Soon we are going to add support for <a href="https://www.jai.com" target="_blank">JAI</a> and <a href="https://www.imperx.com" target="_blank">Imperx</a> cameras. You can add support for desired cameras by yourself. The software is working with demo version of Fastvideo SDK, that is why you can see a watermark on the screen. To get a Fastvideo SDK license for  develoment or for deployment, please contact <a href="https://www.fastcompression.com/" target="_blank">Fastvideo company</a>.
 
 ## How to build gpu-camera-sample
 
@@ -43,13 +43,13 @@ git clone https://github.com/fastvideo/gpu-camera-sample.git
 ```
 * Create OtherLibs folder in the project root folder. This folder will contains external libraries, used in gpu-camera-sample application.
 * Download Fastvideo SDK from <a href="https://drive.google.com/open?id=1p21TXXC7SCw5PdDVEhayRdMQEN6X11ge">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a> (valid till March 23, 2020), unpack it into \<Project root\>\OtherLibs\fastvideoSDK folder.
-* If you need XIMEA camera support, download XiAPI from https://www.ximea.com/support/documents/4. Install downloaded package (by default into C:\XIMEA). Copy API folder from XIAPI installation folder into \<Project root\>\OtherLibs folder.
+* If you need direct XIMEA camera support, download XiAPI from https://www.ximea.com/support/documents/4. Install downloaded package (by default into C:\XIMEA). Copy API folder from XIAPI installation folder into \<Project root\>\OtherLibs folder.
 * If you need GenICam support
    * Download GenICamTM Package Version 2019.11 (https://www.emva.org/wp-content/uploads/GenICam_Package_2019.11.zip).
-   * Unpack it to temporary folder and cd to Reference Implementation folder.
+   * Unpack it to a temporary folder and cd to Reference Implementation folder.
    * Create \<Project root\>\OtherLibs\GenICam folder.
-   * Unpack GenICam_V3_2_0-Win64_x64_VC141-Release-SDK.zip into \<Project root\>\OtherLibs\GeniCam folder.
-   * Unpack GenICam_V3_2_0-Win64_x64_VC141-Release-Runtime.zip into \<Project root\>\OtherLibs\GeniCam\library\CPP
+   * Unpack GenICam_V3_2_0-Win64_x64_VC141-Release-SDK.zip into \<Project root\>\OtherLibs\GenICam folder.
+   * Unpack GenICam_V3_2_0-Win64_x64_VC141-Release-Runtime.zip into \<Project root\>\OtherLibs\GenICam\library\CPP
 * Open src\GPUCameraSample.pro into Qt Creator.
 * By default the application will be built with no camera support. The only option is camera simulator based on PGM file. To enable XIMEA camera suppoer open common_defs.pri and uncomment line DEFINES += SUPPORT_XIMEA.
 * Build project.
@@ -59,13 +59,13 @@ git clone https://github.com/fastvideo/gpu-camera-sample.git
 
 gpu-camera-sample is a multithreaded application. It consists of the following threads:
 
-* Main application thread to control application GUI and other threads
-* Image acquisition from a camera thread which controls camera data acquisition and CUDA-based image processing thread
+* Main application thread to control app GUI and other threads.
+* Image acquisition from a camera thread which controls camera data acquisition and CUDA-based image processing thread.
 * CUDA-based image processing thread. Controls RAW data processing as well as async data writing thread and OpenGL renderer thread.
 * OpenGL rendering thread. Renders processed data into OpenGL surface.
 * Async data writing thread. Writes processed JPEG data to SSD or streams processed video.
 
-We've implemented the simplest approach for camera application. Camera driver is writing raw data to memory ring buffer, then we copy data from that ring buffer to GPU for computations. Full image processing pipeline is done on GPU, so we need just to collect processed frames at the output.
+Here we've implemented the simplest approach for camera application. Camera driver is writing raw data to memory ring buffer, then we copy data from that ring buffer to GPU for computations. Full image processing pipeline is done on GPU, so we need just to collect processed frames at the output.
 
 In general case, Fastvideo SDK can import/export data from/to SSD / CPU memory / GPU memory. This is done to ensure compatibility with third-party libraries on CPU and GPU. You can get more info at <a href="https://www.fastcompression.com/download/Fastvideo_SDK_manual.pdf" target="_blank">Fastvideo SDK Manual</a>.
 
@@ -88,7 +88,7 @@ In general case, Fastvideo SDK can import/export data from/to SSD / CPU memory /
 * NVIDIA CUDA-10.1
 * Compiler MSVC 2017 (MSVC 2015 is not compatible with CUDA-10.1)
 
-We also recommend to check PCI-Express bandwidth for Host-to-Device and Device-to-Host transfers. For GPU with Gen3 x16 it should be in the range of 10-12 GB/s. GPU memory size could be a bottleneck for high resolution cameras, so please check GPU memory usage in the software.
+We also recommend to check PCI-Express bandwidth for Host-to-Device and Device-to-Host transfers. For GPU with Gen3 x16 it should be in the range of 10-12 GB/s. GPU memory size could be a bottleneck for image processing from high resolution cameras, so please check GPU memory usage in the software.
 
 If you are working with images which reside on HDD, please place them on SSD or M2.
 
