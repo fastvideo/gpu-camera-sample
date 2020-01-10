@@ -40,10 +40,9 @@
 #include <QDebug>
 #include <QPoint>
 
-RawProcessor::RawProcessor(CameraBase *camera, GLRenderer *renderer) :
+RawProcessor::RawProcessor(CameraBase *camera, GLRenderer *renderer):QObject(nullptr),
     mCamera(camera),
-    mRenderer(renderer),
-    QObject(nullptr)
+    mRenderer(renderer)
 {
     if(camera->isColor())
         mProcessorPtr.reset(new CUDAProcessorBase());
@@ -117,7 +116,7 @@ void RawProcessor::startWorking()
 {
     mWorking = true;
 
-    int frameTime = 1000 / mRenderFps;
+    int frameTime = qRound(1000.F / mRenderFps);
     qint64 lastTime = 0;
     QElapsedTimer tm;
     tm.start();
@@ -146,8 +145,7 @@ void RawProcessor::startWorking()
                 if(buf != nullptr)
                 {
                     FileWriterTask* task = new FileWriterTask();
-                    task->fileName =  QStringLiteral("%1/%2%3.jpg").arg(mOutputPath).
-                            arg(mFilePrefix).arg(mFrameCnt);
+                    task->fileName =  QStringLiteral("%1/%2%3.jpg").arg(mOutputPath,mFilePrefix).arg(mFrameCnt);
                     task->size = mFileWriterPtr->bufferSize();
                     task->data = buf;
                     mProcessorPtr->exportJPEGData(task->data, mOptions.JpegQuality, task->size);
@@ -173,8 +171,7 @@ void RawProcessor::startWorking()
                     int sz = header.size() + pitch * h;
 
                     FileWriterTask* task = new FileWriterTask();
-                    task->fileName =  QStringLiteral("%1/%2%3.pgm").arg(mOutputPath).
-                            arg(mFilePrefix).arg(mFrameCnt);
+                    task->fileName =  QStringLiteral("%1/%2%3.pgm").arg(mOutputPath,mFilePrefix).arg(mFrameCnt);
                     task->size = sz;
 
                     task->data = buf;
@@ -228,10 +225,7 @@ fastStatus_t RawProcessor::getLastError()
 
 QString RawProcessor::getLastErrorDescription()
 {
-    if(mProcessorPtr)
-        return mProcessorPtr->getLastErrorDescription();
-    else
-        return QString();
+    return  (mProcessorPtr) ? mProcessorPtr->getLastErrorDescription() : QString();
 }
 
 QMap<QString, float> RawProcessor::getStats()

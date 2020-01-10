@@ -68,10 +68,8 @@ void AsyncWriter::initBuffers(unsigned bufferSize)
     if(mBuffers.empty())
         mBuffers.resize(maxQueuSize);
     FastAllocator alloc;
-    for(int i = 0; i < mBuffers.size(); i++)
-    {
-        mBuffers[i].reset((unsigned char*)alloc.allocate(bufferSize));
-    }
+    for(auto & buffer : mBuffers )
+        buffer.reset((unsigned char*)alloc.allocate(bufferSize));
     mBufferSize = bufferSize;
 }
 
@@ -210,7 +208,7 @@ AsyncMJPEGWriter::AsyncMJPEGWriter(int size, QObject *parent):
 
 bool AsyncMJPEGWriter::open(int width, int height, int fps, fastJpegFormat_t fmt, const QString& outFileName)
 {
-    if(!QFileInfo(QFileInfo(outFileName).path()).exists())
+    if(!QFileInfo::exists(QFileInfo(outFileName).path()))
         return false;
 
     if(mEncoderPtr)
@@ -237,5 +235,5 @@ void AsyncMJPEGWriter::processTask(FileWriterTask* task)
     if(!mEncoderPtr)
         return;
 
-    mEncoderPtr->addJPEGFrame(task->data, task->size);
+    mEncoderPtr->addJPEGFrame(task->data, int(task->size));
 }

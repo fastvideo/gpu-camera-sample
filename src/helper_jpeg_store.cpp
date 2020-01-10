@@ -29,7 +29,7 @@ public:
 	template<typename T> Bytestream &operator<<(const T &data) {
         auto *raw = reinterpret_cast<const uint8_t *>(&data);
 
-		for(unsigned i = 0; i < sizeof(T); i++)
+        for(size_t i = 0; i < sizeof(T); i++)
 			data_.push_back(raw[sizeof(T) - 1 - i]);
 
 		return *this;

@@ -32,6 +32,7 @@
 #include <QPoint>
 #include <QScreen>
 #include <QTimer>
+#include <cmath>
 
 #include "fastvideo_sdk.h"
 namespace
@@ -41,9 +42,7 @@ namespace
     const qreal zoomMax = 8.0;
 }
 
-GLImageViewer::GLImageViewer(GLRenderer *renderer) :
-    QOpenGLWindow(),
-    mRenderer(renderer)
+GLImageViewer::GLImageViewer(GLRenderer *renderer): mRenderer(renderer)
 {
     setSurfaceType(QWindow::OpenGLSurface);
     setFormat(renderer->format());
@@ -54,8 +53,6 @@ GLImageViewer::GLImageViewer(GLRenderer *renderer) :
     mViewMode = GLImageViewer::vmZoomFit;
     mShowImage = false;
 }
-
-GLImageViewer::~GLImageViewer(){}
 
 void GLImageViewer::clear()
 {

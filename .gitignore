@@ -4,7 +4,7 @@ src/**/.vs
 src/**/x64
 
 GPUCameraSample*
-OtherLibs
+OtherLibs*
 build-*
 # bin/**/*.lib
 # bin/**/*.iobj

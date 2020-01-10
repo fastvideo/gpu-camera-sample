@@ -34,11 +34,6 @@ CircularBuffer::CircularBuffer(QObject *parent) : QObject(parent)
 
 }
 
-CircularBuffer::~CircularBuffer()
-{
-
-}
-
 bool CircularBuffer::allocate(int width, int height, fastSurfaceFormat_t format)
 {
     QMutexLocker lock(&mMutex);

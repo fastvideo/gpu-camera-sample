@@ -329,7 +329,7 @@ fastStatus_t CUDAProcessorGray::Init(CUDAProcessorOptions &options)
     cudaMemoryInfo("Created hBpcMux");
 
     //Denoise
-    if(1)
+    if( true )
     {
         denoise_static_parameters_t denoiseParameters;
         memcpy(&denoiseParameters, &options.DenoiseStaticParams, sizeof(denoise_static_parameters_t));
@@ -514,7 +514,7 @@ fastStatus_t CUDAProcessorGray::Init(CUDAProcessorOptions &options)
     cudaMemoryInfo("Created hGLBuffer");
 
     //JPEG Stuff
-    if(1)
+    if( true )
     {
         jfifInfo.restartInterval = options.JpegRestartInterval;
         jfifInfo.jpegFmt = JPEG_Y;
@@ -601,7 +601,8 @@ fastStatus_t CUDAProcessorGray::Init(CUDAProcessorOptions &options)
         requestedMemSpace += tmp;
     }
 
-    size_t freeMem, totalMem;
+    size_t freeMem  = 0;
+    size_t totalMem = 0;
     cudaMemGetInfo(&freeMem, &totalMem);
 
     stats[QStringLiteral("totalMem")] = totalMem;

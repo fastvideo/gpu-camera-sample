@@ -56,6 +56,7 @@ public:
 
     typedef enum{
         cif8bpp = 0, ///8 bit per pixel
+        cif10bpp,    ///10 bit per pixel in 16 bit
         cif12bpp,    ///12 bit per pixel in 16 bit
         cif12bpp_p,  ///12 bit per pixel packed (2 pixel in 3 bytes)
         cif16bpp     ///16 bit per pixel

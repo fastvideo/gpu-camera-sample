@@ -31,7 +31,13 @@
 #include "ppm.h"
 
 #include <QVector>
+#include <QString>
+#include <QFileInfo>
 #include <QElapsedTimer>
+
+#ifndef WIN32
+#include <xmmintrin.h> //SSE Intrinsic Functions
+#endif
 
 template<unsigned i>
 float vectorGetByIndex( __m128 V) {
@@ -90,9 +96,9 @@ FFCReader::FFCReader(const QString &fileName) :
     mWidth(0),
     mHeight(0),
     mPitch(0),
-    mFileName(fileName),
     mBoxH(32),
-    mBoxW(32)
+    mBoxW(32),
+    mFileName(fileName)
 {
     QString suf = QFileInfo(fileName).suffix().toLower();
     QVector<float> cfa;
@@ -291,8 +297,11 @@ void FFCReader::cfaMedian(float* src, float* dst)
 
             pos += 2; //CFA(i + 2, j + 2)
             area[8] = _mm_set1_ps(src[pos]);
-
+#ifdef WIN32
             dst[x + y * mWidth] = ffcMedianSSE(area);
+#else
+            dst[x + y * mWidth] = 0;
+#endif
         }
     }
 }

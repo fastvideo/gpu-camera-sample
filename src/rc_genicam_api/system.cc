@@ -165,7 +165,7 @@ std::vector<std::shared_ptr<System> > System::getSystems()
 #else
     // otherwise, use the absolute install path to the default transport layer
 
-    path=GENTL_INSTALL_PATH;
+    path = GENTL_INSTALL_PATH ; // "/opt/XIMEA/lib/";
 #endif
   }
 

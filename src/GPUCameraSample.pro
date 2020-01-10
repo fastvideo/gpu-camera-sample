@@ -1,11 +1,21 @@
 QT += core gui widgets
 
+# OTHER LIB PATH
+win32: OTHER_LIB_PATH = $$dirname(PWD)/OtherLibs
+unix:  OTHER_LIB_PATH = $$dirname(PWD)/OtherLibsLinux
+#
 include(common_defs.pri)
 include(common_funcs.pri)
-include(common.pri)
+win32: include(common.pri)
+unix:  include(common_unix.pri)
 
 TARGET = $$PROJECT_NAME
 TEMPLATE = app
+
+INCLUDEPATH += ./CUDASupport
+INCLUDEPATH += ./Camera
+INCLUDEPATH += ./Widgets
+INCLUDEPATH += $$OTHER_LIB_PATH/FastvideoSDK/core_samples
 
 SOURCES += main.cpp\
         MainWindow.cpp \
@@ -20,14 +30,13 @@ SOURCES += main.cpp\
     helper_jpeg_store.cpp \
     Widgets/DenoiseController.cpp \
     Camera/CameraBase.cpp \
-    Camera/XimeaCamera.cpp \
     Camera/FrameBuffer.cpp \
     Camera/PGMCamera.cpp \
     RawProcessor.cpp \
     AsyncFileWriter.cpp \
-    ../OtherLibs/fastvideoSDK/common/SurfaceTraits.cpp \
-    ../OtherLibs/fastvideoSDK/common/alignment.cpp \
-    ../OtherLibs/fastvideoSDK/core_samples/SurfaceTraitsInternal.cpp \
+    $$OTHER_LIB_PATH/FastvideoSDK/common/SurfaceTraits.cpp \
+    $$OTHER_LIB_PATH/FastvideoSDK/common/alignment.cpp \
+    $$OTHER_LIB_PATH/FastvideoSDK/core_samples/SurfaceTraitsInternal.cpp \
     CUDASupport/CUDAProcessorGray.cpp \
     MJPEGEncoder.cpp \
     Camera/GeniCamCamera.cpp \
@@ -42,6 +51,11 @@ SOURCES += main.cpp\
     rc_genicam_api/pointcloud.cc \
     rc_genicam_api/stream.cc \
     rc_genicam_api/system.cc
+
+contains( DEFINES, SUPPORT_XIMEA ){
+   SOURCES += Camera/XimeaCamera.cpp
+}
+
 
 unix:  SOURCES += rc_genicam_api/gentl_wrapper_linux.cc
 win32: SOURCES += rc_genicam_api/gentl_wrapper_win32.cc
@@ -85,7 +99,8 @@ HEADERS  += MainWindow.h \
 FORMS    += MainWindow.ui \
     Widgets/DenoiseController.ui
 
-RC_FILE = resource.rc
+RC_FILE = gpu-camera-sample.rc
+#resource.rc
 
 unix:copySelectedPluginsToDestdir($$QT_SELECTED_PLUGIN)
 
@@ -93,7 +108,7 @@ unix:copySelectedPluginsToDestdir($$QT_SELECTED_PLUGIN)
 #win32:copyPluginsToDestdir(sqldrivers)
 #copyPluginsToDestdir(printsupport)
 win32:copyPluginsToDestdir(platforms)
-copyPluginsToDestdir(imageformats)
+win32:copyPluginsToDestdir(imageformats)
 
 copyQtDllsToDestdir($$QT_DLLS)
 unix {
@@ -109,8 +124,8 @@ win32 {
 
     copyToDestdir($$FASTVIDEO_DLL)
     copyToDestdir($$CUDA_DLL)
-    copyToDestdir($$FASTVIDEO_EXTRA_DLLS)
 }
+copyToDestdir($$FASTVIDEO_EXTRA_DLLS)
 
 RESOURCES += \
     Resorces.qrc

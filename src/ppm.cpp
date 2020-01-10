@@ -15,6 +15,7 @@ FASTVIDEO SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING, BUT NOT LIMITED TO, 
 #include <cctype>
 #include <fstream>
 #include <cstring>
+#include <cmath>
 
 int loadPPM(const char *file, void** data, BaseAllocator *alloc, unsigned int &width, unsigned &wPitch, unsigned int &height, unsigned &bitsPerPixel, unsigned &channels) {
     FILE *fp = nullptr;

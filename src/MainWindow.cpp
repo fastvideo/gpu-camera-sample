@@ -150,7 +150,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->statusBar->addWidget(mStatusLabel);
     ui->statusBar->addWidget(mFpsLabel);
 
-    QToolButton* openButton=
+    auto * openButton=
                 dynamic_cast<QToolButton*>(ui->mainToolBar->widgetForAction(ui->actionOpenBayerPGM));
     openButton->setPopupMode(QToolButton::MenuButtonPopup);
     openButton->addAction(ui->actionOpenGrayPGM);
@@ -244,9 +244,7 @@ void MainWindow::initNewCamera(CameraBase* cmr, uint32_t devID)
     int bpp = GetBitsPerChannelFromSurface(mCameraPtr->surfaceFormat());
 
     QString msg = QString(QStringLiteral("%1 %2, s\\n: %3 Width: %4, Height: %5, Pixel format: %6 bpp%7")).
-            arg(mCameraPtr->manufacturer()).
-            arg(mCameraPtr->model()).
-            arg(mCameraPtr->serial()).
+            arg(mCameraPtr->manufacturer(),mCameraPtr->model(),mCameraPtr->serial()).
             arg(mOptions.Width).
             arg(mOptions.Height).
             arg(bpp).
@@ -579,9 +577,9 @@ void MainWindow::updateOptions(CUDAProcessorOptions& opts)
 {
     opts.BayerFormat = fastBayerPattern_t(ui->cboBayerPattern->currentData().toInt());
     opts.BayerType = fastDebayerType_t(ui->cboBayerType->currentData().toInt());
-    opts.Red   = (float)(ui->sldRed->value()) / 100.f;
-    opts.Green = (float)(ui->sldGreen->value()) / 100.f;
-    opts.Blue  = (float)(ui->sldBlue->value()) / 100.f;
+    opts.Red   = (float)(ui->sldRed->value()) / 100.F;
+    opts.Green = (float)(ui->sldGreen->value()) / 100.F;
+    opts.Blue  = (float)(ui->sldBlue->value()) / 100.F;
     opts.eV    = (float)(pow(2, double(ui->sldEV->value() / 100.)));
 
     opts.EnableBPC = ui->chkBPC->isChecked();

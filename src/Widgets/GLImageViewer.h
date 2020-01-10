@@ -107,11 +107,11 @@ public:
     };
 
     explicit GLImageViewer(GLRenderer* renderer);
-    ~GLImageViewer();
+    ~GLImageViewer() = default;
 
     void     setViewMode(ViewMode);
     ViewMode getViewMode() const;
-    void     setZoom(qreal value);
+    void     setZoom(qreal scale);
     qreal    getZoom() const;
 
     void load(void *img, int width, int height);

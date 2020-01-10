@@ -53,16 +53,17 @@ CUDAProcessorBase::CUDAProcessorBase(QObject* parent) :
     jfifInfo.exifSectionsCount = 0;
     jpegStreamSize = 0;
 
-    size_t freeMem, totalMem;
+    size_t freeMem  = 0;
+    size_t totalMem = 0;
     cudaMemGetInfo(&freeMem, &totalMem);
     stats.insert(QStringLiteral("totalMem"),  totalMem);
     stats.insert(QStringLiteral("freeMem"), freeMem);
+    //    fastTraceCreate("/tmp/CUDAProcessorBase.log");
 }
 
 CUDAProcessorBase::~CUDAProcessorBase()
 {
     freeFilters();
-
 }
 
 void CUDAProcessorBase::cudaMemoryInfo(const char *str)
@@ -204,8 +205,8 @@ void CUDAProcessorBase::freeFilters()
     //OpenGL stuff
     if(hExportToDevice)
     {
-         fastExportToDeviceDestroy( hExportToDevice );
-         hExportToDevice = nullptr;
+        fastExportToDeviceDestroy( hExportToDevice );
+        hExportToDevice = nullptr;
     }
 
     mLastError = FAST_OK;
@@ -278,8 +279,8 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
         fastTraceCreate(QDir::toNativeSeparators(
                             QStringLiteral("%1.log").arg(
                                 QDateTime::currentDateTime().toString(
-                                QStringLiteral("dd_MM_yyyy_hh_mm_ss")))).
-                                toStdString().c_str());
+                                    QStringLiteral("dd_MM_yyyy_hh_mm_ss")))).
+                        toStdString().c_str());
         fastTraceEnableLUTDump(false);
         fastTraceEnableFlush(true);
         fastEnableInterfaceSynchronization(true);
@@ -352,17 +353,17 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
         samParameter.correctionMatrix = options.MatrixA;
         samParameter.blackShiftMatrix = (char*)options.MatrixB;
         ret = fastImageFilterCreate(
-               &hSam,
+                    &hSam,
 
-               FAST_SAM,
-               &samParameter,
+                    FAST_SAM,
+                    &samParameter,
 
-               maxWidth,
-               maxHeight,
+                    maxWidth,
+                    maxHeight,
 
-               *bufferPtr,
-               &samBuffer
-               );
+                    *bufferPtr,
+                    &samBuffer
+                    );
     }
     else
     {
@@ -370,17 +371,17 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
         samParameter.correctionMatrix = options.MatrixA;
         samParameter.blackShiftMatrix = (short*)options.MatrixB;
         ret = fastImageFilterCreate(
-               &hSam,
+                    &hSam,
 
-               FAST_SAM16,
-               &samParameter,
+                    FAST_SAM16,
+                    &samParameter,
 
-               maxWidth,
-               maxHeight,
+                    maxWidth,
+                    maxHeight,
 
-               *bufferPtr,
-               &samBuffer
-               );
+                    *bufferPtr,
+                    &samBuffer
+                    );
     }
     if(ret != FAST_OK)
         return InitFailed("fastImageFilterCreate for MAD failed",ret);
@@ -546,17 +547,17 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
     bpcParameter.pattern = options.BayerFormat;
 
     ret = fastImageFilterCreate(
-               &hBpc,
+                &hBpc,
 
-               FAST_BAD_PIXEL_CORRECTION_5X5,
-               &bpcParameter,
+                FAST_BAD_PIXEL_CORRECTION_5X5,
+                &bpcParameter,
 
-               maxWidth,
-               maxHeight,
+                maxWidth,
+                maxHeight,
 
-               *bufferPtr,
-               &bpcBuffer
-               );
+                *bufferPtr,
+                &bpcBuffer
+                );
 
     if(ret != FAST_OK)
         return InitFailed("fastImageFilterCreate for MAD failed",ret);
@@ -602,7 +603,7 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
     cudaMemoryInfo("Created hDebayer");
 
     //Denoise
-    if(1)
+    if(true)
     {
         denoise_static_parameters_t denoiseParameters;
         memcpy(&denoiseParameters, &options.DenoiseStaticParams, sizeof(denoise_static_parameters_t));
@@ -723,10 +724,10 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
 
     //Open GL
     ret = fastExportToDeviceCreate(
-        &hExportToDevice,
-        &srcSurfaceFmt,
-        *bufferPtr
-    );
+                &hExportToDevice,
+                &srcSurfaceFmt,
+                *bufferPtr
+                );
     if(ret != FAST_OK)
         return InitFailed("fastExportToDeviceCreate for viewport bitmap failed",ret);
 
@@ -747,10 +748,11 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
     cudaMemoryInfo("Created hGLBuffer");
 
     //JPEG Stuff
-    if(1)
+    if( true )
     {
         bool haveEnoughGPUMem = false;
-        size_t freeMem = 0, totalMem = 0;
+        size_t freeMem = 0;
+        size_t totalMem = 0;
         cudaMemGetInfo(&freeMem, &totalMem);
 
         //JPEG encoder needs up to 15 times of RGB image size
@@ -849,7 +851,8 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
         requestedMemSpace += tmp;
     }
 
-    size_t freeMem, totalMem;
+    size_t freeMem  = 0;
+    size_t totalMem = 0;
     cudaMemGetInfo(&freeMem, &totalMem);
 
     stats[QStringLiteral("totalMem")] = totalMem;
@@ -1008,11 +1011,11 @@ fastStatus_t CUDAProcessorBase::Transform(ImageT *image, CUDAProcessorOptions &o
                 samParameter.correctionMatrix = nullptr;
                 samParameter.blackShiftMatrix = nullptr;
                 ret = fastImageFiltersTransform(
-                           hSam,
-                           &samParameter,
-                           imgWidth,
-                           imgHeight
-                           );
+                            hSam,
+                            &samParameter,
+                            imgWidth,
+                            imgHeight
+                            );
             }
             else
             {
@@ -1020,11 +1023,11 @@ fastStatus_t CUDAProcessorBase::Transform(ImageT *image, CUDAProcessorOptions &o
                 samParameter.correctionMatrix = nullptr;
                 samParameter.blackShiftMatrix = nullptr;
                 ret = fastImageFiltersTransform(
-                           hSam,
-                           &samParameter,
-                           imgWidth,
-                           imgHeight
-                           );
+                            hSam,
+                            &samParameter,
+                            imgWidth,
+                            imgHeight
+                            );
             }
             if(ret != FAST_OK && info)
                 return TransformFailed("fastImageFiltersTransform for SAM failed",ret,profileTimer);
@@ -1174,11 +1177,11 @@ fastStatus_t CUDAProcessorBase::Transform(ImageT *image, CUDAProcessorOptions &o
             bpcParameter.pattern = opts.BayerFormat;
 
             ret = fastImageFiltersTransform(
-                       hBpc,
-                       &bpcParameter,
-                       imgWidth,
-                       imgHeight
-                       );
+                        hBpc,
+                        &bpcParameter,
+                        imgWidth,
+                        imgHeight
+                        );
 
             if(ret != FAST_OK && info)
                 return TransformFailed("fastImageFiltersTransform for BPC failed", ret, profileTimer);
@@ -1395,7 +1398,8 @@ fastStatus_t CUDAProcessorBase::Close()
 {
     QMutexLocker locker(&mut);
 
-    size_t freeMem, totalMem;
+    size_t freeMem  = 0;
+    size_t totalMem = 0;
     cudaMemGetInfo(&freeMem, &totalMem);
 
     stats[QStringLiteral("totalMem")] = totalMem;
@@ -1423,13 +1427,13 @@ fastStatus_t CUDAProcessorBase::exportRawData(void* dstPtr, unsigned int &w, uns
     fastStatus_t ret = FAST_OK;
 
     ret = (fastExportToHostCopy(
-                hDeviceToHostRawAdapter,
-                dstPtr,
-                bufferInfo.width,
-                pitch,
-                bufferInfo.height,
-                &p
-                ) );
+               hDeviceToHostRawAdapter,
+               dstPtr,
+               bufferInfo.width,
+               pitch,
+               bufferInfo.height,
+               &p
+               ) );
 
     if(ret != FAST_OK)
     {
@@ -1498,13 +1502,13 @@ fastStatus_t  CUDAProcessorBase::export16bitData(void* dstPtr, unsigned int &w, 
     fastStatus_t ret = FAST_OK;
 
     ret = (fastExportToHostCopy(
-                hDeviceToHost16Adapter,
-                dstPtr,
-                bufferInfo.width,
-                nPitch,
-                bufferInfo.height,
-                &p
-                ) );
+               hDeviceToHost16Adapter,
+               dstPtr,
+               bufferInfo.width,
+               nPitch,
+               bufferInfo.height,
+               &p
+               ) );
 
     if(ret != FAST_OK)
     {

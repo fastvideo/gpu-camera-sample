@@ -7,8 +7,7 @@
 
 #include <RawProcessor.h>
 
-GeniCamCamera::GeniCamCamera()  :
-    CameraBase()
+GeniCamCamera::GeniCamCamera()
 {
     mCameraThread.setObjectName(QStringLiteral("GeniCamThread"));
     moveToThread(&mCameraThread);
@@ -30,30 +29,30 @@ bool GeniCamCamera::open(uint32_t devID)
     using namespace GenApi;
 
     std::vector<std::shared_ptr<rcg::System> > system=rcg::System::getSystems();
-    for (size_t i=0; i < system.size(); i++)
+    for (auto & i : system)
     {
         if(mDevice)
             break;
 
-        system[i]->open();
-        std::vector<std::shared_ptr<rcg::Interface>> interf = system[i]->getInterfaces();
+        i->open();
+        std::vector<std::shared_ptr<rcg::Interface>> interf = i->getInterfaces();
 
-        for (size_t k=0; k < interf.size(); k++)
+        for (auto & k : interf)
         {
-            interf[k]->open();
-            std::vector<std::shared_ptr<rcg::Device>> device = interf[k]->getDevices();
+            k->open();
+            std::vector<std::shared_ptr<rcg::Device>> device = k->getDevices();
 
-            for (size_t j=0; j < device.size(); j++)
+            for (const auto & j : device)
             {
-                mDevice = device[j];
+                mDevice = j;
                 break;
             }
 
             if(!mDevice)
-                interf[k]->close();
+                k->close();
         }
         if(!mDevice)
-            system[i]->close();
+            i->close();
     }
 
     if(!mDevice)
@@ -87,9 +86,9 @@ bool GeniCamCamera::open(uint32_t devID)
         ptrPixelFormats->GetSymbolics(names);
         QVector<int64_t> pixelFormats;
 
-        for(int i = 0; i < names.size(); i++)
+        for(const auto & name : names)
         {
-            IEnumEntry* entry = ptrPixelFormats->GetEntryByName(names.at(i));
+            IEnumEntry* entry = ptrPixelFormats->GetEntryByName(name);
             if(entry)
                 pixelFormats << entry->GetValue();
         }
@@ -315,7 +314,7 @@ void GeniCamCamera::startStreaming()
         return;
 
     std::vector<std::shared_ptr<rcg::Stream>> streams = mDevice->getStreams();
-    if(streams.size() <= 0)
+    if(streams.empty())
         return;
     streams[0]->open();
     streams[0]->startStreaming();

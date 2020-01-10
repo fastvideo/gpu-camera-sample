@@ -42,7 +42,7 @@ template<typename T> void Read(T *dst, size_t count, std::istream &fd){
         char buf[sizeof(T)];
         fd.read(buf, sizeof(T));
 
-        for(unsigned j = 0; j < sizeof(T); j++)
+        for(size_t j = 0; j < sizeof(T); j++)
             reinterpret_cast<char *>(dst + i)[j] = buf[sizeof(T) - 1 - j];
     }
 }
@@ -475,7 +475,7 @@ fastStatus_t jfifLoadHeader(
                         ReadSOS(jfifInfo->jpegMode, jfifInfo->predictorClass, jfifInfo->scanMap, channelMap, fd);
 
                         //Check if all referenced Huffman tables of a scan are present
-                        for(uint8_t scanPos = 0; scanPos < channelCount; scanPos++)
+                        for(uint8_t scanPos = 0; scanPos < uint8_t(channelCount); scanPos++)
                             for(uint8_t Tc = 0; Tc < 2; Tc++)
                                 if(!isHuffmanUsed[Tc][Map_host(jfifInfo->scanMap.huffmanTableMask[Tc], scanPos)]) {
 #ifdef CONSOLE_APP
@@ -485,7 +485,7 @@ fastStatus_t jfifLoadHeader(
                                 }
 
                         //Check if all referenced quantization tables of an image are present
-                        for(uint8_t channelPos = 0; channelPos < channelCount; channelPos++)
+                        for(uint8_t channelPos = 0; channelPos < uint8_t(channelCount); channelPos++)
                             if(!isQuantUsed[Map_host(jfifInfo->scanMap.quantTableMask, channelPos)]) {
 #ifdef CONSOLE_APP
                                 fprintf(stderr, "Quantization tables verifying error\n");
@@ -683,7 +683,7 @@ fastStatus_t jfifLoadHeaderWithoutExif(
                         ReadSOS(jfifInfo->jpegMode, jfifInfo->predictorClass, jfifInfo->scanMap, channelMap, fd);
 
                         //Check if all referenced Huffman tables of a scan are present
-                        for(uint8_t scanPos = 0; scanPos < channelCount; scanPos++)
+                        for(uint8_t scanPos = 0; scanPos < uint8_t(channelCount); scanPos++)
                             for(uint8_t Tc = 0; Tc < 2; Tc++)
                                 if(!isHuffmanUsed[Tc][Map_host(jfifInfo->scanMap.huffmanTableMask[Tc], scanPos)]) {
 #ifdef CONSOLE_APP
@@ -693,7 +693,7 @@ fastStatus_t jfifLoadHeaderWithoutExif(
                                 }
 
                         //Check if all referenced quantization tables of an image are present
-                        for(uint8_t channelPos = 0; channelPos < channelCount; channelPos++)
+                        for(uint8_t channelPos = 0; channelPos < uint8_t(channelCount); channelPos++)
                             if(!isQuantUsed[Map_host(jfifInfo->scanMap.quantTableMask, channelPos)]) {
 #ifdef CONSOLE_APP
                                 fprintf(stderr, "Quantization tables verifying error\n");

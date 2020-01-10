@@ -36,9 +36,9 @@
 
 #include "AsyncQueue.h"
 #include "FastAllocator.h"
+#include "MJPEGEncoder.h"
 #include <memory>
 
-class MJPEGEncoder;
 
 struct FileWriterTask
 {

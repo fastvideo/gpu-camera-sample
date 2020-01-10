@@ -45,7 +45,7 @@ class CircularBuffer : public QObject
 public:
 
     explicit CircularBuffer(QObject *parent = nullptr);
-    ~CircularBuffer();
+    ~CircularBuffer() = default;
 
     bool allocate(int width, int height, fastSurfaceFormat_t format = FAST_I16);
     unsigned char* getBuffer();

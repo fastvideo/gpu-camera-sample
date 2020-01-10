@@ -32,7 +32,7 @@
 #include <QVector>
 #include <QElapsedTimer>
 
-void FPNTIFFHandler(const char* module, const char* fmt, va_list ap)
+void FPNTIFFHandler(const char* module, const char* fmt, const va_list ap)
 {
     // ignore errors and warnings (or handle them your own way)
     Q_UNUSED(module)

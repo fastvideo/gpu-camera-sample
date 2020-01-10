@@ -33,7 +33,6 @@
 PGMCamera::PGMCamera(const QString &fileName,
                      fastBayerPattern_t  pattern,
                      bool isColor) :
-    CameraBase(),
     mFileName(fileName)
 {
     mPattern = pattern;

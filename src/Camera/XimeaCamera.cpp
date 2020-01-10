@@ -26,9 +26,9 @@
  either expressed or implied, of the FreeBSD Project.
 */
 
+#ifdef SUPPORT_XIMEA
 #include "XimeaCamera.h"
 
-#ifdef SUPPORT_XIMEA
 #include "MainWindow.h"
 #include "RawProcessor.h"
 
@@ -82,6 +82,8 @@ bool XimeaCamera::open(uint32_t devID)
 
         if(image_data_bit_depth == XI_BPP_8)
             ret = xiSetParamInt(hDevice, XI_PRM_IMAGE_DATA_FORMAT, XI_RAW8);
+        else if(image_data_bit_depth == XI_BPP_10)
+            ret = xiSetParamInt(hDevice, XI_PRM_IMAGE_DATA_FORMAT, XI_RAW16);
         else
         {
             ret = xiSetParamInt(hDevice, XI_PRM_IMAGE_DATA_FORMAT, XI_FRM_TRANSPORT_DATA);
@@ -96,6 +98,11 @@ bool XimeaCamera::open(uint32_t devID)
         {
             mImageFormat = cif8bpp;
             mSurfaceFormat = FAST_I8;
+        }
+        else if(image_data_bit_depth == XI_BPP_10 && pack == XI_OFF)
+        {
+            mSurfaceFormat = FAST_I10;
+            mImageFormat = cif10bpp;
         }
         else if(image_data_bit_depth == XI_BPP_12 && pack == XI_ON)
         {

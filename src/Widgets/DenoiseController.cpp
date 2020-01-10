@@ -29,6 +29,7 @@
 #include "DenoiseController.h"
 #include "ui_DenoiseController.h"
 #include <iterator>
+#include <cmath>
 
 DenoiseController::DenoiseController(QWidget *parent) :
     QWidget(parent),
