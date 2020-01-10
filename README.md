@@ -1,6 +1,9 @@
 # gpu-camera-sample
 Camera sample application with realtime GPU image processing
 
+<p><a target="_blank" href="https://www.fastcompression.com/blog/gpu-software-machine-vision-cameras.htm">
+<img src="https://www.fastcompression.com/img/blog/machine-vision/gpu-software-machine-vision-cameras.png" alt="gpu software machine vision genicam" style="max-width:100%"/></a></p>
+
 That software is based on simple image processing pipeline for camera applications that includes:
 * Raw image capture (8-bit, 12-bit packed/unpacked, 16-bit)
 * Import to GPU
