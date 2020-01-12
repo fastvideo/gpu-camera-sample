@@ -4,7 +4,7 @@ Camera sample application with realtime GPU image processing
 <p><a target="_blank" href="https://www.fastcompression.com/blog/gpu-software-machine-vision-cameras.htm">
 <img src="https://www.fastcompression.com/img/blog/machine-vision/gpu-software-machine-vision-cameras.png" alt="gpu software machine vision genicam" style="max-width:100%"/></a></p>
 
-That software is based on simple image processing pipeline for camera applications that includes:
+That software is based on the following image processing pipeline for camera applications that includes:
 * Raw image capture (8-bit, 12-bit packed/unpacked, 16-bit)
 * Import to GPU
 * Raw data convert and unpack
@@ -16,6 +16,8 @@ That software is based on simple image processing pipeline for camera applicatio
 * Exposure Correction (brightness control)
 * Debayer with HQLI (5&times;5 window), DFPD (11&times;11), MG (23&times;23) algorithms
 * Wavelet-based denoiser
+* Resize
+* UnSharp Mask
 * Gamma (linear, sRGB)
 * JPEG / MJPEG encoding
 * Output to monitor
@@ -108,11 +110,11 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 * MJPEG streaming via FFmpeg RTSP - in progress
 * Linux version - in progress
 * Special version for NVIDIA Jetson hardware and L4T for CUDA-10.0 (Jetson Nano, TX2, Xavier) - in progress
-* Resize
-* UnSharp Mask
 * Rotation to an arbitrary angle
+* LCP support (undistortion)
+* DCP support
 * H.264/H.265 encoders (NVIDIA NVENC)
-* JPEG2000 encoder
+* JPEG2000 encoder (Fastvideo J2K on GPU)
 * Realtime raw compression (lossless and/or lossy)
 * Curves and Levels via 1D LUT
 * Color correction with 3&times;3 matrix
@@ -120,8 +122,6 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 * Transforms to Rec.601 (SD), Rec.709 (HD), Rec.2020 (4K)
 * 3D LUT for HSV and RGB
 * Defringe module
-* DCP support
-* LCP support (remap)
 * Interoperability with external FFmpeg and GStreamer
 
 ## Info
