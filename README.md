@@ -20,13 +20,13 @@ That software is based on simple image processing pipeline for camera applicatio
 * JPEG / MJPEG encoding
 * Output to monitor
 * Export from GPU to CPU memory
-* Storage of compressed data to SSD
+* Storage of compressed data to SSD or streaming via FFmpeg RTSP (optional)
 
 Processing is done on NVIDIA GPU to speedup the performance. The software could also work with raw images in PGM format and you can utilize these images for testing or if you don't have a camera or if your camera is not supported. More info about that project you can find <a href="https://www.fastcompression.com/blog/gpu-software-machine-vision-cameras.htm" target="_blank">here</a>.
 
-From the benchmarks on <strong>NVIDIA GeForce RTX 2080ti</strong> we can see that GPU-based raw image processing is very fast and it could offer very high quality at the same time. The total performane could reach <strong>4 GPix/s</strong> for color cameras. The performance strongly depends on complexity of that pipeline. Multiple GPU solutions could significanly improve the performance.
+From the benchmarks on <strong>NVIDIA GeForce RTX 2080ti</strong> we can see that GPU-based raw image processing is very fast and it could offer high image quality at the same time. The total performance could reach <strong>4 GPix/s</strong> for color cameras. The performance strongly depends on complexity of the pipeline. Multiple GPU solutions could significanly improve the performance.
 
-Currently the software is working with <a href="https://www.ximea.com" target="_blank">XIMEA</a> cameras. Via GenICam the software can work with XIMEA and Basler cameras. Soon we are going to add support for <a href="https://www.jai.com" target="_blank">JAI</a> and <a href="https://www.imperx.com" target="_blank">Imperx</a> cameras. You can add support for desired cameras by yourself. The software is working with demo version of Fastvideo SDK, that is why you can see a watermark on the screen. To get a Fastvideo SDK license for  develoment or for deployment, please contact <a href="https://www.fastcompression.com/" target="_blank">Fastvideo company</a>.
+Currently the software is working with <a href="https://www.ximea.com" target="_blank">XIMEA</a> cameras. Via GenICam the software can work with XIMEA and Basler cameras. Soon we are going to add support for <a href="https://www.jai.com" target="_blank">JAI</a> and <a href="https://www.imperx.com" target="_blank">Imperx</a> cameras. You can add support for desired cameras by yourself. The software is working with demo version of Fastvideo SDK, that is why you can see a watermark on the screen. To get a Fastvideo SDK license for  develoment and for deployment, please contact <a href="https://www.fastcompression.com/" target="_blank">Fastvideo company</a>.
 
 ## How to build gpu-camera-sample
 
@@ -53,9 +53,9 @@ git clone https://github.com/fastvideo/gpu-camera-sample.git
    * Create \<Project root\>\OtherLibs\GenICam folder.
    * Unpack GenICam_V3_2_0-Win64_x64_VC141-Release-SDK.zip into \<Project root\>\OtherLibs\GenICam folder.
    * Unpack GenICam_V3_2_0-Win64_x64_VC141-Release-Runtime.zip into \<Project root\>\OtherLibs\GenICam\library\CPP
-* Open src\GPUCameraSample.pro into Qt Creator.
-* By default the application will be built with no camera support. The only option is camera simulator based on PGM file. To enable XIMEA camera suppoer open common_defs.pri and uncomment line DEFINES += SUPPORT_XIMEA.
-* Build project.
+* Open src\GPUCameraSample.pro in Qt Creator.
+* By default the application will be built with no camera support. The only option is camera simulator which is working with PGM files. To enable XIMEA camera support, open common_defs.pri and uncomment line DEFINES += SUPPORT_XIMEA.
+* Build the project.
 * Binaries will be placed into \<Project root\>\GPUCameraSample_x64 folder.
 
 ## Software architecture
@@ -64,9 +64,9 @@ gpu-camera-sample is a multithreaded application. It consists of the following t
 
 * Main application thread to control app GUI and other threads.
 * Image acquisition from a camera thread which controls camera data acquisition and CUDA-based image processing thread.
-* CUDA-based image processing thread. Controls RAW data processing as well as async data writing thread and OpenGL renderer thread.
+* CUDA-based image processing thread. Controls RAW data processing, async data writing thread, and OpenGL renderer thread.
 * OpenGL rendering thread. Renders processed data into OpenGL surface.
-* Async data writing thread. Writes processed JPEG data to SSD or streams processed video.
+* Async data writing thread. Writes processed JPEG/MJPEG data to SSD or streams processed video.
 
 Here we've implemented the simplest approach for camera application. Camera driver is writing raw data to memory ring buffer, then we copy data from that ring buffer to GPU for computations. Full image processing pipeline is done on GPU, so we need just to collect processed frames at the output.
 
@@ -76,17 +76,17 @@ In general case, Fastvideo SDK can import/export data from/to SSD / CPU memory /
 
 * Run GPUCameraSample.exe
 * Press Open button on the toolbar. This will open the first camera in the system or ask to open PGM file (bayer or grayscale) if application was built with no camera support.
-* Press Play button. This will start aquiring data from the camera and display it on the screen.
+* Press Play button. This will start data acquisition from the camera and display it on the screen.
 * Adjust zoom with Zoom slider or toggle Fit check box if requires.
 * Select appropriate output format in the Recording pane (please check that output folder exists in the file system, otherwise nothing will be recorded) and press Record button to start recording to disk.
-* Press Record button again when recording is done.
+* Press Record button again to stop the recording.
 
 ## Minimum Hardware ans Software Requirements
 
 * Windows-7/10, 64-bit
 * The latest NVIDIA driver
 * NVIDIA GPU with Kepler architecture, 6xx series minimum
-* NVIDIA GPU with 4 GB memory or better
+* NVIDIA GPU with 4-8 GB memory or better
 * Intel Core i5 or better
 * NVIDIA CUDA-10.1
 * Compiler MSVC 2017 (MSVC 2015 is not compatible with CUDA-10.1)
@@ -105,7 +105,9 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 * GenICam Standard support - done
 * Support for XIMEA and Basler cameras - done
 * Support for Imperx, JAI, Baumer, Flir cameras - in progress
+* MJPEG streaming via FFmpeg RTSP - in progress
 * Linux version - in progress
+* Special version for NVIDIA Jetson hardware and L4T for CUDA-10.0 (Jetson Nano, TX2, Xavier) - in progress
 * Resize
 * UnSharp Mask
 * Rotation to an arbitrary angle
@@ -120,12 +122,12 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 * Defringe module
 * DCP support
 * LCP support (remap)
-* Special version for NVIDIA Jetson hardware and L4T for CUDA-10.0
 * Interoperability with external FFmpeg and GStreamer
 
 ## Info
 
-  * <a href="https://www.fastcompression.com/products/sdk.htm" target="_blank">Fastvideo SDK for Image & Video Processing</a>
+* <a href="https://www.fastcompression.com/products/sdk.htm" target="_blank">Fastvideo SDK for Image & Video Processing</a>
+* <a href="https://www.fastcinemadng.com/" target="_blank">Full description of image processing pipeline on GPU for digital cinema applications</a>
 
 ## Fastvideo SDK Benchmarks
 
