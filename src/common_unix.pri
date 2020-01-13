@@ -40,7 +40,7 @@ contains(TARGET_ARCH, arm64 ) {
 }
 else {
     GANAPI_LIB_PATH = $$GANAPIPATH/bin/Linux64_x64
-    GCC_VER = gcc49
+    GCC_VER = gcc48
 }
 
     FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libGCBase_$${GCC_VER}_v3_2.so
