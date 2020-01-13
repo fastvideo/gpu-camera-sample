@@ -33,6 +33,7 @@
 #include <QScreen>
 #include <QTimer>
 #include <cmath>
+#include <GL/gl.h>
 
 #include "fastvideo_sdk.h"
 namespace

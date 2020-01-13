@@ -36,9 +36,10 @@
 #include <QElapsedTimer>
 
 #ifndef WIN32
-#include <xmmintrin.h> //SSE Intrinsic Functions
+//#include <xmmintrin.h> //SSE Intrinsic Functions
 #endif
 
+#ifdef WIN32
 template<unsigned i>
 float vectorGetByIndex( __m128 V) {
     union {
@@ -48,6 +49,7 @@ float vectorGetByIndex( __m128 V) {
     converter.v = V;
     return converter.a[i];
 }
+#endif
 
 #ifdef WIN32
 #include <intrin.h>
@@ -246,6 +248,7 @@ float* FFCStore::getFFC(const QString& filename)
 }
 void FFCReader::cfaMedian(float* src, float* dst)
 {
+#ifdef WIN32
     __m128 area[9];
 
     //Top 2 pixel margin
@@ -297,13 +300,10 @@ void FFCReader::cfaMedian(float* src, float* dst)
 
             pos += 2; //CFA(i + 2, j + 2)
             area[8] = _mm_set1_ps(src[pos]);
-#ifdef WIN32
             dst[x + y * mWidth] = ffcMedianSSE(area);
-#else
-            dst[x + y * mWidth] = 0;
-#endif
         }
     }
+#endif
 }
 
 void FFCReader::cfaBoxBlur(float* src, float* dst)

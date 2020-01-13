@@ -1,5 +1,5 @@
 QT += core gui widgets
-
+#opengl
 # OTHER LIB PATH
 win32: OTHER_LIB_PATH = $$dirname(PWD)/OtherLibs
 unix:  OTHER_LIB_PATH = $$dirname(PWD)/OtherLibsLinux

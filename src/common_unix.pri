@@ -1,8 +1,14 @@
-QMAKE_CXXFLAGS += -msse3 -m64
+# contains(TARGET_ARCH, arm64 ): QMAKE_CXXFLAGS += -msse3 -m64
 #
 # CUDA
 #
-CUDA_TOOLKIT_PATH = "/usr/local/cuda-10.1"
+
+contains(TARGET_ARCH, arm64 ) {
+    CUDA_TOOLKIT_PATH = "/usr/local/cuda-10.0"
+} else {
+    CUDA_TOOLKIT_PATH = "/usr/local/cuda-10.1"
+}
+
 INCLUDEPATH += $${CUDA_TOOLKIT_PATH}/include
 CUDA_LIB  = -L$${CUDA_TOOLKIT_PATH}/lib64
 CUDA_LIB += -lnppicc
@@ -28,24 +34,30 @@ contains( DEFINES, SUPPORT_GENICAM ){
 
     GANAPIPATH = $$OTHER_LIB_PATH/GenICam/library/CPP
 
+contains(TARGET_ARCH, arm64 ) {
+    GANAPI_LIB_PATH = $$GANAPIPATH/bin/Linux64_ARM
+    GCC_VER = gcc49
+}
+else {
     GANAPI_LIB_PATH = $$GANAPIPATH/bin/Linux64_x64
+    GCC_VER = gcc49
+}
 
-    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libGCBase_gcc48_v3_2.so
-    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libGenApi_gcc48_v3_2.so
-    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libLog_gcc48_v3_2.so
-    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libMathParser_gcc48_v3_2.so
-    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libNodeMapData_gcc48_v3_2.so
-    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libXmlParser_gcc48_v3_2.so
+    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libGCBase_$${GCC_VER}_v3_2.so
+    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libGenApi_$${GCC_VER}_v3_2.so
+    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libLog_$${GCC_VER}_v3_2.so
+    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libMathParser_$${GCC_VER}_v3_2.so
+    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libNodeMapData_$${GCC_VER}_v3_2.so
+    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libXmlParser_$${GCC_VER}_v3_2.so
 
-#    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libCLProtocol_gcc48_v3_2.so
-#    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libFirmwareUpdate_gcc48_v3_2.so
-#    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/liblog4cpp_gcc48_v3_2.so
-
+#    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libCLProtocol_$${GCC_VER}_v3_2.so
+#    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libFirmwareUpdate_$${GCC_VER}_v3_2.so
+#    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/liblog4cpp_$${GCC_VER}_v3_2.so
 
     INCLUDEPATH += $$GANAPIPATH/include
-    LIBS += -L$$GANAPI_LIB_PATH -lCLAllSerial_gcc48_v3_2 -lGCBase_gcc48_v3_2 -lGenApi_gcc48_v3_2
-    LIBS += -lLog_gcc48_v3_2 -lMathParser_gcc48_v3_2 -lNodeMapData_gcc48_v3_2 -lXmlParser_gcc48_v3_2
-#    LIBS += -lFirmwareUpdate_gcc48_v3_2 -llog4cpp_gcc48_v3_2 -lCLProtocol_gcc48_v3_2
+    LIBS += -L$$GANAPI_LIB_PATH -lCLAllSerial_$${GCC_VER}_v3_2 -lGCBase_$${GCC_VER}_v3_2 -lGenApi_$${GCC_VER}_v3_2
+    LIBS += -lLog_$${GCC_VER}_v3_2 -lMathParser_$${GCC_VER}_v3_2 -lNodeMapData_$${GCC_VER}_v3_2 -lXmlParser_$${GCC_VER}_v3_2
+#    LIBS += -lFirmwareUpdate_$${GCC_VER}_v3_2 -llog4cpp_$${GCC_VER}_v3_2 -lCLProtocol_$${GCC_VER}_v3_2
 }
 
 #
@@ -63,7 +75,12 @@ FASTVIDEO_LIB += -lfastvideo_sdk -lfastvideo_denoise
 # -lfastvideo_mjpeg -lfastvideo_denoise -lfastvideo_nppFilter -lfastvideo_nppResize -lfastvideo_nppGeometry
 #
 FFMPEG_PATH = $$OTHER_LIB_PATH/FastvideoSDK/libs/ffmpeg
-FFMPEG_LIB = -L$$FFMPEG_PATH/lib/linux/x86_64/
+contains(TARGET_ARCH, arm64 ) {
+    FFMPEG_LIB = -L$$FFMPEG_PATH/lib/linux/aarch64/
+}
+else {
+    FFMPEG_LIB = -L$$FFMPEG_PATH/lib/linux/x86_64/
+}
 FFMPEG_LIB += -lavcodec -lavformat -lavutil -lswresample
 #
 INCLUDEPATH += $$FASTVIDEO_INC
@@ -73,6 +90,8 @@ LIBS += $$FASTVIDEO_LIB
 LIBS += $$CUDA_LIB
 LIBS += $$FFMPEG_LIB
 LIBS += -ldl
+#
+contains(TARGET_ARCH, arm64 ): LIBS += -lGL
 #
 defineTest(copyQtIcuDllsToDestdir) {
     DLLS = $$1
