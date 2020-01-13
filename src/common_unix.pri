@@ -15,7 +15,7 @@ CUDA_LIB += -lcudart
 contains( DEFINES, SUPPORT_XIMEA ){
     XI_API_PATH = /opt/XIMEA/
     INCLUDEPATH += $$XI_API_PATH/include
-    LIBS += -L$$XI_API_PATH/lib -lxiapi_dng_store
+    LIBS += -lm3api
 }
 
 contains( DEFINES, SUPPORT_GENICAM ){
