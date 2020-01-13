@@ -36,7 +36,6 @@ SOURCES += main.cpp\
     AsyncFileWriter.cpp \
     $$OTHER_LIB_PATH/FastvideoSDK/common/SurfaceTraits.cpp \
     $$OTHER_LIB_PATH/FastvideoSDK/common/alignment.cpp \
-    $$OTHER_LIB_PATH/FastvideoSDK/core_samples/SurfaceTraitsInternal.cpp \
     CUDASupport/CUDAProcessorGray.cpp \
     MJPEGEncoder.cpp \
     Camera/GeniCamCamera.cpp \
@@ -59,6 +58,8 @@ contains( DEFINES, SUPPORT_XIMEA ){
 
 unix:  SOURCES += rc_genicam_api/gentl_wrapper_linux.cc
 win32: SOURCES += rc_genicam_api/gentl_wrapper_win32.cc
+win32: SOURCES += $$OTHER_LIB_PATH/FastvideoSDK/core_samples/SurfaceTraitsInternal.cpp
+
 
 HEADERS  += MainWindow.h \
     Widgets/GLImageViewer.h \

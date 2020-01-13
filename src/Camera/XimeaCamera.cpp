@@ -215,7 +215,7 @@ void XimeaCamera::startStreaming()
     while(mState == cstStreaming)
     {
         tmr.restart();
-        XI_IMG image = {0};
+        XI_IMG image; // = {0};
         image.size = sizeof(XI_IMG);
         image.bp_size = mInputBuffer.size();
         image.bp = mInputBuffer.getBuffer();
