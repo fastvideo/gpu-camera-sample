@@ -155,16 +155,14 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 * GPU pipeline for monochrome cameras - done
 * GenICam Standard support - done
 * Support for XIMEA and Basler cameras - done
+* MJPEG streaming via FFmpeg RTSP - done
+* Linux version - done
+* Special version for NVIDIA Jetson hardware and L4T for CUDA-10.0 (Jetson Nano, TX2, Xavier) - done
 * Support for Imperx, JAI, Baumer, Flir cameras - in progress
-* MJPEG streaming via FFmpeg RTSP - in progress
-* Linux version - in progress
-* Special version for NVIDIA Jetson hardware and L4T for CUDA-10.0 (Jetson Nano, TX2, Xavier) - in progress
-* Rotation to an arbitrary angle
 * LCP support (undistortion)
 * DCP support
 * H.264/H.265 encoders (NVIDIA NVENC)
 * JPEG2000 encoder (Fastvideo J2K on GPU)
-* Realtime raw compression (lossless and/or lossy)
 * Curves and Levels via 1D LUT
 * Color correction with 3&times;3 matrix
 * Support of other color spaces
