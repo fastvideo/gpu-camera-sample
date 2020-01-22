@@ -42,6 +42,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName(QStringLiteral(MAIN_APPLICATION_NAME));
     QCoreApplication::setApplicationVersion(QStringLiteral(APP_VERSION_STRING));
     QCoreApplication::addLibraryPath(QStringLiteral("."));
+    QCoreApplication::addLibraryPath(QCoreApplication::applicationDirPath());
 
     QApplication a(argc, argv);
 

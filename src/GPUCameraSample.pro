@@ -38,8 +38,10 @@ SOURCES += main.cpp\
     $$OTHER_LIB_PATH/FastvideoSDK/common/alignment.cpp \
     CUDASupport/CUDAProcessorGray.cpp \
     MJPEGEncoder.cpp \
-    Camera/GeniCamCamera.cpp \
-    rc_genicam_api/buffer.cc \
+    Camera/GeniCamCamera.cpp
+
+contains( DEFINES, SUPPORT_GENICAM ){
+    SOURCES += rc_genicam_api/buffer.cc \
     rc_genicam_api/config.cc \
     rc_genicam_api/cport.cc \
     rc_genicam_api/device.cc \
@@ -50,16 +52,28 @@ SOURCES += main.cpp\
     rc_genicam_api/pointcloud.cc \
     rc_genicam_api/stream.cc \
     rc_genicam_api/system.cc
+    unix:  SOURCES += rc_genicam_api/gentl_wrapper_linux.cc
+    win32: SOURCES += rc_genicam_api/gentl_wrapper_win32.cc
 
+    HEADERS  +=  rc_genicam_api/buffer.h \
+    rc_genicam_api/config.h \
+    rc_genicam_api/cport.h \
+    rc_genicam_api/device.h \
+    rc_genicam_api/exception.h \
+    rc_genicam_api/gentl_wrapper.h \
+    rc_genicam_api/image.h \
+    rc_genicam_api/imagelist.h \
+    rc_genicam_api/interface.h \
+    rc_genicam_api/pixel_formats.h \
+    rc_genicam_api/pointcloud.h \
+    rc_genicam_api/stream.h \
+    rc_genicam_api/system.h
+}
 contains( DEFINES, SUPPORT_XIMEA ){
    SOURCES += Camera/XimeaCamera.cpp
 }
 
-
-unix:  SOURCES += rc_genicam_api/gentl_wrapper_linux.cc
-win32: SOURCES += rc_genicam_api/gentl_wrapper_win32.cc
 win32: SOURCES += $$OTHER_LIB_PATH/FastvideoSDK/core_samples/SurfaceTraitsInternal.cpp
-
 
 HEADERS  += MainWindow.h \
     Widgets/GLImageViewer.h \
@@ -81,20 +95,7 @@ HEADERS  += MainWindow.h \
     AsyncQueue.h \
     CUDASupport/CUDAProcessorGray.h \
     MJPEGEncoder.h \
-    Camera/GeniCamCamera.h \
-    rc_genicam_api/buffer.h \
-    rc_genicam_api/config.h \
-    rc_genicam_api/cport.h \
-    rc_genicam_api/device.h \
-    rc_genicam_api/exception.h \
-    rc_genicam_api/gentl_wrapper.h \
-    rc_genicam_api/image.h \
-    rc_genicam_api/imagelist.h \
-    rc_genicam_api/interface.h \
-    rc_genicam_api/pixel_formats.h \
-    rc_genicam_api/pointcloud.h \
-    rc_genicam_api/stream.h \
-    rc_genicam_api/system.h \
+    Camera/GeniCamCamera.h
     version.h
 
 FORMS    += MainWindow.ui \

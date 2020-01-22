@@ -69,18 +69,35 @@ FASTVIDEO_INC  = $$FASTVIDEO_SDK/inc
 FASTVIDEO_INC += $$FASTVIDEOPATH/common
 FASTVIDEO_INC += $$FASTVIDEOPATH/libs/OpenGL/inc
 #
-FASTVIDEO_LIB += -L$$FASTVIDEOPATH/fastvideo_sdk/lib
+FASTVIDEO_LIB += -L$$FASTVIDEOPATH/fastvideo_sdk/lib/$$PLATFORM
 FASTVIDEO_LIB += -lfastvideo_sdk -lfastvideo_denoise
 #
 # -lfastvideo_mjpeg -lfastvideo_denoise -lfastvideo_nppFilter -lfastvideo_nppResize -lfastvideo_nppGeometry
 #
+FASTVIDEO_EXTRA_DLLS += $$(_PRO_FILE_PWD_)/GPUCameraSample.sh
+#FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libavcodec.so
+#FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libavcodec.so.58
+#FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libavcodec.so.58.18.100
+#FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libavformat.so
+#FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libavformat.so.58
+#FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libavformat.so.58.12.100
+#FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libavutil.so
+#FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libavutil.so.56
+#FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libavutil.so.56.14.100
+#FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libfastvideo_denoise.so
+#FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libfastvideo_denoise.so.1.0.1.015000
+#FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libfastvideo_denoise.so.2
+#FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libfastvideo_sdk.so
+#FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libfastvideo_sdk.so.15.0.0.015000.so
+#FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libfastvideo_sdk.so.18
+
 FFMPEG_PATH = $$OTHER_LIB_PATH/FastvideoSDK/libs/ffmpeg
-contains(TARGET_ARCH, arm64 ) {
-    FFMPEG_LIB = -L$$FFMPEG_PATH/lib/linux/aarch64/
-}
-else {
-    FFMPEG_LIB = -L$$FFMPEG_PATH/lib/linux/x86_64/
-}
+#contains(TARGET_ARCH, arm64 ) {
+#    FFMPEG_LIB = -L$$FFMPEG_PATH/lib/linux/aarch64/
+#}
+#else {
+#    FFMPEG_LIB = -L$$FFMPEG_PATH/lib/linux/x86_64/
+#}
 FFMPEG_LIB += -lavcodec -lavformat -lavutil -lswresample
 #
 INCLUDEPATH += $$FASTVIDEO_INC

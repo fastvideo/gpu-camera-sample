@@ -32,7 +32,8 @@
 #include <QPoint>
 #include <QScreen>
 #include <QTimer>
-#include <cmath>
+
+#include <math.h>
 #include <GL/gl.h>
 
 #include "fastvideo_sdk.h"
@@ -43,7 +44,9 @@ namespace
     const qreal zoomMax = 8.0;
 }
 
-GLImageViewer::GLImageViewer(GLRenderer *renderer): mRenderer(renderer)
+GLImageViewer::GLImageViewer(GLRenderer *renderer) :
+    QOpenGLWindow(),
+    mRenderer(renderer)
 {
     setSurfaceType(QWindow::OpenGLSurface);
     setFormat(renderer->format());
@@ -54,6 +57,8 @@ GLImageViewer::GLImageViewer(GLRenderer *renderer): mRenderer(renderer)
     mViewMode = GLImageViewer::vmZoomFit;
     mShowImage = false;
 }
+
+GLImageViewer::~GLImageViewer(){}
 
 void GLImageViewer::clear()
 {
@@ -314,15 +319,19 @@ GLRenderer::GLRenderer(QObject *parent):
     m_context->setFormat(m_format);
     m_context->create();
 
+#ifndef __aarch64__
     mRenderThread.setObjectName(QStringLiteral("RenderThread"));
     moveToThread(&mRenderThread);
     mRenderThread.start();
+#endif
 }
 
 GLRenderer::~GLRenderer()
 {
+#ifndef __aarch64__
     mRenderThread.quit();
     mRenderThread.wait(3000);
+#endif
 }
 
 void GLRenderer::initialize()
@@ -339,6 +348,38 @@ void GLRenderer::initialize()
     glBufferData(GL_PIXEL_UNPACK_BUFFER, GLsizeiptr(3 * sizeof(unsigned char)) * sz.width() * sz.height(), nullptr, GL_STREAM_COPY);
     glGetBufferParameteriv(GL_PIXEL_UNPACK_BUFFER, GL_BUFFER_SIZE, &bsize);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+    static const char *vertexShaderSource =
+        //"# version 120\n"
+        "varying vec2 texcoord;\n"
+        "attribute highp vec4 vertexPosAttr;\n"
+        "attribute highp vec4 texPosAttr;\n"
+        "void main(void) \n"
+        "{\n"
+        "    gl_Position = vertexPosAttr;\n"
+        "    texcoord = texPosAttr.xy;\n"
+        "}\n";
+
+    static const char *fragmentShaderSource =
+        //"# version 120\n"
+        "uniform sampler2D tex;\n"
+        "varying mediump vec2 texcoord;\n"
+        "void main(void) \n"
+        "{\n"
+        "    gl_FragColor = texture2D(tex, texcoord);\n"
+        //"    gl_FragColor = vec4(0.5, 0.5, 0.8, 1.);\n"
+        "}\n";
+
+    m_program = new QOpenGLShaderProgram(this);
+    m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSource);
+    m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSource);
+    bool ret = m_program->link();
+    if(!ret)
+        qDebug() << m_program->log();
+
+    m_texUniform = m_program->uniformLocation("tex");
+    m_vertPosAttr = m_program->attributeLocation("vertexPosAttr");
+    m_texPosAttr = m_program->attributeLocation("texPosAttr");
 
     glDisable(GL_TEXTURE_2D);
 }
@@ -406,11 +447,13 @@ void GLRenderer::render()
     glClear(GL_COLOR_BUFFER_BIT);
 
     glDisable(GL_DEPTH_TEST);
-    glEnable(GL_TEXTURE_2D);
 
+    glActiveTexture(GL_TEXTURE1);
+    glEnable(GL_TEXTURE_2D);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_buffer);
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, iw, ih, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+
 
     float rectLeft, rectTop, rectRight, rectBottom;
     float texLeft, texTop, texRight, texBottom;
@@ -463,22 +506,47 @@ void GLRenderer::render()
     texTop /= ih;
     texBottom /= ih;
 
+    m_program->bind();
+    m_program->setUniformValue(m_texUniform, texture);
+    glDisable(GL_TEXTURE_2D);
 
-    glBegin(GL_QUADS);
-    {
-        glTexCoord2f(texRight, texBottom);
-        glVertex2f(rectRight, rectTop);
+    //Adjust calculated rectangle to -1...1 coordinate system
+    rectRight = 2 * rectRight - 1;
+    rectLeft = 2 * rectLeft - 1;
+    rectTop = 2 * rectTop - 1;
+    rectBottom = 2 * rectBottom - 1;
 
-        glTexCoord2f(texRight, texTop);
-        glVertex2f(rectRight, rectBottom);
+    GLfloat vertices[] = {
+        rectRight, rectTop,
+        rectRight, rectBottom,
+        rectLeft, rectBottom,
+        rectLeft, rectBottom,
+        rectLeft, rectTop,
+        rectRight, rectTop
+    };
 
-        glTexCoord2f(texLeft, texTop);
-        glVertex2f(rectLeft, rectBottom);
+    GLfloat texCoords[] = {
+        texRight, texBottom,
+        texRight, texTop,
+        texLeft, texTop,
+        texLeft, texTop,
+        texLeft, texBottom,
+        texRight, texBottom
+    };
 
-        glTexCoord2f(texLeft, texBottom);
-        glVertex2f(rectLeft, rectTop);
-    }
-    glEnd();
+    glVertexAttribPointer(m_vertPosAttr, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+    glVertexAttribPointer(m_texPosAttr, 2, GL_FLOAT, GL_FALSE, 0, texCoords);
+
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    glDisableVertexAttribArray(1);
+    glDisableVertexAttribArray(0);
+
+    m_program->release();
+
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
@@ -501,13 +569,14 @@ void GLRenderer::loadImageInternal(void* img, int width, int height)
 
     mImageSize = QSize(width, height);
 
-
-
-    if(!pbo_buffer)
-        initialize();
-
     if(!m_context->makeCurrent(mRenderWnd))
         return;
+
+    if(!pbo_buffer)
+    {
+        initialize();
+        m_initialized = true;
+    }
 
     GLint bsize;
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_buffer);
@@ -521,19 +590,19 @@ void GLRenderer::loadImageInternal(void* img, int width, int height)
         return;
 
     error = cudaGraphicsGLRegisterBuffer(&cuda_pbo_resource, pbo_buffer, cudaGraphicsMapFlagsWriteDiscard);
-    if ( error != cudaSuccess )
+    if(error != cudaSuccess)
     {
         qDebug("Cannot register CUDA Graphic Resource: %s\n", cudaGetErrorString(error));
         return;
     }
 
-    if ( ( error = cudaGraphicsMapResources( 1, &cuda_pbo_resource, 0 ) ) != cudaSuccess)
+    if((error = cudaGraphicsMapResources( 1, &cuda_pbo_resource, 0 ) ) != cudaSuccess)
     {
         qDebug("cudaGraphicsMapResources failed: %s\n", cudaGetErrorString(error) );
         return;
     }
 
-    if(( error = cudaGraphicsResourceGetMappedPointer( (void **)&data, &pboBufferSize, cuda_pbo_resource ) ) != cudaSuccess )
+    if((error = cudaGraphicsResourceGetMappedPointer( (void **)&data, &pboBufferSize, cuda_pbo_resource ) ) != cudaSuccess )
     {
         qDebug("cudaGraphicsResourceGetMappedPointer failed: %s\n", cudaGetErrorString(error) );
         return;
@@ -545,13 +614,13 @@ void GLRenderer::loadImageInternal(void* img, int width, int height)
         return;
     }
 
-    if(( error = cudaMemcpy( data, img, width * height * 3 * sizeof(unsigned char), cudaMemcpyDeviceToDevice ) ) != cudaSuccess)
+    if((error = cudaMemcpy( data, img, width * height * 3 * sizeof(unsigned char), cudaMemcpyDeviceToDevice ) ) != cudaSuccess)
     {
         qDebug("cudaMemcpy failed: %s\n", cudaGetErrorString(error) );
         return;
     }
 
-    if(( error = cudaGraphicsUnmapResources( 1, &cuda_pbo_resource, 0 ) ) != cudaSuccess )
+    if((error = cudaGraphicsUnmapResources( 1, &cuda_pbo_resource, 0 ) ) != cudaSuccess )
     {
          qDebug("cudaGraphicsUnmapResources failed: %s\n", cudaGetErrorString(error) );
          return;

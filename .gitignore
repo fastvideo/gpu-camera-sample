@@ -2,6 +2,7 @@ src/**/*.user*
 src/**/*.filters
 src/**/.vs
 src/**/x64
+*.zip
 
 GPUCameraSample*
 OtherLibs*

@@ -31,7 +31,7 @@
 
 #include <QOpenGLWindow>
 #include <QOpenGLFunctions>
-#include <QOpenGLTexture>
+#include <QOpenGLShaderProgram>
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QMouseEvent>
@@ -73,10 +73,16 @@ private:
     QSize  mImageSize;
     GLuint texture = 0;
     GLuint pbo_buffer = 0;
+
     GLImageViewer* mRenderWnd = nullptr;
 
     QSurfaceFormat m_format;
     QOpenGLContext *m_context = nullptr;
+
+    QOpenGLShaderProgram* m_program;
+    GLint m_texUniform;
+    GLuint m_vertPosAttr;
+    GLuint m_texPosAttr;
 
     bool mStreaming;
     bool mShowImage;
@@ -107,11 +113,11 @@ public:
     };
 
     explicit GLImageViewer(GLRenderer* renderer);
-    ~GLImageViewer() = default;
+    ~GLImageViewer();
 
     void     setViewMode(ViewMode);
     ViewMode getViewMode() const;
-    void     setZoom(qreal scale);
+    void     setZoom(qreal value);
     qreal    getZoom() const;
 
     void load(void *img, int width, int height);
