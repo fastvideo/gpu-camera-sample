@@ -154,10 +154,10 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 
 * GPU pipeline for monochrome cameras - done
 * GenICam Standard support - done
-* Support for XIMEA, Basler, JAI, Daheng Imaging cameras - done
 * Linux version - done
 * Special version for NVIDIA Jetson hardware and L4T for CUDA-10.0 (Jetson Nano, TX2, Xavier) - done
 * Glass-to-Glass (G2G) test for latency measurements - done
+* Support for XIMEA, Basler, JAI, Daheng Imaging cameras - done
 * MJPEG streaming via FFmpeg RTSP - in progress
 * Support for Imperx, Baumer, Flir cameras
 * LCP support (undistortion)
