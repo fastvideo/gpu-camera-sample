@@ -16,8 +16,6 @@ That software is based on the following image processing pipeline for camera app
 * Exposure Correction (brightness control)
 * Debayer with HQLI (5&times;5 window), DFPD (11&times;11), MG (23&times;23) algorithms
 * Wavelet-based denoiser
-* Resize
-* UnSharp Mask
 * Gamma (linear, sRGB)
 * JPEG / MJPEG encoding
 * Output to monitor
