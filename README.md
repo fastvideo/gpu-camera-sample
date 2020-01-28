@@ -22,7 +22,7 @@ That software is based on the following image processing pipeline for camera app
 * JPEG / MJPEG encoding
 * Output to monitor
 * Export from GPU to CPU memory
-* Storage of compressed data to SSD or streaming via FFmpeg RTSP (optional)
+* Storage of compressed data to SSD or streaming via FFmpeg RTSP
 
 Processing is done on NVIDIA GPU to speedup the performance. The software could also work with raw images in PGM format and you can utilize these images for testing or if you don't have a camera or if your camera is not supported. More info about that project you can find <a href="https://www.fastcompression.com/blog/gpu-software-machine-vision-cameras.htm" target="_blank">here</a>.
 
@@ -34,7 +34,7 @@ Currently the software is working with <a href="https://www.ximea.com" target="_
 
 ### Requirements for Windows
 
-* Camera SDK or GenICam package + camera vendor GenTL producer (.cti) for XIMEA, Basler, Flir, Baumer, JAI, Imperx, etc. (currently XIMEA and Basler are supported)
+* Camera SDK or GenICam package + camera vendor GenTL producer (.cti) for XIMEA, Basler, JAI, Daheng Imaging, Flir, Baumer, Imperx, etc. (currently XIMEA, Basler, JAI, Daheng Imaging cameras are supported)
 * Fastvideo SDK (demo) ver.0.15.0.0
 * NVIDIA CUDA-10.1
 * Qt ver.5.13.1
@@ -154,23 +154,21 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 
 * GPU pipeline for monochrome cameras - done
 * GenICam Standard support - done
-* Support for XIMEA and Basler cameras - done
+* Support for XIMEA, Basler, JAI, Daheng Imaging cameras - done
+* Linux version - done
 * Special version for NVIDIA Jetson hardware and L4T for CUDA-10.0 (Jetson Nano, TX2, Xavier) - done
-* Support for Imperx, JAI, Baumer, Flir cameras - in progress
+* Glass-to-Glass (G2G) test for latency measurements - done
 * MJPEG streaming via FFmpeg RTSP - in progress
-* Linux version - in progress
-* Rotation to an arbitrary angle
+* Support for Imperx, Baumer, Flir cameras
 * LCP support (undistortion)
 * DCP support
 * H.264/H.265 encoders (NVIDIA NVENC)
 * JPEG2000 encoder (Fastvideo J2K on GPU)
-* Realtime raw compression (lossless and/or lossy)
 * Curves and Levels via 1D LUT
 * Color correction with 3&times;3 matrix
 * Support of other color spaces
 * Transforms to Rec.601 (SD), Rec.709 (HD), Rec.2020 (4K)
 * 3D LUT for HSV and RGB
-* Defringe module
 * Interoperability with external FFmpeg and GStreamer
 
 ## Info
