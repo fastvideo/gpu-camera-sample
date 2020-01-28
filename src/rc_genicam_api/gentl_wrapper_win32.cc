@@ -208,8 +208,8 @@ GenTLWrapper::GenTLWrapper(const std::string &filename)
   *reinterpret_cast<void**>(&DevGetParentIF)=getFunction(lp, "DevGetParentIF");
   *reinterpret_cast<void**>(&DSGetParentDev)=getFunction(lp, "DSGetParentDev");
 
-  *reinterpret_cast<void**>(&DSGetNumBufferParts)=getFunction(lp, "DSGetNumBufferParts");
-  *reinterpret_cast<void**>(&DSGetBufferPartInfo)=getFunction(lp, "DSGetBufferPartInfo");
+  //*reinterpret_cast<void**>(&DSGetNumBufferParts)=getFunction(lp, "DSGetNumBufferParts");
+  //*reinterpret_cast<void**>(&DSGetBufferPartInfo)=getFunction(lp, "DSGetBufferPartInfo");
 
   lib=static_cast<void *>(lp);
 }

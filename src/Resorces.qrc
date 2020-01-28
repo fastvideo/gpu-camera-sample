@@ -80,5 +80,7 @@
         <file>res/WBPicker.svg</file>
         <file>res/imageGray.svg</file>
         <file>res/camera.svg</file>
+        <file>quadVertex.vert</file>
+        <file>quadFragment.frag</file>
     </qresource>
 </RCC>

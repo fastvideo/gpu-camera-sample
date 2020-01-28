@@ -38,7 +38,7 @@
      <x>0</x>
      <y>0</y>
      <width>1571</width>
-     <height>22</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuCamera">
@@ -1041,6 +1041,21 @@ QSlider::handle:horizontal {
     </layout>
    </widget>
   </widget>
+  <widget class="QDockWidget" name="gtgDockWidget">
+   <property name="windowTitle">
+    <string>Glass to Glass test</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_4">
+    <layout class="QHBoxLayout" name="gtgLayout">
+     <item>
+      <widget class="GtGWidget" name="gtgWidget" native="true"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
   <action name="actionOpenCamera">
    <property name="icon">
     <iconset resource="Resorces.qrc">
@@ -1147,6 +1162,12 @@ QSlider::handle:horizontal {
    <class>DenoiseController</class>
    <extends>QWidget</extends>
    <header>DenoiseController.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>GtGWidget</class>
+   <extends>QWidget</extends>
+   <header>Widgets/GtGWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

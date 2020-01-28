@@ -38,7 +38,8 @@ SOURCES += main.cpp\
     $$OTHER_LIB_PATH/FastvideoSDK/common/alignment.cpp \
     CUDASupport/CUDAProcessorGray.cpp \
     MJPEGEncoder.cpp \
-    Camera/GeniCamCamera.cpp
+    Camera/GeniCamCamera.cpp \
+    Widgets/GtGWidget.cpp
 
 contains( DEFINES, SUPPORT_GENICAM ){
     SOURCES += rc_genicam_api/buffer.cc \
@@ -95,7 +96,8 @@ HEADERS  += MainWindow.h \
     AsyncQueue.h \
     CUDASupport/CUDAProcessorGray.h \
     MJPEGEncoder.h \
-    Camera/GeniCamCamera.h
+    Camera/GeniCamCamera.h \
+    Widgets/GtGWidget.h
     version.h
 
 FORMS    += MainWindow.ui \

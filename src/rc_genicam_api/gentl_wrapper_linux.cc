@@ -186,8 +186,8 @@ GenTLWrapper::GenTLWrapper(const std::string &filename)
   *reinterpret_cast<void**>(&DevGetParentIF)=dlsym(lib, "DevGetParentIF");
   *reinterpret_cast<void**>(&DSGetParentDev)=dlsym(lib, "DSGetParentDev");
 
-  *reinterpret_cast<void**>(&DSGetNumBufferParts)=dlsym(lib, "DSGetNumBufferParts");
-  *reinterpret_cast<void**>(&DSGetBufferPartInfo)=dlsym(lib, "DSGetBufferPartInfo");
+//  *reinterpret_cast<void**>(&DSGetNumBufferParts)=dlsym(lib, "DSGetNumBufferParts");
+//  *reinterpret_cast<void**>(&DSGetBufferPartInfo)=dlsym(lib, "DSGetBufferPartInfo");
 
   const char *err=dlerror();
 

@@ -48,7 +48,7 @@ Currently the software is working with <a href="https://www.ximea.com" target="_
 * NVIDIA CUDA-10.1 for x64 platform
 * NVIDIA CUDA-10.0 for Arm64 platform
 * Qt 5 (qtbase5-dev)
-``` console 
+``` console
 sudo apt-get install qtbase5-dev qtbase5-dev-tools qtcreator
 ```
 * Compiler gcc 7.4
@@ -61,7 +61,7 @@ sudo apt-get install  libavutil-dev libavcodec-dev libavdevice-dev libavfilter-d
 ### Build instructions
 
 * Obtain source code: 
-``` console 
+``` console
 git clone https://github.com/fastvideo/gpu-camera-sample.git 
 ```
 
@@ -85,7 +85,7 @@ For Linux users
 
 * Create OtherLibsLinux folder in the project root folder. This folder will contains external libraries, used in gpu-camera-sample application.
 * Download Fastvideo SDK x64 platform from <a href="https://drive.google.com/open?id=1GNcQtGmz-FBrKqrsSnMENMCbg44xxWQn">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a> (valid till March 23, 2020), or Fastvideo SDK Arm64 platform from <a href="https://drive.google.com/file/d/1gBfPkazCiHLHc4piPHSJA2_Rm52CnoKD/view?usp=sharing">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> unpack it into \<Project root\>\OtherLibsLinux\fastvideoSDK folder. Copy all files from \<Project root\>/OtherLibsLinux/fastvideoSDK/fastvideo_sdk/lib to \<Project root\>/OtherLibsLinux/fastvideoSDK/fastvideo_sdk/lib/x64 for x64 platform and to \<Project root\>/OtherLibsLinux/fastvideoSDK/fastvideo_sdk/lib/Arm64 for Arm64 platform. CD to created folder and run
-``` console 
+``` console
 ldconfig -n .
 link libfastvideo_denoise.so.2 libfastvideo_denoise.so
 link libfastvideo_sdk.so.18 libfastvideo_sdk.so
@@ -102,7 +102,7 @@ This will create required for application build symbolic links.
 * By default the application will be built with no camera support. The only option is camera simulator which is working with PGM files. To enable XIMEA camera support, open common_defs.pri and uncomment line DEFINES += SUPPORT_XIMEA.
 * Build the project.
 * Binaries will be placed into \<Project root\>\GPUCameraSample_Arm64 or GPUCameraSample_Linux64 folder. To run application from terminal run from application executable folder:
-``` console 
+``` console
 ldconfig -n .
 export LD_LIBRARY_PATH=`pwd`
 ./GPUCameraSample
@@ -132,15 +132,15 @@ In general case, Fastvideo SDK can import/export data from/to SSD / CPU memory /
 * Select appropriate output format in the Recording pane (please check that output folder exists in the file system, otherwise nothing will be recorded) and press Record button to start recording to disk.
 * Press Record button again to stop the recording.
 
-## Minimum Hardware ans Software Requirements
+## Minimum Hardware ans Software Requirements for desktop application
 
-* Windows-7/10, 64-bit
+* Windows-7/10, Ubuntu 18.04 64-bit
 * The latest NVIDIA driver
 * NVIDIA GPU with Kepler architecture, 6xx series minimum
 * NVIDIA GPU with 4-8 GB memory or better
 * Intel Core i5 or better
 * NVIDIA CUDA-10.1
-* Compiler MSVC 2017 (MSVC 2015 is not compatible with CUDA-10.1)
+* Compiler MSVC 2017 (MSVC 2015 is not compatible with CUDA-10.1) for Windows or gcc 7.4.0 for Linux
 
 We also recommend to check PCI-Express bandwidth for Host-to-Device and Device-to-Host transfers. For GPU with Gen3 x16 it should be in the range of 10-12 GB/s. GPU memory size could be a bottleneck for image processing from high resolution cameras, so please check GPU memory usage in the software.
 
@@ -155,10 +155,10 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 * GPU pipeline for monochrome cameras - done
 * GenICam Standard support - done
 * Support for XIMEA and Basler cameras - done
+* Special version for NVIDIA Jetson hardware and L4T for CUDA-10.0 (Jetson Nano, TX2, Xavier) - done
 * Support for Imperx, JAI, Baumer, Flir cameras - in progress
 * MJPEG streaming via FFmpeg RTSP - in progress
 * Linux version - in progress
-* Special version for NVIDIA Jetson hardware and L4T for CUDA-10.0 (Jetson Nano, TX2, Xavier) - in progress
 * Rotation to an arbitrary angle
 * LCP support (undistortion)
 * DCP support

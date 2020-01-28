@@ -349,33 +349,10 @@ void GLRenderer::initialize()
     glGetBufferParameteriv(GL_PIXEL_UNPACK_BUFFER, GL_BUFFER_SIZE, &bsize);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-    static const char *vertexShaderSource =
-        //"# version 120\n"
-        "varying vec2 texcoord;\n"
-        "attribute highp vec4 vertexPosAttr;\n"
-        "attribute highp vec4 texPosAttr;\n"
-        "void main(void) \n"
-        "{\n"
-        "    gl_Position = vertexPosAttr;\n"
-        "    texcoord = texPosAttr.xy;\n"
-        "}\n";
-
-    static const char *fragmentShaderSource =
-        //"# version 120\n"
-        "uniform sampler2D tex;\n"
-        "varying mediump vec2 texcoord;\n"
-        "void main(void) \n"
-        "{\n"
-        "    gl_FragColor = texture2D(tex, texcoord);\n"
-        //"    gl_FragColor = vec4(0.5, 0.5, 0.8, 1.);\n"
-        "}\n";
-
     m_program = new QOpenGLShaderProgram(this);
-    m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSource);
-    m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSource);
-    bool ret = m_program->link();
-    if(!ret)
-        qDebug() << m_program->log();
+    m_program->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/quadVertex.vert");
+    m_program->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/quadFragment.frag");
+    m_program->link();
 
     m_texUniform = m_program->uniformLocation("tex");
     m_vertPosAttr = m_program->attributeLocation("vertexPosAttr");

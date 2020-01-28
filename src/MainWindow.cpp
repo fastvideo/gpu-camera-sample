@@ -40,6 +40,7 @@
 #include "RawProcessor.h"
 #include "FPNReader.h"
 #include "FFCReader.h"
+//#include "GtGWidget.h"
 
 #ifdef SUPPORT_XIMEA
 #include "XimeaCamera.h"
@@ -75,7 +76,6 @@ MainWindow::MainWindow(QWidget *parent) :
     mContainerPtr->setMinimumSize(QSize(100, 100));
     mContainerPtr->setFocusPolicy(Qt::NoFocus);
     mRendererPtr->setRenderWnd(mMediaViewer.data());
-
 
     for(int i = 0; i < 16384; i++)
     {
@@ -981,11 +981,13 @@ void MainWindow::on_actionPlay_toggled(bool arg1)
         mRendererPtr->showImage();
         mCameraPtr->start();
         mProcessorPtr->start();
+        ui->gtgWidget->start();
 
     }
     else
     {
         mCameraPtr->stop();
+        ui->gtgWidget->stop();
     }
 }
 
@@ -1021,3 +1023,4 @@ void MainWindow::onNewWBFromPoint(const QPoint& pt)
 
     mProcessorPtr->updateOptions(mOptions);
 }
+

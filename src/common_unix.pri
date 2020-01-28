@@ -27,10 +27,12 @@ contains( DEFINES, SUPPORT_XIMEA ){
 contains( DEFINES, SUPPORT_GENICAM ){
     DEFINES -= UNICODE
     DEFINES += GENICAM_NO_AUTO_IMPLIB
-    #
-    # Setup Ximea Transport Layer !!!!
-    #
+
+    #Ximea Transport Layer
     DEFINES += GENTL_INSTALL_PATH=\'\"/opt/XIMEA/lib\"\'
+
+    #Daheng transport layer
+    #DEFINES += GENTL_INSTALL_PATH=\'\"/usr/lib\"\'
 
     GANAPIPATH = $$OTHER_LIB_PATH/GenICam/library/CPP
 

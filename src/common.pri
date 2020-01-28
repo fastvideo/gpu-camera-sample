@@ -73,7 +73,7 @@ INCLUDEPATH += $$PWD/Widgets
 INCLUDEPATH += $$PWD/Camera
 INCLUDEPATH += $$CUDAINC
 INCLUDEPATH += $$FASTVIDEO_INC
-INCLUDEPATH += $$FASTVIDEOPATH\core_samples
+INCLUDEPATH += $$FASTVIDEOPATH/core_samples
 INCLUDEPATH += $$FFMPEG_PATH/inc
 
 QMAKE_CXXFLAGS += "/WX" # Treats all compiler warnings as errors.
