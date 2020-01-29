@@ -177,7 +177,7 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 ## Fastvideo SDK Benchmarks
 
 * <a href="https://www.fastcompression.com/pub/2019/Fastvideo_SDK_benchmarks.pdf" target="_blank">Fastvideo SDK Benchmarks 2019</a>
-* <a href="https://www.fastcompression.com/blog/jetson-benchmark-comparison.htm" target="_blank">Jetson Benchmark Comparison: Nano vs TX1 vs TX2 vs Xavier</a>
+* <a href="https://www.fastcompression.com/blog/jetson-benchmark-comparison.htm" target="_blank">Jetson Benchmark Comparison at Image Processing: Nano vs TX1 vs TX2 vs Xavier</a>
 
 ## Downloads
 
