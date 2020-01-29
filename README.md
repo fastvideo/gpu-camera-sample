@@ -32,7 +32,7 @@ Currently the software is working with <a href="https://www.ximea.com" target="_
 
 ### Requirements for Windows
 
-* Camera SDK or GenICam package + camera vendor GenTL producer (.cti) for XIMEA, Basler, JAI, Daheng Imaging, FLIR, Baumer, Imperx, etc. (currently XIMEA, Basler, JAI, Daheng Imaging cameras are supported)
+* Camera SDK or GenICam package + camera vendor GenTL producer (.cti). Сurrently XIMEA, Basler, JAI, Daheng Imaging cameras are supported
 * Fastvideo SDK (demo) ver.0.15.0.0
 * NVIDIA CUDA-10.1
 * Qt ver.5.13.1
