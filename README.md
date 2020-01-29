@@ -26,13 +26,13 @@ Processing is done on NVIDIA GPU to speedup the performance. The software could 
 
 From the benchmarks on <strong>NVIDIA GeForce RTX 2080ti</strong> we can see that GPU-based raw image processing is very fast and it could offer high image quality at the same time. The total performance could reach <strong>4 GPix/s</strong> for color cameras. The performance strongly depends on complexity of the pipeline. Multiple GPU solutions could significanly improve the performance.
 
-Currently the software is working with <a href="https://www.ximea.com" target="_blank">XIMEA</a> cameras. Via GenICam the software can work with XIMEA and Basler cameras. Soon we are going to add support for <a href="https://www.jai.com" target="_blank">JAI</a> and <a href="https://www.imperx.com" target="_blank">Imperx</a> cameras. You can add support for desired cameras by yourself. The software is working with demo version of Fastvideo SDK, that is why you can see a watermark on the screen. To get a Fastvideo SDK license for  develoment and for deployment, please contact <a href="https://www.fastcompression.com/" target="_blank">Fastvideo company</a>.
+Currently the software is working with <a href="https://www.ximea.com" target="_blank">XIMEA</a> cameras via XIMEA SDK. Via GenICam the software can work with <a href="https://www.ximea.com" target="_blank">XIMEA</a>, <a href="https://www.baslerweb.com" target="_blank">Basler</a>, <a href="https://www.jai.com" target="_blank">JAI</a>, <a href="https://dahengimaging.com/" target="_blank">Daheng Imaging</a> cameras. Soon we are going to add support for <a href="https://www.imperx.com" target="_blank">Imperx</a>, Baumer and FLIR cameras. You can add support for desired cameras by yourself. The software is working with demo version of Fastvideo SDK, that is why you can see a watermark on the screen. To get a Fastvideo SDK license for develoment and for deployment, please contact <a href="https://www.fastcompression.com/" target="_blank">Fastvideo company</a>.
 
 ## How to build gpu-camera-sample
 
 ### Requirements for Windows
 
-* Camera SDK or GenICam package + camera vendor GenTL producer (.cti) for XIMEA, Basler, JAI, Daheng Imaging, Flir, Baumer, Imperx, etc. (currently XIMEA, Basler, JAI, Daheng Imaging cameras are supported)
+* Camera SDK or GenICam package + camera vendor GenTL producer (.cti) for XIMEA, Basler, JAI, Daheng Imaging, FLIR, Baumer, Imperx, etc. (currently XIMEA, Basler, JAI, Daheng Imaging cameras are supported)
 * Fastvideo SDK (demo) ver.0.15.0.0
 * NVIDIA CUDA-10.1
 * Qt ver.5.13.1
@@ -44,7 +44,7 @@ Currently the software is working with <a href="https://www.ximea.com" target="_
 * Camera SDK or GenICam package + camera vendor GenTL producer (.cti) for XIMEA, Basler, Flir, Baumer, JAI, Imperx, etc. (currently XIMEA and Basler are supported)
 * Fastvideo SDK (demo) ver.0.15.0.0
 * NVIDIA CUDA-10.1 for x64 platform
-* NVIDIA CUDA-10.0 for Arm64 platform
+* NVIDIA CUDA-10.0 for ARM64 platform
 * Qt 5 (qtbase5-dev)
 ``` console
 sudo apt-get install qtbase5-dev qtbase5-dev-tools qtcreator
@@ -153,11 +153,11 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 * GPU pipeline for monochrome cameras - done
 * GenICam Standard support - done
 * Linux version - done
-* Special version for NVIDIA Jetson hardware and L4T for CUDA-10.0 (Jetson Nano, TX2, Xavier) - done
+* Software for NVIDIA Jetson hardware and L4T for CUDA-10.0 (Jetson Nano, TX2, Xavier) - done
 * Glass-to-Glass (G2G) test for latency measurements - done
 * Support for XIMEA, Basler, JAI, Daheng Imaging cameras - done
 * MJPEG streaming via FFmpeg RTSP - in progress
-* Support for Imperx, Baumer, Flir cameras
+* Support for Imperx, Baumer, FLIR cameras
 * LCP support (undistortion)
 * DCP support
 * H.264/H.265 encoders (NVIDIA NVENC)
