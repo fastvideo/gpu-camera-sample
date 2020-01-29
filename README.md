@@ -41,7 +41,7 @@ Currently the software is working with <a href="https://www.ximea.com" target="_
 ### Requirements for Linux
 
 * Ubuntu 18.04 (x64 or Arm64)
-* Camera SDK or GenICam package + camera vendor GenTL producer (.cti) for XIMEA, Basler, Flir, Baumer, JAI, Imperx, etc. (currently XIMEA and Basler are supported)
+* Camera SDK or GenICam package + camera vendor GenTL producer (.cti). Currently XIMEA, Basler, JAI, Daheng Imaging cameras are supported).
 * Fastvideo SDK (demo) ver.0.15.0.0
 * NVIDIA CUDA-10.1 for x64 platform
 * NVIDIA CUDA-10.0 for ARM64 platform
@@ -171,13 +171,13 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 
 ## Info
 
-* <a href="https://www.fastcompression.com/products/sdk.htm" target="_blank">Fastvideo SDK for Image & Video Processing</a>
+* <a href="https://www.fastcompression.com/products/sdk.htm" target="_blank">Fastvideo SDK for Image & Video Processing on GPU</a>
 * <a href="https://www.fastcinemadng.com/" target="_blank">Full description of image processing pipeline on GPU for digital cinema applications</a>
 
 ## Fastvideo SDK Benchmarks
 
 * <a href="https://www.fastcompression.com/pub/2019/Fastvideo_SDK_benchmarks.pdf" target="_blank">Fastvideo SDK Benchmarks 2019</a>
-* <a href="https://www.fastcompression.com/blog/jetson-benchmark-comparison.htm" target="_blank">Jetson Benchmark Comparison at Image Processing: Nano vs TX1 vs TX2 vs Xavier</a>
+* <a href="https://www.fastcompression.com/blog/jetson-benchmark-comparison.htm" target="_blank">Jetson Benchmark Comparison for Image Processing: Nano vs TX1 vs TX2 vs Xavier</a>
 
 ## Downloads
 
