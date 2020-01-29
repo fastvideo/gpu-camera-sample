@@ -41,7 +41,7 @@ Currently the software is working with <a href="https://www.ximea.com" target="_
 ### Requirements for Linux
 
 * Ubuntu 18.04 (x64 or Arm64)
-* Camera SDK or GenICam package + camera vendor GenTL producer (.cti). Currently XIMEA, Basler, JAI, Daheng Imaging cameras are supported).
+* Camera SDK or GenICam package + camera vendor GenTL producer (.cti). Currently XIMEA, Basler, JAI, Daheng Imaging cameras are supported
 * Fastvideo SDK (demo) ver.0.15.0.0
 * NVIDIA CUDA-10.1 for x64 platform
 * NVIDIA CUDA-10.0 for ARM64 platform
