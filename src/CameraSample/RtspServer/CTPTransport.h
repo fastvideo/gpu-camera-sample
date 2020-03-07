@@ -1,0 +1,43 @@
+#ifndef CTPTRANSPORT_H
+#define CTPTRANSPORT_H
+
+#include <QDataStream>
+#include <QList>
+
+#include "common_utils.h"
+
+const quint32 headerId = 0x01100110;
+const quint32 max_packet_data_size = 30000;
+const quint32 buffersize_udp = 1000000;
+
+class CTPTransport
+{
+public:
+    CTPTransport();
+
+    void createPacket(const uchar *dataPtr, int len, std::vector<QByteArray> &output);
+
+    QByteArray getPacket();
+    quint32 SN() const;
+
+    bool addUdpPacket(const uchar *dataPtr, int len);
+    bool isPacketAssembly() const;
+    void clearPacket();
+
+private:
+    qint32 m_SN = 0;
+
+    struct Udp{
+        QByteArray d;
+        quint32 off = 0;
+        quint32 size = 0;
+        quint32 id = 0;
+    };
+    std::vector<Udp> m_udpPackets;
+    QByteArray m_packet;
+
+    void assemplyPacket();
+
+};
+
+#endif // CTPTRANSPORT_H

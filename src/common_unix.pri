@@ -1,8 +1,9 @@
 # contains(TARGET_ARCH, arm64 ): QMAKE_CXXFLAGS += -msse3 -m64
+OTHER_LIB_PATH = $$dirname(PWD)/OtherLibsLinux
+
 #
 # CUDA
 #
-
 contains(TARGET_ARCH, arm64 ) {
     CUDA_TOOLKIT_PATH = "/usr/local/cuda-10.0"
 } else {
@@ -109,6 +110,8 @@ LIBS += $$FASTVIDEO_LIB
 LIBS += $$CUDA_LIB
 LIBS += $$FFMPEG_LIB
 LIBS += -ldl
+LIBS += -ljpeg
+
 #
 contains(TARGET_ARCH, arm64 ): LIBS += -lGL
 #

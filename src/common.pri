@@ -1,12 +1,16 @@
 QMAKE_CXXFLAGS += "/openmp"
 
-win32: QMAKE_CXXFLAGS_RELEASE -= -Zc:strictStrings
-win32: QMAKE_CFLAGS_RELEASE -= -Zc:strictStrings
-win32: QMAKE_CFLAGS -= -Zc:strictStrings
-win32: QMAKE_CXXFLAGS -= -Zc:strictStrings
+QMAKE_CXXFLAGS_RELEASE -= -Zc:strictStrings
+QMAKE_CFLAGS_RELEASE -= -Zc:strictStrings
+QMAKE_CFLAGS -= -Zc:strictStrings
+QMAKE_CXXFLAGS -= -Zc:strictStrings
 
 QMAKE_LFLAGS_WINDOWS += "/MACHINE:X64"
 QMAKE_LFLAGS_WINDOWS += "/LARGEADDRESSAWARE"
+
+OTHER_LIB_PATH = $$dirname(PWD)/OtherLibs
+
+JPEGTURBO = $$OTHER_LIB_PATH/jpeg-turbo
 
 FASTVIDEOPATH = $$OTHER_LIB_PATH/FastvideoSDK
 FASTVIDEO_SDK = $$FASTVIDEOPATH/fastvideo_sdk
@@ -15,9 +19,9 @@ FASTVIDEO_INC  = $$FASTVIDEO_SDK/inc
 FASTVIDEO_INC += $$FASTVIDEOPATH/common
 FASTVIDEO_INC += $$FASTVIDEOPATH/libs/OpenGL/inc
 
-FFMPEG_PATH = $$FASTVIDEOPATH/libs/ffmpeg
+FFMPEG_PATH = $$OTHER_LIB_PATH/ffmpeg
 FFMPEG_SRC  = $$FFMPEG_PATH/src/ffmpeg-4.0.2.tar.bz2
-FFMPEG_LIB  = $$FFMPEG_PATH/lib/win/$$PLATFORM
+FFMPEG_LIB  = $$FFMPEG_PATH/lib
 
 FASTVIDEO_LIB  = -L$$FASTVIDEO_SDK/lib/$$PLATFORM
 FASTVIDEO_DLL_PATH = $$FASTVIDEO_SDK/bin/$$PLATFORM
@@ -67,14 +71,11 @@ CUDA_DLL += $$CUDA_DLL_PATH/nppicc64_10.dll
 CUDA_DLL += $$CUDA_DLL_PATH/nppig64_10.dll
 
 
-INCLUDEPATH += $$PWD
-INCLUDEPATH += $$PWD/CUDASupport
-INCLUDEPATH += $$PWD/Widgets
-INCLUDEPATH += $$PWD/Camera
 INCLUDEPATH += $$CUDAINC
 INCLUDEPATH += $$FASTVIDEO_INC
 INCLUDEPATH += $$FASTVIDEOPATH/core_samples
-INCLUDEPATH += $$FFMPEG_PATH/inc
+INCLUDEPATH += $$FFMPEG_PATH/include
+INCLUDEPATH += $$JPEGTURBO/include
 
 QMAKE_CXXFLAGS += "/WX" # Treats all compiler warnings as errors.
 #QMAKE_LFLAGS_WINDOWS += "/NODEFAULTLIB:LIBCMT"
@@ -83,10 +84,11 @@ QT_DLLS += Qt5Core
 QT_DLLS += Qt5Gui
 QT_DLLS += Qt5Widgets
 QT_DLLS += Qt5Svg
+QT_DLLS += Qt5Network
+QT_DLLS += Qt5OpenGL
 #QT_DLLS += Qt5Xml
 #QT_DLLS += Qt5Multimedia
-#QT_DLLS += Qt5OpenGL
-#QT_DLLS += Qt5Network
+
 
 CONFIG(debug, debug|release){
     QMAKE_LFLAGS_WINDOWS += "/NODEFAULTLIB:LIBCMTD"
@@ -102,6 +104,7 @@ LIBS += $$FASTVIDEO_EXTRA_LIBS
 LIBS += -L$$FFMPEG_LIB  -lavcodec -lavformat -lavutil -lswresample
 LIBS += -L$$CUDA_TOOLKIT_PATH/lib/$$PLATFORM -lcudart -lcuda
 LIBS += -lglu32 -lopengl32 -lgdi32 -luser32 -lMscms -lShell32 -lOle32 -lWs2_32 -lstrmiids -lComdlg32
+LIBS += -L$$JPEGTURBO/lib -ljpeg-static -lturbojpeg-static
 
 contains( DEFINES, SUPPORT_XIMEA ){
     XI_API_PATH = $$OTHER_LIB_PATH/XIMEA/API

@@ -1,9 +1,10 @@
 #DEFINES += SUPPORT_XIMEA
-#DEFINES += SUPPORT_GENICAM
+DEFINES += SUPPORT_GENICAM
 
 TARGET_ARCH=$${QT_ARCH}
 
 contains(TARGET_ARCH, arm64 ) {
+    BITS = 64
     PLATFORM = Arm64
 } else {
     contains(TARGET_ARCH, x86_64) {
@@ -13,12 +14,12 @@ contains(TARGET_ARCH, arm64 ) {
         BITS = 32
         win32: PLATFORM = win32
     }
-unix: PLATFORM = Linux$$BITS
+    unix: PLATFORM = Linux$$BITS
 }
 
 PROJECT_NAME = GPUCameraSample
 
-DESTDIR = $$absolute_path($$_PRO_FILE_PWD_/../$${PROJECT_NAME}_$$PLATFORM)
+DESTDIR = $$absolute_path($$PWD/../$${PROJECT_NAME}_$$PLATFORM)
 CONFIG(debug, debug|release){
     DESTDIR = $$DESTDIR/debug
 }else:CONFIG(release, debug|release){
