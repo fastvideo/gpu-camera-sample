@@ -118,6 +118,10 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
 		return;
 	}
 
+	mDelayFps = 1000 / mFps;
+
+	mTimerCtrlFps.restart();
+
     mEncoderBuffer.resize(mWidth * mHeight * 4);
 }
 
@@ -459,6 +463,11 @@ bool RTSPStreamerServer::addBigFrame(unsigned char* rgbPtr, size_t linesize)
 
 bool RTSPStreamerServer::addFrame(unsigned char *rgbPtr)
 {
+	if(mTimerCtrlFps.elapsed() - mDelayFps < mCurrentTimeElapsed){
+		return false;
+	}
+	mCurrentTimeElapsed = mTimerCtrlFps.elapsed();
+
     if(!mIsInitialized || mClients.empty())
 		return false;
     int ret = 0;

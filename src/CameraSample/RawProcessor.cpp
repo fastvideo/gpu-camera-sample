@@ -532,7 +532,10 @@ void RawProcessor::setRtspServer(const QString &url)
     mRtspServer->setMultithreading(false);
 
     auto funEncode = [this](int, unsigned char* , int width, int height, int, bytearray& output){
-        unsigned pitch = 3 *(((width + FAST_ALIGNMENT - 1) / FAST_ALIGNMENT ) * FAST_ALIGNMENT);
+
+		int channels = dynamic_cast<CUDAProcessorGray*>(mProcessorPtr.data()) == nullptr? 3 : 1;
+
+		unsigned pitch = channels *(((width + FAST_ALIGNMENT - 1) / FAST_ALIGNMENT ) * FAST_ALIGNMENT);
         unsigned sz = pitch * height;
 
         output.resize(sz);

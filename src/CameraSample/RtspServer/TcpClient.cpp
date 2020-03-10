@@ -131,14 +131,17 @@ void TcpClient::parseBuffer()
 {
 	while(!m_buffer.isEmpty()){
 		if(m_isReadBytes){
-			if(m_buffer.size() < m_rawSize){
+			if(m_buffer.size() >= m_rawSize){
+				m_rawData = m_buffer.left(m_rawSize);
+				m_buffer.remove(0, m_rawSize);
+				m_isReadBytes = false;
+				m_isRawHasRead = true;
+				//parseSdp(m_rawData);
+			}else{
 				break;
 			}
-			m_rawData = m_buffer.left(m_rawSize);
-			m_buffer.remove(0, m_rawSize);
-			m_isReadBytes = false;
-			m_isRawHasRead = true;
-		}else{
+			continue;
+		}
 			int pos = m_buffer.indexOf("\r\n\r\n");
 			if(pos >= 0){
                 //qDebug("%s\n", m_buffer.data());
@@ -155,7 +158,6 @@ void TcpClient::parseBuffer()
                 qDebug("----- end ------ \n");
 			}else{
 				break;
-			}
 		}
 	}
 }

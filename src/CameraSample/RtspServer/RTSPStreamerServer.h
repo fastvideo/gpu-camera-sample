@@ -5,6 +5,7 @@
 #include <QThread>
 #include <QTcpServer>
 #include <QTcpSocket>
+#include <QElapsedTimer>
 #include <QTimer>
 #include <memory>
 #include <list>
@@ -116,6 +117,12 @@ private:
     bool        mMultithreading = true;
     bool        mUseCustomEncodeJpeg = true;
     bool        mUseCustomEncodeH264 = false;
+
+	QElapsedTimer mTimerCtrlFps;
+	int mFps = 60;
+	int mDelayFps = 1000 / mFps;
+	qint64 mCurrentTimeElapsed = 0;
+
     qint64      mFramesProcessed = 0;
     qint64      mBitrate = 20000000;
 
