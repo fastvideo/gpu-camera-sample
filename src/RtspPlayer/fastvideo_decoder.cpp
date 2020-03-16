@@ -67,7 +67,7 @@ bool fastvideo_decoder::decode(const uint8_t *input, uint32_t len, PImage &outpu
     ret = fastJpegDecode(m_handle, &info);
 
     if(ret == FAST_OK){
-        if(!output.get() || output->width != info.width || output->height != info.height){
+		if(!output.get() || output->width != info.width || output->height != info.height){
 			output.reset(new Image(info.width, info.height, fmt == FAST_I8? Image::GRAY : Image::RGB));
         }
 
