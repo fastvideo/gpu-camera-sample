@@ -69,6 +69,7 @@ bool CTPTransport::addUdpPacket(const uchar *dataPtr, int len)
 
     if(off == 0){
         m_SN = sn;
+		m_starttime = getNow();
     }
     if(sn != m_SN){
         qDebug("ctp: error of serial number");
@@ -87,6 +88,7 @@ bool CTPTransport::addUdpPacket(const uchar *dataPtr, int len)
 
     if(off + l == pkt.size){
         assemplyPacket();
+		m_durations["assembly_packet"] = getDuration(m_starttime);
     }
 
     return true;
@@ -100,7 +102,12 @@ bool CTPTransport::isPacketAssembly() const
 void CTPTransport::clearPacket()
 {
     m_udpPackets.clear();
-    m_packet.clear();
+	m_packet.clear();
+}
+
+QMap<QString, double> CTPTransport::durations()
+{
+	return m_durations;
 }
 
 void CTPTransport::assemplyPacket()

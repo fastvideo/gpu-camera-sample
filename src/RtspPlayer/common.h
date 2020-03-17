@@ -4,6 +4,11 @@
 #include <vector>
 #include <memory>
 
+#include <chrono>
+
+#include <QMap>
+#include <QMapIterator>
+
 typedef std::vector< unsigned char > bytearray;
 
 class Image{
@@ -103,5 +108,30 @@ public:
     virtual PImage takeFrame() = 0;
     virtual uint64_t bytesReaded() = 0;
 };
+
+inline std::chrono::steady_clock::time_point getNow()
+{
+	return std::chrono::high_resolution_clock::now();
+}
+
+inline double getDuration(std::chrono::steady_clock::time_point start)
+{
+	auto dur = std::chrono::high_resolution_clock::now() - start;
+	double duration = std::chrono::duration_cast<std::chrono::microseconds>(dur).count()/1000.;
+	return duration;
+}
+
+template<typename T>
+inline QMap<QString, T> mergeMaps(const QMap<QString, T>& first, const QMap<QString, T>& second)
+{
+	QMap<QString, T> res = first;
+	QMapIterator<QString, T> it(second);
+
+	while(it.hasNext()){
+		it.next();
+		res[it.key()] = it.value();
+	}
+	return res;
+}
 
 #endif // COMMON_H

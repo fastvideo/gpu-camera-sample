@@ -119,6 +119,12 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->cboSamplingFmt->addItem(QStringLiteral("422"), JPEG_422);
         ui->cboSamplingFmt->addItem(QStringLiteral("444"), JPEG_444);
     }
+	{
+		QSignalBlocker b(ui->cboSamplingFmtRtsp);
+		ui->cboSamplingFmtRtsp->addItem(QStringLiteral("420"), JPEG_420);
+		ui->cboSamplingFmtRtsp->addItem(QStringLiteral("422"), JPEG_422);
+		ui->cboSamplingFmtRtsp->addItem(QStringLiteral("444"), JPEG_444);
+	}
     {
         QSignalBlocker b(ui->cboOutFormat);
         ui->cboOutFormat->addItem(QStringLiteral("JPEG"), CUDAProcessorOptions::vcJPG);
@@ -596,6 +602,9 @@ void MainWindow::updateOptions(CUDAProcessorOptions& opts)
     opts.JpegQuality = ui->spnJpegQty->value();
     opts.JpegSamplingFmt = (fastJpegFormat_t)(ui->cboSamplingFmt->currentData().toInt());
 
+	ui->spnJpegQtyRtsp->setValue(ui->spnJpegQty->value());
+	ui->cboSamplingFmtRtsp->setCurrentIndex(ui->cboSamplingFmt->currentIndex());
+
     ui->denoiseCtlr->getDenoiseParams(opts.DenoiseParams, opts.EnableDenoise);
     ui->denoiseCtlr->getStaticDenoiseParams(opts.DenoiseStaticParams);
 }
@@ -1032,6 +1041,39 @@ void MainWindow::onNewWBFromPoint(const QPoint& pt)
     mProcessorPtr->updateOptions(mOptions);
 }
 
+int getBitrate(const QString& text, int minimum = 10000)
+{
+	int res = 0;
+
+	int posMB = text.indexOf("MB");
+	int posKB = text.indexOf("KB");
+
+	if(posMB < 0 && posKB < 0){
+		res = text.toInt();
+	}else{
+		if(posMB > 0){
+			QString snum = text.left(posMB).trimmed();
+			res = snum.toInt() * 1e+6;
+		}else if(posKB > 0){
+			QString snum = text.left(posMB).trimmed();
+			res = snum.toInt() * 1e+3;
+		}
+	}
+
+	return std::max(minimum, res);
+}
+
+void setBitrate(QComboBox* cb, int bitrate)
+{
+	if(bitrate >= 1e+6 && (bitrate % 1000000) == 0){
+		cb->setCurrentText(QString::number(bitrate / 1000000) + " MB");
+	}else if(bitrate >= 1000 && (bitrate % 1000) == 0){
+		cb->setCurrentText(QString::number(bitrate / 1000) + " KB");
+	}else{
+		cb->setCurrentText(QString::number(bitrate));
+	}
+}
+
 void MainWindow::on_btnStartRtspServer_clicked()
 {
     if(!mProcessorPtr)
@@ -1046,9 +1088,11 @@ void MainWindow::on_btnStartRtspServer_clicked()
         mOptions.Codec = CUDAProcessorOptions::vcH264;
     }
 
-    mOptions.bitrate = ui->spnBitrate->value();
-    mOptions.JpegQuality = ui->spnJpegQty->value();
-    mOptions.JpegSamplingFmt = (fastJpegFormat_t)(ui->cboSamplingFmt->currentData().toInt());
+	mOptions.bitrate = getBitrate(ui->cbBitrateRtsp->currentText());
+	setBitrate(ui->cbBitrateRtsp, mOptions.bitrate);
+
+	mOptions.JpegQuality = ui->spnJpegQtyRtsp->value();
+	mOptions.JpegSamplingFmt = (fastJpegFormat_t)(ui->cboSamplingFmtRtsp->currentData().toInt());
     mProcessorPtr->updateOptions(mOptions);
 
     mProcessorPtr->setRtspServer(ui->txtRtspServer->text());
@@ -1077,4 +1121,9 @@ void MainWindow::onTimeoutStatusRtsp()
         ui->lblStatusRtspServer->setStyleSheet("background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.295, fy:0.272727, stop:0 rgba(255, 255, 255, 255), stop:1 rgba(0, 100, 0, 255));\nborder-radius: 9px;");
         ui->lblStatusRtspServer->setToolTip("Connected to client");
     }
+}
+
+void MainWindow::on_cboFormatEnc_currentIndexChanged(int index)
+{
+	ui->swRtspOptions->setCurrentIndex(index);
 }

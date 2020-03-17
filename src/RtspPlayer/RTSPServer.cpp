@@ -226,6 +226,11 @@ void RTSPServer::doProcess()
 
 }
 
+QMap<QString, double> RTSPServer::durations()
+{
+	return m_durations;
+}
+
 bool RTSPServer::done() const
 {
     return m_done;
@@ -429,26 +434,38 @@ void RTSPServer::closeAV()
     m_doStop = false;
 }
 
+#pragma warning(push)
+#pragma warning(disable : 4189)
+
 void RTSPServer::decode_packet(AVPacket *pkt, bool customDecode)
 {
     if(!customDecode){
         int ret = 0;
-        do{
-            ret = avcodec_send_packet(m_cdcctx, pkt);
-        }while(ret == AVERROR(EAGAIN));
+		int got = 0;
+
+		auto starttime = getNow();
 
         AVFrame *frame = av_frame_alloc();
 
-        while(avcodec_receive_frame(m_cdcctx, frame) >= 0){
+		ret = avcodec_decode_video2(m_cdcctx, frame, &got, pkt);
+
+		if(got > 0){
             analyze_frame(frame);
             av_frame_unref(frame);
+
+			QString name = m_cdcctx->codec->name;
+			QString out = "decode (" + name + "):";
+
+			m_durations[out] = getDuration(starttime);
         }
 
         av_frame_free(&frame);
     }else{
         PImage obj;
 
-        if(m_encodedData.empty()){
+		auto starttime = getNow();
+
+		if(m_encodedData.empty()){
             m_encodedData.resize(1);
         }
         if(m_partImages.empty()){
@@ -475,6 +492,11 @@ void RTSPServer::decode_packet(AVPacket *pkt, bool customDecode)
         }
         m_mutexDecoder.unlock();
 
+		QString name = m_cdcctx->codec->name;
+		QString out = "decode (" + name + "):";
+
+		m_durations[out] = getDuration(starttime);
+
         if(obj.get()){
             m_mutex.lock();
             m_frames.push(obj);
@@ -485,20 +507,32 @@ void RTSPServer::decode_packet(AVPacket *pkt, bool customDecode)
 
 void RTSPServer::decode_packet(AVPacket *pkt, PImage &image)
 {
-    int ret = 0;
-    do{
-        ret = avcodec_send_packet(m_cdcctx, pkt);
-    }while(ret == AVERROR(EAGAIN));
+	auto starttime = getNow();
 
+	int got = 0;
     AVFrame *frame = av_frame_alloc();
 
-    while(avcodec_receive_frame(m_cdcctx, frame) >= 0){
+	/// this function deprecated but comfortable to calculate duration
+	int res = avcodec_decode_video2(m_cdcctx, frame, &got, pkt);
+
+	if(got > 0){
         getImage(frame, image);
         av_frame_unref(frame);
-    }
+
+		double duration = getDuration(starttime);
+
+		m_mutexDecoder.unlock();
+
+		QString name = m_cdcctx->codec->name;
+		QString out = "decode (" + name + "):";
+
+		m_durations[out] = duration;
+	}
 
     av_frame_free(&frame);
 }
+
+#pragma warning(pop)
 
 void RTSPServer::analyze_frame(AVFrame *frame)
 {
@@ -983,6 +1017,8 @@ void RTSPServer::doPlay()
                     m_encodecPkts.push(data);
                     m_mutexDec.unlock();
 
+					m_durations = mergeMaps(m_durations, m_ctpTransport.durations());
+
                     m_bytesReaded += data.size();
                 }else{
                     qDebug("packet cannot show. overflow buffer. drop frames %d", ++m_dropFrames);
@@ -992,7 +1028,7 @@ void RTSPServer::doPlay()
             }
 
         }else{
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
     }
 
@@ -1005,7 +1041,7 @@ void RTSPServer::doDecode()
 {
     while(!m_done){
         if(m_encodecPkts.empty()){
-            std::this_thread::sleep_for(std::chrono::milliseconds(2));
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }else{
             m_mutexDec.lock();
             QByteArray enc = m_encodecPkts.front();
@@ -1029,20 +1065,24 @@ void RTSPServer::decode_packet(const QByteArray &enc)
 
     double duration = -1;
 
-    auto starttime = std::chrono::high_resolution_clock::now();
+	auto starttime = getNow();
+	QString name;
 
     if(m_idCodec == CODEC_JPEG){
         if(m_useFastvideo){
+			name = "Fastvideo";
             if(!m_decoderFv.get())
                 m_decoderFv.reset(new fastvideo_decoder);
 
             m_decoderFv->decode((uchar*)enc.data(), enc.size(), m_fvImage);
         }else{
-            jpegenc dec;
+			name = "JpegTurbo";
+			jpegenc dec;
 			dec.decode((uchar*)enc.data(), enc.size(), obj);
 		}
 
     }else{
+		name = "";
         AVPacket pkt;
         av_init_packet(&pkt);
         av_new_packet(&pkt, enc.size());
@@ -1050,10 +1090,14 @@ void RTSPServer::decode_packet(const QByteArray &enc)
         decode_packet(&pkt, obj);
         av_packet_unref(&pkt);
     }
-    auto dur = std::chrono::high_resolution_clock::now() - starttime;
-    duration = std::chrono::duration_cast<std::chrono::microseconds>(dur).count()/1000.;
+	duration = getDuration(starttime);
 
     m_mutexDecoder.unlock();
+
+	if(!name.isEmpty()){
+		QString out = "decode (" + name + "):";
+		m_durations[out] = duration;
+	}
 
     qDebug("decode duration(ms): %f         \r", duration);
 

@@ -134,6 +134,8 @@ private slots:
     void onTimeoutStatusRtsp();
 
 
+	void on_cboFormatEnc_currentIndexChanged(int index);
+
 private:
     Ui::MainWindow *ui;
 

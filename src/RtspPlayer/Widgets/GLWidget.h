@@ -28,6 +28,8 @@ public:
     double fps() const;
     double bytesReaded() const;
 
+	QMap<QString, double> durations();
+
 public slots:
     void onTimeout();
 
@@ -45,6 +47,8 @@ private:
     qint64 m_wait_timer_ms = 1500;
     quint64 m_LastBytesReaded = 0;
     double m_bytesReaded = 0;
+
+	QMap<QString, double> m_durations;
 
     QMatrix4x4 m_modelview;
     QMatrix4x4 m_projection;

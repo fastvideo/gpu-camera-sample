@@ -38,7 +38,7 @@
      <x>0</x>
      <y>0</y>
      <width>1571</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuCamera">
@@ -1140,34 +1140,143 @@ QSlider::handle:horizontal {
       </layout>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_8">
-       <item>
-        <widget class="QLabel" name="label_10">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+      <widget class="QStackedWidget" name="swRtspOptions">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="currentIndex">
+        <number>0</number>
+       </property>
+       <widget class="QWidget" name="page">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_4">
+         <property name="leftMargin">
+          <number>0</number>
          </property>
-         <property name="text">
-          <string>Bitrate</string>
+         <property name="topMargin">
+          <number>0</number>
          </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QSpinBox" name="spnBitrate">
-         <property name="maximum">
-          <number>999999999</number>
+         <property name="rightMargin">
+          <number>0</number>
          </property>
-         <property name="singleStep">
-          <number>1000000</number>
+         <property name="bottomMargin">
+          <number>0</number>
          </property>
-         <property name="value">
-          <number>20000000</number>
-         </property>
-        </widget>
-       </item>
-      </layout>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_9">
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="label_12">
+             <property name="text">
+              <string>Sampling</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="cboSamplingFmtRtsp"/>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_11">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Quality</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="spnJpegQtyRtsp">
+             <property name="minimum">
+              <number>50</number>
+             </property>
+             <property name="maximum">
+              <number>100</number>
+             </property>
+             <property name="value">
+              <number>90</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="page_2">
+        <layout class="QVBoxLayout" name="verticalLayout_5">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_8">
+           <item>
+            <widget class="QLabel" name="label_10">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Bitrate</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="cbBitrateRtsp">
+             <property name="editable">
+              <bool>true</bool>
+             </property>
+             <property name="currentIndex">
+              <number>2</number>
+             </property>
+             <item>
+              <property name="text">
+               <string>100 MB</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>50 MB</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>20 MB</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>10 MB</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>5 MB</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1 MB</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </widget>
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_5">
@@ -1347,15 +1456,15 @@ border-radius: 9px;</string>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>DenoiseController</class>
-   <extends>QWidget</extends>
-   <header>DenoiseController.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>GtGWidget</class>
    <extends>QWidget</extends>
    <header>Widgets/GtGWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>DenoiseController</class>
+   <extends>QWidget</extends>
+   <header>DenoiseController.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

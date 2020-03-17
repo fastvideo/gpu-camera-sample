@@ -55,6 +55,8 @@ public:
     bool isDoStop() const;
     void doProcess();
 
+	QMap<QString, double> durations();
+
 signals:
     void startStopServer(bool);
 
@@ -68,6 +70,8 @@ private:
     QString m_url;
     QString m_error;
     bool m_isClient = false;
+
+	QMap<QString, double> m_durations;
 
     int m_bufferUdp = 1000000;
 

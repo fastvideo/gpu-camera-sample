@@ -3,6 +3,8 @@
 
 #include "DialogOpenServer.h"
 
+#include <QMapIterator>
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -107,6 +109,35 @@ void MainWindow::onTimeout()
         ui->lb_count_frames->setText(QString::number(m_rtspServer->framesCount()));
         ui->lb_fps->setText(QString::number(ui->widgetPlay->fps(), 'f', 1) + " frames/s");
         ui->lb_bitrate->setText(QString::number((ui->widgetPlay->bytesReaded() * 8)/1000, 'f', 1) + " kB/s");
+
+		QString sdur;
+
+		QMap<QString, double> durations = m_rtspServer->durations();
+
+		{
+			sdur += "Decoding: \n";
+
+			QMapIterator<QString, double> it(durations);
+			while(it.hasNext()){
+				it.next();
+
+				sdur += it.key() + ":\t " + QString::number(it.value(), 'f', 3) + " ms\n";
+			}
+		}
+
+		{
+			sdur += "\nShow: \n";
+
+			durations = ui->widgetPlay->durations();
+			QMapIterator<QString, double> it(durations);
+			while(it.hasNext()){
+				it.next();
+
+				sdur += it.key() + ":\t " + QString::number(it.value(), 'f', 3) + " ms\n";
+			}
+		}
+
+		ui->lb_durations->setText(sdur);
     }
 }
 

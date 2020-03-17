@@ -3,7 +3,9 @@
 
 #include <QDataStream>
 #include <QList>
+#include <QMap>
 
+#include "common.h"
 #include "common_utils.h"
 
 const quint32 headerId = 0x01100110;
@@ -24,8 +26,13 @@ public:
     bool isPacketAssembly() const;
     void clearPacket();
 
+	QMap<QString, double> durations();
+
 private:
     qint32 m_SN = 0;
+
+	QMap<QString, double> m_durations;
+	std::chrono::steady_clock::time_point m_starttime;
 
     struct Udp{
         QByteArray d;
