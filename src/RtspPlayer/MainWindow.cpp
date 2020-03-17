@@ -163,3 +163,17 @@ void MainWindow::onStartStopServer(bool start)
         ui->statusbar->showMessage("RTSP stopped");
     }
 }
+
+void MainWindow::on_actionPlay_toggled(bool arg1)
+{
+	if(arg1)
+	{
+		ui->widgetPlay->start();
+		ui->gtgWidget->start();
+	}
+	else
+	{
+		ui->widgetPlay->stop();
+		ui->gtgWidget->stop();
+	}
+}

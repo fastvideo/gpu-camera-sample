@@ -28,6 +28,9 @@ public:
     double fps() const;
     double bytesReaded() const;
 
+	void start();
+	void stop();
+
 	QMap<QString, double> durations();
 
 public slots:
@@ -47,6 +50,8 @@ private:
     qint64 m_wait_timer_ms = 1500;
     quint64 m_LastBytesReaded = 0;
     double m_bytesReaded = 0;
+
+	bool m_is_start = true;
 
 	QMap<QString, double> m_durations;
 

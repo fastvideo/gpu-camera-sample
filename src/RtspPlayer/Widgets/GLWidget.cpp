@@ -56,6 +56,16 @@ double GLWidget::bytesReaded() const
 	return m_bytesReaded;
 }
 
+void GLWidget::start()
+{
+	m_is_start = true;
+}
+
+void GLWidget::stop()
+{
+	m_is_start = false;
+}
+
 QMap<QString, double> GLWidget::durations()
 {
 	return m_durations;
@@ -66,28 +76,34 @@ void GLWidget::onTimeout()
     if(m_receiver){
         if(m_receiver->isFrameExists()){
 
-            if(m_timeFps.elapsed() > m_wait_timer_ms){
-                double cnt = m_frameCount_Fps;
-                double time = m_timeFps.elapsed();
-                double bytesReaded = m_receiver->bytesReaded() - m_LastBytesReaded;
-                m_LastBytesReaded = m_receiver->bytesReaded();
-                m_frameCount_Fps = 0;
-                m_timeFps.restart();
+			if(m_is_start){
 
-                if(time > 0){
-                    m_fps = cnt / time * 1000.;
-                    m_bytesReaded = bytesReaded / time * 1000.;
-                }else{
-                    m_fps = 0;
-                    m_bytesReaded = 0;
-                }
-            }
+				if(m_timeFps.elapsed() > m_wait_timer_ms){
+					double cnt = m_frameCount_Fps;
+					double time = m_timeFps.elapsed();
+					double bytesReaded = m_receiver->bytesReaded() - m_LastBytesReaded;
+					m_LastBytesReaded = m_receiver->bytesReaded();
+					m_frameCount_Fps = 0;
+					m_timeFps.restart();
 
-            m_image = m_receiver->takeFrame();
-            m_is_update = true;
-            m_is_texupdate = true;
-            m_frameCount++;
-            m_frameCount_Fps++;
+					if(time > 0){
+						m_fps = cnt / time * 1000.;
+						m_bytesReaded = bytesReaded / time * 1000.;
+					}else{
+						m_fps = 0;
+						m_bytesReaded = 0;
+					}
+				}
+
+				m_image = m_receiver->takeFrame();
+				m_is_update = true;
+				m_is_texupdate = true;
+				m_frameCount++;
+				m_frameCount_Fps++;
+
+			}else{
+				m_receiver->takeFrame();
+			}
 
             //qDebug("frames %d, w=%d; h=%d               \r", m_frameCount, m_image->width, m_image->height);
         }

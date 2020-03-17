@@ -53,6 +53,7 @@
    <addaction name="actionOpen_RTSP_client"/>
    <addaction name="actionOpen_RTSP_server"/>
    <addaction name="actionClose_RTSP_server"/>
+   <addaction name="actionPlay"/>
   </widget>
   <widget class="QDockWidget" name="dwRtspConfig">
    <property name="windowTitle">
@@ -245,6 +246,17 @@
   <action name="actionOpen_RTSP_client">
    <property name="text">
     <string>Open RTSP client</string>
+   </property>
+  </action>
+  <action name="actionPlay">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>►</string>
    </property>
   </action>
  </widget>

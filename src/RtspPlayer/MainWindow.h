@@ -35,6 +35,8 @@ private slots:
 
     void onStartStopServer(bool start);
 
+	void on_actionPlay_toggled(bool arg1);
+
 private:
     Ui::MainWindow *ui;
     QTimer m_timer;

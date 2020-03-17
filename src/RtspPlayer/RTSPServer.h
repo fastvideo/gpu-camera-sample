@@ -93,14 +93,15 @@ private:
     size_t m_height = 0;
     bool m_updatedImages = false;
 
-    std::queue< PImage > m_frames;
-    size_t m_max_frames = 10;
+	//std::queue< PImage > m_frames;
+	//size_t m_max_frames = 10;
     std::mutex m_mutex;
     std::mutex m_mutexDecoder;
 
     std::unique_ptr<fastvideo_decoder> m_decoderFv;
     bool m_useFastvideo = false;
     PImage m_fvImage;
+	bool m_image_updated = false;
 
     bool m_useCustomProtocol = false;
     std::unique_ptr<QUdpSocket> m_socket;

@@ -155,8 +155,8 @@ void RTSPServer::stopServer()
 
     m_state = NONE;
 
-    while(!m_frames.empty())
-        m_frames.pop();
+//    while(!m_frames.empty())
+//        m_frames.pop();
 
     m_partImages.clear();
     m_encodedData.clear();
@@ -166,9 +166,8 @@ void RTSPServer::stopServer()
 
 void RTSPServer::setUseFastVideo(bool val)
 {
-    m_mutexDecoder.lock();
+	std::lock_guard<std::mutex> lg(m_mutexDecoder);
     m_useFastvideo = val;
-    m_mutexDecoder.unlock();
 }
 
 void RTSPServer::setUseCustomProtocol(bool val)
@@ -178,21 +177,26 @@ void RTSPServer::setUseCustomProtocol(bool val)
 
 bool RTSPServer::isFrameExists() const
 {
-    return m_useFastvideo && m_fvImage.get() || !m_frames.empty();
+	return m_fvImage.get() && m_image_updated;// m_useFastvideo && m_fvImage.get() || !m_frames.empty();
 }
 
 PImage RTSPServer::takeFrame()
 {
-    if(m_useFastvideo){
-        m_framesCount++;
-        return m_fvImage;
-    }
-    m_mutex.lock();
-    PImage obj = m_frames.front();
-    m_frames.pop();
-    m_mutex.unlock();
-    m_framesCount++;
-    return obj;
+	if(m_image_updated){
+		m_framesCount++;
+		m_image_updated = false;
+	}
+	return m_fvImage;
+//    if(m_useFastvideo){
+//        m_framesCount++;
+//        return m_fvImage;
+//    }
+//    m_mutex.lock();
+//    PImage obj = m_frames.front();
+//    m_frames.pop();
+//    m_mutex.unlock();
+//    m_framesCount++;
+//    return obj;
 
 }
 
@@ -461,7 +465,7 @@ void RTSPServer::decode_packet(AVPacket *pkt, bool customDecode)
 
         av_frame_free(&frame);
     }else{
-        PImage obj;
+//        PImage obj;
 
 		auto starttime = getNow();
 
@@ -473,35 +477,36 @@ void RTSPServer::decode_packet(AVPacket *pkt, bool customDecode)
         }
         getEncodedData(pkt, m_encodedData[0]);
 
-        m_mutexDecoder.lock();
+		std::lock_guard<std::mutex> lg(m_mutexDecoder);
         if(m_useFastvideo && m_idCodec != CODEC_H264){
             if(m_idCodec == CODEC_JPEG){
                 if(!m_decoderFv.get())
                     m_decoderFv.reset(new fastvideo_decoder);
-                m_decoderFv->decode(m_encodedData[0], obj);
+				m_decoderFv->decode(m_encodedData[0], m_fvImage);
+				m_image_updated = true;
             }
         }else{
             if(m_idCodec == CODEC_JPEG){
                 jpegenc dec;
                 dec.decode(m_encodedData[0], m_partImages[0]);
-                if(!obj.get())
-                    obj.reset(new Image);
-                obj->setRGB(m_partImages[0]->width, m_partImages[0]->height);
-                copyRect(m_partImages[0], 0, 0, obj);
+				if(!m_fvImage.get())
+					m_fvImage.reset(new Image);
+				m_fvImage->setRGB(m_partImages[0]->width, m_partImages[0]->height);
+				copyRect(m_partImages[0], 0, 0, m_fvImage);
+				m_image_updated = true;
             }
         }
-        m_mutexDecoder.unlock();
 
 		QString name = m_cdcctx->codec->name;
 		QString out = "decode (" + name + "):";
 
 		m_durations[out] = getDuration(starttime);
 
-        if(obj.get()){
-            m_mutex.lock();
-            m_frames.push(obj);
-            m_mutex.unlock();
-        }
+//        if(obj.get()){
+//            m_mutex.lock();
+//			m_frames.push(obj);
+//            m_mutex.unlock();
+//        }
     }
 }
 
@@ -536,19 +541,20 @@ void RTSPServer::decode_packet(AVPacket *pkt, PImage &image)
 
 void RTSPServer::analyze_frame(AVFrame *frame)
 {
-    if(m_frames.size() > m_max_frames)
-        return;
+//    if(m_frames.size() > m_max_frames)
+//        return;
 
     if(frame->format == AV_PIX_FMT_YUV420P ||
             frame->format == AV_PIX_FMT_YUVJ420P ||
             frame->format == AV_PIX_FMT_NV12){
 
-        PImage obj;
-        getImage(frame, obj);
+//      PImage obj;
+		getImage(frame, m_fvImage);
+		m_image_updated = true;
 
-        m_mutex.lock();
-        m_frames.push(obj);
-        m_mutex.unlock();
+//      m_mutex.lock();
+//      m_frames.push(obj);
+//      m_mutex.unlock();
     }
 }
 
@@ -643,11 +649,12 @@ void RTSPServer::assemplyOutput()
         size_t y = k / m_cntX;
         size_t off = y * m_cntX + x;
         if(offsets[off].x() < obj->width && offsets[off].y() < obj->height)
-            copyRect(m_partImages[off], offsets[off].x(), offsets[off].y(), obj);
+			copyRect(m_partImages[off], offsets[off].x(), offsets[off].y(), m_fvImage);
     }
-    m_mutex.lock();
-    m_frames.push(obj);
-    m_mutex.unlock();
+	m_image_updated = true;
+//    m_mutex.lock();
+//    m_frames.push(obj);
+//    m_mutex.unlock();
 
     m_updatedImages = true;
 }
@@ -999,7 +1006,7 @@ void RTSPServer::doPlay()
 
     emit startStopServer(true);
 
-    QByteArray data, enc;
+	QByteArray data;
     while(!m_done){
         if(!m_socket.get()){
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -1055,13 +1062,13 @@ void RTSPServer::doDecode()
 
 void RTSPServer::decode_packet(const QByteArray &enc)
 {
-    PImage obj;
+	//PImage obj;
 
     if(m_partImages.empty()){
         m_partImages.resize(1);
     }
 
-    m_mutexDecoder.lock();
+	std::lock_guard<std::mutex> lg(m_mutexDecoder);
 
     double duration = -1;
 
@@ -1075,10 +1082,12 @@ void RTSPServer::decode_packet(const QByteArray &enc)
                 m_decoderFv.reset(new fastvideo_decoder);
 
             m_decoderFv->decode((uchar*)enc.data(), enc.size(), m_fvImage);
+			m_image_updated = true;
         }else{
 			name = "JpegTurbo";
 			jpegenc dec;
-			dec.decode((uchar*)enc.data(), enc.size(), obj);
+			dec.decode((uchar*)enc.data(), enc.size(), m_fvImage);
+			m_image_updated = true;
 		}
 
     }else{
@@ -1087,12 +1096,11 @@ void RTSPServer::decode_packet(const QByteArray &enc)
         av_init_packet(&pkt);
         av_new_packet(&pkt, enc.size());
         std::copy(enc.data(), enc.data() + enc.size(), pkt.data);
-        decode_packet(&pkt, obj);
+		decode_packet(&pkt, m_fvImage);
         av_packet_unref(&pkt);
+		m_image_updated = true;
     }
 	duration = getDuration(starttime);
-
-    m_mutexDecoder.unlock();
 
 	if(!name.isEmpty()){
 		QString out = "decode (" + name + "):";
@@ -1101,11 +1109,11 @@ void RTSPServer::decode_packet(const QByteArray &enc)
 
     qDebug("decode duration(ms): %f         \r", duration);
 
-    if(!m_useFastvideo){
-        if(obj.get()){
-            m_mutex.lock();
-            m_frames.push(obj);
-            m_mutex.unlock();
-        }
-    }
+//    if(!m_useFastvideo){
+//        if(obj.get()){
+//            m_mutex.lock();
+//            m_frames.push(obj);
+//            m_mutex.unlock();
+//        }
+//    }
 }
