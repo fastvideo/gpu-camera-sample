@@ -53,8 +53,11 @@ void MainWindow::openClient(const QString &url)
 
     QMap<QString,QVariant> params;
     params["client"] = 1;
+	params["mjpeg_fastvideo"] = ui->rbFastvideoJpeg->isChecked();
+	params["h264_cuvid"] = ui->rbCuvid->isChecked();
+	params["libx264"] = true;
+	params["ctp"] = ui->rbCtp->isChecked();
 
-    m_rtspServer->setUseCustomProtocol(ui->chb_use_custom_protocol->isChecked());
     m_rtspServer->startServer(url, params);
     ui->widgetPlay->setReceiver(m_rtspServer.get());
     ui->statusbar->showMessage("Try to open remote server", 2000);
@@ -64,6 +67,9 @@ void MainWindow::on_actionClose_RTSP_server_triggered()
 {
     ui->widgetPlay->setReceiver(nullptr);
     m_rtspServer.reset();
+
+	ui->gbDecodersH264->setEnabled(true);
+	ui->gbTransportProtocol->setEnabled(true);
 
     ui->statusbar->showMessage("Rtsp server is close");
 }
@@ -88,12 +94,8 @@ void MainWindow::on_pb_openRtsp_clicked()
         ui->statusbar->showMessage("Url is empty");
         return;
     }
-    if(ui->cb_rtspIsClient->isChecked()){
-        openClient(url);
-    }else{
-        openServer(url);
-    }
-    m_rtspServer->setUseFastVideo(ui->chb_fastvideo->isChecked());
+
+	openClient(url);
 }
 
 void MainWindow::onTimeout()
@@ -106,6 +108,15 @@ void MainWindow::onTimeout()
                 ui->statusbar->showMessage("Rtsp server is close");
             }
         }
+
+		if(m_rtspServer->isServerOpened()){
+			ui->gbDecodersH264->setEnabled(false);
+			ui->gbTransportProtocol->setEnabled(false);
+		}else{
+			ui->gbDecodersH264->setEnabled(true);
+			ui->gbTransportProtocol->setEnabled(true);
+		}
+
         ui->lb_count_frames->setText(QString::number(m_rtspServer->framesCount()));
         ui->lb_fps->setText(QString::number(ui->widgetPlay->fps(), 'f', 1) + " frames/s");
         ui->lb_bitrate->setText(QString::number((ui->widgetPlay->bytesReaded() * 8)/1000, 'f', 1) + " kB/s");
@@ -121,7 +132,7 @@ void MainWindow::onTimeout()
 			while(it.hasNext()){
 				it.next();
 
-				sdur += it.key() + ":\t " + QString::number(it.value(), 'f', 3) + " ms\n";
+				sdur += it.key() + " = " + QString::number(it.value(), 'f', 3) + " ms\n";
 			}
 		}
 
@@ -133,18 +144,11 @@ void MainWindow::onTimeout()
 			while(it.hasNext()){
 				it.next();
 
-				sdur += it.key() + ":\t " + QString::number(it.value(), 'f', 3) + " ms\n";
+				sdur += it.key() + " = " + QString::number(it.value(), 'f', 3) + " ms\n";
 			}
 		}
 
 		ui->lb_durations->setText(sdur);
-    }
-}
-
-void MainWindow::on_chb_fastvideo_clicked(bool checked)
-{
-    if(m_rtspServer.get()){
-        m_rtspServer->setUseFastVideo(checked);
     }
 }
 
@@ -175,5 +179,23 @@ void MainWindow::on_actionPlay_toggled(bool arg1)
 	{
 		ui->widgetPlay->stop();
 		ui->gtgWidget->stop();
+	}
+}
+
+void MainWindow::on_rbJpegTurbo_clicked(bool checked)
+{
+	if(checked){
+		if(m_rtspServer.get()){
+			m_rtspServer->setUseFastVideo(false);
+		}
+	}
+}
+
+void MainWindow::on_rbFastvideoJpeg_clicked(bool checked)
+{
+	if(checked){
+		if(m_rtspServer.get()){
+			m_rtspServer->setUseFastVideo(true);
+		}
 	}
 }

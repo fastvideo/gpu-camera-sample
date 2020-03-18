@@ -32,15 +32,20 @@ public:
     ~RTSPServer();
 
     QString url() const;
-    void startServer(const QString &url, const QMap<QString, QVariant>& additional_params);
 
+	bool isServerOpened() const;
+    void startServer(const QString &url, const QMap<QString, QVariant>& additional_params);
     void stopServer();
 
     void setUseFastVideo(bool val);
 
     void setUseCustomProtocol(bool val);
 
+	void setH264Codec(const QString& codec);
+
     void setMaxWidthFastvideo(uint val);
+
+	bool isCuvidFound() const;
 
     bool isFrameExists() const override;
     PImage takeFrame() override;
@@ -70,6 +75,8 @@ private:
     QString m_url;
     QString m_error;
     bool m_isClient = false;
+	QString m_codecH264 = "h264_cuvid";
+	bool m_isServerOpened = false;
 
 	QMap<QString, double> m_durations;
 

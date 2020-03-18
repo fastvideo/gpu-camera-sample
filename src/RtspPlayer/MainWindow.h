@@ -29,13 +29,15 @@ private slots:
 
     void onTimeout();
 
-    void on_chb_fastvideo_clicked(bool checked);
-
     void on_pb_stopRtsp_clicked();
 
     void onStartStopServer(bool start);
 
 	void on_actionPlay_toggled(bool arg1);
+
+	void on_rbJpegTurbo_clicked(bool checked);
+
+	void on_rbFastvideoJpeg_clicked(bool checked);
 
 private:
     Ui::MainWindow *ui;

@@ -33,9 +33,7 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionOpen_RTSP_server"/>
-    <addaction name="actionClose_RTSP_server"/>
-    <addaction name="actionOpen_RTSP_client"/>
+    <addaction name="actionExit"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
@@ -50,9 +48,6 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionOpen_RTSP_client"/>
-   <addaction name="actionOpen_RTSP_server"/>
-   <addaction name="actionClose_RTSP_server"/>
    <addaction name="actionPlay"/>
   </widget>
   <widget class="QDockWidget" name="dwRtspConfig">
@@ -65,30 +60,81 @@
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
-      <widget class="QCheckBox" name="cb_rtspIsClient">
-       <property name="text">
-        <string>Client</string>
+      <widget class="QGroupBox" name="gbTransportProtocol">
+       <property name="title">
+        <string>Transport protocol</string>
        </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_6">
+        <item>
+         <widget class="QRadioButton" name="rbRtp">
+          <property name="text">
+           <string>RTP (UDP)</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="rbCtp">
+          <property name="text">
+           <string>CTP (UDP)</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="chb_fastvideo">
-       <property name="text">
-        <string>Use fastvideo decoder</string>
+      <widget class="QGroupBox" name="gbDecodersH264">
+       <property name="title">
+        <string>H.264 parameters</string>
        </property>
-       <property name="checked">
-        <bool>false</bool>
-       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_5">
+        <item>
+         <widget class="QRadioButton" name="rbCuvid">
+          <property name="text">
+           <string>cuvid decoder</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="rbOtherAvailable">
+          <property name="text">
+           <string>Other available</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="chb_use_custom_protocol">
-       <property name="text">
-        <string>Use custom protocol</string>
+      <widget class="QGroupBox" name="groupBox">
+       <property name="title">
+        <string>MJPEG parameters</string>
        </property>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QRadioButton" name="rbJpegTurbo">
+          <property name="text">
+           <string>JpegTurbo decoder</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="rbFastvideoJpeg">
+          <property name="text">
+           <string>FastVideo decoder</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </item>
      <item>
@@ -259,6 +305,11 @@
     <string>►</string>
    </property>
   </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -275,5 +326,22 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>actionExit</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>444</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

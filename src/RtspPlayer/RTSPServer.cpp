@@ -97,7 +97,12 @@ RTSPServer::~RTSPServer()
 
 QString RTSPServer::url() const
 {
-    return m_url;
+	return m_url;
+}
+
+bool RTSPServer::isServerOpened() const
+{
+	return m_isServerOpened;
 }
 
 void RTSPServer::startServer(const QString &url, const QMap<QString, QVariant> &additional_params)
@@ -108,10 +113,35 @@ void RTSPServer::startServer(const QString &url, const QMap<QString, QVariant> &
     m_done = false;
     m_dropFrames = 0;
     m_bytesReaded = 0;
+	m_addiotionalParams = additional_params;
 
-    m_url = url;
-    m_addiotionalParams = additional_params;
-    m_playing = true;
+	if(additional_params.contains("ctp")){
+		setUseCustomProtocol(additional_params["ctp"].toBool());
+	}
+	if(additional_params.contains("mjpeg_fastvideo")){
+		setUseFastVideo(additional_params["mjpeg_fastvideo"].toBool());
+	}
+	if(additional_params.contains("h264_cuvid")){
+		if(additional_params["h264_cuvid"].toBool()){
+			setH264Codec("h264_cuvid");
+		}else{
+			if(additional_params["libx264"].toBool()){
+				setH264Codec("libx264");
+			}else{
+				setH264Codec("h264");
+			}
+		}
+	}
+	if(additional_params.contains("client")){
+		m_isClient = true;
+	}
+	if(additional_params.contains("buffer")){
+		m_bufferUdp = m_addiotionalParams["buffer"].toInt();
+	}
+
+	m_url = url;
+	m_isServerOpened = true;
+	m_playing = true;
     m_thread.reset(new std::thread([this](){
         if(m_useCustomProtocol){
             doServerCustom();
@@ -119,6 +149,7 @@ void RTSPServer::startServer(const QString &url, const QMap<QString, QVariant> &
             doServer();
         }
     }));
+
 }
 
 void RTSPServer::stopServer()
@@ -172,7 +203,17 @@ void RTSPServer::setUseFastVideo(bool val)
 
 void RTSPServer::setUseCustomProtocol(bool val)
 {
-    m_useCustomProtocol = val;
+	m_useCustomProtocol = val;
+}
+
+void RTSPServer::setH264Codec(const QString &codec)
+{
+	m_codecH264 = codec;
+}
+
+bool RTSPServer::isCuvidFound() const
+{
+	return m_codec && QString(m_codec->name) == "h264_cuvid";
 }
 
 bool RTSPServer::isFrameExists() const
@@ -281,13 +322,6 @@ void RTSPServer::doServer()
 
     AVDictionary *dict = nullptr;
 
-    if(m_addiotionalParams.contains("client")){
-        m_isClient = true;
-    }
-    if(m_addiotionalParams.contains("buffer")){
-        m_bufferUdp = m_addiotionalParams["buffer"].toInt();
-    }
-
     if(!m_isClient){
         av_dict_set(&dict, "rtsp_flags", "listen", 0);
         qDebug("Try to open server %s ..", m_url.toLatin1().data());
@@ -355,7 +389,7 @@ void RTSPServer::doServer()
                     break;
                 }
                 if(m_codec->id == AV_CODEC_ID_H264){
-                    AVCodec *c = avcodec_find_decoder_by_name("h264_cuvid");
+					AVCodec *c = avcodec_find_decoder_by_name(m_codecH264.toLatin1().data());
                     if(c) m_codec = c;
                     m_idCodec = CODEC_H264;
                 }
@@ -419,6 +453,7 @@ void RTSPServer::doServer()
     m_playing = false;
     m_is_open = false;
     m_done = true;
+	m_isServerOpened = false;
 
     qDebug("Decode ended");
 }
@@ -712,13 +747,6 @@ void copyRect(const PImage &part, size_t xOff, size_t yOff, PImage &out)
 
 void RTSPServer::doServerCustom()
 {
-    if(m_addiotionalParams.contains("client")){
-        m_isClient = true;
-    }
-    if(m_addiotionalParams.contains("buffer")){
-        m_bufferUdp = m_addiotionalParams["buffer"].toInt();
-    }
-
     if(!m_isClient){
         m_error = "Work only as client";
         qDebug("Work only as client");
@@ -763,6 +791,7 @@ void RTSPServer::doServerCustom()
     m_socketTcp.reset();
 
     m_playing = false;
+	m_isServerOpened = false;
 }
 
 void RTSPServer::parseData()
@@ -953,7 +982,7 @@ void RTSPServer::sendPlay()
     int ret = 0;
 
     if(m_idCodec == CODEC_H264){
-        m_codec = avcodec_find_decoder_by_name("h264_cuvid");
+		m_codec = avcodec_find_decoder_by_name(m_codecH264.toLatin1().data());
         if(!m_codec){
             m_codec = avcodec_find_decoder_by_name("h264");
             if(!m_codec){
