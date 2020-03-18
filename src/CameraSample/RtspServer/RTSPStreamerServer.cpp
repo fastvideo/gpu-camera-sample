@@ -82,13 +82,13 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
 	//frames per second
     mCtx->time_base = {1, 60};         // for test. maybe do not affect
     mCtx->framerate = {60, 1};         // for test. maybe do not affect
-    mCtx->gop_size = 0;
+	mCtx->gop_size = 0;
     mCtx->pix_fmt = mPixFmt;
 
     if(mCodecId != AV_CODEC_ID_MJPEG)
     {
-        mCtx->max_b_frames = 1;        // codec do not open for mjpeg
-        mCtx->keyint_min = 1;
+		mCtx->max_b_frames = 1;        // codec do not open for mjpeg
+		mCtx->keyint_min = 0;
         mCtx->flags |= AV_CODEC_FLAG_LOW_DELAY;
         mCtx->flags2 |= AV_CODEC_FLAG2_FAST;
     }
@@ -463,9 +463,9 @@ bool RTSPStreamerServer::addBigFrame(unsigned char* rgbPtr, size_t linesize)
 
 bool RTSPStreamerServer::addFrame(unsigned char *rgbPtr)
 {
-	if(mTimerCtrlFps.elapsed() - mDelayFps < mCurrentTimeElapsed){
-		return false;
-	}
+//	if(mTimerCtrlFps.elapsed() - mDelayFps < mCurrentTimeElapsed){
+//		return false;
+//	}
 	mCurrentTimeElapsed = mTimerCtrlFps.elapsed();
 
     if(!mIsInitialized || mClients.empty())
@@ -534,25 +534,20 @@ bool RTSPStreamerServer::addFrame(unsigned char *rgbPtr)
 
 void RTSPStreamerServer::encodeWriteFrame(AVFrame *frame)
 {
-	int ret;
+	int ret, got = 0;
 	AVPacket enc_pkt;
     enc_pkt.data = nullptr;
 	enc_pkt.size = 0;
 	av_init_packet(&enc_pkt);
-    do
-    {
-        ret = avcodec_send_frame(mCtx, frame);
-	}while(ret == AVERROR(EAGAIN));
 
-	do{
-        ret = avcodec_receive_packet(mCtx, &enc_pkt);
-        if(ret >= 0)
-        {
-            enc_pkt.pts = frame->pts;
-            sendPkt(&enc_pkt);
-            av_packet_unref(&enc_pkt);
-        }
-    }while(ret >= 0);
+	ret = avcodec_encode_video2(mCtx, &enc_pkt, frame, &got);
+
+	if(got > 0)
+	{
+		enc_pkt.pts = frame->pts;
+		sendPkt(&enc_pkt);
+		av_packet_unref(&enc_pkt);
+	}
 }
 
 void RTSPStreamerServer::sendPkt(AVPacket *pkt)

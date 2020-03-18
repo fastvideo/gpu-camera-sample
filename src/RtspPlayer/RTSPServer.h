@@ -56,6 +56,9 @@ public:
 
     quint32 framesCount() const;
 
+	void startDecode();
+	void stopDecode();
+
     bool done() const;
     bool isDoStop() const;
     void doProcess();
@@ -84,6 +87,8 @@ private:
 
     quint32 m_framesCount = 0;
     quint64 m_bytesReaded = 0;
+
+	bool m_isStartDecode = true;
 
     AVCodec *m_codec = nullptr;
     AVFormatContext *m_fmtctx = nullptr;

@@ -84,6 +84,8 @@ void MainWindow::on_actionOpen_RTSP_client_triggered()
         dlg.setUrl("");
     if(dlg.exec()){
         openClient(dlg.url());
+		ui->actionPlay->setChecked(true);
+		ui->gtgWidget->start();
     }
 }
 
@@ -172,12 +174,18 @@ void MainWindow::on_actionPlay_toggled(bool arg1)
 {
 	if(arg1)
 	{
-		ui->widgetPlay->start();
+		if(m_rtspServer.get()){
+			m_rtspServer->startDecode();
+		}
+		//ui->widgetPlay->start();
 		ui->gtgWidget->start();
 	}
 	else
 	{
-		ui->widgetPlay->stop();
+		if(m_rtspServer.get()){
+			m_rtspServer->stopDecode();
+		}
+//		ui->widgetPlay->stop();
 		ui->gtgWidget->stop();
 	}
 }

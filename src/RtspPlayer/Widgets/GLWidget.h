@@ -72,6 +72,10 @@ private:
     int m_utexIntV;
     int m_rgbInt;
 
+	int m_prevWidth = 0;
+	int m_prevHeight = 0;
+	Image::TYPE m_prevType;
+
     std::vector< float > m_vertexBuffer;
     std::vector< float > m_textureBuffer;
 

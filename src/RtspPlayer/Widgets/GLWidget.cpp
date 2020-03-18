@@ -32,7 +32,7 @@ GLWidget::GLWidget(QWidget *parent) :
     setAutoFillBackground(false);
 
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(onTimeout()));
-    m_timer.start(4);
+	m_timer.start(2);
     m_timeFps.start();
 }
 
@@ -211,46 +211,72 @@ void GLWidget::generateTexture()
         return;
     m_is_texupdate = false;
 
-    if(m_image->type == Image::YUV){
-		auto starttime = getNow();
+	bool newTex = false;
 
+	if(m_prevWidth != m_image->width || m_prevHeight != m_image->height || m_prevType != m_image->type){
+		newTex = true;
+	}
+
+	auto starttime = getNow();
+
+	m_prevWidth = m_image->width;
+	m_prevHeight = m_image->height;
+	m_prevType = m_image->type;
+
+    if(m_image->type == Image::YUV){
 		glBindTexture(GL_TEXTURE_2D, m_bindTex);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, m_image->width, m_image->height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_image->Y.data());
+		if(newTex){
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, m_image->width, m_image->height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_image->Y.data());
+		}else {
+			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_image->width, m_image->height, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_image->Y.data());
+		}
 
         glBindTexture(GL_TEXTURE_2D, m_bindTexU);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, m_image->width/2, m_image->height/2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_image->U.data());
+		if(newTex){
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, m_image->width/2, m_image->height/2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_image->U.data());
+		}else {
+			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_image->width/2, m_image->height/2, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_image->U.data());
+		}
 
         glBindTexture(GL_TEXTURE_2D, m_bindTexV);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, m_image->width/2, m_image->height/2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_image->V.data());
+		if(newTex){
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, m_image->width/2, m_image->height/2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_image->V.data());
+		}else {
+			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_image->width/2, m_image->height/2, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_image->V.data());
+		}
 
 		m_durations["generate_texture_yuv"] = getDuration(starttime);
 	}else if(m_image->type == Image::RGB){
-		auto starttime = getNow();
 		glBindTexture(GL_TEXTURE_2D, m_bindTex);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_image->width, m_image->height, 0, GL_RGB, GL_UNSIGNED_BYTE, m_image->rgb.data());
+		if(newTex){
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_image->width, m_image->height, 0, GL_RGB, GL_UNSIGNED_BYTE, m_image->rgb.data());
+		}else{
+			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_image->width, m_image->height, GL_RGB, GL_UNSIGNED_BYTE, m_image->rgb.data());
+		}
 
 		m_durations["generate_texture_rgb"] = getDuration(starttime);
 	}else if(m_image->type == Image::GRAY){
-		auto starttime = getNow();
 		glBindTexture(GL_TEXTURE_2D, m_bindTex);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, m_image->width, m_image->height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_image->rgb.data());
-
-		glBindTexture(GL_TEXTURE_2D, m_bindTexU);
+		if(newTex){
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, m_image->width, m_image->height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_image->rgb.data());
+		}else{
+			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_image->width, m_image->height, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_image->rgb.data());
+		}
 
 		m_durations["generate_texture_gray"] = getDuration(starttime);
 	}

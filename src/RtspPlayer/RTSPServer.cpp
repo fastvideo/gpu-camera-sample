@@ -142,6 +142,7 @@ void RTSPServer::startServer(const QString &url, const QMap<QString, QVariant> &
 	m_url = url;
 	m_isServerOpened = true;
 	m_playing = true;
+	m_isStartDecode = true;
     m_thread.reset(new std::thread([this](){
         if(m_useCustomProtocol){
             doServerCustom();
@@ -258,7 +259,17 @@ QString RTSPServer::errorStr()
 
 quint32 RTSPServer::framesCount() const
 {
-    return m_framesCount;
+	return m_framesCount;
+}
+
+void RTSPServer::startDecode()
+{
+	m_isStartDecode = true;
+}
+
+void RTSPServer::stopDecode()
+{
+	m_isStartDecode = false;
 }
 
 bool RTSPServer::isDoStop() const
@@ -287,12 +298,14 @@ void RTSPServer::waitUntilStopStreaming()
         QTime time;
         time.start();
         m_doStop = true;
-        while(m_is_open && time.elapsed() < MAXIMUM_WAIT){
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        }
-        if(time.elapsed() > MAXIMUM_WAIT){
-            qDebug("Oops. Streaming not stopped");
-        }
+		if(!m_useCustomProtocol){
+			while(m_is_open && time.elapsed() < MAXIMUM_WAIT){
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			}
+			if(time.elapsed() > MAXIMUM_WAIT){
+				qDebug("Oops. Streaming not stopped");
+			}
+		}
         m_doStop = false;
         m_is_open = false;
 
@@ -380,7 +393,8 @@ void RTSPServer::doServer()
                     m_is_open = false;
                     break;
                 }
-                m_cdcctx->flags |= AV_CODEC_FLAG_LOW_DELAY | AV_CODEC_FLAG2_FAST;
+				m_cdcctx->flags |= AV_CODEC_FLAG_LOW_DELAY;
+				m_cdcctx->flags2 |= AV_CODEC_FLAG2_FAST;
 
                 m_codec = avcodec_find_decoder(m_cdcctx->codec_id);
                 if(!m_codec){
@@ -478,6 +492,8 @@ void RTSPServer::closeAV()
 
 void RTSPServer::decode_packet(AVPacket *pkt, bool customDecode)
 {
+	if(!m_isStartDecode)
+		return;
     if(!customDecode){
         int ret = 0;
 		int got = 0;
@@ -547,6 +563,9 @@ void RTSPServer::decode_packet(AVPacket *pkt, bool customDecode)
 
 void RTSPServer::decode_packet(AVPacket *pkt, PImage &image)
 {
+	if(!m_isStartDecode)
+		return;
+
 	auto starttime = getNow();
 
 	int got = 0;
@@ -780,7 +799,7 @@ void RTSPServer::doServerCustom()
         if(res && m_socketTcp.get()){
             QByteArray ba = m_socketTcp->read(2048 * 1024);
             if(ba.isEmpty()){
-                std::this_thread::sleep_for(std::chrono::milliseconds(16));
+				std::this_thread::sleep_for(std::chrono::milliseconds(16));
             }else{
                 m_buffer.append(ba);
                 parseData();
@@ -998,7 +1017,10 @@ void RTSPServer::sendPlay()
         m_cdcctx->flags |= AV_CODEC_FLAG_LOW_DELAY;
         m_cdcctx->flags2 |= AV_CODEC_FLAG2_FAST;
 
-        if((ret = avcodec_open2(m_cdcctx, m_codec, nullptr)) < 0){
+		AVDictionary *dict = nullptr;
+		av_dict_set(&dict, "threads", "auto", 0);
+
+		if((ret = avcodec_open2(m_cdcctx, m_codec, &dict)) < 0){
             m_error = "Codec not open";
             avcodec_free_context(&m_cdcctx);
             return;
@@ -1091,6 +1113,8 @@ void RTSPServer::doDecode()
 
 void RTSPServer::decode_packet(const QByteArray &enc)
 {
+	if(!m_isStartDecode)
+		return;
 	//PImage obj;
 
     if(m_partImages.empty()){
