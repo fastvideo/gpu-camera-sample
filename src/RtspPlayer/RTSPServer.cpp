@@ -574,6 +574,18 @@ void RTSPServer::decode_packet(AVPacket *pkt, PImage &image)
 	/// this function deprecated but comfortable to calculate duration
 	int res = avcodec_decode_video2(m_cdcctx, frame, &got, pkt);
 
+	static int cnt = 1;
+	static auto time = getNow();
+
+	double duration = 0;
+	if(cnt == 1){
+		time = getNow();
+	}else{
+		duration = getDuration(time);
+	}
+
+	qDebug("got frame %d, %d; time %f; packet size %d", got, cnt++, duration, pkt->size);
+
 	if(got > 0){
         getImage(frame, image);
         av_frame_unref(frame);
@@ -1014,8 +1026,8 @@ void RTSPServer::sendPlay()
         }
 
         m_cdcctx = avcodec_alloc_context3(m_codec);
-        m_cdcctx->flags |= AV_CODEC_FLAG_LOW_DELAY;
-        m_cdcctx->flags2 |= AV_CODEC_FLAG2_FAST;
+		m_cdcctx->flags |= AV_CODEC_FLAG_LOW_DELAY;
+		m_cdcctx->flags2 |= AV_CODEC_FLAG2_FAST;
 
 		AVDictionary *dict = nullptr;
 		av_dict_set(&dict, "threads", "auto", 0);
