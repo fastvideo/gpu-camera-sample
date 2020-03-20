@@ -111,6 +111,14 @@ void MainWindow::onTimeout()
             }
         }
 
+		if(m_rtspServer->isMJpeg()){
+			ui->gbDecodersH264->setVisible(false);
+			ui->gbMJpegParameters->setVisible(true);
+		}else{
+			ui->gbDecodersH264->setVisible(true);
+			ui->gbMJpegParameters->setVisible(false);
+		}
+
 		if(m_rtspServer->isServerOpened()){
 			ui->gbDecodersH264->setEnabled(false);
 			ui->gbTransportProtocol->setEnabled(false);
@@ -151,7 +159,12 @@ void MainWindow::onTimeout()
 		}
 
 		ui->lb_durations->setText(sdur);
-    }
+	}else{
+		ui->gbDecodersH264->setEnabled(true);
+		ui->gbTransportProtocol->setEnabled(true);
+		ui->gbDecodersH264->setVisible(true);
+		ui->gbMJpegParameters->setVisible(true);
+	}
 }
 
 void MainWindow::on_pb_stopRtsp_clicked()

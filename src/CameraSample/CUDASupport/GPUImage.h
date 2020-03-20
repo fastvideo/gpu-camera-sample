@@ -62,8 +62,7 @@ public:
         unsigned fullSize = wPitch * h;
 
         try {
-            CudaAllocator alloc;
-            data.reset((T*)alloc.allocate(fullSize));
+			data.reset((T*)CudaAllocator::allocate(fullSize));
         } catch (std::bad_alloc& ba) {
             fprintf(stderr, "Memory allocation failed: %s\n", ba.what());
             return;

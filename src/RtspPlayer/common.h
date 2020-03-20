@@ -11,9 +11,9 @@
 
 typedef std::vector< unsigned char > bytearray;
 
-class Image{
+class Image: public std::enable_shared_from_this<Image>{
 public:
-    enum TYPE{YUV, RGB, GRAY};
+	enum TYPE{YUV, NV12, RGB, GRAY};
 
     Image(){
 
@@ -21,11 +21,20 @@ public:
     Image(int w, int h, TYPE tp){
         if(tp == YUV)
             setYUV(w, h);
+		else if(tp == NV12)
+			setNV12(w, h);
         else if(tp == RGB)
             setRGB(w, h);
         else if(tp == GRAY)
             setGray(w, h);
     }
+	Image(const Image& o){
+		width = o.width;
+		height = o.height;
+		type = o.type;
+		rgb = o.rgb;
+		yuv = o.yuv;
+	}
 
     void setYUV(uint8_t *data[], int linesize[], int w, int h){
         type = YUV;
@@ -33,43 +42,39 @@ public:
         height = h;
         size_t size1 = static_cast<size_t>(linesize[0] * h);
         size_t size2 = static_cast<size_t>(linesize[1] * h/2);
-        size_t size3 = static_cast<size_t>(linesize[2] * h/2);
-        Y.resize(size1);
-        U.resize(size2);
-        V.resize(size3);
+		//size_t size3 = static_cast<size_t>(linesize[2] * h/2);
+		yuv.resize(size1 + size2 * 2);
 
-        std::copy(data[0], data[0] + size1, Y.data());
-        std::copy(data[1], data[1] + size2, U.data());
-        std::copy(data[2], data[2] + size3, V.data());
-    }
+		std::copy(data[0], data[0] + size1, yuv.data());
+		std::copy(data[1], data[1] + size2, yuv.data() + size1);
+		std::copy(data[2], data[2] + size2, yuv.data() + size1 + size2);
+	}
 
     void setNV12(uint8_t *data[], int linesize[], int w, int h){
-        type = YUV;
+		type = NV12;
         width = w;
         height = h;
         size_t size1 = static_cast<size_t>(linesize[0] * h);
         size_t size2 = static_cast<size_t>(linesize[1]/2 * h/2);
-        size_t size3 = static_cast<size_t>(linesize[1]/2 * h/2);
-        Y.resize(size1);
-        U.resize(size2);
-        V.resize(size3);
+		//size_t size3 = static_cast<size_t>(linesize[1]/2 * h/2);
+		yuv.resize(size1 + size2 * 2);
 
-        std::copy(data[0], data[0] + size1, Y.data());
-
-        for(size_t x = 0; x < size2; ++x){
-            U[x] = data[1][x * 2 + 0];
-            V[x] = data[1][x * 2 + 1];
-        }
-    }
+		std::copy(data[0], data[0] + size1, yuv.data());
+		std::copy(data[1], data[1] + size2 * 2, yuv.data() + size1);
+	}
 
     void setYUV(int w, int h){
         type = YUV;
         width = w;
         height = h;
-        Y.resize(w * h);
-        U.resize(w/2 * h/2);
-        V.resize(w/2 * h/2);
-    }
+		yuv.resize(w * h + w/2 * h/2 * 2);
+	}
+	void setNV12(int w, int h){
+		type = YUV;
+		width = w;
+		height = h;
+		yuv.resize(w * h + w/2 * h/2 * 2);
+	}
     void setRGB(int w, int h){
         type = RGB;
         width = w;
@@ -87,9 +92,7 @@ public:
         return width == 0 || height == 0;
     }
 
-    bytearray Y;
-    bytearray U;
-    bytearray V;
+	bytearray yuv;
     bytearray rgb;
     TYPE type = YUV;
     int width = 0;

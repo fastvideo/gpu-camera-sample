@@ -11,6 +11,10 @@
 
 #include "common.h"
 
+#include <fastvideo_sdk.h>
+
+#include "SDIConverter.h"
+
 namespace Ui {
 class GLWidget;
 }
@@ -61,16 +65,13 @@ private:
 
     QGLShaderProgram m_shader_program;
 
-    uint m_bindTex;
-    uint m_bindTexU;
-    uint m_bindTexV;
+	GLuint texture = 0;
+	GLuint pbo_buffer = 0;
+
     int m_vecInt;
     int m_texInt;
     int m_mvpInt;
     int m_utexIntY;
-    int m_utexIntU;
-    int m_utexIntV;
-    int m_rgbInt;
 
 	int m_prevWidth = 0;
 	int m_prevHeight = 0;
@@ -78,6 +79,12 @@ private:
 
     std::vector< float > m_vertexBuffer;
     std::vector< float > m_textureBuffer;
+
+	SDIConverter m_sdiConverter;
+	void *m_cudaRgb = nullptr;
+
+	bool initCudaBuffer();
+	void releaseCudaBuffer();
 
     void drawGL();
     void generateTexture();

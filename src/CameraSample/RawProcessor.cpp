@@ -537,16 +537,16 @@ void RawProcessor::setRtspServer(const QString &url)
 
     mRtspServer->setMultithreading(false);
 
-    auto funEncode = [this](int, unsigned char* , int width, int height, int, bytearray& output){
+	auto funEncode = [this](int, unsigned char* , int width, int height, int, Buffer& output){
 
 		int channels = dynamic_cast<CUDAProcessorGray*>(mProcessorPtr.data()) == nullptr? 3 : 1;
 
 		unsigned pitch = channels *(((width + FAST_ALIGNMENT - 1) / FAST_ALIGNMENT ) * FAST_ALIGNMENT);
         unsigned sz = pitch * height;
 
-        output.resize(sz);
-        mProcessorPtr->exportJPEGData(output.data(), mOptions.JpegQuality, sz);
-        output.resize(sz);
+		output.buffer.resize(sz);
+		mProcessorPtr->exportJPEGData(output.buffer.data(), mOptions.JpegQuality, sz);
+		output.size = sz;
     };
     mRtspServer->setUseCustomEncodeJpeg(true);
     mRtspServer->setEncodeFun(funEncode);

@@ -12,6 +12,7 @@ TEMPLATE = app
 SOURCES = main.cpp \
     $$OTHER_LIB_PATH/FastvideoSDK/common/helper_jpeg/helper_jpeg_load.cpp \
     $$OTHER_LIB_PATH/FastvideoSDK/common/helper_jpeg/helper_jpeg_store.cpp \
+    SDIConverter.cpp \
     Widgets/GtGWidget.cpp \
     CTPTransport.cpp \
     DialogOpenServer.cpp \
@@ -28,6 +29,7 @@ FORMS += \
 
 HEADERS += \
     $$OTHER_LIB_PATH/FastvideoSDK/common/helper_jpeg/helper_jpeg.hpp \
+    SDIConverter.h \
     Widgets/GtGWidget.h \
     common.h \
     CTPTransport.h \
@@ -66,3 +68,6 @@ win32{
 }
 
 win32: QMAKE_CXXFLAGS += /openmp
+
+RESOURCES += \
+    resorces.qrc

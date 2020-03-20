@@ -38,7 +38,6 @@ CircularBuffer::CircularBuffer(QObject *parent) : QObject(parent)
 bool CircularBuffer::allocate(int width, int height, fastSurfaceFormat_t format)
 {
     QMutexLocker lock(&mMutex);
-    CudaAllocator alloc;
 
     int pitch = GetPitchFromSurface(format, width);
     int bpc = GetBitsPerChannelFromSurface(format);
@@ -63,7 +62,7 @@ bool CircularBuffer::allocate(int width, int height, fastSurfaceFormat_t format)
         mImages[i].bitsPerChannel = bpc;
         try
         {
-            mImages[i].data.reset(static_cast<unsigned char*>(alloc.allocate(bytesAlloc)));
+			mImages[i].data.reset(static_cast<unsigned char*>(CudaAllocator::allocate(bytesAlloc)));
         }
         catch(...)
         {

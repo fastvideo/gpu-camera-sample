@@ -4,6 +4,48 @@
 #include <stdio.h>
 
 #include <QPainter>
+#include <QGuiApplication>
+#include <QScreen>
+
+#include <fastvideo_sdk.h>
+#include <cuda_runtime.h>
+#include <cuda_gl_interop.h>
+
+///////////////////////////
+
+void RGB2Yuv420p(unsigned char *yuv,
+							   unsigned char *rgb,
+							   int width,
+							   int height)
+{
+  const size_t image_size = width * height;
+  unsigned char *dst_y = yuv;
+  unsigned char *dst_u = yuv + image_size;
+  unsigned char *dst_v = yuv + image_size * 5 / 4;
+
+	// Y plane
+	for(size_t i = 0; i < image_size; i++)
+	{
+		int r = rgb[3 * i];
+		int g = rgb[3 * i + 1];
+		int b = rgb[3 * i + 2];
+		*dst_y++ = ((67316 * r + 132154 * g + 25666 * b) >> 18 ) + 16;
+	}
+
+	// U and V plane
+	for(size_t y = 0; y < height; y+=2)
+	{
+		for(size_t x = 0; x < width; x+=2)
+		{
+			const size_t i = y * width + x;
+			int r = rgb[3 * i];
+			int g = rgb[3 * i + 1];
+			int b = rgb[3 * i + 2];
+			*dst_u++ = ((-38856 * r - 76282 * g + 115138 * b ) >> 18 ) + 128;
+			*dst_v++ = ((115138 * r - 96414 * g - 18724 * b) >> 18 ) + 128;
+		}
+	}
+}
 
 ///////////////////////////
 
@@ -29,7 +71,7 @@ GLWidget::GLWidget(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    setAutoFillBackground(false);
+	setAutoFillBackground(false);
 
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(onTimeout()));
 	m_timer.start(2);
@@ -38,6 +80,10 @@ GLWidget::GLWidget(QWidget *parent) :
 
 GLWidget::~GLWidget()
 {
+	if(m_cudaRgb){
+		cudaFree(m_cudaRgb);
+	}
+
     delete ui;
 }
 
@@ -113,7 +159,7 @@ void GLWidget::onTimeout()
         m_is_update = false;
         generateTexture();
         update();
-    }
+	}
 }
 
 inline void qmat2float(const QMatrix4x4& mat, float* data, int len = 16)
@@ -154,9 +200,9 @@ void GLWidget::drawGL()
     }
 
     if(ar > arim){
-     m_modelview.scale(arim, 1, 1);
+		m_modelview.scale(arim, 1, 1);
     }else{
-     m_modelview.scale(ar, ar / arim, 1);
+		m_modelview.scale(ar, ar / arim, 1);
     }
 
     m_mvp = m_projection * m_modelview;
@@ -165,29 +211,16 @@ void GLWidget::drawGL()
 
     glUniformMatrix4fv(m_mvpInt, 1, false, mvp);
 
-    if(m_image->type == Image::RGB){
-        glUniform1i(m_rgbInt, 1);
-	}else if(m_image->type == Image::GRAY){
-		glUniform1i(m_rgbInt, 2);
-	}else{
-        glUniform1i(m_rgbInt, 0);
-    }
+	GLfloat iw = m_image->width;
+	GLfloat ih = m_image->height;
 
 	auto starttime = getNow();
 
-    glEnable(GL_TEXTURE_2D);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_bindTex);
-    glUniform1i(m_utexIntY, 0);
-
-    if(m_image->type == Image::YUV){
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, m_bindTexU);
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, m_bindTexV);
-        glUniform1i(m_utexIntU, 1);
-        glUniform1i(m_utexIntV, 2);
-    }
+	//glActiveTexture(GL_TEXTURE1);
+	glEnable(GL_TEXTURE_2D);
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_buffer);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, iw, ih, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
 
     glEnableVertexAttribArray(m_vecInt);
     glEnableVertexAttribArray(m_texInt);
@@ -199,7 +232,33 @@ void GLWidget::drawGL()
 
     glDisable(GL_TEXTURE_2D);
 
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+	glFinish();
+
 	m_durations["output_duration"] = getDuration(starttime);
+}
+
+bool GLWidget::initCudaBuffer()
+{
+	if(m_cudaRgb && m_image->width == m_prevWidth && m_image->height == m_prevHeight){
+		return true;
+	}
+	releaseCudaBuffer();
+
+	size_t sz = m_image->width * m_image->height * 3;
+
+	cudaError_t err = cudaMalloc(&m_cudaRgb, sz);
+
+	return err == cudaSuccess;
+}
+
+void GLWidget::releaseCudaBuffer()
+{
+	if(m_cudaRgb){
+		cudaFree(m_cudaRgb);
+	}
+	m_cudaRgb = nullptr;
 }
 
 void GLWidget::generateTexture()
@@ -211,75 +270,106 @@ void GLWidget::generateTexture()
         return;
     m_is_texupdate = false;
 
-	bool newTex = false;
-
-	if(m_prevWidth != m_image->width || m_prevHeight != m_image->height || m_prevType != m_image->type){
-		newTex = true;
-	}
+	unsigned char *data = NULL;
+	size_t pboBufferSize = 0;
+	cudaError_t error = cudaSuccess;
 
 	auto starttime = getNow();
+
+	int width = m_image->width;
+	int height = m_image->height;
+
+	if(!initCudaBuffer()){
+		return;
+	}
+
+	void *img = m_cudaRgb;
+
+	if(m_image->type == Image::YUV || m_image->type == Image::NV12){
+		if(!m_sdiConverter.convertToRgb(m_image, m_cudaRgb)){
+			return;
+		}
+	}else if(m_image->type == Image::RGB){
+		error = cudaMemcpy(m_cudaRgb, m_image->rgb.data(), m_image->rgb.size(), cudaMemcpyHostToDevice);
+		if(error != cudaSuccess){
+			return;
+		}
+	}else if(m_image->type == Image::GRAY){
+		// not yet supported
+		return;
+	}
+
+	GLint bsize;
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_buffer);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	glBufferData(GL_PIXEL_UNPACK_BUFFER, 3 * sizeof(unsigned char) * width * height, NULL, GL_STREAM_COPY);
+	glGetBufferParameteriv(GL_PIXEL_UNPACK_BUFFER, GL_BUFFER_SIZE, &bsize);
+	struct cudaGraphicsResource* cuda_pbo_resource = 0;
+
+	if(img == nullptr)
+		return;
+
+	error = cudaGraphicsGLRegisterBuffer(&cuda_pbo_resource, pbo_buffer, cudaGraphicsMapFlagsWriteDiscard);
+	if(error != cudaSuccess)
+	{
+		qDebug("Cannot register CUDA Graphic Resource: %s\n", cudaGetErrorString(error));
+		return;
+	}
+
+	if((error = cudaGraphicsMapResources( 1, &cuda_pbo_resource, 0 ) ) != cudaSuccess)
+	{
+		qDebug("cudaGraphicsMapResources failed: %s\n", cudaGetErrorString(error) );
+		return;
+	}
+
+	if((error = cudaGraphicsResourceGetMappedPointer( (void **)&data, &pboBufferSize, cuda_pbo_resource ) ) != cudaSuccess )
+	{
+		qDebug("cudaGraphicsResourceGetMappedPointer failed: %s\n", cudaGetErrorString(error) );
+		return;
+	}
+
+	if(pboBufferSize < ( width * height * 3 * sizeof(unsigned char) ))
+	{
+		qDebug("cudaGraphicsResourceGetMappedPointer failed: %s\n", cudaGetErrorString(error) );
+		return;
+	}
+
+	if((error = cudaMemcpy( data, img, width * height * 3 * sizeof(unsigned char), cudaMemcpyDeviceToDevice ) ) != cudaSuccess)
+	{
+		qDebug("cudaMemcpy failed: %s\n", cudaGetErrorString(error) );
+		return;
+	}
+
+	if((error = cudaGraphicsUnmapResources( 1, &cuda_pbo_resource, 0 ) ) != cudaSuccess )
+	{
+		 qDebug("cudaGraphicsUnmapResources failed: %s\n", cudaGetErrorString(error) );
+		 return;
+	}
+
+	if(cuda_pbo_resource)
+	{
+		if((error  = cudaGraphicsUnregisterResource(cuda_pbo_resource))!= cudaSuccess)
+		{
+			qDebug("Cannot unregister CUDA Graphic Resource: %s\n", cudaGetErrorString(error));
+			return;
+		}
+		cuda_pbo_resource = 0;
+	}
+
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_buffer);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
 	m_prevWidth = m_image->width;
 	m_prevHeight = m_image->height;
 	m_prevType = m_image->type;
 
-    if(m_image->type == Image::YUV){
-		glBindTexture(GL_TEXTURE_2D, m_bindTex);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		if(newTex){
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, m_image->width, m_image->height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_image->Y.data());
-		}else {
-			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_image->width, m_image->height, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_image->Y.data());
-		}
-
-        glBindTexture(GL_TEXTURE_2D, m_bindTexU);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		if(newTex){
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, m_image->width/2, m_image->height/2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_image->U.data());
-		}else {
-			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_image->width/2, m_image->height/2, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_image->U.data());
-		}
-
-        glBindTexture(GL_TEXTURE_2D, m_bindTexV);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		if(newTex){
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, m_image->width/2, m_image->height/2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_image->V.data());
-		}else {
-			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_image->width/2, m_image->height/2, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_image->V.data());
-		}
-
-		m_durations["generate_texture_yuv"] = getDuration(starttime);
-	}else if(m_image->type == Image::RGB){
-		glBindTexture(GL_TEXTURE_2D, m_bindTex);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		if(newTex){
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_image->width, m_image->height, 0, GL_RGB, GL_UNSIGNED_BYTE, m_image->rgb.data());
-		}else{
-			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_image->width, m_image->height, GL_RGB, GL_UNSIGNED_BYTE, m_image->rgb.data());
-		}
-
-		m_durations["generate_texture_rgb"] = getDuration(starttime);
-	}else if(m_image->type == Image::GRAY){
-		glBindTexture(GL_TEXTURE_2D, m_bindTex);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		if(newTex){
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, m_image->width, m_image->height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_image->rgb.data());
-		}else{
-			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_image->width, m_image->height, GL_LUMINANCE, GL_UNSIGNED_BYTE, m_image->rgb.data());
-		}
-
-		m_durations["generate_texture_gray"] = getDuration(starttime);
-	}
+	m_durations["generate_texture_rgb"] = getDuration(starttime);
 }
 
 void GLWidget::paintEvent(QPaintEvent *event)
@@ -299,11 +389,12 @@ void GLWidget::initializeGL()
     QGLWidget::initializeGL();
     QOpenGLFunctions::initializeOpenGLFunctions();
 
-    glGenTextures(1, &m_bindTex);
-    glGenTextures(1, &m_bindTexU);
-    glGenTextures(1, &m_bindTexV);
+	bool res = false;
+//    glGenTextures(1, &m_bindTex);
+//    glGenTextures(1, &m_bindTexU);
+//    glGenTextures(1, &m_bindTexV);
 
-    m_shader_program.addShaderFromSourceCode(QGLShader::Vertex,
+	res = m_shader_program.addShaderFromSourceCode(QGLShader::Vertex,
                                             "attribute vec3 aVec;\n"
                                             "attribute vec2 aTex;\n"
                                             "uniform mat4 uMvp;\n"
@@ -313,35 +404,12 @@ void GLWidget::initializeGL()
                                             "    vTex = aTex;\n"
                                             "}");
 
-    m_shader_program.addShaderFromSourceCode(QGLShader::Fragment,
+	res = m_shader_program.addShaderFromSourceCode(QGLShader::Fragment,
                                              "//precision highp float;\n"
                                             "varying vec2 vTex;                                                         \n"
                                             "uniform sampler2D uTexY;                                                   \n"
-                                            "uniform sampler2D uTexU;                                                   \n"
-                                            "uniform sampler2D uTexV;                                                   \n"
-                                            "uniform int rgb;                                                           \n"
-                                            "vec3 getRgb(vec3 yuv)                                                      \n"
-                                            " {                                                                         \n"
-                                            "     vec3 vec;                                                             \n"
-                                            "                                                                           \n"
-                                            "     vec.x = yuv.x + 1.402 * (yuv.z - 0.5);                                \n"
-                                            "     vec.y = yuv.x - 0.344 * (yuv.y - 0.5) - 0.714 * (yuv.z - 0.5);        \n"
-                                            "     vec.z = yuv.x + 1.772 * (yuv.y - 0.5);                                \n"
-                                            "     return vec;                                                           \n"
-                                            " }                                                                         \n"
                                             "void main(){                                                               \n"
-											"   if(rgb  == 1){                                                          \n"
-                                            "       gl_FragColor = texture2D(uTexY, vTex);                              \n"
-											"   }																		\n"
-											"   if(rgb == 2){															\n"
-											"		gl_FragColor = texture2D(uTexY, vTex).bbba;							\n"
-											"	}																		\n"
-											"   if(rgb == 0){                                                           \n"
-											"       float y = texture2D(uTexY, vTex).b;                                 \n"
-											"       float u = texture2D(uTexU, vTex).b;                                 \n"
-											"       float v = texture2D(uTexV, vTex).b;                                 \n"
-											"       gl_FragColor = vec4(getRgb(vec3(y, u, v)), 1);                      \n"
-                                            "   }                                                                       \n"
+											"   gl_FragColor = texture2D(uTexY, vTex);                              \n"
                                             "}");
 
     m_shader_program.link();
@@ -351,9 +419,9 @@ void GLWidget::initializeGL()
     m_texInt = m_shader_program.attributeLocation("aTex");
     m_mvpInt = m_shader_program.uniformLocation("uMvp");
     m_utexIntY = m_shader_program.uniformLocation("uTexY");
-    m_utexIntU = m_shader_program.uniformLocation("uTexU");
-    m_utexIntV = m_shader_program.uniformLocation("uTexV");
-    m_rgbInt = m_shader_program.uniformLocation("rgb");
+//    m_utexIntU = m_shader_program.uniformLocation("uTexU");
+//    m_utexIntV = m_shader_program.uniformLocation("uTexV");
+//    m_rgbInt = m_shader_program.uniformLocation("rgb");
 
     addPt(m_vertexBuffer, -1, -1, 0);
     addPt(m_vertexBuffer, -1, 1, 0);
@@ -364,6 +432,31 @@ void GLWidget::initializeGL()
     addPt(m_textureBuffer, 0, 0);
     addPt(m_textureBuffer, 1, 1);
     addPt(m_textureBuffer, 1, 0);
+
+	QSize sz = QGuiApplication::primaryScreen()->size() * 2;
+
+	GLint bsize;
+	glGenTextures(1, &texture);
+	glGenBuffers(1, &pbo_buffer);
+
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_buffer);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glBufferData(GL_PIXEL_UNPACK_BUFFER, GLsizeiptr(3 * sizeof(unsigned char)) * sz.width() * sz.height(), nullptr, GL_STREAM_COPY);
+	glGetBufferParameteriv(GL_PIXEL_UNPACK_BUFFER, GL_BUFFER_SIZE, &bsize);
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+//	QImage im;
+//	im.load("test.jpeg");
+//	if(!im.isNull()){
+//		im = im.convertToFormat(QImage::Format_RGB888);
+//		m_image.reset(new Image(im.width(), im.height(), Image::YUV));
+//		RGB2Yuv420p(m_image->yuv.data(), im.bits(), im.width(), im.height());
+////		size_t sz = im.width() * im.height() * 3;
+////		memcpy(m_image->rgb.data(), im.bits(), sz);
+//		m_is_texupdate = true;
+//		m_is_update = true;
+//	}
+
 }
 
 void GLWidget::resizeGL(int w, int h)

@@ -173,7 +173,7 @@ private:
     std::list<TcpClient*>  mClients;
 
     std::vector<bytearray> mData;
-    std::vector<bytearray> mJpegData;
+	std::vector<Buffer> mJpegData;
 
     time_point             mStartTime = time_point (std::chrono::milliseconds(0));
 

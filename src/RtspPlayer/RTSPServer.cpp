@@ -217,6 +217,11 @@ bool RTSPServer::isCuvidFound() const
 	return m_codec && QString(m_codec->name) == "h264_cuvid";
 }
 
+bool RTSPServer::isMJpeg() const
+{
+	return m_idCodec == CODEC_JPEG;
+}
+
 bool RTSPServer::isFrameExists() const
 {
 	return m_fvImage.get() && m_image_updated;// m_useFastvideo && m_fvImage.get() || !m_frames.empty();
@@ -228,7 +233,12 @@ PImage RTSPServer::takeFrame()
 		m_framesCount++;
 		m_image_updated = false;
 	}
-	return m_fvImage;
+	std::lock_guard<std::mutex> lg(m_mutexDecoder);
+
+	PImage obj;
+	obj.reset(new Image(*m_fvImage.get()));
+
+	return obj;
 //    if(m_useFastvideo){
 //        m_framesCount++;
 //        return m_fvImage;
@@ -592,8 +602,6 @@ void RTSPServer::decode_packet(AVPacket *pkt, PImage &image)
 
 		double duration = getDuration(starttime);
 
-		m_mutexDecoder.unlock();
-
 		QString name = m_cdcctx->codec->name;
 		QString out = "decode (" + name + "):";
 
@@ -745,20 +753,26 @@ void copyRect(const PImage &part, size_t xOff, size_t yOff, PImage &out)
         int linesizeUVP = part->width/2;
         int linesizeYO = out->width;
         int linesizeUVO = out->width/2;
-        for(int y = 0; y < part->height; ++y){
-            unsigned char * yp = part->Y.data() + linesizeYP * y;
-            unsigned char * yo = out->Y.data() + linesizeYO * (y + yOff) + xOff;
+		uchar *pY = part->yuv.data();
+		uchar *oY = out->yuv.data();
+		for(int y = 0; y < part->height; ++y){
+			unsigned char * yp = pY + linesizeYP * y;
+			unsigned char * yo = oY + linesizeYO * (y + yOff) + xOff;
             std::copy(yp, yp + linesizeYP, yo);
         }
 
-        for(int y = 0; y < part->height/2; ++y){
-            unsigned char * up = part->U.data() + linesizeUVP * y;
-            unsigned char * uo = out->U.data() + linesizeUVO * (y + yOff/2) + xOff/2;
+		uchar *pU = pY + part->width * part->height;
+		uchar *oU = oY + out->width * out->height;
+		uchar *pV = pU + part->width/2 * part->height/2;
+		uchar *oV = oU + out->width/2 * out->height/2;
+		for(int y = 0; y < part->height/2; ++y){
+			unsigned char * up = pU + linesizeUVP * y;
+			unsigned char * uo = oU + linesizeUVO * (y + yOff/2) + xOff/2;
 
             std::copy(up, up + linesizeUVP, uo);
 
-            unsigned char * vp = part->V.data() + linesizeUVP * y;
-            unsigned char * vo = out->V.data() + linesizeUVO * (y + yOff/2) + xOff/2;
+			unsigned char * vp = pV + linesizeUVP * y;
+			unsigned char * vo = oV + linesizeUVO * (y + yOff/2) + xOff/2;
             std::copy(vp, vp + linesizeUVP, vo);
         }
     }else if(part->type == Image::RGB){

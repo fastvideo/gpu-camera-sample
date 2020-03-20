@@ -46,6 +46,7 @@ public:
     void setMaxWidthFastvideo(uint val);
 
 	bool isCuvidFound() const;
+	bool isMJpeg() const;
 
     bool isFrameExists() const override;
     PImage takeFrame() override;
@@ -83,7 +84,7 @@ private:
 
 	QMap<QString, double> m_durations;
 
-    int m_bufferUdp = 1000000;
+	int m_bufferUdp = 5000000;
 
     quint32 m_framesCount = 0;
     quint64 m_bytesReaded = 0;
@@ -153,7 +154,7 @@ private:
 
     std::queue<QByteArray> m_encodecPkts;
     std::mutex m_mutexDec;
-    size_t m_max_buffer_size = 2;
+	size_t m_max_buffer_size = 2;
 
     enum {
         CODEC_JPEG,

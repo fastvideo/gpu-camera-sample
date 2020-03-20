@@ -453,13 +453,13 @@ bool RTSPStreamerServer::addBigFrame(unsigned char* rgbPtr, size_t linesize)
 
         mJpegEncode(static_cast<int>(t), mData[t].data(), MAX_WIDTH_JPEG, MAX_HEIGHT_JPEG, mChannels, mJpegData[t]);
 
-        av_new_packet(&pkts[t], static_cast<int>(mJpegData[t].size()+ rtp_packet_add_header::sizeof_header));
+		av_new_packet(&pkts[t], static_cast<int>(mJpegData[t].size + rtp_packet_add_header::sizeof_header));
         pkts[t].pts = mFramesProcessed + t;
 
         uchar x = static_cast<uchar>(t % cntW);
         uchar y = static_cast<uchar>(t / cntW);
 
-        std::copy(mJpegData[t].data(), mJpegData[t].data() + mJpegData[t].size(), pkts[t].data);
+		std::copy(mJpegData[t].buffer.data(), mJpegData[t].buffer.data() + mJpegData[t].size, pkts[t].data);
         rtp_packet_add_header::setHeader(pkts[t].data + pkts[t].size - rtp_packet_add_header::sizeof_header - 2,
                                          x, y, cntW, cntH, mWidth, mHeight);
     };
@@ -554,10 +554,10 @@ bool RTSPStreamerServer::addFrame(unsigned char *rgbPtr)
 			throw new std::exception();
         }
 
-        av_new_packet(&pkt, static_cast<int>(mJpegData[t].size()));
+		av_new_packet(&pkt, static_cast<int>(mJpegData[t].size));
         pkt.pts = mFramesProcessed++;
 
-        std::copy(mJpegData[t].data(), mJpegData[t].data() + mJpegData[t].size(), pkt.data);
+		std::copy(mJpegData[t].buffer.data(), mJpegData[t].buffer.data() + mJpegData[t].size, pkt.data);
 
         sendPkt(&pkt);
         av_packet_unref(&pkt);
