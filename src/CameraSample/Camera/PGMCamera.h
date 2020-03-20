@@ -31,6 +31,8 @@
 
 #include "CameraBase.h"
 #include "FrameBuffer.h"
+#include "Image.h"
+#include "FastAllocator.h"
 
 class PGMCamera : public CameraBase
 {
@@ -52,7 +54,7 @@ private:
     void startStreaming();
 
     QString mFileName;
-    ImageT mInputImage;
+    Image<unsigned char, FastAllocator> mInputImage;
 
 
 };

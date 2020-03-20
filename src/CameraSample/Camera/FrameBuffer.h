@@ -34,10 +34,11 @@
 #include <QMutex>
 #include <QMutexLocker>
 
-#include "Image.h"
-#include "FastAllocator.h"
+//#include "Image.h"
+//#include "FastAllocator.h"
+#include "GPUImage.h"
 
-typedef Image<unsigned char, FastAllocator> ImageT;
+typedef GPUImage<unsigned char> ImageT;
 
 class CircularBuffer : public QObject
 {
@@ -63,7 +64,7 @@ signals:
 public slots:
 
 private:
-    const int numBuffers = 16;
+    const int numBuffers = 4;
 
     //Currently written buffer
     int mCurrent = 0;
@@ -74,6 +75,10 @@ private:
     QVector<ImageT> mImages;
     QMutex mMutex;
     int mAllocated = 0;
+
+    int mRead = 0;
+    int mWritten = 0;
+    int mDropped = 0;
 };
 
 #endif // FRAMEBUFFER_H

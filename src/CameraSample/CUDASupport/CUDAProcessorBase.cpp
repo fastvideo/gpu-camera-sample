@@ -81,16 +81,16 @@ void CUDAProcessorBase::freeFilters()
     Close();
 
 
-    if( hHostToDeviceAdapter != nullptr )
+    if( hDeviceToDeviceAdapter != nullptr )
     {
-        fastImportFromHostDestroy( hHostToDeviceAdapter ) ;
-        hHostToDeviceAdapter = nullptr;
+        fastImportFromDeviceDestroy( hDeviceToDeviceAdapter ) ;
+        hDeviceToDeviceAdapter = nullptr;
         cudaMemoryInfo("Destroyed hHostToDeviceAdapter");
     }
 
     if( hRawUnpacker != nullptr )
     {
-        fastRawImportFromHostDestroy( hRawUnpacker );
+        fastRawImportFromDeviceDestroy( hRawUnpacker );
         hRawUnpacker = nullptr;
         cudaMemoryInfo("Destroyed hRawUnpacker");
     }
@@ -298,7 +298,7 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
 
     if(options.Packed)
     {
-        ret = fastRawImportFromHostCreate(
+        ret = fastRawImportFromDeviceCreate(
                     &hRawUnpacker,
 
                     FAST_RAW_XIMEA12,
@@ -317,8 +317,8 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
     }
     else
     {
-        ret = fastImportFromHostCreate(
-                    &hHostToDeviceAdapter,
+        ret = fastImportFromDeviceCreate(
+                    &hDeviceToDeviceAdapter,
 
                     srcSurfaceFmt,
                     maxWidth,
@@ -804,15 +804,15 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
         fastDebayerGetAllocatedGpuMemorySize( hDebayer, &tmp );
         requestedMemSpace += tmp;
     }
-    if( hHostToDeviceAdapter != nullptr )
+    if( hDeviceToDeviceAdapter != nullptr )
     {
-        fastImportFromHostGetAllocatedGpuMemorySize( hHostToDeviceAdapter, &tmp );
+        fastImportFromDeviceGetAllocatedGpuMemorySize( hDeviceToDeviceAdapter, &tmp );
         requestedMemSpace += tmp;
     }
 
     if( hRawUnpacker != nullptr )
     {
-        fastRawImportFromHostGetAllocatedGpuMemorySize( hRawUnpacker, &tmp );
+        fastRawImportFromDeviceGetAllocatedGpuMemorySize( hRawUnpacker, &tmp );
         requestedMemSpace += tmp;
     }
 
@@ -903,7 +903,6 @@ QSize CUDAProcessorBase::getMaxInputSize()
 fastStatus_t CUDAProcessorBase::Transform(ImageT *image, CUDAProcessorOptions &opts)
 {
     QMutexLocker locker(&mut);
-
     if(image == nullptr)
     {
         mLastError = FAST_INVALID_VALUE;
@@ -913,9 +912,6 @@ fastStatus_t CUDAProcessorBase::Transform(ImageT *image, CUDAProcessorOptions &o
 
     float fullTime = 0.;
     float elapsedTimeGpu = 0.;
-
-    QElapsedTimer cpuTimer;
-    cpuTimer.start();
 
     if(!mInitialised)
         return mLastError;
@@ -955,14 +951,17 @@ fastStatus_t CUDAProcessorBase::Transform(ImageT *image, CUDAProcessorOptions &o
     stats[QStringLiteral("inputWidth")] = imgWidth;
     stats[QStringLiteral("inputHeight")] = imgHeight;
 
+    QElapsedTimer cpuTimer;
+    cpuTimer.start();
+
     if(info)
         fastGpuTimerStart(profileTimer);
     QString key;
-    if(hHostToDeviceAdapter != nullptr)
+    if(hDeviceToDeviceAdapter != nullptr)
     {
         key = QStringLiteral("hHostToDeviceAdapter");
-        ret = fastImportFromHostCopy(
-                    hHostToDeviceAdapter,
+        ret = fastImportFromDeviceCopy(
+                    hDeviceToDeviceAdapter,
 
                     image->data.get(),
                     imgWidth,
@@ -976,7 +975,7 @@ fastStatus_t CUDAProcessorBase::Transform(ImageT *image, CUDAProcessorOptions &o
     else if(hRawUnpacker != nullptr)
     {
         key = QStringLiteral("hRawUnpacker");
-        ret = fastRawImportFromHostDecode(
+        ret = fastRawImportFromDeviceDecode(
                     hRawUnpacker,
 
                     image->data.get(),
@@ -1366,8 +1365,7 @@ fastStatus_t CUDAProcessorBase::Transform(ImageT *image, CUDAProcessorOptions &o
     if(info)
     {
         cudaDeviceSynchronize();
-
-        float mcs = float(cpuTimer.elapsed());
+        float mcs = float(cpuTimer.nsecsElapsed()) / 1000000.f;
         stats[QStringLiteral("totalGPUCPUTime")] = mcs;
         stats[QStringLiteral("totalGPUTime")] = fullTime;
     }
@@ -1379,7 +1377,6 @@ fastStatus_t CUDAProcessorBase::Transform(ImageT *image, CUDAProcessorOptions &o
     }
 
     locker.unlock();
-
     emit finished();
     return FAST_OK;
 }

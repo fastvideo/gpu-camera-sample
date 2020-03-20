@@ -174,7 +174,6 @@ MainWindow::MainWindow(QWidget *parent) :
     QTimer::singleShot(0, this, [this](){delayInit();});
 }
 
-
 MainWindow::~MainWindow()
 {
     delete ui;

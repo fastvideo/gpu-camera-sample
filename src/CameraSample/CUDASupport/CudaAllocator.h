@@ -26,26 +26,39 @@
  either expressed or implied, of the FreeBSD Project.
 */
 
-#ifndef CUDAPROCESSORGRAY_H
-#define CUDAPROCESSORGRAY_H
-#include "CUDAProcessorBase.h"
+#ifndef CUDAALLOCATOR_H
+#define CUDAALLOCATOR_H
+#include <cuda_runtime.h>
 
-class CUDAProcessorGray : public CUDAProcessorBase
-{
+class CudaAllocator{
 public:
-    CUDAProcessorGray(QObject *parent = nullptr);
-    ~CUDAProcessorGray() override;
-    virtual fastStatus_t Init(CUDAProcessorOptions& options);
-    virtual fastStatus_t Transform(ImageT *image, CUDAProcessorOptions& opts) override;
-    virtual bool isGrayscale() override {return true;}
-    virtual void freeFilters() override;
-    virtual fastStatus_t export8bitData(void* dstPtr, bool forceRGB = true) override;
-//    virtual fastStatus_t exportJPEGData(void* dstPtr, unsigned jpegQuality, unsigned &size);
+    static void* allocate(size_t bytesCount) {
+        void* p = nullptr;
+        cudaError_t ret_cuda = cudaMalloc( (void **)&p,  bytesCount);
+        if(ret_cuda != cudaSuccess)
+        {
+            throw std::bad_alloc();
+        }
+        return p;
+    }
 
-private:
-    fastSurfaceConverterHandle_t    hGrayToRGBTransform = nullptr;
-    fastDeviceSurfaceBufferHandle_t dstGrayBuffer = nullptr;
-    fastExportToHostHandle_t        hDeviceToHostGrayAdapter = nullptr;
+    static void deallocate(void* p, size_t)
+    {
+        cudaError_t ret_cuda = cudaFree(p);
+        if(ret_cuda != cudaSuccess)
+        {
+            throw std::bad_alloc();
+        }
+    }
+
+    void operator()(void* p)
+    {
+        cudaError_t ret_cuda = cudaFree(p);
+        if(ret_cuda != cudaSuccess)
+        {
+            throw std::bad_alloc();
+        }
+    }
 };
 
-#endif // CUDAPROCESSORGRAY_H
+#endif // CUDAALLOCATOR_H

@@ -28,6 +28,7 @@
 
 #include "FrameBuffer.h"
 #include "SurfaceTraits.hpp"
+#include <QDateTime>
 
 CircularBuffer::CircularBuffer(QObject *parent) : QObject(parent)
 {
@@ -37,7 +38,7 @@ CircularBuffer::CircularBuffer(QObject *parent) : QObject(parent)
 bool CircularBuffer::allocate(int width, int height, fastSurfaceFormat_t format)
 {
     QMutexLocker lock(&mMutex);
-    FastAllocator alloc;
+    CudaAllocator alloc;
 
     int pitch = GetPitchFromSurface(format, width);
     int bpc = GetBitsPerChannelFromSurface(format);
@@ -62,7 +63,7 @@ bool CircularBuffer::allocate(int width, int height, fastSurfaceFormat_t format)
         mImages[i].bitsPerChannel = bpc;
         try
         {
-            mImages[i].data.reset(static_cast<unsigned char *>(alloc.allocate(bytesAlloc)));
+            mImages[i].data.reset(static_cast<unsigned char*>(alloc.allocate(bytesAlloc)));
         }
         catch(...)
         {
@@ -72,22 +73,22 @@ bool CircularBuffer::allocate(int width, int height, fastSurfaceFormat_t format)
     }
 
     mAllocated = bytesAlloc;
-
+    mRead = mWritten = 0;
     return true;
 }
 
 int CircularBuffer::width()
 {
-    return mImages.isEmpty() ? 0 : mImages.at(0).w;
+    return mImages.isEmpty() ? 0 : mImages.front().w;
 }
 
 int CircularBuffer::height()
 {
-    return  mImages.isEmpty() ? 0 : mImages.at(0).h;
+    return  mImages.isEmpty() ? 0 : mImages.front().h;
 }
 int CircularBuffer::pitch()
 {
-    return  mImages.isEmpty() ? 0 : mImages.at(0).wPitch;
+    return  mImages.isEmpty() ? 0 : mImages.front().wPitch;
 }
 
 int CircularBuffer::size()
@@ -96,7 +97,7 @@ int CircularBuffer::size()
 }
 fastSurfaceFormat_t CircularBuffer::surfaceFmt()
 {
-    return  mImages.isEmpty() ? FAST_I8 : mImages.at(0).surfaceFmt;
+    return  mImages.isEmpty() ? FAST_I8 : mImages.front().surfaceFmt;
 }
 
 unsigned char* CircularBuffer::getBuffer()
@@ -115,11 +116,15 @@ ImageT* CircularBuffer::getLastImage()
 {
     if(mImages.isEmpty() || mLast < 0)
         return nullptr;
-
+    mRead++;
+//    qDebug("Reading image = %d, ts = %u", mLast, QDateTime::currentDateTime().toMSecsSinceEpoch());
     return &(mImages[mLast]);
 }
 
 void CircularBuffer::release()
 {
     mLast = mCurrent;
+    mWritten++;
+    mDropped = mWritten - mRead;
+//    qDebug("Read = %d, written = %d, ts = %u", mRead, mWritten, QDateTime::currentDateTime().toMSecsSinceEpoch());
 }

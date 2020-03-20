@@ -103,6 +103,7 @@ void RawProcessor::stop()
 
 void RawProcessor::wake()
 {
+    mWake = true;
     mWaitCond.wakeAll();
 }
 
@@ -125,12 +126,17 @@ void RawProcessor::startWorking()
 
     QByteArray buffer;
     buffer.resize(mOptions.Width * mOptions.Height * 4);
+    mWake = false;
 
     while(mWorking)
     {
-        mWaitMutex.lock();
-        mWaitCond.wait(&mWaitMutex);
-        mWaitMutex.unlock();
+        if(!mWake)
+        {
+            mWaitMutex.lock();
+            mWaitCond.wait(&mWaitMutex);
+            mWaitMutex.unlock();
+        }
+        mWake = false;
 
         if(!mWorking)
             break;

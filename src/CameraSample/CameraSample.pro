@@ -112,7 +112,9 @@ HEADERS  += MainWindow.h \
     RtspServer/JpegEncoder.h \
     RtspServer/RTSPStreamerServer.h \
     RtspServer/TcpClient.h \
-    RtspServer/vutils.h
+    RtspServer/vutils.h \
+    CUDASupport/CudaAllocator.h \
+    CUDASupport/GPUImage.h
     version.h
 
 FORMS    += MainWindow.ui \
@@ -150,5 +152,4 @@ copyToDestdir($$FASTVIDEO_EXTRA_DLLS)
 RESOURCES += \
     Resorces.qrc
 
-DISTFILES += \
-    res/camera.svg
+DISTFILES +=

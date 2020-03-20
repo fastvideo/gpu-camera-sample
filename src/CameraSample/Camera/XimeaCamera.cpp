@@ -32,6 +32,8 @@
 #include "MainWindow.h"
 #include "RawProcessor.h"
 
+#include <QByteArray>
+
 XimeaCamera::XimeaCamera() :
     CameraBase()
 {
@@ -211,15 +213,21 @@ void XimeaCamera::startStreaming()
     ret = xiStartAcquisition(hDevice);
     if(ret != XI_OK)
         return;
+
+    QByteArray frameData;
+    frameData.resize(mInputBuffer.size());
+    XI_IMG image = {0};
+    image.size = sizeof(XI_IMG);
+    image.bp_size = frameData.size();
+    image.bp = frameData.data();
+
     QElapsedTimer tmr;
     while(mState == cstStreaming)
     {
         tmr.restart();
-        XI_IMG image; // = {0};
-        image.size = sizeof(XI_IMG);
-        image.bp_size = mInputBuffer.size();
-        image.bp = mInputBuffer.getBuffer();
         ret = xiGetImage(hDevice, 5000, &image);
+        unsigned char* dst = mInputBuffer.getBuffer();
+        cudaMemcpy(dst, frameData.data(), image.bp_size, cudaMemcpyHostToDevice);
         mInputBuffer.release();
 
         {

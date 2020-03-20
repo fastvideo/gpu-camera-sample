@@ -156,7 +156,7 @@ void PGMCamera::startStreaming()
 
     while(mState == cstStreaming)
     {
-        memcpy(mInputBuffer.getBuffer(), mInputImage.data.get(), mInputImage.wPitch * mInputImage.h);
+        cudaMemcpy(mInputBuffer.getBuffer(), mInputImage.data.get(), mInputImage.wPitch * mInputImage.h, cudaMemcpyHostToDevice);
         mInputBuffer.release();
         QThread::msleep(1000 / mFPS);
 
@@ -170,8 +170,23 @@ void PGMCamera::startStreaming()
 }
 bool PGMCamera::getParameter(cmrCameraParameter param, float& val)
 {
-    Q_UNUSED(param)
-    Q_UNUSED(val)
+    if(param < 0 || param > prmLast)
+        return false;
+
+    switch (param)
+    {
+    case prmFrameRate:
+        val = mFPS;
+        return true;
+
+    case prmExposureTime:
+        val = 1000 / mFPS;
+        return true;
+
+    default:
+        break;
+    }
+
     return false;
 }
 

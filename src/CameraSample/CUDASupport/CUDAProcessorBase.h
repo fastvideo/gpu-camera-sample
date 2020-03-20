@@ -136,7 +136,7 @@ protected:
     QString             mErrString;
     fastStatus_t        mLastError {};
 
-    fastImportFromHostHandle_t      hHostToDeviceAdapter = nullptr;
+    fastImportFromDeviceHandle_t    hDeviceToDeviceAdapter = nullptr;
     fastDeviceSurfaceBufferHandle_t srcBuffer = nullptr;
 
     fastRawUnpackerHandle_t         hRawUnpacker = nullptr;

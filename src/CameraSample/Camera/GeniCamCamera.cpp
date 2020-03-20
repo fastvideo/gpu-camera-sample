@@ -329,7 +329,7 @@ void GeniCamCamera::startStreaming()
             const unsigned char* in = static_cast<const unsigned char *>(buffer->getBase(1));
             unsigned char* out = mInputBuffer.getBuffer();
             size_t sz = buffer->getSize(1);
-            memcpy(out, in, sz);
+            cudaMemcpy(out, in, sz, cudaMemcpyHostToDevice);
             mInputBuffer.release();
         }
 

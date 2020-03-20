@@ -99,9 +99,9 @@ private:
     QScopedPointer<AsyncWriter>       mFileWriterPtr;
     QMutex               mWaitMutex;
     QWaitCondition       mWaitCond;
+    bool                 mWake = false;
     CameraBase*          mCamera = nullptr;
     GLRenderer*          mRenderer = nullptr;
-//    QThread              mTransformThread;
     QThread              mCUDAThread;
     float                mRenderFps = 30;
     QString              mOutputPath;

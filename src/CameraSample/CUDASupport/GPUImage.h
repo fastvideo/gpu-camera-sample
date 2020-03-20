@@ -26,26 +26,53 @@
  either expressed or implied, of the FreeBSD Project.
 */
 
-#ifndef CUDAPROCESSORGRAY_H
-#define CUDAPROCESSORGRAY_H
-#include "CUDAProcessorBase.h"
+#ifndef GPUIMAGE_H
+#define GPUIMAGE_H
 
-class CUDAProcessorGray : public CUDAProcessorBase
-{
+#include "fastvideo_sdk.h"
+#include <string>
+#include <memory>
+#include <cstring>
+#include "alignment.hpp"
+#include "CudaAllocator.h"
+
+template<class T>
+class GPUImage {
 public:
-    CUDAProcessorGray(QObject *parent = nullptr);
-    ~CUDAProcessorGray() override;
-    virtual fastStatus_t Init(CUDAProcessorOptions& options);
-    virtual fastStatus_t Transform(ImageT *image, CUDAProcessorOptions& opts) override;
-    virtual bool isGrayscale() override {return true;}
-    virtual void freeFilters() override;
-    virtual fastStatus_t export8bitData(void* dstPtr, bool forceRGB = true) override;
-//    virtual fastStatus_t exportJPEGData(void* dstPtr, unsigned jpegQuality, unsigned &size);
+    std::unique_ptr<T, CudaAllocator> data;
+    unsigned w;
+    unsigned h;
+    unsigned wPitch;
+    unsigned bitsPerChannel;
 
-private:
-    fastSurfaceConverterHandle_t    hGrayToRGBTransform = nullptr;
-    fastDeviceSurfaceBufferHandle_t dstGrayBuffer = nullptr;
-    fastExportToHostHandle_t        hDeviceToHostGrayAdapter = nullptr;
+    fastSurfaceFormat_t surfaceFmt;
+
+    GPUImage(void) {
+        w = h = wPitch = 0;
+        bitsPerChannel = 8;
+    };
+
+    GPUImage(const GPUImage &img) {
+        w = img.w;
+        h = img.h;
+        wPitch = img.wPitch;
+        bitsPerChannel = img.bitsPerChannel;
+        surfaceFmt = img.surfaceFmt;
+
+        unsigned fullSize = wPitch * h;
+
+        try {
+            CudaAllocator alloc;
+            data.reset((T*)alloc.allocate(fullSize));
+        } catch (std::bad_alloc& ba) {
+            fprintf(stderr, "Memory allocation failed: %s\n", ba.what());
+            return;
+        }
+        cudaMemcpy(data.get(), img.data.get(), fullSize * sizeof(T), cudaMemcpyDeviceToDevice);
+    };
+
+    unsigned GetBytesPerPixel() const {
+        return uDivUp(bitsPerChannel, 8u);
+    }
 };
-
-#endif // CUDAPROCESSORGRAY_H
+#endif // GPUIMAGE_H
