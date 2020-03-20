@@ -98,7 +98,9 @@ TcpClient::~TcpClient()
 
 void TcpClient::sendpkt(AVPacket *pkt)
 {
-    m_mutex.lock();
+	std::lock_guard<std::mutex> lg(m_mutex);
+
+	auto starttime = getNow();
 
     if(m_isCustomTransport && m_udpSocket.get()){
         m_ctpTransport.createPacket(pkt->data, pkt->size, m_packets);
@@ -118,7 +120,14 @@ void TcpClient::sendpkt(AVPacket *pkt)
         //ret = avformat_write_header(m_fmt, nullptr);
         ret = av_write_frame(m_fmt, pkt);
 	}
-    m_mutex.unlock();
+
+	double duration = getDuration(starttime);
+	qDebug("send duration %f", duration);
+}
+
+bool TcpClient::isInit() const
+{
+	return m_isInit;
 }
 
 void TcpClient::connected()
@@ -498,10 +507,10 @@ void TcpClient::setPlay()
             char buf[100];
             av_make_error_string(buf, sizeof(buf), ret);
             qDebug("error: %s", buf);
-        }else{
-            m_mutex.lock();
-            m_isInit = true;
-            m_mutex.unlock();
+		}else{
+			m_mutex.lock();
+			m_isInit = true;
+			m_mutex.unlock();
         }
     }
 }

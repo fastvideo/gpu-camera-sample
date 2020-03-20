@@ -118,7 +118,7 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
 		mCtx->max_b_frames = 1;        // codec do not open for mjpeg
 		mCtx->keyint_min = 0;
         mCtx->flags |= AV_CODEC_FLAG_LOW_DELAY;
-        mCtx->flags2 |= AV_CODEC_FLAG2_FAST;
+		mCtx->flags2 |= AV_CODEC_FLAG2_FAST;
     }
 
 	AVDictionary *dict = nullptr;
@@ -132,8 +132,9 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
 
     if(mCodecId == AV_CODEC_ID_H264)
     {
-		av_dict_set(&dict, "zerolatency", "1", 0);
+		av_dict_set(&dict, "tune", "zerolatency", 0);
 		av_dict_set(&dict, "preset", "fast", 0);
+		av_dict_set(&dict, "movflags", "+faststart", 0);
 	}
 
     int ret = avcodec_open2(mCtx, mCodec, &dict);
@@ -210,7 +211,17 @@ QString RTSPStreamerServer::errorStr() const
 
 bool RTSPStreamerServer::isConnected() const
 {
-    return mIsInitialized && !mClients.empty();
+	return mIsInitialized && !mClients.empty() && isAnyClientInit();
+}
+
+bool RTSPStreamerServer::isAnyClientInit() const
+{
+	for(TcpClient *c: mClients){
+		if(c->isInit()){
+			return true;
+		}
+	}
+	return false;
 }
 
 bool RTSPStreamerServer::isStarted() const
@@ -496,6 +507,8 @@ bool RTSPStreamerServer::addFrame(unsigned char *rgbPtr)
 //	}
 	mCurrentTimeElapsed = mTimerCtrlFps.elapsed();
 
+	auto starttime = getNow();
+
     if(!mIsInitialized || mClients.empty())
 		return false;
     int ret = 0;
@@ -550,6 +563,8 @@ bool RTSPStreamerServer::addFrame(unsigned char *rgbPtr)
         av_packet_unref(&pkt);
     }
 
+	double duration = getDuration(starttime);
+	qDebug("encode duration %f", duration);
 
     if(ret == 0)
     {

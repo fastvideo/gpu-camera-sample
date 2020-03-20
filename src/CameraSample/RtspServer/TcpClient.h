@@ -79,8 +79,18 @@ public:
 	explicit TcpClient(QTcpSocket *sock, const QString& url,
 					   AVCodecContext *codec, QObject *parent = nullptr);
 	~TcpClient();
-
+	/**
+	 * @brief sendpkt
+	 * send packet to client
+	 * @param pkt
+	 */
 	void sendpkt(AVPacket* pkt);
+	/**
+	 * @brief isInit
+	 * return true if transport ready
+	 * @return
+	 */
+	bool isInit() const;
 
 signals:
 	void removeClient(TcpClient *);
@@ -150,7 +160,7 @@ private:
 
 	void parseTransport(const QString& transport);
 
-    QString generateSDP(ushort portudp = 0);
+	QString generateSDP(ushort portudp = 0);
 };
 
 #endif // TCPCLIENT_H

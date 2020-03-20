@@ -114,4 +114,17 @@ typedef std::unique_ptr< std::thread > pthread;
   return tm;                                                                                    \
 }();
 
+
+inline std::chrono::steady_clock::time_point getNow()
+{
+	return std::chrono::high_resolution_clock::now();
+}
+
+inline double getDuration(std::chrono::steady_clock::time_point start)
+{
+	auto dur = std::chrono::high_resolution_clock::now() - start;
+	double duration = std::chrono::duration_cast<std::chrono::microseconds>(dur).count()/1000.;
+	return duration;
+}
+
 #endif // COMMON_H

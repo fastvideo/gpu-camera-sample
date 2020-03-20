@@ -101,6 +101,7 @@ public:
      * @return
      */
     bool isConnected() const;
+	bool isAnyClientInit() const;
     /**
      * @brief isStarted
      * @return
