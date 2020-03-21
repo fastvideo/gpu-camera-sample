@@ -107,8 +107,6 @@ class AbstractReceiver{
 public:
     virtual ~AbstractReceiver(){}
 
-    virtual bool isFrameExists() const = 0;
-    virtual PImage takeFrame() = 0;
     virtual uint64_t bytesReaded() = 0;
 };
 

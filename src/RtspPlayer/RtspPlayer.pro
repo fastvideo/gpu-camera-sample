@@ -13,29 +13,28 @@ SOURCES = main.cpp \
     $$OTHER_LIB_PATH/FastvideoSDK/common/helper_jpeg/helper_jpeg_load.cpp \
     $$OTHER_LIB_PATH/FastvideoSDK/common/helper_jpeg/helper_jpeg_store.cpp \
     SDIConverter.cpp \
+    Widgets/GLImageViewer.cpp \
     Widgets/GtGWidget.cpp \
     CTPTransport.cpp \
     DialogOpenServer.cpp \
     fastvideo_decoder.cpp \
-    Widgets/GLWidget.cpp \
     jpegenc.cpp \
     MainWindow.cpp \
     RTSPServer.cpp
 
 FORMS += \
     DialogOpenServer.ui \
-    Widgets/GLWidget.ui \
     MainWindow.ui
 
 HEADERS += \
     $$OTHER_LIB_PATH/FastvideoSDK/common/helper_jpeg/helper_jpeg.hpp \
     SDIConverter.h \
+    Widgets/GLImageViewer.h \
     Widgets/GtGWidget.h \
     common.h \
     CTPTransport.h \
     DialogOpenServer.h \
     fastvideo_decoder.h \
-    Widgets/GLWidget.h \
     jpegenc.h \
     MainWindow.h \
     RTSPServer.h \

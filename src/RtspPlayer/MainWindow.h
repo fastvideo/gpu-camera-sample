@@ -4,6 +4,9 @@
 #include <QMainWindow>
 #include <QTimer>
 
+#include <QScopedPointer>
+#include "GLImageViewer.h"
+
 #include "RTSPServer.h"
 
 namespace Ui {
@@ -39,11 +42,18 @@ private slots:
 
 	void on_rbFastvideoJpeg_clicked(bool checked);
 
+protected:
+	void closeEvent(QCloseEvent* event) override;
+
 private:
     Ui::MainWindow *ui;
     QTimer m_timer;
 
     std::unique_ptr<RTSPServer> m_rtspServer;
+
+	QScopedPointer<QWidget> mContainerPtr;
+	QScopedPointer<GLImageViewer> mMediaViewer;
+	QSharedPointer<GLRenderer> mRendererPtr;
 
     void openServer(const QString &url);
     void openClient(const QString &url);

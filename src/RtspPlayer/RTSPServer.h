@@ -24,11 +24,13 @@ extern "C"{
 #include <libavutil/avutil.h>
 }
 
+class GLRenderer;
+
 class RTSPServer : public QObject, public AbstractReceiver
 {
     Q_OBJECT
 public:
-    explicit RTSPServer(QObject *parent = nullptr);
+	explicit RTSPServer(GLRenderer* renderer, QObject *parent = nullptr);
     ~RTSPServer();
 
     QString url() const;
@@ -48,8 +50,7 @@ public:
 	bool isCuvidFound() const;
 	bool isMJpeg() const;
 
-    bool isFrameExists() const override;
-    PImage takeFrame() override;
+	bool isFrameExists() const;
     uint64_t bytesReaded() override;
 
     bool isError() const;
@@ -173,6 +174,8 @@ private:
 
     uint32_t m_dropFrames = 0;
 
+	GLRenderer* mRenderer = nullptr;
+
     void doServer();
     void closeAV();
 
@@ -207,25 +210,27 @@ private:
      * @param pkt
      * @param customDecode
      */
-    void decode_packet(AVPacket *pkt, bool customDecode = false);
+	void decode_packet(AVPacket *pkt);
     void decode_packet(AVPacket *pkt, PImage &image);
-    void analyze_frame(AVFrame *frame);
+	void analyze_frame(AVFrame *frame, PImage image);
     void waitUntilStopStreaming();
     void getEncodedData(AVPacket *pkt, bytearray& data);
 
     void getImage(AVFrame *frame, PImage &obj);
-    /**
-     * @brief assemblyImages
-     * if custom headers is exists then copy packet to m_encodedData
-     * @param pkt
-     * @return
-     */
-    bool assemblyImages(AVPacket *pkt);
-    /**
-     * @brief assemplyOutput
-     * assembly part of images to one image
-     */
-    void assemplyOutput();
+
+	void updateRenderer();
+//    /**
+//     * @brief assemblyImages
+//     * if custom headers is exists then copy packet to m_encodedData
+//     * @param pkt
+//     * @return
+//     */
+//    bool assemblyImages(AVPacket *pkt);
+//    /**
+//     * @brief assemplyOutput
+//     * assembly part of images to one image
+//     */
+//    void assemplyOutput();
 };
 
 #endif // RTSPSERVER_H

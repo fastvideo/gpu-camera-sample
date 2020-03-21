@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="GLWidget" name="widgetPlay" native="true"/>
+     <layout class="QVBoxLayout" name="MediaViewerLayout"/>
     </item>
    </layout>
   </widget>
@@ -335,12 +335,6 @@
    <class>GtGWidget</class>
    <extends>QWidget</extends>
    <header>Widgets/GtGWidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>GLWidget</class>
-   <extends>QWidget</extends>
-   <header>glwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
