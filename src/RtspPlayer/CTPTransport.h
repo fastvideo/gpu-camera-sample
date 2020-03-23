@@ -9,8 +9,8 @@
 #include "common_utils.h"
 
 const quint32 headerId = 0x01100110;
-const quint32 max_packet_data_size = 30000;
-const quint32 buffersize_udp = 1000000;
+const quint32 max_packet_data_size = 60000;
+const quint32 buffersize_udp = 5000000;
 
 class CTPTransport
 {

@@ -137,7 +137,7 @@ void RawProcessor::startWorking()
             mWaitMutex.unlock();
         }
         mWake = false;
-
+        qDebug("Start transform, ts = %u", QDateTime::currentDateTime().toMSecsSinceEpoch());
         if(!mWorking)
             break;
 
@@ -241,6 +241,7 @@ void RawProcessor::startWorking()
 
             }
         }
+        qDebug("End transform, ts = %u", QDateTime::currentDateTime().toMSecsSinceEpoch());
     }
     mWorking = false;
 }

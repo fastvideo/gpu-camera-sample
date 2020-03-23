@@ -153,7 +153,7 @@ private:
 
     std::queue<QByteArray> m_encodecPkts;
     std::mutex m_mutexDec;
-    size_t m_max_buffer_size = 2;
+    size_t m_max_buffer_size = 1;
 
     enum {
         CODEC_JPEG,
