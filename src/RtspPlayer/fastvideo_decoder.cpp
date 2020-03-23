@@ -14,29 +14,57 @@ fastvideo_decoder::fastvideo_decoder()
 
 fastvideo_decoder::~fastvideo_decoder()
 {
-    if(m_handle)
-        fastJpegDecoderDestroy(m_handle);
-    if(m_DeviceToHost)
-        fastExportToHostDestroy(m_DeviceToHost);
+	release_decoder();
 }
 
-bool fastvideo_decoder::init_decoder(uint32_t width, uint32_t height, fastSurfaceFormat_t fmt)
+bool fastvideo_decoder::init_decoder(uint32_t width, uint32_t height, fastSurfaceFormat_t fmt, bool cudaImage)
 {
     Q_UNUSED(height)
     fastStatus_t ret;
 
 	ret = fastJpegDecoderCreate(&m_handle, fmt, width, width, true, &m_dHandle);
 
-    ret = fastExportToHostCreate(&m_DeviceToHost, &m_surfaceFmt, m_dHandle);
+	if(cudaImage){
+		ret = fastExportToDeviceCreate(&m_DeviceToDevice, &m_surfaceFmt, m_dHandle);
+	}else{
+		ret = fastExportToHostCreate(&m_DeviceToHost, &m_surfaceFmt, m_dHandle);
+	}
 
-    unsigned reqMem = 0;
-    ret = fastJpegDecoderGetAllocatedGpuMemorySize(m_handle, &reqMem);
-    qDebug("requested memory %d", reqMem);
+	unsigned allMem = 0;
+	{
+		unsigned reqMem = 0;
+		ret = fastJpegDecoderGetAllocatedGpuMemorySize(m_handle, &reqMem);
+		allMem += reqMem;
+	}
 
-    return ret == FAST_OK;
+	{
+		unsigned reqMem = 0;
+		ret = fastExportToDeviceGetAllocatedGpuMemorySize(m_DeviceToDevice, &reqMem);
+		allMem += reqMem;
+	}
+
+	qDebug("requested memory %d", allMem);
+
+	m_width = width;
+	m_height = height;
+
+	return ret == FAST_OK;
 }
 
-bool fastvideo_decoder::decode(const uint8_t *input, uint32_t len, PImage &output)
+void fastvideo_decoder::release_decoder()
+{
+	if(m_handle)
+		fastJpegDecoderDestroy(m_handle);
+	if(m_DeviceToHost)
+		fastExportToHostDestroy(m_DeviceToHost);
+	if(m_DeviceToDevice)
+		fastExportToDeviceDestroy(m_DeviceToDevice);
+	m_handle = nullptr;
+	m_DeviceToHost = nullptr;
+	m_DeviceToDevice = nullptr;
+}
+
+bool fastvideo_decoder::decode(const uint8_t *input, uint32_t len, PImage &output, bool cudaImage)
 {
     fastJfifInfo_t info;
     fastStatus_t ret;
@@ -57,8 +85,10 @@ bool fastvideo_decoder::decode(const uint8_t *input, uint32_t len, PImage &outpu
 
 	fastSurfaceFormat_t fmt = info.jpegFmt == JPEG_Y? FAST_I8 : FAST_RGB8;
 
+	m_isInit &= info.width == m_width && info.height == m_height;
+
     if(!m_isInit){
-		m_isInit = init_decoder(info.width, info.height, fmt);
+		m_isInit = init_decoder(info.width, info.height, fmt, cudaImage);
     }
 
     if(ret != FAST_OK || !m_isInit)
@@ -67,22 +97,33 @@ bool fastvideo_decoder::decode(const uint8_t *input, uint32_t len, PImage &outpu
     ret = fastJpegDecode(m_handle, &info);
 
     if(ret == FAST_OK){
-		if(!output.get() || output->width != info.width || output->height != info.height){
-			output.reset(new Image(info.width, info.height, fmt == FAST_I8? Image::GRAY : Image::RGB));
-        }
+		if(cudaImage){
+			if(!output.get() || output->width != info.width || output->height != info.height){
+				output.reset(new Image(info.width, info.height, fmt == FAST_I8? Image::CUDA_GRAY : Image::CUDA_RGB));
+			}
+		}else{
+			if(!output.get() || output->width != info.width || output->height != info.height){
+				output.reset(new Image(info.width, info.height, fmt == FAST_I8? Image::GRAY : Image::RGB));
+			}
+		}
 
 		int channels = fmt == FAST_I8? 1 : 3;
 
 		int pitch = output->width * channels;
 
-        ret = fastExportToHostCopy(m_DeviceToHost, output->rgb.data(), output->width, pitch,
-                                   output->height, &params);
+		if(cudaImage){
+			ret = fastExportToDeviceCopy(m_DeviceToDevice, output->cudaRgb, output->width, pitch,
+										 output->height, &params);
+		}else{
+			ret = fastExportToHostCopy(m_DeviceToHost, output->rgb.data(), output->width, pitch,
+									   output->height, &params);
+		}
         return ret == FAST_OK;
     }
     return false;
 }
 
-bool fastvideo_decoder::decode(const bytearray &input, PImage& output)
+bool fastvideo_decoder::decode(const bytearray &input, PImage& output, bool cudaImage)
 {
     if(!m_handle || !m_DeviceToHost)
         return false;
@@ -104,22 +145,38 @@ bool fastvideo_decoder::decode(const bytearray &input, PImage& output)
 
     ret = fastJfifLoadFromMemory(input.data(), (unsigned)input.size(), &info);
 
-    if(ret != FAST_OK)
+	m_isInit &= info.width == m_width && info.height == m_height;
+
+	if(!m_isInit){
+		m_isInit = init_decoder(info.width, info.height, FAST_RGB8, cudaImage);
+	}
+
+	if(ret != FAST_OK)
         return false;
 
     ret = fastJpegDecode(m_handle, &info);
 
     if(ret == FAST_OK){
-        if(!output.get() || output->width != info.width || output->height != info.height){
-            qDebug("new alloc");
-            output.reset(new Image(info.width, info.height, Image::RGB));
-        }
+		if(cudaImage){
+			if(!output.get() || output->width != info.width || output->height != info.height){
+				output.reset(new Image(info.width, info.height, Image::CUDA_RGB));
+			}
+		}else{
+			if(!output.get() || output->width != info.width || output->height != info.height){
+				output.reset(new Image(info.width, info.height, Image::RGB));
+			}
+		}
 
         int pitch = output->width * 3;
 
-        ret = fastExportToHostCopy(m_DeviceToHost, output->rgb.data(), output->width, pitch,
-                                   output->height, &params);
-        return ret == FAST_OK;
+		if(cudaImage){
+			ret = fastExportToDeviceCopy(m_DeviceToDevice, output->cudaRgb, output->width, pitch,
+										 output->height, &params);
+		}else{
+			ret = fastExportToHostCopy(m_DeviceToHost, output->rgb.data(), output->width, pitch,
+									   output->height, &params);
+		}
+		return ret == FAST_OK;
     }
     return false;
 }

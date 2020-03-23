@@ -11,6 +11,16 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+	mRendererPtr.reset(new GLRenderer());
+
+	mMediaViewer.reset(new GLImageViewer(mRendererPtr.data()));
+	mContainerPtr.reset(QWidget::createWindowContainer(mMediaViewer.data()));
+	mContainerPtr->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	ui->MediaViewerLayout->insertWidget(0, mContainerPtr.data());
+	mContainerPtr->setMinimumSize(QSize(100, 100));
+	mContainerPtr->setFocusPolicy(Qt::NoFocus);
+	mRendererPtr->setRenderWnd(mMediaViewer.data());
+
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(onTimeout()));
     m_timer.start(300);
 
@@ -34,20 +44,17 @@ void MainWindow::on_actionOpen_RTSP_server_triggered()
 
 void MainWindow::openServer(const QString &url)
 {
-    ui->widgetPlay->setReceiver(nullptr);
-    m_rtspServer.reset(new RTSPServer);
+	m_rtspServer.reset(new RTSPServer(mRendererPtr.get()));
 
     connect(m_rtspServer.get(), SIGNAL(startStopServer(bool)), this, SLOT(onStartStopServer(bool)), Qt::QueuedConnection);
 
     m_rtspServer->startServer(url, QMap<QString,QVariant>());
-    ui->widgetPlay->setReceiver(m_rtspServer.get());
     ui->statusbar->showMessage("Try to open local server", 2000);
 }
 
 void MainWindow::openClient(const QString &url)
 {
-    ui->widgetPlay->setReceiver(nullptr);
-    m_rtspServer.reset(new RTSPServer);
+	m_rtspServer.reset(new RTSPServer(mRendererPtr.get()));
 
     connect(m_rtspServer.get(), SIGNAL(startStopServer(bool)), this, SLOT(onStartStopServer(bool)), Qt::QueuedConnection);
 
@@ -59,13 +66,11 @@ void MainWindow::openClient(const QString &url)
 	params["ctp"] = ui->rbCtp->isChecked();
 
     m_rtspServer->startServer(url, params);
-    ui->widgetPlay->setReceiver(m_rtspServer.get());
     ui->statusbar->showMessage("Try to open remote server", 2000);
 }
 
 void MainWindow::on_actionClose_RTSP_server_triggered()
 {
-    ui->widgetPlay->setReceiver(nullptr);
     m_rtspServer.reset();
 
 	ui->gbDecodersH264->setEnabled(true);
@@ -102,7 +107,7 @@ void MainWindow::on_pb_openRtsp_clicked()
 
 void MainWindow::onTimeout()
 {
-    if(m_rtspServer.get()){
+	if(m_rtspServer.get()){
         if(m_rtspServer->isError()){
             ui->statusbar->showMessage(m_rtspServer->errorStr());
         }else{
@@ -110,6 +115,14 @@ void MainWindow::onTimeout()
                 ui->statusbar->showMessage("Rtsp server is close");
             }
         }
+
+		if(m_rtspServer->isMJpeg()){
+			ui->gbDecodersH264->setVisible(false);
+			ui->gbMJpegParameters->setVisible(true);
+		}else{
+			ui->gbDecodersH264->setVisible(true);
+			ui->gbMJpegParameters->setVisible(false);
+		}
 
 		if(m_rtspServer->isServerOpened()){
 			ui->gbDecodersH264->setEnabled(false);
@@ -120,8 +133,8 @@ void MainWindow::onTimeout()
 		}
 
         ui->lb_count_frames->setText(QString::number(m_rtspServer->framesCount()));
-        ui->lb_fps->setText(QString::number(ui->widgetPlay->fps(), 'f', 1) + " frames/s");
-        ui->lb_bitrate->setText(QString::number((ui->widgetPlay->bytesReaded() * 8)/1000, 'f', 1) + " kB/s");
+		ui->lb_fps->setText(QString::number(mRendererPtr->fps(), 'f', 1) + " frames/s");
+		ui->lb_bitrate->setText(QString::number((mRendererPtr->bytesReaded() * 8)/1000, 'f', 1) + " kB/s");
 
 		QString sdur;
 
@@ -139,19 +152,24 @@ void MainWindow::onTimeout()
 		}
 
 		{
-			sdur += "\nShow: \n";
+//			sdur += "\nShow: \n";
 
-			durations = ui->widgetPlay->durations();
-			QMapIterator<QString, double> it(durations);
-			while(it.hasNext()){
-				it.next();
+//			durations = ui->widgetPlay->durations();
+//			QMapIterator<QString, double> it(durations);
+//			while(it.hasNext()){
+//				it.next();
 
-				sdur += it.key() + " = " + QString::number(it.value(), 'f', 3) + " ms\n";
-			}
+//				sdur += it.key() + " = " + QString::number(it.value(), 'f', 3) + " ms\n";
+//			}
 		}
 
 		ui->lb_durations->setText(sdur);
-    }
+	}else{
+		ui->gbDecodersH264->setEnabled(true);
+		ui->gbTransportProtocol->setEnabled(true);
+		ui->gbDecodersH264->setVisible(true);
+		ui->gbMJpegParameters->setVisible(true);
+	}
 }
 
 void MainWindow::on_pb_stopRtsp_clicked()
@@ -206,4 +224,13 @@ void MainWindow::on_rbFastvideoJpeg_clicked(bool checked)
 			m_rtspServer->setUseFastVideo(true);
 		}
 	}
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+	if(m_rtspServer){
+		m_rtspServer.reset();
+	}
+
+	QMainWindow::closeEvent(event);
 }

@@ -156,6 +156,12 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
 
 RTSPStreamerServer::~RTSPStreamerServer()
 {
+	mDone = true;
+	if(mFrameThread.get()){
+		mFrameThread->join();
+		mFrameThread.reset();
+	}
+
     if(mThread.get())
     {
         mThread->quit();
@@ -453,13 +459,13 @@ bool RTSPStreamerServer::addBigFrame(unsigned char* rgbPtr, size_t linesize)
 
         mJpegEncode(static_cast<int>(t), mData[t].data(), MAX_WIDTH_JPEG, MAX_HEIGHT_JPEG, mChannels, mJpegData[t]);
 
-        av_new_packet(&pkts[t], static_cast<int>(mJpegData[t].size()+ rtp_packet_add_header::sizeof_header));
+		av_new_packet(&pkts[t], static_cast<int>(mJpegData[t].size + rtp_packet_add_header::sizeof_header));
         pkts[t].pts = mFramesProcessed + t;
 
         uchar x = static_cast<uchar>(t % cntW);
         uchar y = static_cast<uchar>(t / cntW);
 
-        std::copy(mJpegData[t].data(), mJpegData[t].data() + mJpegData[t].size(), pkts[t].data);
+		std::copy(mJpegData[t].buffer.data(), mJpegData[t].buffer.data() + mJpegData[t].size, pkts[t].data);
         rtp_packet_add_header::setHeader(pkts[t].data + pkts[t].size - rtp_packet_add_header::sizeof_header - 2,
                                          x, y, cntW, cntH, mWidth, mHeight);
     };
@@ -505,74 +511,105 @@ bool RTSPStreamerServer::addFrame(unsigned char *rgbPtr)
 //	if(mTimerCtrlFps.elapsed() - mDelayFps < mCurrentTimeElapsed){
 //		return false;
 //	}
-	mCurrentTimeElapsed = mTimerCtrlFps.elapsed();
+//	mCurrentTimeElapsed = mTimerCtrlFps.elapsed();
+	// unsafe but push buffer to another thread
+	std::lock_guard<std::mutex> lg(mFrameMutex);
 
+	if(mFrameBuffers.size() < mMaxFrameBuffers)
+		mFrameBuffers.push_back(FrameBuffer(rgbPtr));
+
+	if(!mFrameThread.get()){
+		mFrameThread.reset(new std::thread([this](){
+			doFrameBuffer();
+		}));
+	}
+	return true;
+}
+
+void RTSPStreamerServer::doFrameBuffer()
+{
+	while(!mDone){
+		if(mFrameBuffers.empty()){
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		}else{
+			mFrameMutex.lock();
+			FrameBuffer fb = mFrameBuffers.front();
+			mFrameBuffers.pop_front();
+			mFrameMutex.unlock();
+
+			addInternalFrame(fb.buffer);
+		}
+	}
+}
+
+bool RTSPStreamerServer::addInternalFrame(uchar *rgbPtr)
+{
 	auto starttime = getNow();
 
-    if(!mIsInitialized || mClients.empty())
+	if(!mIsInitialized || mClients.empty())
 		return false;
-    int ret = 0;
+	int ret = 0;
 
-    if((mCodecId == AV_CODEC_ID_H264 && !mUseCustomEncodeH264)
-            || (mCodecId == AV_CODEC_ID_MJPEG && !mUseCustomEncodeJpeg))
-    {
-        AVFrame* frm = av_frame_alloc();
-        frm->width = mWidth;
-        frm->height = mHeight;
-        frm->format = mPixFmt;
-        frm->pts = mFramesProcessed++;
-        //Set frame->data pointers manually
-        if(mChannels == 1)
-        {
-            Gray2Yuv420p(mEncoderBuffer.data(), rgbPtr, mWidth, mHeight);
-        }
-        else
-        {
-            RGB2Yuv420p(mEncoderBuffer.data(), rgbPtr, mWidth, mHeight);
-        }
-        ret = av_image_fill_arrays(frm->data, frm->linesize, mEncoderBuffer.data(), mPixFmt, frm->width, frm->height, 1);
-    //	ret = encode_write_frame(frm, 0, &got_frame);
-        encodeWriteFrame(frm);
+	if((mCodecId == AV_CODEC_ID_H264 && !mUseCustomEncodeH264)
+			|| (mCodecId == AV_CODEC_ID_MJPEG && !mUseCustomEncodeJpeg))
+	{
+		AVFrame* frm = av_frame_alloc();
+		frm->width = mWidth;
+		frm->height = mHeight;
+		frm->format = mPixFmt;
+		frm->pts = mFramesProcessed++;
+		//Set frame->data pointers manually
+		if(mChannels == 1)
+		{
+			Gray2Yuv420p(mEncoderBuffer.data(), rgbPtr, mWidth, mHeight);
+		}
+		else
+		{
+			RGB2Yuv420p(mEncoderBuffer.data(), rgbPtr, mWidth, mHeight);
+		}
+		ret = av_image_fill_arrays(frm->data, frm->linesize, mEncoderBuffer.data(), mPixFmt, frm->width, frm->height, 1);
+	//	ret = encode_write_frame(frm, 0, &got_frame);
+		encodeWriteFrame(frm);
 
-        av_frame_free(&frm);
-    }
-    else
-    {
-        AVPacket pkt;
-        av_init_packet(&pkt);
+		av_frame_free(&frm);
+	}
+	else
+	{
+		AVPacket pkt;
+		av_init_packet(&pkt);
 
-        int t = 0;
+		int t = 0;
 
-        if(mCodecId == AV_CODEC_ID_MJPEG)
-        {
-            if(mJpegData.empty())
-                mJpegData.resize(1);
-            mJpegEncode(t, rgbPtr, mWidth, mHeight, mChannels, mJpegData[t]);
-        }
-        else
-        {
+		if(mCodecId == AV_CODEC_ID_MJPEG)
+		{
+			if(mJpegData.empty())
+				mJpegData.resize(1);
+			mJpegEncode(t, rgbPtr, mWidth, mHeight, mChannels, mJpegData[t]);
+		}
+		else
+		{
 			throw new std::exception();
-        }
+		}
 
-        av_new_packet(&pkt, static_cast<int>(mJpegData[t].size()));
-        pkt.pts = mFramesProcessed++;
+		av_new_packet(&pkt, static_cast<int>(mJpegData[t].size));
+		pkt.pts = mFramesProcessed++;
 
-        std::copy(mJpegData[t].data(), mJpegData[t].data() + mJpegData[t].size(), pkt.data);
+		std::copy(mJpegData[t].buffer.data(), mJpegData[t].buffer.data() + mJpegData[t].size, pkt.data);
 
-        sendPkt(&pkt);
-        av_packet_unref(&pkt);
-    }
+		sendPkt(&pkt);
+		av_packet_unref(&pkt);
+	}
 
 	double duration = getDuration(starttime);
 	qDebug("encode duration %f", duration);
 
-    if(ret == 0)
-    {
-        mFramesProcessed++;
-        return true;
-    }
+	if(ret == 0)
+	{
+		mFramesProcessed++;
+		return true;
+	}
 
-    return false;
+	return false;
 }
 
 void RTSPStreamerServer::encodeWriteFrame(AVFrame *frame)

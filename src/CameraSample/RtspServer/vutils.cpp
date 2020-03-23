@@ -30,7 +30,7 @@
 
 #include "JpegEncoder.h"
 
-void encodeJpeg(int idthread, unsigned char* data, int width, int height, int channels, bytearray& output)
+void encodeJpeg(int idthread, unsigned char* data, int width, int height, int channels, Buffer& output)
 {
 #if 0
 	QImage::Format fmt = QImage::Format_Grayscale8;
@@ -45,12 +45,14 @@ void encodeJpeg(int idthread, unsigned char* data, int width, int height, int ch
 	writer.setQuality(40);
 
 	writer.write(img);
-	output.resize(d.size());
-	std::copy(d.data(), d.data() + d.size(), output.data());
+	output.buffer.resize(d.size());
+	output.size = d.size();
+	std::copy(d.data(), d.data() + d.size(), output.buffer.data());
 #else
     idthread;
 	jpeg_encoder enc;
-    enc.encode(data, width, height, channels, output, 30);
+	enc.encode(data, width, height, channels, output.buffer, 30);
+	output.size = output.buffer.size();
 #endif
 }
 

@@ -24,11 +24,13 @@ extern "C"{
 #include <libavutil/avutil.h>
 }
 
+class GLRenderer;
+
 class RTSPServer : public QObject, public AbstractReceiver
 {
     Q_OBJECT
 public:
-    explicit RTSPServer(QObject *parent = nullptr);
+	explicit RTSPServer(GLRenderer* renderer, QObject *parent = nullptr);
     ~RTSPServer();
 
     QString url() const;
@@ -46,9 +48,9 @@ public:
     void setMaxWidthFastvideo(uint val);
 
 	bool isCuvidFound() const;
+	bool isMJpeg() const;
 
-    bool isFrameExists() const override;
-    PImage takeFrame() override;
+	bool isFrameExists() const;
     uint64_t bytesReaded() override;
 
     bool isError() const;
@@ -83,7 +85,7 @@ private:
 
 	QMap<QString, double> m_durations;
 
-    int m_bufferUdp = 1000000;
+	int m_bufferUdp = 5000000;
 
     quint32 m_framesCount = 0;
     quint64 m_bytesReaded = 0;
@@ -153,7 +155,7 @@ private:
 
     std::queue<QByteArray> m_encodecPkts;
     std::mutex m_mutexDec;
-    size_t m_max_buffer_size = 1;
+	size_t m_max_buffer_size = 2;
 
     enum {
         CODEC_JPEG,
@@ -171,6 +173,8 @@ private:
     Transport m_transport = CTP;
 
     uint32_t m_dropFrames = 0;
+
+	GLRenderer* mRenderer = nullptr;
 
     void doServer();
     void closeAV();
@@ -206,25 +210,27 @@ private:
      * @param pkt
      * @param customDecode
      */
-    void decode_packet(AVPacket *pkt, bool customDecode = false);
+	void decode_packet(AVPacket *pkt);
     void decode_packet(AVPacket *pkt, PImage &image);
-    void analyze_frame(AVFrame *frame);
+	void analyze_frame(AVFrame *frame, PImage image);
     void waitUntilStopStreaming();
     void getEncodedData(AVPacket *pkt, bytearray& data);
 
     void getImage(AVFrame *frame, PImage &obj);
-    /**
-     * @brief assemblyImages
-     * if custom headers is exists then copy packet to m_encodedData
-     * @param pkt
-     * @return
-     */
-    bool assemblyImages(AVPacket *pkt);
-    /**
-     * @brief assemplyOutput
-     * assembly part of images to one image
-     */
-    void assemplyOutput();
+
+	void updateRenderer();
+//    /**
+//     * @brief assemblyImages
+//     * if custom headers is exists then copy packet to m_encodedData
+//     * @param pkt
+//     * @return
+//     */
+//    bool assemblyImages(AVPacket *pkt);
+//    /**
+//     * @brief assemplyOutput
+//     * assembly part of images to one image
+//     */
+//    void assemplyOutput();
 };
 
 #endif // RTSPSERVER_H

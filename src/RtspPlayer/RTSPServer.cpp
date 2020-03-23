@@ -15,6 +15,8 @@
 #include <sys/socket.h>
 #endif
 
+#include "GLImageViewer.h"
+
 #include "common_utils.h"
 
 #include "jpegenc.h"
@@ -77,7 +79,9 @@ bool extratAddress(const QString &_url, QHostAddress& _addr, ushort &_port)
 
 ////////////////////////////
 
-RTSPServer::RTSPServer(QObject *parent) : QObject(parent)
+RTSPServer::RTSPServer(GLRenderer *renderer, QObject *parent)
+	: QObject(parent)
+	, mRenderer(renderer)
 {
     av_register_all();
     avformat_network_init();
@@ -88,6 +92,8 @@ RTSPServer::RTSPServer(QObject *parent) : QObject(parent)
 
 RTSPServer::~RTSPServer()
 {
+	mRenderer = nullptr;
+
     qDebug("close server..");
 
     stopServer();
@@ -217,29 +223,14 @@ bool RTSPServer::isCuvidFound() const
 	return m_codec && QString(m_codec->name) == "h264_cuvid";
 }
 
+bool RTSPServer::isMJpeg() const
+{
+	return m_idCodec == CODEC_JPEG;
+}
+
 bool RTSPServer::isFrameExists() const
 {
 	return m_fvImage.get() && m_image_updated;// m_useFastvideo && m_fvImage.get() || !m_frames.empty();
-}
-
-PImage RTSPServer::takeFrame()
-{
-	if(m_image_updated){
-		m_framesCount++;
-		m_image_updated = false;
-	}
-	return m_fvImage;
-//    if(m_useFastvideo){
-//        m_framesCount++;
-//        return m_fvImage;
-//    }
-//    m_mutex.lock();
-//    PImage obj = m_frames.front();
-//    m_frames.pop();
-//    m_mutex.unlock();
-//    m_framesCount++;
-//    return obj;
-
 }
 
 uint64_t RTSPServer::bytesReaded()
@@ -430,11 +421,11 @@ void RTSPServer::doServer()
                     res = av_read_frame(m_fmtctx, &pkt);
 
                     if(res >= 0){
-                        /// try to check packet to additionaly header
-                        /// if true then move to assemply packets
-                        /// else simply decode
-                        if(!assemblyImages(&pkt))
-                            decode_packet(&pkt, m_idCodec != CODEC_H264);
+						/// try to check packet to additionaly header
+						/// if true then move to assemply packets
+						/// else simply decode
+//						if(!assemblyImages(&pkt))
+						decode_packet(&pkt);
 
                         m_bytesReaded += pkt.size;
                     }else{
@@ -490,11 +481,11 @@ void RTSPServer::closeAV()
 #pragma warning(push)
 #pragma warning(disable : 4189)
 
-void RTSPServer::decode_packet(AVPacket *pkt, bool customDecode)
+void RTSPServer::decode_packet(AVPacket *pkt)
 {
 	if(!m_isStartDecode)
 		return;
-    if(!customDecode){
+	if(m_idCodec != CODEC_JPEG){
         int ret = 0;
 		int got = 0;
 
@@ -505,19 +496,20 @@ void RTSPServer::decode_packet(AVPacket *pkt, bool customDecode)
 		ret = avcodec_decode_video2(m_cdcctx, frame, &got, pkt);
 
 		if(got > 0){
-            analyze_frame(frame);
+			analyze_frame(frame, m_fvImage);
             av_frame_unref(frame);
 
 			QString name = m_cdcctx->codec->name;
 			QString out = "decode (" + name + "):";
 
 			m_durations[out] = getDuration(starttime);
+
+			updateRenderer();
         }
 
         av_frame_free(&frame);
     }else{
 //        PImage obj;
-
 		auto starttime = getNow();
 
 		if(m_encodedData.empty()){
@@ -529,29 +521,27 @@ void RTSPServer::decode_packet(AVPacket *pkt, bool customDecode)
         getEncodedData(pkt, m_encodedData[0]);
 
 		std::lock_guard<std::mutex> lg(m_mutexDecoder);
-        if(m_useFastvideo && m_idCodec != CODEC_H264){
-            if(m_idCodec == CODEC_JPEG){
-                if(!m_decoderFv.get())
-                    m_decoderFv.reset(new fastvideo_decoder);
-				m_decoderFv->decode(m_encodedData[0], m_fvImage);
-				m_image_updated = true;
-            }
+		if(m_useFastvideo){
+			if(!m_decoderFv.get())
+				m_decoderFv.reset(new fastvideo_decoder);
+			m_decoderFv->decode(m_encodedData[0], m_fvImage, true);
+			m_image_updated = true;
         }else{
-            if(m_idCodec == CODEC_JPEG){
-                jpegenc dec;
-                dec.decode(m_encodedData[0], m_partImages[0]);
-				if(!m_fvImage.get())
-					m_fvImage.reset(new Image);
-				m_fvImage->setRGB(m_partImages[0]->width, m_partImages[0]->height);
-				copyRect(m_partImages[0], 0, 0, m_fvImage);
-				m_image_updated = true;
-            }
+			jpegenc dec;
+			dec.decode(m_encodedData[0], m_partImages[0]);
+			if(!m_fvImage.get())
+				m_fvImage.reset(new Image);
+			m_fvImage->setRGB(m_partImages[0]->width, m_partImages[0]->height);
+			copyRect(m_partImages[0], 0, 0, m_fvImage);
+			m_image_updated = true;
         }
 
 		QString name = m_cdcctx->codec->name;
 		QString out = "decode (" + name + "):";
 
 		m_durations[out] = getDuration(starttime);
+
+		updateRenderer();
 
 //        if(obj.get()){
 //            m_mutex.lock();
@@ -592,8 +582,6 @@ void RTSPServer::decode_packet(AVPacket *pkt, PImage &image)
 
 		double duration = getDuration(starttime);
 
-		m_mutexDecoder.unlock();
-
 		QString name = m_cdcctx->codec->name;
 		QString out = "decode (" + name + "):";
 
@@ -605,7 +593,7 @@ void RTSPServer::decode_packet(AVPacket *pkt, PImage &image)
 
 #pragma warning(pop)
 
-void RTSPServer::analyze_frame(AVFrame *frame)
+void RTSPServer::analyze_frame(AVFrame *frame, PImage image)
 {
 //    if(m_frames.size() > m_max_frames)
 //        return;
@@ -615,7 +603,7 @@ void RTSPServer::analyze_frame(AVFrame *frame)
             frame->format == AV_PIX_FMT_NV12){
 
 //      PImage obj;
-		getImage(frame, m_fvImage);
+		getImage(frame, image);
 		m_image_updated = true;
 
 //      m_mutex.lock();
@@ -632,98 +620,110 @@ void RTSPServer::getImage(AVFrame *frame, PImage &obj)
         obj->setNV12(frame->data, frame->linesize, frame->width, frame->height);
     }else{
         obj->setYUV(frame->data, frame->linesize, frame->width, frame->height);
-    }
+	}
 }
 
-bool RTSPServer::assemblyImages(AVPacket *pkt)
+void RTSPServer::updateRenderer()
 {
-    if(pkt->size < rtp_packet_add_header::sizeof_header + 2)
-        return false;
-
-    size_t xOff, yOff, cntX, cntY;
-    unsigned short width, height;
-    if(!rtp_packet_add_header::getHeader(pkt->data + pkt->size - rtp_packet_add_header::sizeof_header - 2,
-                                     xOff, yOff, cntX, cntY, width, height)){
-        return false;
-    }
-    m_cntX = cntX;
-    m_cntY = cntY;
-    m_width = width;
-    m_height = height;
-    m_partImages.resize(m_cntX * m_cntY);
-    m_encodedData.resize(m_cntX * m_cntY);
-    size_t off = yOff * cntX + xOff;
-
-    if(!m_partImages[off].get()){
-        m_partImages[off].reset(new Image);
-    }
-    getEncodedData(pkt, m_encodedData[off]);
-    //decode_packet(pkt, m_partImages[off]);
-
-    //qDebug("%d %d %d %d %d", xOff, yOff, cntX, cntY, off);
-
-    if(off == m_partImages.size() - 1 && m_width && m_height){
-        assemplyOutput();
-    }
-    return true;
+	if(mRenderer){
+		mRenderer->loadImage(m_fvImage, m_bytesReaded);
+		mRenderer->update();
+	}
 }
 
-void RTSPServer::assemplyOutput()
-{
-    PImage obj;
-    obj.reset(new Image);
-    obj->setRGB((int)m_width, (int)m_height);
+//bool RTSPServer::assemblyImages(AVPacket *pkt)
+//{
+//    if(pkt->size < rtp_packet_add_header::sizeof_header + 2)
+//        return false;
 
-    std::vector< pthread > threads;
-    threads.resize(m_encodedData.size());
+//    size_t xOff, yOff, cntX, cntY;
+//    unsigned short width, height;
+//    if(!rtp_packet_add_header::getHeader(pkt->data + pkt->size - rtp_packet_add_header::sizeof_header - 2,
+//                                     xOff, yOff, cntX, cntY, width, height)){
+//        return false;
+//    }
+//    m_cntX = cntX;
+//    m_cntY = cntY;
+//    m_width = width;
+//    m_height = height;
+//    m_partImages.resize(m_cntX * m_cntY);
+//    m_encodedData.resize(m_cntX * m_cntY);
+//    size_t off = yOff * cntX + xOff;
 
-//   #pragma omp parallel for num_threads(8)
-    for(size_t y = 0; y < m_encodedData.size(); ++y){
-//        QFile f(QString::number(y) + ".jpeg");
-//        if(f.open(QIODevice::WriteOnly)){
-//            f.write((char*)m_encodedData[y].data(), m_encodedData[y].size());
-//            f.close();
+//    if(!m_partImages[off].get()){
+//        m_partImages[off].reset(new Image);
+//    }
+//    getEncodedData(pkt, m_encodedData[off]);
+//    //decode_packet(pkt, m_partImages[off]);
+
+//    //qDebug("%d %d %d %d %d", xOff, yOff, cntX, cntY, off);
+
+//    if(off == m_partImages.size() - 1 && m_width && m_height){
+//        assemplyOutput();
+//    }
+//    return true;
+//}
+
+//void RTSPServer::assemplyOutput()
+//{
+//    PImage obj;
+//    obj.reset(new Image);
+//    obj->setRGB((int)m_width, (int)m_height);
+
+//    std::vector< pthread > threads;
+//    threads.resize(m_encodedData.size());
+
+////   #pragma omp parallel for num_threads(8)
+//    for(size_t y = 0; y < m_encodedData.size(); ++y){
+////        QFile f(QString::number(y) + ".jpeg");
+////        if(f.open(QIODevice::WriteOnly)){
+////            f.write((char*)m_encodedData[y].data(), m_encodedData[y].size());
+////            f.close();
+////        }
+//        threads[y].reset(new std::thread([&](size_t t){
+//            jpegenc dec;
+//            dec.decode(m_encodedData[t], m_partImages[t]);
+//        }, y));
+//    }
+
+//    for(int y = 0; y < m_encodedData.size(); ++y){
+//        threads[y]->join();
+//    }
+
+//    std::vector<QPoint> offsets;
+//    offsets.resize(m_encodedData.size());
+//    int xOff = 0, yOff = 0, off = 0;
+//    for(int y = 0; y < m_cntY; ++y){
+//        xOff = 0;
+//        for(int x = 0; x < m_cntX; ++x){
+//            off = y * (int)m_cntX + x;
+
+//            offsets[off] = QPoint(xOff, yOff);
+
+//            xOff += (int)m_partImages[off]->width;
 //        }
-        threads[y].reset(new std::thread([&](size_t t){
-            jpegenc dec;
-            dec.decode(m_encodedData[t], m_partImages[t]);
-        }, y));
-    }
+//        yOff += m_partImages[y * m_cntX]->height;
+//    }
 
-    for(int y = 0; y < m_encodedData.size(); ++y){
-        threads[y]->join();
-    }
+////#pragma omp parallel for num_threads(8)
+//    for(int k = 0; k < m_cntX * m_cntY; ++k){
+//        size_t x = k % m_cntX;
+//        size_t y = k / m_cntX;
+//        size_t off = y * m_cntX + x;
+//        if(offsets[off].x() < obj->width && offsets[off].y() < obj->height)
+//			copyRect(m_partImages[off], offsets[off].x(), offsets[off].y(), m_fvImage);
+//    }
+//	m_image_updated = true;
 
-    std::vector<QPoint> offsets;
-    offsets.resize(m_encodedData.size());
-    int xOff = 0, yOff = 0, off = 0;
-    for(int y = 0; y < m_cntY; ++y){
-        xOff = 0;
-        for(int x = 0; x < m_cntX; ++x){
-            off = y * (int)m_cntX + x;
+//	if(mRenderer){
+//		mRenderer->loadImage(m_fvImage);
+//	}
+////    m_mutex.lock();
+////    m_frames.push(obj);
+////    m_mutex.unlock();
 
-            offsets[off] = QPoint(xOff, yOff);
-
-            xOff += (int)m_partImages[off]->width;
-        }
-        yOff += m_partImages[y * m_cntX]->height;
-    }
-
-//#pragma omp parallel for num_threads(8)
-    for(int k = 0; k < m_cntX * m_cntY; ++k){
-        size_t x = k % m_cntX;
-        size_t y = k / m_cntX;
-        size_t off = y * m_cntX + x;
-        if(offsets[off].x() < obj->width && offsets[off].y() < obj->height)
-			copyRect(m_partImages[off], offsets[off].x(), offsets[off].y(), m_fvImage);
-    }
-	m_image_updated = true;
-//    m_mutex.lock();
-//    m_frames.push(obj);
-//    m_mutex.unlock();
-
-    m_updatedImages = true;
-}
+//    m_updatedImages = true;
+//}
 
 /**
  * @brief copyRect
@@ -745,20 +745,26 @@ void copyRect(const PImage &part, size_t xOff, size_t yOff, PImage &out)
         int linesizeUVP = part->width/2;
         int linesizeYO = out->width;
         int linesizeUVO = out->width/2;
-        for(int y = 0; y < part->height; ++y){
-            unsigned char * yp = part->Y.data() + linesizeYP * y;
-            unsigned char * yo = out->Y.data() + linesizeYO * (y + yOff) + xOff;
+		uchar *pY = part->yuv.data();
+		uchar *oY = out->yuv.data();
+		for(int y = 0; y < part->height; ++y){
+			unsigned char * yp = pY + linesizeYP * y;
+			unsigned char * yo = oY + linesizeYO * (y + yOff) + xOff;
             std::copy(yp, yp + linesizeYP, yo);
         }
 
-        for(int y = 0; y < part->height/2; ++y){
-            unsigned char * up = part->U.data() + linesizeUVP * y;
-            unsigned char * uo = out->U.data() + linesizeUVO * (y + yOff/2) + xOff/2;
+		uchar *pU = pY + part->width * part->height;
+		uchar *oU = oY + out->width * out->height;
+		uchar *pV = pU + part->width/2 * part->height/2;
+		uchar *oV = oU + out->width/2 * out->height/2;
+		for(int y = 0; y < part->height/2; ++y){
+			unsigned char * up = pU + linesizeUVP * y;
+			unsigned char * uo = oU + linesizeUVO * (y + yOff/2) + xOff/2;
 
             std::copy(up, up + linesizeUVP, uo);
 
-            unsigned char * vp = part->V.data() + linesizeUVP * y;
-            unsigned char * vo = out->V.data() + linesizeUVO * (y + yOff/2) + xOff/2;
+			unsigned char * vp = pV + linesizeUVP * y;
+			unsigned char * vo = oV + linesizeUVO * (y + yOff/2) + xOff/2;
             std::copy(vp, vp + linesizeUVP, vo);
         }
     }else if(part->type == Image::RGB){
@@ -1118,7 +1124,7 @@ void RTSPServer::doDecode()
             m_encodecPkts.pop();
             m_mutexDec.unlock();
 
-            decode_packet(enc);
+			decode_packet(enc);
         }
     }
 }
@@ -1146,7 +1152,7 @@ void RTSPServer::decode_packet(const QByteArray &enc)
             if(!m_decoderFv.get())
                 m_decoderFv.reset(new fastvideo_decoder);
 
-            m_decoderFv->decode((uchar*)enc.data(), enc.size(), m_fvImage);
+			m_decoderFv->decode((uchar*)enc.data(), enc.size(), m_fvImage, true);
 			m_image_updated = true;
         }else{
 			name = "JpegTurbo";
@@ -1154,7 +1160,6 @@ void RTSPServer::decode_packet(const QByteArray &enc)
 			dec.decode((uchar*)enc.data(), enc.size(), m_fvImage);
 			m_image_updated = true;
 		}
-
     }else{
 		name = "";
         AVPacket pkt;
@@ -1165,12 +1170,15 @@ void RTSPServer::decode_packet(const QByteArray &enc)
         av_packet_unref(&pkt);
 		m_image_updated = true;
     }
+
 	duration = getDuration(starttime);
 
 	if(!name.isEmpty()){
 		QString out = "decode (" + name + "):";
 		m_durations[out] = duration;
 	}
+
+	updateRenderer();
 
     qDebug("decode duration(ms): %f         \r", duration);
 

@@ -54,7 +54,7 @@ extern "C" {
 }
 
 #include "common_utils.h"
-#include "tcpclient.h"
+#include "TcpClient.h"
 
 class RTSPStreamerServer : public QObject
 {
@@ -158,6 +158,21 @@ private:
     std::unique_ptr<QTcpServer> mServer;
     std::shared_ptr<QThread>    mThread;
 
+	std::shared_ptr< std::thread > mFrameThread;
+
+	struct FrameBuffer{
+		uchar *buffer = nullptr;
+		size_t size = 0;
+		FrameBuffer(){}
+		FrameBuffer(uchar *buf){ buffer = buf; }
+	};
+	// very unsafe
+	size_t mMaxFrameBuffers = 2;
+	std::list<FrameBuffer> mFrameBuffers;
+	std::mutex mFrameMutex;
+	bool mDone = false;
+	void doFrameBuffer();
+	bool addInternalFrame(uchar *rgbPtr);
 
     QHostAddress    mHost;
     ushort          mPort;
@@ -173,7 +188,7 @@ private:
     std::list<TcpClient*>  mClients;
 
     std::vector<bytearray> mData;
-    std::vector<bytearray> mJpegData;
+	std::vector<Buffer> mJpegData;
 
     time_point             mStartTime = time_point (std::chrono::milliseconds(0));
 

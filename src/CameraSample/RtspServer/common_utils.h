@@ -48,7 +48,12 @@ const size_t MAX_HEIGHT_JPEG = 1024;
 
 typedef std::vector <unsigned char > bytearray;
 
-typedef std::function<void(int, unsigned char* data, int width, int height, int channels, bytearray& output)> TEncodeRgb;
+struct Buffer{
+	bytearray buffer;
+	size_t size = 0;
+};
+
+typedef std::function<void(int, unsigned char* data, int width, int height, int channels, Buffer& output)> TEncodeRgb;
 
 namespace rtp_packet_add_header
 {

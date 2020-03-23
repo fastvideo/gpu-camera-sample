@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="quadFragment.frag">res/quadFragment.frag</file>
+        <file alias="quadVertex.vert">res/quadVertex.vert</file>
+        <file>res/play_fwd.svg</file>
+    </qresource>
+</RCC>
