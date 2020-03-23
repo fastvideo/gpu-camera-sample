@@ -524,7 +524,7 @@ void RTSPServer::decode_packet(AVPacket *pkt)
 		if(m_useFastvideo){
 			if(!m_decoderFv.get())
 				m_decoderFv.reset(new fastvideo_decoder);
-			m_decoderFv->decode(m_encodedData[0], m_fvImage);
+			m_decoderFv->decode(m_encodedData[0], m_fvImage, true);
 			m_image_updated = true;
         }else{
 			jpegenc dec;
@@ -1152,7 +1152,7 @@ void RTSPServer::decode_packet(const QByteArray &enc)
             if(!m_decoderFv.get())
                 m_decoderFv.reset(new fastvideo_decoder);
 
-            m_decoderFv->decode((uchar*)enc.data(), enc.size(), m_fvImage);
+			m_decoderFv->decode((uchar*)enc.data(), enc.size(), m_fvImage, true);
 			m_image_updated = true;
         }else{
 			name = "JpegTurbo";

@@ -13,90 +13,33 @@ typedef std::vector< unsigned char > bytearray;
 
 class Image: public std::enable_shared_from_this<Image>{
 public:
-	enum TYPE{YUV, NV12, RGB, GRAY};
+	enum TYPE{YUV, NV12, RGB, GRAY, CUDA_RGB, CUDA_GRAY};
 
-    Image(){
+	Image();
+	Image(int w, int h, TYPE tp);
+	Image(const Image& o);
+	~Image();
 
-    }
-    Image(int w, int h, TYPE tp){
-        if(tp == YUV)
-            setYUV(w, h);
-		else if(tp == NV12)
-			setNV12(w, h);
-        else if(tp == RGB)
-            setRGB(w, h);
-        else if(tp == GRAY)
-            setGray(w, h);
-    }
-	Image(const Image& o){
-		width = o.width;
-		height = o.height;
-		type = o.type;
-		rgb = o.rgb;
-		yuv = o.yuv;
-	}
+	void setYUV(uint8_t *data[], int linesize[], int w, int h);
+	void setNV12(uint8_t *data[], int linesize[], int w, int h);
+	bool setCudaRgb(int w, int h);
+	bool setCudaGray(int w, int h);
+	void setYUV(int w, int h);
+	void setNV12(int w, int h);
+	void setRGB(int w, int h);
+	void setGray(int w, int h);
 
-    void setYUV(uint8_t *data[], int linesize[], int w, int h){
-        type = YUV;
-        width = w;
-        height = h;
-        size_t size1 = static_cast<size_t>(linesize[0] * h);
-        size_t size2 = static_cast<size_t>(linesize[1] * h/2);
-		//size_t size3 = static_cast<size_t>(linesize[2] * h/2);
-		yuv.resize(size1 + size2 * 2);
+	void releaseCudaRgbBuffer();
 
-		std::copy(data[0], data[0] + size1, yuv.data());
-		std::copy(data[1], data[1] + size2, yuv.data() + size1);
-		std::copy(data[2], data[2] + size2, yuv.data() + size1 + size2);
-	}
-
-    void setNV12(uint8_t *data[], int linesize[], int w, int h){
-		type = NV12;
-        width = w;
-        height = h;
-        size_t size1 = static_cast<size_t>(linesize[0] * h);
-        size_t size2 = static_cast<size_t>(linesize[1]/2 * h/2);
-		//size_t size3 = static_cast<size_t>(linesize[1]/2 * h/2);
-		yuv.resize(size1 + size2 * 2);
-
-		std::copy(data[0], data[0] + size1, yuv.data());
-		std::copy(data[1], data[1] + size2 * 2, yuv.data() + size1);
-	}
-
-    void setYUV(int w, int h){
-        type = YUV;
-        width = w;
-        height = h;
-		yuv.resize(w * h + w/2 * h/2 * 2);
-	}
-	void setNV12(int w, int h){
-		type = YUV;
-		width = w;
-		height = h;
-		yuv.resize(w * h + w/2 * h/2 * 2);
-	}
-    void setRGB(int w, int h){
-        type = RGB;
-        width = w;
-        height = h;
-        rgb.resize(w * h * 3);
-    }
-    void setGray(int w, int h){
-        type = GRAY;
-        width = w;
-        height = h;
-        rgb.resize(w * h);
-    }
-
-    bool empty() const{
-        return width == 0 || height == 0;
-    }
+	bool empty() const;
 
 	bytearray yuv;
     bytearray rgb;
     TYPE type = YUV;
     int width = 0;
     int height = 0;
+	void *cudaRgb = nullptr;
+	size_t cudaSize = 0;
 private:
 
 };

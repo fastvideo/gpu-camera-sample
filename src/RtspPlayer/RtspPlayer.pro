@@ -17,6 +17,7 @@ SOURCES = main.cpp \
     Widgets/GtGWidget.cpp \
     CTPTransport.cpp \
     DialogOpenServer.cpp \
+    common.cpp \
     fastvideo_decoder.cpp \
     jpegenc.cpp \
     MainWindow.cpp \

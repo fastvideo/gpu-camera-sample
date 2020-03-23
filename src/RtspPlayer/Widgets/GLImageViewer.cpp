@@ -609,6 +609,10 @@ void GLRenderer::loadImageInternal(PImage image)
 	}else if(image->type == Image::GRAY){
 		// not yet supported
 		return;
+	}else if(image->type == Image::CUDA_RGB){
+		error = cudaMemcpy(m_cudaRgb, image->cudaRgb, image->cudaSize, cudaMemcpyDeviceToDevice);
+	}else if(image->type == Image::CUDA_GRAY){
+		// not yet support
 	}
 
     GLint bsize;
