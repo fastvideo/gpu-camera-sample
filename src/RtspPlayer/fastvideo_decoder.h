@@ -24,7 +24,7 @@ private:
     fastSurfaceFormat_t m_surfaceFmt;
     fastExportToHostHandle_t m_DeviceToHost = nullptr;
 	fastExportToDeviceHandle_t m_DeviceToDevice = nullptr;
-
+	bool m_useCuda = false;
     bool m_isInit = false;
 	unsigned m_width = 0;
 	unsigned m_height = 0;

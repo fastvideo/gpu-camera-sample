@@ -112,8 +112,8 @@ private:
     std::mutex m_mutex;
     std::mutex m_mutexDecoder;
 
-    std::unique_ptr<fastvideo_decoder> m_decoderFv;
-    bool m_useFastvideo = false;
+	std::unique_ptr<fastvideo_decoder> m_decoderFv;
+	bool m_useFastvideo = false;
     PImage m_fvImage;
 	bool m_image_updated = false;
 

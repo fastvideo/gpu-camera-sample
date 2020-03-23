@@ -187,7 +187,7 @@ void RTSPServer::stopServer()
     m_socket.reset();
     m_socketTcp.reset();
 
-    m_decoderFv.reset();
+	m_decoderFv.reset();
 
     closeAV();
 
@@ -206,6 +206,7 @@ void RTSPServer::setUseFastVideo(bool val)
 {
 	std::lock_guard<std::mutex> lg(m_mutexDecoder);
     m_useFastvideo = val;
+	m_fvImage.reset();
 }
 
 void RTSPServer::setUseCustomProtocol(bool val)
@@ -1149,8 +1150,8 @@ void RTSPServer::decode_packet(const QByteArray &enc)
     if(m_idCodec == CODEC_JPEG){
         if(m_useFastvideo){
 			name = "Fastvideo";
-            if(!m_decoderFv.get())
-                m_decoderFv.reset(new fastvideo_decoder);
+			if(!m_decoderFv.get())
+				m_decoderFv.reset(new fastvideo_decoder);
 
 			m_decoderFv->decode((uchar*)enc.data(), enc.size(), m_fvImage, true);
 			m_image_updated = true;

@@ -20,6 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	mContainerPtr->setMinimumSize(QSize(100, 100));
 	mContainerPtr->setFocusPolicy(Qt::NoFocus);
 	mRendererPtr->setRenderWnd(mMediaViewer.data());
+	mRendererPtr->showImage(true);
 
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(onTimeout()));
     m_timer.start(300);

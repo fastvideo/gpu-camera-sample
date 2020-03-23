@@ -22,6 +22,8 @@ bool fastvideo_decoder::init_decoder(uint32_t width, uint32_t height, fastSurfac
     Q_UNUSED(height)
     fastStatus_t ret;
 
+	release_decoder();
+
 	ret = fastJpegDecoderCreate(&m_handle, fmt, width, width, true, &m_dHandle);
 
 	if(cudaImage){
@@ -87,8 +89,11 @@ bool fastvideo_decoder::decode(const uint8_t *input, uint32_t len, PImage &outpu
 
 	m_isInit &= info.width == m_width && info.height == m_height;
 
-    if(!m_isInit){
+	bool reinit = false;
+	if(!m_isInit || m_useCuda != cudaImage){
 		m_isInit = init_decoder(info.width, info.height, fmt, cudaImage);
+		m_useCuda = cudaImage;
+		reinit = true;
     }
 
     if(ret != FAST_OK || !m_isInit)
@@ -98,11 +103,11 @@ bool fastvideo_decoder::decode(const uint8_t *input, uint32_t len, PImage &outpu
 
     if(ret == FAST_OK){
 		if(cudaImage){
-			if(!output.get() || output->width != info.width || output->height != info.height){
+			if(reinit || !output.get() || output->width != info.width || output->height != info.height){
 				output.reset(new Image(info.width, info.height, fmt == FAST_I8? Image::CUDA_GRAY : Image::CUDA_RGB));
 			}
 		}else{
-			if(!output.get() || output->width != info.width || output->height != info.height){
+			if(reinit || !output.get() || output->width != info.width || output->height != info.height){
 				output.reset(new Image(info.width, info.height, fmt == FAST_I8? Image::GRAY : Image::RGB));
 			}
 		}
@@ -147,8 +152,11 @@ bool fastvideo_decoder::decode(const bytearray &input, PImage& output, bool cuda
 
 	m_isInit &= info.width == m_width && info.height == m_height;
 
-	if(!m_isInit){
+	bool reinit = false;
+	if(!m_isInit || m_useCuda != cudaImage){
 		m_isInit = init_decoder(info.width, info.height, FAST_RGB8, cudaImage);
+		m_useCuda = cudaImage;
+		reinit = true;
 	}
 
 	if(ret != FAST_OK)
@@ -158,11 +166,11 @@ bool fastvideo_decoder::decode(const bytearray &input, PImage& output, bool cuda
 
     if(ret == FAST_OK){
 		if(cudaImage){
-			if(!output.get() || output->width != info.width || output->height != info.height){
+			if(reinit || !output.get() || output->width != info.width || output->height != info.height){
 				output.reset(new Image(info.width, info.height, Image::CUDA_RGB));
 			}
 		}else{
-			if(!output.get() || output->width != info.width || output->height != info.height){
+			if(reinit || !output.get() || output->width != info.width || output->height != info.height){
 				output.reset(new Image(info.width, info.height, Image::RGB));
 			}
 		}

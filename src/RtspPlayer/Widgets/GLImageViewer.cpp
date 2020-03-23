@@ -73,7 +73,7 @@ void GLImageViewer::load(PImage image)
     if(mRenderer == nullptr)
         return;
     //mImageSize = QSize(width, height);
-    //mShowImage = true;
+	mShowImage = true;
 
 
 	mRenderer->loadImage(image, 0);
@@ -405,9 +405,11 @@ void GLRenderer::render()
         glClear(GL_COLOR_BUFFER_BIT);
         m_context->swapBuffers(mRenderWnd);
         m_context->doneCurrent();
-
+		qDebug("not render %d %d", mImageSize.width(), mShowImage);
         return;
     }
+
+	qDebug("render");
 
     //qDebug("mImageSize.isEmpty() = %d, mShowImage = %d", mImageSize.isEmpty(), mShowImage);
 
@@ -572,6 +574,8 @@ void GLRenderer::loadImageInternal(PImage image)
 	if(!image.get())
 		return;
 
+	auto starttime = getNow();
+
     unsigned char *data = NULL;
     size_t pboBufferSize = 0;
 
@@ -680,6 +684,9 @@ void GLRenderer::loadImageInternal(PImage image)
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+	double duration = getDuration(starttime);
+	qDebug("generate texture %f ms", duration);
 
 	m_context->doneCurrent();
 }
