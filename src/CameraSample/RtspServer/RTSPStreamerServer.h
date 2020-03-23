@@ -54,7 +54,7 @@ extern "C" {
 }
 
 #include "common_utils.h"
-#include "tcpclient.h"
+#include "TcpClient.h"
 
 class RTSPStreamerServer : public QObject
 {
