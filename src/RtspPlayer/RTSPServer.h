@@ -118,7 +118,12 @@ private:
 	bool m_image_updated = false;
 
     bool m_useCustomProtocol = false;
-    std::unique_ptr<QUdpSocket> m_socket;
+    //std::unique_ptr<QUdpSocket> m_socket;
+#ifdef _MSC_VER
+    uint64_t mHSocket = 0;
+#else
+    void *mHSocket = nullptr;
+#endif
     std::unique_ptr<QTcpSocket> m_socketTcp;
     QByteArray m_buffer;
     QStringList m_gets;

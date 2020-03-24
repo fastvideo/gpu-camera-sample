@@ -88,6 +88,11 @@ RTSPServer::RTSPServer(GLRenderer *renderer, QObject *parent)
 
     m_url = "rtsp://127.0.0.1:1234/live.sdp";
 
+#ifdef _MSC_VER
+    WSADATA WSAData;
+    WORD wV = MAKEWORD(2, 2);
+    WSAStartup(wV, &WSAData);
+#endif
 }
 
 RTSPServer::~RTSPServer()
@@ -161,6 +166,11 @@ void RTSPServer::startServer(const QString &url, const QMap<QString, QVariant> &
 
 void RTSPServer::stopServer()
 {
+    if(mHSocket){
+        closesocket(mHSocket);
+        mHSocket = 0;
+    }
+
     m_done = true;
 
     waitUntilStopStreaming();
@@ -184,7 +194,7 @@ void RTSPServer::stopServer()
         m_udpThread.reset();
     }
 
-    m_socket.reset();
+    //m_socket.reset();
     m_socketTcp.reset();
 
 	m_decoderFv.reset();
@@ -626,6 +636,7 @@ void RTSPServer::getImage(AVFrame *frame, PImage &obj)
 
 void RTSPServer::updateRenderer()
 {
+    m_framesCount++;
 	if(mRenderer){
 		mRenderer->loadImage(m_fvImage, m_bytesReaded);
 		mRenderer->update();
@@ -1067,25 +1078,56 @@ void RTSPServer::sendPlay()
 
 void RTSPServer::doPlay()
 {
-    m_socket.reset(new QUdpSocket);
-    m_socket->moveToThread(QThread::currentThread());
-    m_socket->bind(m_clientPort1);
+//    m_socket.reset(new QUdpSocket);
+//    m_socket->moveToThread(QThread::currentThread());
+//    m_socket->bind(m_clientPort1);
+    if(mHSocket){
+        closesocket(mHSocket);
+        mHSocket = 0;
+    }
+
+    mHSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if(!mHSocket){
+        qDebug("Error create socket");
+        return;
+    }
+
+    const int timeout_in_mseconds = 10;
+#ifdef _MSC_VER
+    // WINDOWS
+    DWORD timeout = timeout_in_mseconds;
+    setsockopt(mHSocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof timeout);
+#else
+    // LINUX
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = timeout_in_mseconds * 1000;
+    setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
+
+#endif
+
+    sockaddr_in addr;
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = inet_addr("0.0.0.0");
+    addr.sin_port = htons(m_clientPort1);
+    int res = bind(mHSocket, (SOCKADDR*)&addr, sizeof(addr));
+    if(res == SOCKET_ERROR){
+        qDebug("Socket bind error");
+        return;
+    }
+
 
     int opt = m_bufferUdp;
-    setsockopt(m_socket->socketDescriptor(), SOL_SOCKET, SO_RCVBUF, (char*)&opt, sizeof(opt));
+    //setsockopt(m_socket->socketDescriptor(), SOL_SOCKET, SO_RCVBUF, (char*)&opt, sizeof(opt));
+    setsockopt(mHSocket, SOL_SOCKET, SO_RCVBUF, (char*)&opt, sizeof(opt));
 
     emit startStopServer(true);
 
-	QByteArray data;
+    uchar data[65536] = {0};
     while(!m_done){
-        if(!m_socket.get()){
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            continue;
-        }
-        if(m_socket->hasPendingDatagrams()){
-            data.resize(m_socket->pendingDatagramSize());
-            m_socket->readDatagram(data.data(), data.size());
-            m_ctpTransport.addUdpPacket((uchar*)data.data(), data.size());
+        res = recv(mHSocket, (char*)data, sizeof(data), 0);
+        if(res > 0){
+            m_ctpTransport.addUdpPacket(data, res);
 
             if(m_ctpTransport.isPacketAssembly()){
                 if(m_encodecPkts.size() < m_max_buffer_size){
@@ -1111,7 +1153,11 @@ void RTSPServer::doPlay()
 
     emit startStopServer(false);
 
-    m_socket.reset();
+    if(mHSocket){
+        closesocket(mHSocket);
+        mHSocket = 0;
+    }
+    //m_socket.reset();
 }
 
 void RTSPServer::doDecode()

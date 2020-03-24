@@ -139,6 +139,10 @@ void MainWindow::onTimeout()
 
 		QMap<QString, double> durations = m_rtspServer->durations();
 
+        if(mRendererPtr.get()){
+            sdur += QString("Output image: %1x%2 pixels\n").arg(mRendererPtr->imageSize().width()).arg(mRendererPtr->imageSize().height());
+        }
+
 		{
 			sdur += "Decoding: \n";
 
