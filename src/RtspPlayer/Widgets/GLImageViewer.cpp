@@ -72,7 +72,6 @@ void GLImageViewer::load(PImage image)
 
     if(mRenderer == nullptr)
         return;
-    //mImageSize = QSize(width, height);
 	mShowImage = true;
 
 
@@ -319,8 +318,8 @@ GLRenderer::GLRenderer(QObject *parent):
     m_context->setFormat(m_format);
     m_context->create();
 
-	connect(&m_timer, SIGNAL(timeout()), this, SLOT(onTimeout()));
-	m_timer.start(200);
+    connect(&m_timer, SIGNAL(timeout()), this, SLOT(onTimeout()));
+    m_timer.start(200);
 
 #ifndef __aarch64__
     mRenderThread.setObjectName(QStringLiteral("RenderThread"));
@@ -364,7 +363,19 @@ void GLRenderer::initialize()
 
     glDisable(GL_TEXTURE_2D);
 }
+void GLRenderer::customEvent(QEvent* event)
+{
+    if(event->type() == EVENT_UPDATE)
+    {
+        render();
+    }
+    else if(event->type() == EVENT_LOAD_IMAGE)
+    {
+        auto* e = dynamic_cast<LoadImageEvent*>(event);
+        loadImageInternal(e->image);
 
+    }
+}
 void GLRenderer::showImage(bool show)
 {
     mShowImage = show;
@@ -372,7 +383,7 @@ void GLRenderer::showImage(bool show)
 
 void GLRenderer::update()
 {
-    QTimer::singleShot(0, this, [this](){render();});
+    QApplication::postEvent(this, new QEvent(static_cast<QEvent::Type>(EVENT_UPDATE)));
 }
 
 void GLRenderer::render()
@@ -409,9 +420,6 @@ void GLRenderer::render()
         return;
     }
 
-	qDebug("render");
-
-    //qDebug("mImageSize.isEmpty() = %d, mShowImage = %d", mImageSize.isEmpty(), mShowImage);
 
     int w = mRenderWnd->width();
     int h = mRenderWnd->height();
@@ -535,30 +543,34 @@ void GLRenderer::render()
 
     glFinish();
     m_context->swapBuffers(mRenderWnd);
-	glFinish();
+    glFinish();
 }
 
 void GLRenderer::onTimeout()
 {
-	{
-		if(m_timeFps.elapsed() > m_wait_timer_ms){
-			double cnt = m_frameCount_Fps;
-			double time = m_timeFps.elapsed();
-			double bytesReaded = m_BytesReaded - m_LastBytesReaded;
-			m_LastBytesReaded = m_BytesReaded;
-			m_frameCount_Fps = 0;
-			m_timeFps.restart();
+    {
+        if(m_timeFps.elapsed() > m_wait_timer_ms)
+        {
+            double cnt = m_frameCount_Fps;
+            double time = m_timeFps.elapsed();
+            double bytesReaded = m_BytesReaded - m_LastBytesReaded;
+            m_LastBytesReaded = m_BytesReaded;
+            m_frameCount_Fps = 0;
+            m_timeFps.restart();
 
-			if(time > 0){
-				m_fps = cnt / time * 1000.;
-				m_bytesReaded = bytesReaded / time * 1000.;
-			}else{
-				m_fps = 0;
-				m_bytesReaded = 0;
-			}
-		}
+            if(time > 0)
+            {
+                m_fps = cnt / time * 1000.;
+                m_bytesReaded = bytesReaded / time * 1000.;
+            }
+            else
+            {
+                m_fps = 0;
+                m_bytesReaded = 0;
+            }
+        }
 
-	}
+    }
 }
 
 void GLRenderer::loadImage(PImage image, qint64 bytesReaded)
@@ -566,7 +578,7 @@ void GLRenderer::loadImage(PImage image, qint64 bytesReaded)
 	m_BytesReaded = bytesReaded;
 	m_frameCount++;
 	m_frameCount_Fps++;
-	QTimer::singleShot(0, this, [this, image](){loadImageInternal(image);});
+    QApplication::postEvent(this, new LoadImageEvent(image));
 }
 
 void GLRenderer::loadImageInternal(PImage image)

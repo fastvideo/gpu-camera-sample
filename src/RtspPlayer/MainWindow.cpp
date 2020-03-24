@@ -24,8 +24,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(onTimeout()));
     m_timer.start(300);
-
-    //openServer("rtsp://127.0.0.1:1234/live.sdp");
 }
 
 MainWindow::~MainWindow()

@@ -69,13 +69,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     mRendererPtr.reset(new GLRenderer());
 
-    mMediaViewer.reset(new GLImageViewer(mRendererPtr.data()));
+    mMediaViewer.reset(new GLImageViewer(mRendererPtr.get()));
     mContainerPtr.reset(QWidget::createWindowContainer(mMediaViewer.data()));
     mContainerPtr->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     ui->MediaViewerLayout->insertWidget(0, mContainerPtr.data());
     mContainerPtr->setMinimumSize(QSize(100, 100));
     mContainerPtr->setFocusPolicy(Qt::NoFocus);
-    mRendererPtr->setRenderWnd(mMediaViewer.data());
+    mRendererPtr->setRenderWnd(mMediaViewer.get());
 
     for(int i = 0; i < 16384; i++)
     {

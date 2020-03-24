@@ -41,6 +41,7 @@
 #include <QSize>
 #include <QTimer>
 #include <QElapsedTimer>
+#include <QEvent>
 
 #include <cuda_runtime.h>
 #include <cuda_gl_interop.h>
@@ -48,6 +49,22 @@
 #include "common.h"
 #include "common_utils.h"
 #include "SDIConverter.h"
+
+#define EVENT_UPDATE (QEvent::User + 1)
+#define EVENT_LOAD_IMAGE (QEvent::User + 2)
+
+
+class LoadImageEvent : public QEvent
+{
+public:
+    explicit LoadImageEvent():QEvent(static_cast<QEvent::Type>(EVENT_LOAD_IMAGE))
+    {}
+    LoadImageEvent(PImage img):QEvent(static_cast<QEvent::Type>(EVENT_LOAD_IMAGE)),
+            image(img)
+    {}
+
+    PImage image;
+};
 
 class GLImageViewer;
 
@@ -66,15 +83,18 @@ public:
     QSize imageSize(){return mImageSize;}
     void setImageSize(const QSize& sz){mImageSize = sz;}
 
-	double fps() const {return m_fps;};
-	double bytesReaded() const { return m_bytesReaded; };
+    double fps() const {return m_fps;}
+    double bytesReaded() const { return m_bytesReaded; }
+
+signals:
+    void sLoadImage(PImage image);
 
 private slots:
     void render();
-
-	void onTimeout();
+    void onTimeout();
 
 protected:
+    void customEvent(QEvent* event) override;
 
 private:
     void initialize();
@@ -109,7 +129,7 @@ private:
 	int m_prevHeight = 0;
 	Image::TYPE m_prevType;
 
-	QTimer m_timer;
+    QTimer m_timer;
 	QElapsedTimer m_timeFps;
 	qint64 m_wait_timer_ms = 2000;
 	qint64 m_frameCount_Fps = 0;
