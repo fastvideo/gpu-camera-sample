@@ -604,7 +604,7 @@ void RTSPServer::decode_packet(AVPacket *pkt, PImage &image)
 
 #pragma warning(pop)
 
-void RTSPServer::analyze_frame(AVFrame *frame, PImage image)
+void RTSPServer::analyze_frame(AVFrame *frame, PImage& image)
 {
 //    if(m_frames.size() > m_max_frames)
 //        return;

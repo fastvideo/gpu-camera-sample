@@ -217,7 +217,7 @@ private:
      */
 	void decode_packet(AVPacket *pkt);
     void decode_packet(AVPacket *pkt, PImage &image);
-	void analyze_frame(AVFrame *frame, PImage image);
+    void analyze_frame(AVFrame *frame, PImage &image);
     void waitUntilStopStreaming();
     void getEncodedData(AVPacket *pkt, bytearray& data);
 

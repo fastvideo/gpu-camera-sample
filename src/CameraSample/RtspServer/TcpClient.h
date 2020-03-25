@@ -160,7 +160,7 @@ private:
 
 	void parseTransport(const QString& transport);
 
-	QString generateSDP(ushort portudp = 0);
+    QString generateSDP(ushort portudp = 0);
 };
 
 #endif // TCPCLIENT_H
