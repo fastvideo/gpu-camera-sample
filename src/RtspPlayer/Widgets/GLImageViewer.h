@@ -53,7 +53,6 @@
 #define EVENT_UPDATE (QEvent::User + 1)
 #define EVENT_LOAD_IMAGE (QEvent::User + 2)
 
-
 class LoadImageEvent : public QEvent
 {
 public:
@@ -86,8 +85,6 @@ public:
     double fps() const {return m_fps;}
     double bytesReaded() const { return m_bytesReaded; }
 
-signals:
-    void sLoadImage(PImage image);
 
 private slots:
     void render();
