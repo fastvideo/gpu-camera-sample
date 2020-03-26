@@ -52,13 +52,30 @@ void Image::setNV12(uint8_t *data[], int linesize[], int w, int h){
 	type = NV12;
 	width = w;
 	height = h;
-	size_t size1 = static_cast<size_t>(linesize[0] * h);
-	size_t size2 = static_cast<size_t>(linesize[1]/2 * h/2);
+    size_t size1 = static_cast<size_t>(w * h);
+    size_t size2 = static_cast<size_t>(w/2 * h/2);
 	//size_t size3 = static_cast<size_t>(linesize[1]/2 * h/2);
 	yuv.resize(size1 + size2 * 2);
 
-	std::copy(data[0], data[0] + size1, yuv.data());
-	std::copy(data[1], data[1] + size2 * 2, yuv.data() + size1);
+    int l1 = linesize[0];
+    int l2 = linesize[1];
+    Q_UNUSED(l1)
+    Q_UNUSED(l2)
+
+    for(int i = 0; i < h; ++i){
+        uchar *dY = data[0] + i * l1;
+        uchar *dOY = yuv.data() + i * w;
+        std::copy(dY, dY + w, dOY);
+    }
+    uchar *offUV = yuv.data() + size1;
+    for(int i = 0; i < h/2; ++i){
+        uchar *dUV = data[1] + i * l2;
+        uchar *dOUV = offUV + i * w;
+        std::copy(dUV, dUV + w, dOUV);
+    }
+
+    //std::copy(data[0], data[0] + size1, yuv.data());
+    //std::copy(data[1], data[1] + size2 * 2, yuv.data() + size1);
 }
 
 bool Image::setCudaRgb(int w, int h){
@@ -66,8 +83,8 @@ bool Image::setCudaRgb(int w, int h){
 		releaseCudaRgbBuffer();
 	type = CUDA_RGB;
 	width = w;
-	height = h;
-	size_t sz = w * h * 3;
+    height = h;
+    size_t sz = w * h * 3;
 	cudaSize = sz;
 	return cudaMalloc(&cudaRgb, sz) == cudaSuccess;
 }
@@ -78,8 +95,8 @@ bool Image::setCudaGray(int w, int h)
 		releaseCudaRgbBuffer();
 	type = CUDA_GRAY;
 	width = w;
-	height = h;
-	size_t sz = w * h;
+    height = h;
+    size_t sz = w * h;
 	cudaSize = sz;
 	return cudaMalloc(&cudaRgb, sz) == cudaSuccess;
 }

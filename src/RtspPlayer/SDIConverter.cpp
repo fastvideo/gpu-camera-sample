@@ -160,12 +160,12 @@ bool SDIConverter::sdiConvert(PImage image, void *cudaRgb)
 	bool convertToBGR = false;
 
 	fastExportParameters_t exportParameters;
-	exportParameters.convert = convertToBGR ? FAST_CONVERT_BGR : FAST_CONVERT_NONE;
+    exportParameters.convert = convertToBGR ? FAST_CONVERT_BGR : FAST_CONVERT_NONE;
 	res = (fastExportToDeviceCopy(
 		m_hExport,
 		cudaRgb,
 		width,
-		width * 3,
+        width * 3,
 		height,
 
 		&exportParameters
