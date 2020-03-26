@@ -546,8 +546,8 @@ bool RTSPStreamerServer::addInternalFrame(uchar *rgbPtr)
 {
 	auto starttime = getNow();
 
-	if(!mIsInitialized || mClients.empty())
-		return false;
+    if(!mIsInitialized || mClients.empty())
+        return false;
 	int ret = 0;
 
 	if((mCodecId == AV_CODEC_ID_H264 && !mUseCustomEncodeH264)
@@ -614,22 +614,27 @@ bool RTSPStreamerServer::addInternalFrame(uchar *rgbPtr)
 
 void RTSPStreamerServer::encodeWriteFrame(AVFrame *frame)
 {
-	int ret, got = 0;
+    int ret, ret1;
 	AVPacket enc_pkt;
     enc_pkt.data = nullptr;
 	enc_pkt.size = 0;
-	av_init_packet(&enc_pkt);
 
-	ret = avcodec_encode_video2(mCtx, &enc_pkt, frame, &got);
-
-//    qDebug() << "got = " << got;
-
-	if(got > 0)
-	{
-		enc_pkt.pts = frame->pts;
-		sendPkt(&enc_pkt);
-		av_packet_unref(&enc_pkt);
-	}
+    ret = avcodec_send_frame(mCtx, frame);
+    if(ret < 0)
+        return;
+    do{
+        av_init_packet(&enc_pkt);
+        while((ret = avcodec_receive_packet(mCtx, &enc_pkt)) >= 0)
+        {
+            enc_pkt.pts = frame->pts;
+            sendPkt(&enc_pkt);
+            av_packet_unref(&enc_pkt);
+            return;
+        }
+        if(ret == AVERROR(EAGAIN)){
+            ret1 = avcodec_send_frame(mCtx, frame);
+        }
+    }while(ret == AVERROR(EAGAIN));
 }
 
 void RTSPStreamerServer::sendPkt(AVPacket *pkt)
