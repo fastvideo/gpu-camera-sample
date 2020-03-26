@@ -119,7 +119,7 @@ void RawProcessor::startWorking()
 {
     mWorking = true;
 
-    int frameTime = qRound(1000.F / mRenderFps);
+//    int frameTime = qRound(1000.F / mRenderFps);
     qint64 lastTime = 0;
     QElapsedTimer tm;
     tm.start();
@@ -137,7 +137,6 @@ void RawProcessor::startWorking()
             mWaitMutex.unlock();
         }
         mWake = false;
-        qDebug("Start transform, ts = %u", QDateTime::currentDateTime().toMSecsSinceEpoch());
         if(!mWorking)
             break;
 
@@ -149,7 +148,7 @@ void RawProcessor::startWorking()
         if(mRenderer)
         {
             qint64 curTime = tm.elapsed();
-            if(curTime - lastTime >= frameTime)
+            //if(curTime - lastTime >= frameTime)
             {
                 mRenderer->loadImage(mProcessorPtr->GetFrameBuffer(), mOptions.Width, mOptions.Height);
                 mRenderer->update();
@@ -241,7 +240,6 @@ void RawProcessor::startWorking()
 
             }
         }
-        qDebug("End transform, ts = %u", QDateTime::currentDateTime().toMSecsSinceEpoch());
     }
     mWorking = false;
 }

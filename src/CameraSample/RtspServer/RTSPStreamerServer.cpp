@@ -622,6 +622,8 @@ void RTSPStreamerServer::encodeWriteFrame(AVFrame *frame)
 
 	ret = avcodec_encode_video2(mCtx, &enc_pkt, frame, &got);
 
+//    qDebug() << "got = " << got;
+
 	if(got > 0)
 	{
 		enc_pkt.pts = frame->pts;
