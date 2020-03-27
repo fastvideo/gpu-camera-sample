@@ -80,6 +80,11 @@ public:
      */
 	void setEncodeFun(TEncodeRgb fun);
     /**
+     * @brief setEncodeNv12Fun
+     * @param fun
+     */
+    void setEncodeNv12Fun(TEncodeNv12 fun);
+    /**
      * @brief setMultithreading
      * set use multithreading
      * @param val
@@ -143,6 +148,7 @@ private:
     QString     mErrStr;
     EncoderType mEncoderType = etNVENC;
     TEncodeRgb  mJpegEncode;
+    TEncodeNv12 mNv12Encode;
     bool        mMultithreading = true;
     bool        mUseCustomEncodeJpeg = true;
     bool        mUseCustomEncodeH264 = false;

@@ -91,6 +91,7 @@ public:
 
     virtual fastStatus_t export8bitData(void* dstPtr, bool forceRGB = true);
     virtual fastStatus_t exportJPEGData(void* dstPtr, unsigned jpegQuality, unsigned &size);
+    virtual fastStatus_t exportNV12Data(void* dstPtr);
 
     fastStatus_t exportRawData(void* dstPtr, unsigned int &w, unsigned int &h, unsigned int &pitch);
     fastStatus_t export16bitData(void* dstPtr, unsigned int &w, unsigned int &h, unsigned int &pitch);
@@ -166,6 +167,8 @@ protected:
 
     fastSurfaceConverterHandle_t    h16to8Transform = nullptr;
     fastDeviceSurfaceBufferHandle_t displaytBuffer = nullptr;
+
+    fastSDIExportToHostHandle_t     hSdiExportToHost = nullptr;
 
     fastDeviceSurfaceBufferHandle_t dstBuffer = nullptr;
 

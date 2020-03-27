@@ -171,10 +171,10 @@ void RawProcessor::startWorking()
         {
             if(mRtspServer && mRtspServer->isConnected())
             {
-                unsigned char* data = (uchar*)buffer.data();
-                mProcessorPtr->export8bitData((void*)data, true);
+//                unsigned char* data = (uchar*)buffer.data();
+//                mProcessorPtr->export8bitData((void*)data, true);
 
-                mRtspServer->addFrame(data);
+                mRtspServer->addFrame(nullptr);
             }
         }
 
@@ -549,6 +549,13 @@ void RawProcessor::setRtspServer(const QString &url)
     };
     mRtspServer->setUseCustomEncodeJpeg(true);
     mRtspServer->setEncodeFun(funEncode);
+
+    auto funEncodeNv12 = [this](unsigned char* yuv, unsigned char*, int , int ){
+        //int channels = dynamic_cast<CUDAProcessorGray*>(mProcessorPtr.data()) == nullptr? 3 : 1;
+
+        mProcessorPtr->exportNV12Data(yuv);
+    };
+    mRtspServer->setEncodeNv12Fun(funEncodeNv12);
 
     mRtspServer->startServer();
 }

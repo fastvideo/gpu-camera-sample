@@ -36,6 +36,10 @@
 #include "common_utils.h"
 #include "vutils.h"
 
+#include <QPainter>
+#include <QImage>
+#include <QDateTime>
+
 RTSPStreamerServer::RTSPStreamerServer(int width, int height,
                                        int channels,
                                        const QString &url,
@@ -132,9 +136,11 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
 
     if(mCodecId == AV_CODEC_ID_H264)
     {
-		av_dict_set(&dict, "tune", "zerolatency", 0);
-		av_dict_set(&dict, "preset", "fast", 0);
+        av_dict_set(&dict, "zerolatency", "1", 0);
+        //av_dict_set(&dict, "preset", "fast", 0);
 		av_dict_set(&dict, "movflags", "+faststart", 0);
+        av_dict_set(&dict, "delay", "0", 0);
+        av_dict_set(&dict, "rc", "constqp", 0);
 	}
 
     int ret = avcodec_open2(mCtx, mCodec, &dict);
@@ -183,6 +189,11 @@ void RTSPStreamerServer::setBitrate(qint64 bitrate)
 void RTSPStreamerServer::setEncodeFun(TEncodeRgb fun)
 {
     mJpegEncode = fun;
+}
+
+void RTSPStreamerServer::setEncodeNv12Fun(TEncodeNv12 fun)
+{
+    mNv12Encode = fun;
 }
 
 void RTSPStreamerServer::setMultithreading(bool val)
@@ -542,6 +553,38 @@ void RTSPStreamerServer::doFrameBuffer()
 	}
 }
 
+void drawTimeToImage(uchar *rgbPtr, int width, int height, const QDateTime& time)
+{
+    if(!rgbPtr)
+        return;
+    QImage image(rgbPtr, width, height, QImage::Format_RGB32);
+    QPainter painter(&image);
+
+    painter.setFont(QFont("Arial", 80));
+    QPen pen;
+    pen.setWidth(2);
+    pen.setColor(Qt::white);
+    painter.setPen(pen);
+    painter.drawText(10, 100, time.toString("hh:mm:ss.zzz"));
+    qDebug("time %s", time.toString("hh:mm:ss.zzz").toLatin1().data());
+}
+
+void drawTimeToImageGray(uchar *gray, int width, int height, const QDateTime& time)
+{
+    if(!gray)
+        return;
+    QImage image(gray, width, height, QImage::Format_Grayscale8);
+    QPainter painter(&image);
+
+    painter.setFont(QFont("Arial", 80));
+    QPen pen;
+    pen.setWidth(2);
+    pen.setColor(Qt::white);
+    painter.setPen(pen);
+    painter.drawText(10, 100, time.toString("hh:mm:ss.zzz"));
+    qDebug("time %s", time.toString("hh:mm:ss.zzz").toLatin1().data());
+}
+
 bool RTSPStreamerServer::addInternalFrame(uchar *rgbPtr)
 {
 	auto starttime = getNow();
@@ -565,9 +608,18 @@ bool RTSPStreamerServer::addInternalFrame(uchar *rgbPtr)
 		}
 		else
 		{
-			RGB2Yuv420p(mEncoderBuffer.data(), rgbPtr, mWidth, mHeight);
+//            QDateTime dt = QDateTime::currentDateTime();
+//            drawTimeToImage(rgbPtr, mWidth, mHeight, dt);
+
+            if(mNv12Encode){
+                frm->format = AV_PIX_FMT_NV12;
+                mNv12Encode(mEncoderBuffer.data(), rgbPtr, mWidth, mHeight);
+//                drawTimeToImageGray(mEncoderBuffer.data(), mWidth, mHeight, dt);
+            }else{
+                RGB2Yuv420p(mEncoderBuffer.data(), rgbPtr, mWidth, mHeight);
+            }
 		}
-		ret = av_image_fill_arrays(frm->data, frm->linesize, mEncoderBuffer.data(), mPixFmt, frm->width, frm->height, 1);
+        ret = av_image_fill_arrays(frm->data, frm->linesize, mEncoderBuffer.data(), (AVPixelFormat)frm->format, frm->width, frm->height, 1);
 	//	ret = encode_write_frame(frm, 0, &got_frame);
 		encodeWriteFrame(frm);
 
@@ -614,27 +666,19 @@ bool RTSPStreamerServer::addInternalFrame(uchar *rgbPtr)
 
 void RTSPStreamerServer::encodeWriteFrame(AVFrame *frame)
 {
-    int ret, ret1;
+    int ret, got;
 	AVPacket enc_pkt;
     enc_pkt.data = nullptr;
 	enc_pkt.size = 0;
 
-    ret = avcodec_send_frame(mCtx, frame);
-    if(ret < 0)
-        return;
-    do{
-        av_init_packet(&enc_pkt);
-        while((ret = avcodec_receive_packet(mCtx, &enc_pkt)) >= 0)
-        {
-            enc_pkt.pts = frame->pts;
-            sendPkt(&enc_pkt);
-            av_packet_unref(&enc_pkt);
-            return;
-        }
-        if(ret == AVERROR(EAGAIN)){
-            ret1 = avcodec_send_frame(mCtx, frame);
-        }
-    }while(ret == AVERROR(EAGAIN));
+    av_init_packet(&enc_pkt);
+
+    ret = avcodec_encode_video2(mCtx, &enc_pkt, frame, &got);
+    if(got > 0){
+        enc_pkt.pts = frame->pts;
+        sendPkt(&enc_pkt);
+        av_packet_unref(&enc_pkt);
+    }
 }
 
 void RTSPStreamerServer::sendPkt(AVPacket *pkt)

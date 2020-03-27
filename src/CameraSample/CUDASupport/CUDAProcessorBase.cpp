@@ -227,6 +227,11 @@ void CUDAProcessorBase::freeFilters()
 
     clearExifSections();
 
+    if(hSdiExportToHost){
+        fastSDIExportToHostDestroy(hSdiExportToHost);
+        hSdiExportToHost = nullptr;
+    }
+
     if(hBitmapExport != nullptr)
     {
         fastExportToHostDestroy( hBitmapExport );
@@ -797,6 +802,14 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
         }
     }
 
+    {
+        fastSurfaceFormat_t fmt;
+        ret = fastSDIExportToHostCreate(&hSdiExportToHost, FAST_SDI_NV12_BT601, &fmt, maxWidth, maxHeight, dstBuffer);
+        if(ret != FAST_OK){
+            return InitFailed("fastSDIExportToHostCreate failed",ret);
+        }
+    }
+
     size_t  requestedMemSpace = 0;
     unsigned tmp = 0;
     if(hDebayer)
@@ -849,6 +862,11 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
     {
         fastJpegEncoderGetAllocatedGpuMemorySize(hJpegEncoder, &tmp);
         qDebug("hMjpegEncoder allocated %d MBytes", tmp / 1024 / 1024);
+        requestedMemSpace += tmp;
+    }
+
+    if(hSdiExportToHost != nullptr){
+        fastSDIExportToHostGetAllocatedGpuMemorySize(hSdiExportToHost, &tmp);
         requestedMemSpace += tmp;
     }
 
@@ -1568,6 +1586,55 @@ fastStatus_t CUDAProcessorBase::exportJPEGData(void* dstPtr, unsigned jpegQualit
     else
     {
         stats[QStringLiteral("hMjpegEncoder")] = -1;
+    }
+
+    if(profileTimer)
+    {
+        fastGpuTimerDestroy(profileTimer);
+        profileTimer = nullptr;
+    }
+
+    return FAST_OK;
+}
+
+fastStatus_t CUDAProcessorBase::exportNV12Data(void *dstPtr)
+{
+    if(!hSdiExportToHost){
+        return FAST_INVALID_HANDLE;
+    }
+
+    fastStatus_t ret;
+
+    float elapsedTimeGpu = 0.;
+    fastGpuTimerHandle_t profileTimer = nullptr;
+    if(info)
+        fastGpuTimerCreate(&profileTimer);
+
+    if(info)
+    {
+        fastGpuTimerStart(profileTimer);
+    }
+
+    fastDeviceSurfaceBufferInfo_t bufferInfo;
+    fastGetDeviceSurfaceBufferInfo(dstBuffer, &bufferInfo);
+
+    unsigned width = bufferInfo.width, height = bufferInfo.height;
+
+    ret = fastSDIExportToHostCopy(hSdiExportToHost, dstPtr, &width, &height);
+
+    if(ret != FAST_OK){
+        return TransformFailed("fastExportToHostCopy failed", ret, profileTimer);
+    }
+
+    if(info)
+    {
+        fastGpuTimerStop(profileTimer);
+        fastGpuTimerGetTime(profileTimer, &elapsedTimeGpu);
+        stats[QStringLiteral("fastSDIExportToHostCopy")] = elapsedTimeGpu;
+    }
+    else
+    {
+        stats[QStringLiteral("fastSDIExportToHostCopy")] = -1;
     }
 
     if(profileTimer)
