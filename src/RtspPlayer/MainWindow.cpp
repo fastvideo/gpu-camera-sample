@@ -5,6 +5,8 @@
 
 #include <QMapIterator>
 
+const qint64 max_server_waiting_ms = 2000;
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -66,6 +68,8 @@ void MainWindow::openClient(const QString &url)
 
     m_rtspServer->startServer(url, params);
     ui->statusbar->showMessage("Try to open remote server", 2000);
+
+    m_timerStartServer.restart();
 }
 
 void MainWindow::on_actionClose_RTSP_server_triggered()
@@ -106,13 +110,17 @@ void MainWindow::on_pb_openRtsp_clicked()
 
 void MainWindow::onTimeout()
 {
-	if(m_rtspServer.get()){
+    if(m_rtspServer.get() && m_timerStartServer.elapsed() < max_server_waiting_ms){
         if(m_rtspServer->isError()){
             ui->statusbar->showMessage(m_rtspServer->errorStr());
         }else{
             if(m_rtspServer->done()){
                 ui->statusbar->showMessage("Rtsp server is close");
             }
+        }
+
+        if(m_rtspServer->isClientStarted()){
+            m_timerStartServer.restart();
         }
 
 		if(m_rtspServer->isMJpeg()){
@@ -168,11 +176,15 @@ void MainWindow::onTimeout()
 
 		ui->lb_durations->setText(sdur);
 	}else{
+        if(m_rtspServer.get()){
+            m_rtspServer.reset();
+        }
+
 		ui->gbDecodersH264->setEnabled(true);
 		ui->gbTransportProtocol->setEnabled(true);
 		ui->gbDecodersH264->setVisible(true);
 		ui->gbMJpegParameters->setVisible(true);
-	}
+    }
 }
 
 void MainWindow::on_pb_stopRtsp_clicked()

@@ -413,9 +413,7 @@ void RTSPServer::doServer()
                 qDebug("Decoder found: %s", m_codec->name);
 
                 AVDictionary *dict = nullptr;
-                av_dict_set(&dict, "threads", "auto", 0);
-                av_dict_set(&dict, "framerate", "144", 0);
-                av_dict_set(&dict, "refcounted_frames", "1", 0);
+                av_dict_set(&dict, "zerolatency", "1", 0);
                 av_dict_set_int(&dict, "buffer_size", m_bufferUdp, 0);
 
                 res = avcodec_open2(m_cdcctx, m_codec, &dict);
@@ -425,6 +423,7 @@ void RTSPServer::doServer()
                     break;
                 }
                 qDebug("Decoder opened");
+                m_clientStarted = true;
 
                 for(;!m_done;){
                     AVPacket pkt;
@@ -1049,13 +1048,13 @@ void RTSPServer::sendPlay()
 
 		AVDictionary *dict = nullptr;
 		av_dict_set(&dict, "threads", "auto", 0);
+        av_dict_set(&dict, "zerolatency", "1", 0);
 
 		if((ret = avcodec_open2(m_cdcctx, m_codec, &dict)) < 0){
             m_error = "Codec not open";
             avcodec_free_context(&m_cdcctx);
             return;
         }
-
     }
 
     m_udpThread.reset(new std::thread([this](){
@@ -1072,6 +1071,8 @@ void RTSPServer::sendPlay()
             "User-agent: " + m_UserAgent + "\r\n"
             "\r\n";
     writeToTcpSocket(request);
+
+    m_clientStarted = true;
 
     m_state = PLAYING;
 }

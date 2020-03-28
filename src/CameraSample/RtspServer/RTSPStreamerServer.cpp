@@ -119,7 +119,7 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
 
     if(mCodecId != AV_CODEC_ID_MJPEG)
     {
-		mCtx->max_b_frames = 1;        // codec do not open for mjpeg
+        mCtx->max_b_frames = 0;        // codec do not open for mjpeg
 		mCtx->keyint_min = 0;
         mCtx->flags |= AV_CODEC_FLAG_LOW_DELAY;
 		mCtx->flags2 |= AV_CODEC_FLAG2_FAST;
@@ -140,7 +140,7 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
         //av_dict_set(&dict, "preset", "fast", 0);
 		av_dict_set(&dict, "movflags", "+faststart", 0);
         av_dict_set(&dict, "delay", "0", 0);
-        av_dict_set(&dict, "rc", "constqp", 0);
+        av_dict_set(&dict, "rc", "cbr_ld_hq", 0);
 	}
 
     int ret = avcodec_open2(mCtx, mCodec, &dict);

@@ -39,6 +39,8 @@ public:
     void startServer(const QString &url, const QMap<QString, QVariant>& additional_params);
     void stopServer();
 
+    bool isClientStarted() const { return m_clientStarted;}
+
     void setUseFastVideo(bool val);
 
     void setUseCustomProtocol(bool val);
@@ -82,6 +84,7 @@ private:
     bool m_isClient = false;
 	QString m_codecH264 = "h264_cuvid";
 	bool m_isServerOpened = false;
+    bool m_clientStarted = false;
 
 	QMap<QString, double> m_durations;
 

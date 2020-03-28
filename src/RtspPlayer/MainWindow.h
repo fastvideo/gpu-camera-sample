@@ -5,6 +5,7 @@
 #include <QTimer>
 
 #include <QScopedPointer>
+#include <QElapsedTimer>
 #include "GLImageViewer.h"
 
 #include "RTSPServer.h"
@@ -48,6 +49,7 @@ protected:
 private:
     Ui::MainWindow *ui;
     QTimer m_timer;
+    QElapsedTimer m_timerStartServer;
 
     std::unique_ptr<RTSPServer> m_rtspServer;
 
