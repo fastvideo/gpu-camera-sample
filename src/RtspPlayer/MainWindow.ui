@@ -118,8 +118,11 @@
         </item>
         <item>
          <widget class="QRadioButton" name="rbOtherAvailable">
+          <property name="toolTip">
+           <string>H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10</string>
+          </property>
           <property name="text">
-           <string>Other available</string>
+           <string>H.264 on CPU</string>
           </property>
          </widget>
         </item>
@@ -317,7 +320,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../CameraSample/Resorces.qrc">
+    <iconset resource="resorces.qrc">
      <normaloff>:/res/play_fwd.svg</normaloff>:/res/play_fwd.svg</iconset>
    </property>
    <property name="text">
@@ -339,7 +342,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../CameraSample/Resorces.qrc"/>
+  <include location="resorces.qrc"/>
  </resources>
  <connections>
   <connection>

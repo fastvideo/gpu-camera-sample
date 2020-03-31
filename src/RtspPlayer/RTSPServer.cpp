@@ -561,6 +561,26 @@ void RTSPServer::decode_packet(AVPacket *pkt)
     }
 }
 
+//std::list<QByteArray> pkts;
+//void doFileWrite(){
+//    QFile f("tmp.s_h264");
+//    f.open(QIODevice::WriteOnly | QIODevice::Append);
+//    while(1){
+//        if(pkts.empty()){
+//            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+//        }else{
+//            QByteArray pkt = pkts.front();
+//            pkts.pop_front();
+//            int size = pkt.size();
+//            f.write((char*)&size, 4);
+//            f.write(pkt);
+//        }
+//    }
+//    f.close();
+//}
+
+//std::thread thread(doFileWrite);
+
 void RTSPServer::decode_packet(AVPacket *pkt, PImage &image)
 {
 	if(!m_isStartDecode)
@@ -573,6 +593,9 @@ void RTSPServer::decode_packet(AVPacket *pkt, PImage &image)
 
 	/// this function deprecated but comfortable to calculate duration
 	int res = avcodec_decode_video2(m_cdcctx, frame, &got, pkt);
+
+//    QByteArray cb((char*)pkt->data, pkt->size);
+//    pkts.push_back(cb);
 
 	static int cnt = 1;
 	static auto time = getNow();

@@ -412,7 +412,7 @@ void GLRenderer::render()
         glOrtho(0, 1, 0, 1, 0, 1);
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
-        glClearColor(0.25, 0.25, 0.25, 1.0f);
+        glClearColor(0.0, 0.0, 0.0, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         m_context->swapBuffers(mRenderWnd);
         m_context->doneCurrent();
@@ -434,7 +434,7 @@ void GLRenderer::render()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    glClearColor(0.25, 0.25, 0.25, 1.0f);
+    glClearColor(0.0, 0.0, 0.0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     glDisable(GL_DEPTH_TEST);
