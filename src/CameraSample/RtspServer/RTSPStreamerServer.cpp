@@ -611,7 +611,7 @@ bool RTSPStreamerServer::addInternalFrame(uchar *rgbPtr)
 //            QDateTime dt = QDateTime::currentDateTime();
 //            drawTimeToImage(rgbPtr, mWidth, mHeight, dt);
 
-            if(mNv12Encode){
+            if(mNv12Encode != nullptr){
                 frm->format = AV_PIX_FMT_NV12;
                 mNv12Encode(mEncoderBuffer.data(), rgbPtr, mWidth, mHeight);
 //                drawTimeToImageGray(mEncoderBuffer.data(), mWidth, mHeight, dt);
