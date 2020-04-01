@@ -72,7 +72,9 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
                 mErrStr = "Codec not found";
                 return;
 			}
-		}
+        }else{
+            mPixFmt = AV_PIX_FMT_NV12;
+        }
 	}
     if(mEncoderType == etJPEG)
     {
@@ -618,7 +620,7 @@ bool RTSPStreamerServer::addInternalFrame(uchar *rgbPtr)
             }else{
                 RGB2Yuv420p(mEncoderBuffer.data(), rgbPtr, mWidth, mHeight);
             }
-		}
+        }
         ret = av_image_fill_arrays(frm->data, frm->linesize, mEncoderBuffer.data(), (AVPixelFormat)frm->format, frm->width, frm->height, 1);
 	//	ret = encode_write_frame(frm, 0, &got_frame);
 		encodeWriteFrame(frm);
