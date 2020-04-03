@@ -109,7 +109,7 @@
         <item>
          <widget class="QRadioButton" name="rbCuvid">
           <property name="text">
-           <string>cuvid decoder</string>
+           <string>cuvid decoder (FFMPEG)</string>
           </property>
           <property name="checked">
            <bool>true</bool>
@@ -122,7 +122,14 @@
            <string>H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10</string>
           </property>
           <property name="text">
-           <string>H.264 on CPU</string>
+           <string>H.264 on CPU (FFMPEG)</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="rbCuvidNV">
+          <property name="text">
+           <string>cuvid decoder (NVCodec)</string>
           </property>
          </widget>
         </item>

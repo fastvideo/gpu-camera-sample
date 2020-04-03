@@ -21,7 +21,8 @@ SOURCES = main.cpp \
     fastvideo_decoder.cpp \
     jpegenc.cpp \
     MainWindow.cpp \
-    RTSPServer.cpp
+    RTSPServer.cpp \
+    vdecoder.cpp
 
 FORMS += \
     DialogOpenServer.ui \
@@ -39,7 +40,8 @@ HEADERS += \
     jpegenc.h \
     MainWindow.h \
     RTSPServer.h \
-    common_utils.h
+    common_utils.h \
+    vdecoder.h
 
 FFMPEGDIR = $$OTHER_LIB_PATH/ffmpeg
 
@@ -71,3 +73,5 @@ win32: QMAKE_CXXFLAGS += /openmp
 
 RESOURCES += \
     resorces.qrc
+
+include(cuviddecoder/cuviddecoder.pri)

@@ -8,6 +8,7 @@
 #include <QTcpSocket>
 #include <QMap>
 #include <QVariant>
+#include <QElapsedTimer>
 
 #include <queue>
 #include <memory>
@@ -15,15 +16,9 @@
 #include <thread>
 
 #include "common.h"
-#include "ctptransport.h"
-#include "fastvideo_decoder.h"
+#include "CTPTransport.h"
 
-extern "C"{
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libavutil/avutil.h>
-}
-
+class VDecoder;
 class GLRenderer;
 
 class RTSPServer : public QObject, public AbstractReceiver
@@ -65,7 +60,8 @@ public:
 
     bool done() const;
     bool isDoStop() const;
-    void doProcess();
+
+    bool isLive() const;
 
 	QMap<QString, double> durations();
 
@@ -82,7 +78,6 @@ private:
     QString m_url;
     QString m_error;
     bool m_isClient = false;
-	QString m_codecH264 = "h264_cuvid";
 	bool m_isServerOpened = false;
     bool m_clientStarted = false;
 
@@ -95,32 +90,18 @@ private:
 
 	bool m_isStartDecode = true;
 
-    AVCodec *m_codec = nullptr;
-    AVFormatContext *m_fmtctx = nullptr;
-    AVCodecContext *m_cdcctx = nullptr;
-    AVInputFormat *m_inputfmt = nullptr;
-    bool m_is_open = false;
-    bool m_doStop = false;
-
-    std::vector< PImage > m_partImages;
-    std::vector< bytearray > m_encodedData;
-    size_t m_cntX = 0;
-    size_t m_cntY = 0;
-    size_t m_width = 0;
-    size_t m_height = 0;
-    bool m_updatedImages = false;
-
 	//std::queue< PImage > m_frames;
 	//size_t m_max_frames = 10;
     std::mutex m_mutex;
     std::mutex m_mutexDecoder;
 
-	std::unique_ptr<fastvideo_decoder> m_decoderFv;
-	bool m_useFastvideo = false;
+    std::unique_ptr<VDecoder> mVDecoder;
     PImage m_fvImage;
 	bool m_image_updated = false;
 
     bool m_useCustomProtocol = false;
+
+    QElapsedTimer m_timerStartServer;
     //std::unique_ptr<QUdpSocket> m_socket;
 #ifdef _MSC_VER
     uint64_t mHSocket = 0;
@@ -165,11 +146,6 @@ private:
     std::mutex m_mutexDec;
 	size_t m_max_buffer_size = 2;
 
-    enum {
-        CODEC_JPEG,
-        CODEC_H264
-    };
-    int m_idCodec = CODEC_JPEG;
     ushort m_clientPort1 = 8000;
     ushort m_clientPort2 = 8001;
     CTPTransport m_ctpTransport;
@@ -183,6 +159,8 @@ private:
     uint32_t m_dropFrames = 0;
 
 	GLRenderer* mRenderer = nullptr;
+
+    qint64 max_server_waiting_ms = 2000;
 
     void doServer();
     void closeAV();
@@ -208,23 +186,12 @@ private:
      */
     void doDecode();
     void decode_packet(const QByteArray &enc);
+    void decodePacket();
     /**
      * @brief writeToTcpSocket
      * @param lines
      */
     void writeToTcpSocket(const QString& lines);
-    /**
-     * @brief decode_packet
-     * @param pkt
-     * @param customDecode
-     */
-	void decode_packet(AVPacket *pkt);
-    void decode_packet(AVPacket *pkt, PImage &image);
-    void analyze_frame(AVFrame *frame, PImage &image);
-    void waitUntilStopStreaming();
-    void getEncodedData(AVPacket *pkt, bytearray& data);
-
-    void getImage(AVFrame *frame, PImage &obj);
 
 	void updateRenderer();
 //    /**

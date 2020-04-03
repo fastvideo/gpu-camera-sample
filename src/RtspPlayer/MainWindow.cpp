@@ -5,8 +5,6 @@
 
 #include <QMapIterator>
 
-const qint64 max_server_waiting_ms = 2000;
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -59,17 +57,23 @@ void MainWindow::openClient(const QString &url)
 
     connect(m_rtspServer.get(), SIGNAL(startStopServer(bool)), this, SLOT(onStartStopServer(bool)), Qt::QueuedConnection);
 
+    int h264id = 1;
+    if(ui->rbCuvid->isChecked()){
+        h264id = 1;
+    }else if(ui->rbOtherAvailable->isChecked()){
+        h264id = 2;
+    }else if(ui->rbCuvidNV->isChecked()){
+        h264id = 3;
+    }
+
     QMap<QString,QVariant> params;
     params["client"] = 1;
 	params["mjpeg_fastvideo"] = ui->rbFastvideoJpeg->isChecked();
-	params["h264_cuvid"] = ui->rbCuvid->isChecked();
-	params["libx264"] = true;
+    params["h264"] = h264id;
 	params["ctp"] = ui->rbCtp->isChecked();
 
     m_rtspServer->startServer(url, params);
     ui->statusbar->showMessage("Try to open remote server", 2000);
-
-    m_timerStartServer.restart();
 }
 
 void MainWindow::on_actionClose_RTSP_server_triggered()
@@ -110,17 +114,13 @@ void MainWindow::on_pb_openRtsp_clicked()
 
 void MainWindow::onTimeout()
 {
-    if(m_rtspServer.get() && m_timerStartServer.elapsed() < max_server_waiting_ms){
+    if(m_rtspServer.get() && m_rtspServer->isLive()){
         if(m_rtspServer->isError()){
             ui->statusbar->showMessage(m_rtspServer->errorStr());
         }else{
             if(m_rtspServer->done()){
                 ui->statusbar->showMessage("Rtsp server is close");
             }
-        }
-
-        if(m_rtspServer->isClientStarted()){
-            m_timerStartServer.restart();
         }
 
 		if(m_rtspServer->isMJpeg()){
@@ -180,6 +180,8 @@ void MainWindow::onTimeout()
             m_rtspServer.reset();
         }
 
+        ui->actionPlay->setChecked(true);
+        on_actionPlay_toggled(true);
 		ui->gbDecodersH264->setEnabled(true);
 		ui->gbTransportProtocol->setEnabled(true);
 		ui->gbDecodersH264->setVisible(true);
@@ -209,9 +211,11 @@ void MainWindow::on_actionPlay_toggled(bool arg1)
 	{
 		if(m_rtspServer.get()){
 			m_rtspServer->startDecode();
-		}
+            ui->gtgWidget->start();
+        }else{
+            ui->gtgWidget->stop();
+        }
 		//ui->widgetPlay->start();
-		ui->gtgWidget->start();
 	}
 	else
 	{

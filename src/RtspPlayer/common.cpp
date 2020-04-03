@@ -136,7 +136,7 @@ void Image::setYUV(int w, int h){
 }
 
 void Image::setNV12(int w, int h){
-	type = YUV;
+    type = NV12;
 	width = w;
 	height = h;
 	yuv.resize(w * h + w/2 * h/2 * 2);

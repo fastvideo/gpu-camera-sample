@@ -16,33 +16,17 @@
 #endif
 
 #include "GLImageViewer.h"
-
+#include "vdecoder.h"
 #include "common_utils.h"
-
+#include "cuviddecoder.h"
 #include "jpegenc.h"
-
-const int STREAM_TYPE_VIDEO     = 0;
-const int MAXIMUM_WAIT          = 3000;
 
 ////////////////////////////
 void copyRect(const PImage &part, size_t xOff, size_t yOff, PImage &out);
 
-
-int callback_layer(void* data)
-{
-    RTSPServer *obj = static_cast<RTSPServer*>(data);
-    obj->doProcess();
-
-    if(obj->done() || obj->isDoStop()){
-        return 1;
-    }
-
-    return 0;
-}
-
 ////////////////////////////
 
-bool extratAddress(const QString &_url, QHostAddress& _addr, ushort &_port)
+bool extractAddress(const QString &_url, QHostAddress& _addr, ushort &_port)
 {
     QString addr, port, url = _url;
     if(url.indexOf("rtsp://") >= 0){
@@ -83,8 +67,7 @@ RTSPServer::RTSPServer(GLRenderer *renderer, QObject *parent)
 	: QObject(parent)
 	, mRenderer(renderer)
 {
-    av_register_all();
-    avformat_network_init();
+    mVDecoder.reset(new VDecoder);
 
     m_url = "rtsp://127.0.0.1:1234/live.sdp";
 
@@ -132,17 +115,16 @@ void RTSPServer::startServer(const QString &url, const QMap<QString, QVariant> &
 	if(additional_params.contains("mjpeg_fastvideo")){
 		setUseFastVideo(additional_params["mjpeg_fastvideo"].toBool());
 	}
-	if(additional_params.contains("h264_cuvid")){
-		if(additional_params["h264_cuvid"].toBool()){
+    if(additional_params.contains("h264")){
+        int id = additional_params["h264"].toInt();
+        if(id == 1){
 			setH264Codec("h264_cuvid");
-		}else{
-			if(additional_params["libx264"].toBool()){
-				setH264Codec("libx264");
-			}else{
-				setH264Codec("h264");
-			}
-		}
-	}
+        }else if(id == 2){
+            setH264Codec("h264");
+        }else if(id == 3){
+            setH264Codec("nv");
+        }
+    }
 	if(additional_params.contains("client")){
 		m_isClient = true;
 	}
@@ -154,6 +136,9 @@ void RTSPServer::startServer(const QString &url, const QMap<QString, QVariant> &
 	m_isServerOpened = true;
 	m_playing = true;
 	m_isStartDecode = true;
+
+    m_timerStartServer.start();
+
     m_thread.reset(new std::thread([this](){
         if(m_useCustomProtocol){
             doServerCustom();
@@ -173,7 +158,10 @@ void RTSPServer::stopServer()
 
     m_done = true;
 
-    waitUntilStopStreaming();
+    if(mVDecoder.get())
+        mVDecoder->waitUntilStopStreaming();
+
+    mVDecoder.reset();
 
     while(m_playing){
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -197,25 +185,20 @@ void RTSPServer::stopServer()
     //m_socket.reset();
     m_socketTcp.reset();
 
-	m_decoderFv.reset();
-
     closeAV();
 
     m_state = NONE;
 
 //    while(!m_frames.empty())
 //        m_frames.pop();
-
-    m_partImages.clear();
-    m_encodedData.clear();
-
-    m_is_open = false;
 }
 
 void RTSPServer::setUseFastVideo(bool val)
 {
 	std::lock_guard<std::mutex> lg(m_mutexDecoder);
-    m_useFastvideo = val;
+    if(mVDecoder.get()){
+        mVDecoder->setUseFastVideo(val);
+    }
 	m_fvImage.reset();
 }
 
@@ -226,17 +209,18 @@ void RTSPServer::setUseCustomProtocol(bool val)
 
 void RTSPServer::setH264Codec(const QString &codec)
 {
-	m_codecH264 = codec;
+    if(mVDecoder.get())
+        mVDecoder->setH264Codec(codec);
 }
 
 bool RTSPServer::isCuvidFound() const
 {
-	return m_codec && QString(m_codec->name) == "h264_cuvid";
+    return mVDecoder.get() && mVDecoder->isCuvidFound();
 }
 
 bool RTSPServer::isMJpeg() const
 {
-	return m_idCodec == CODEC_JPEG;
+    return mVDecoder.get() && mVDecoder->isMJpeg();
 }
 
 bool RTSPServer::isFrameExists() const
@@ -274,16 +258,6 @@ void RTSPServer::stopDecode()
 	m_isStartDecode = false;
 }
 
-bool RTSPServer::isDoStop() const
-{
-    return m_doStop;
-}
-
-void RTSPServer::doProcess()
-{
-
-}
-
 QMap<QString, double> RTSPServer::durations()
 {
 	return m_durations;
@@ -294,85 +268,20 @@ bool RTSPServer::done() const
     return m_done;
 }
 
-void RTSPServer::waitUntilStopStreaming()
+bool RTSPServer::isLive() const
 {
-    if(m_is_open){
-        QTime time;
-        time.start();
-        m_doStop = true;
-		if(!m_useCustomProtocol){
-			while(m_is_open && time.elapsed() < MAXIMUM_WAIT){
-				std::this_thread::sleep_for(std::chrono::milliseconds(10));
-			}
-			if(time.elapsed() > MAXIMUM_WAIT){
-				qDebug("Oops. Streaming not stopped");
-			}
-		}
-        m_doStop = false;
-        m_is_open = false;
-
-        if(m_cdcctx && avcodec_is_open(m_cdcctx)){
-            avcodec_close(m_cdcctx);
-        }
-
-        if(m_fmtctx){
-            avformat_close_input(&m_fmtctx);
-        }
-        m_fmtctx = nullptr;
-        m_cdcctx = nullptr;
-    }
-}
-
-void RTSPServer::getEncodedData(AVPacket *pkt, bytearray &data)
-{
-    data.resize(pkt->size);
-    std::copy(pkt->data, pkt->data + pkt->size, data.data());
+    return m_timerStartServer.elapsed() < max_server_waiting_ms;
 }
 
 void RTSPServer::doServer()
 {
     int res = 0;
-    m_fmtctx = avformat_alloc_context();
     m_bytesReaded = 0;
 
-    AVDictionary *dict = nullptr;
-
-    if(!m_isClient){
-        av_dict_set(&dict, "rtsp_flags", "listen", 0);
-        qDebug("Try to open server %s ..", m_url.toLatin1().data());
-    }else{
-        qDebug("Try to open address %s ..", m_url.toLatin1().data());
-    }
-
-    av_dict_set(&dict, "preset", "slow", 0);
-    /// try to decrease latency
-    av_dict_set(&dict, "tune", "zerolatency", 0);
-    /// need if recevie many packets or packet is big
-    av_dict_set(&dict, "buffer_size", "500000", 0);
-    /// dont know. copy from originaly ffplay
-    av_dict_set(&dict, "scan_all_pmts", "1", AV_DICT_DONT_OVERWRITE);
-
-    try {
-        m_is_open = true;
-
-        m_fmtctx->interrupt_callback.callback = callback_layer;
-        m_fmtctx->interrupt_callback.opaque = this;
-
-        res = avformat_open_input(&m_fmtctx, m_url.toLatin1().data(), m_inputfmt, &dict);
-
-        if(res < 0){
-            qDebug("url %s can'not open", m_url.toLatin1().data());
-            m_error = "url can'not open";
-            m_is_open = false;
-        }
-    } catch (...) {
-        m_is_open = false;
-        m_error = "closed uncorrectrly";
-        qDebug("closed input uncorrectly");
+    if(mVDecoder.get() == nullptr)
         return;
-    }
 
-    if(!m_is_open){
+    if(!mVDecoder->initContext(m_url, m_isClient)){
         m_playing = false;
         return;
     }
@@ -383,61 +292,21 @@ void RTSPServer::doServer()
         if(res >= 0){
             qDebug("<< Server opened >>");
 
-            res = av_find_best_stream(m_fmtctx, AVMEDIA_TYPE_VIDEO, STREAM_TYPE_VIDEO, -1, nullptr, 0);
+            res = mVDecoder->initStream();
 
             if(res >= 0){
-                res = avformat_find_stream_info(m_fmtctx, nullptr);
-
-                m_cdcctx = avcodec_alloc_context3(m_codec);
-                res = avcodec_parameters_to_context(m_cdcctx, m_fmtctx->streams[STREAM_TYPE_VIDEO]->codecpar);
-                if(res < 0){
-                    m_error = QString("error copy paramters to context %1").arg(res);
-                    m_is_open = false;
-                    break;
-                }
-				m_cdcctx->flags |= AV_CODEC_FLAG_LOW_DELAY;
-				m_cdcctx->flags2 |= AV_CODEC_FLAG2_FAST;
-
-                m_codec = avcodec_find_decoder(m_cdcctx->codec_id);
-                if(!m_codec){
-                    m_error = "Codec not found";
-                    m_is_open = false;
-                    break;
-                }
-                if(m_codec->id == AV_CODEC_ID_H264){
-					AVCodec *c = avcodec_find_decoder_by_name(m_codecH264.toLatin1().data());
-                    if(c) m_codec = c;
-                    m_idCodec = CODEC_H264;
-                }
-
-                qDebug("Decoder found: %s", m_codec->name);
-
-                AVDictionary *dict = nullptr;
-                av_dict_set(&dict, "zerolatency", "1", 0);
-                av_dict_set_int(&dict, "buffer_size", m_bufferUdp, 0);
-
-                res = avcodec_open2(m_cdcctx, m_codec, &dict);
-                if(res < 0){
-                    m_error = QString("decoder not open: %1").arg(res);
-                    m_is_open = false;
-                    break;
-                }
                 qDebug("Decoder opened");
                 m_clientStarted = true;
 
                 for(;!m_done;){
-                    AVPacket pkt;
-                    av_init_packet(&pkt);
-                    res = av_read_frame(m_fmtctx, &pkt);
+                    res = mVDecoder->readPacket();
 
                     if(res >= 0){
 						/// try to check packet to additionaly header
 						/// if true then move to assemply packets
 						/// else simply decode
 //						if(!assemblyImages(&pkt))
-						decode_packet(&pkt);
-
-                        m_bytesReaded += pkt.size;
+                        decodePacket();
                     }else{
                         char buf[100];
                         av_make_error_string(buf, sizeof(buf), res);
@@ -446,18 +315,16 @@ void RTSPServer::doServer()
                         break;
                     }
 
-                    av_packet_unref(&pkt);
+                    mVDecoder->freePacket();
                 }
             }else{
                 m_error = QString("stream not found: %1").arg(res);
-                m_is_open = false;
                 break;
             }
 
         }else{
             m_error = QString("input not opened: %1").arg(res);
             m_done = true;
-            m_is_open = false;
         }
     }while(0);
 
@@ -466,7 +333,6 @@ void RTSPServer::doServer()
     m_error = "closed correctly";
 
     m_playing = false;
-    m_is_open = false;
     m_done = true;
 	m_isServerOpened = false;
 
@@ -475,185 +341,26 @@ void RTSPServer::doServer()
 
 void RTSPServer::closeAV()
 {
-    if(m_fmtctx){
-        avformat_close_input(&m_fmtctx);
-        m_fmtctx = nullptr;
-    }
-    if(m_cdcctx){
-        avcodec_free_context(&m_cdcctx);
-        m_cdcctx = nullptr;
-    }
-    m_codec = nullptr;
-    m_inputfmt = nullptr;
-    m_doStop = false;
+    if(mVDecoder.get())
+        mVDecoder->close();
 }
 
-#pragma warning(push)
-#pragma warning(disable : 4189)
-
-void RTSPServer::decode_packet(AVPacket *pkt)
+void RTSPServer::decodePacket()
 {
-	if(!m_isStartDecode)
-		return;
-	if(m_idCodec != CODEC_JPEG){
-        int ret = 0;
-		int got = 0;
+    m_timerStartServer.restart();
 
-		auto starttime = getNow();
-
-        AVFrame *frame = av_frame_alloc();
-
-		ret = avcodec_decode_video2(m_cdcctx, frame, &got, pkt);
-
-		if(got > 0){
-			analyze_frame(frame, m_fvImage);
-            av_frame_unref(frame);
-
-			QString name = m_cdcctx->codec->name;
-			QString out = "decode (" + name + "):";
-
-			m_durations[out] = getDuration(starttime);
-
-			updateRenderer();
-        }
-
-        av_frame_free(&frame);
-    }else{
-//        PImage obj;
-		auto starttime = getNow();
-
-		if(m_encodedData.empty()){
-            m_encodedData.resize(1);
-        }
-        if(m_partImages.empty()){
-            m_partImages.resize(1);
-        }
-        getEncodedData(pkt, m_encodedData[0]);
-
-		std::lock_guard<std::mutex> lg(m_mutexDecoder);
-		if(m_useFastvideo){
-			if(!m_decoderFv.get())
-				m_decoderFv.reset(new fastvideo_decoder);
-			m_decoderFv->decode(m_encodedData[0], m_fvImage, true);
-			m_image_updated = true;
-        }else{
-			jpegenc dec;
-			dec.decode(m_encodedData[0], m_partImages[0]);
-			if(!m_fvImage.get())
-				m_fvImage.reset(new Image);
-			m_fvImage->setRGB(m_partImages[0]->width, m_partImages[0]->height);
-			copyRect(m_partImages[0], 0, 0, m_fvImage);
-			m_image_updated = true;
-        }
-
-		QString name = m_cdcctx->codec->name;
-		QString out = "decode (" + name + "):";
-
-		m_durations[out] = getDuration(starttime);
-
-		updateRenderer();
-
-//        if(obj.get()){
-//            m_mutex.lock();
-//			m_frames.push(obj);
-//            m_mutex.unlock();
-//        }
-    }
-}
-
-//std::list<QByteArray> pkts;
-//void doFileWrite(){
-//    QFile f("tmp.s_h264");
-//    f.open(QIODevice::WriteOnly | QIODevice::Append);
-//    while(1){
-//        if(pkts.empty()){
-//            std::this_thread::sleep_for(std::chrono::milliseconds(10));
-//        }else{
-//            QByteArray pkt = pkts.front();
-//            pkts.pop_front();
-//            int size = pkt.size();
-//            f.write((char*)&size, 4);
-//            f.write(pkt);
-//        }
-//    }
-//    f.close();
-//}
-
-//std::thread thread(doFileWrite);
-
-void RTSPServer::decode_packet(AVPacket *pkt, PImage &image)
-{
-	if(!m_isStartDecode)
+    if(!m_isStartDecode || !mVDecoder.get())
 		return;
 
-	auto starttime = getNow();
+    double duration = -1;
 
-	int got = 0;
-    AVFrame *frame = av_frame_alloc();
+    QString str;
+    if(mVDecoder->decodePacket(m_fvImage, str, m_bytesReaded, duration)){
+        if(!str.isEmpty())
+            m_durations[str] = duration;
 
-	/// this function deprecated but comfortable to calculate duration
-	int res = avcodec_decode_video2(m_cdcctx, frame, &got, pkt);
-
-//    QByteArray cb((char*)pkt->data, pkt->size);
-//    pkts.push_back(cb);
-
-	static int cnt = 1;
-	static auto time = getNow();
-
-	double duration = 0;
-	if(cnt == 1){
-		time = getNow();
-	}else{
-		duration = getDuration(time);
-	}
-
-	qDebug("got frame %d, %d; time %f; packet size %d", got, cnt++, duration, pkt->size);
-
-	if(got > 0){
-        getImage(frame, image);
-        av_frame_unref(frame);
-
-		double duration = getDuration(starttime);
-
-		QString name = m_cdcctx->codec->name;
-		QString out = "decode (" + name + "):";
-
-		m_durations[out] = duration;
-	}
-
-    av_frame_free(&frame);
-}
-
-#pragma warning(pop)
-
-void RTSPServer::analyze_frame(AVFrame *frame, PImage& image)
-{
-//    if(m_frames.size() > m_max_frames)
-//        return;
-
-    if(frame->format == AV_PIX_FMT_YUV420P ||
-            frame->format == AV_PIX_FMT_YUVJ420P ||
-            frame->format == AV_PIX_FMT_NV12){
-
-//      PImage obj;
-		getImage(frame, image);
-		m_image_updated = true;
-
-//      m_mutex.lock();
-//      m_frames.push(obj);
-//      m_mutex.unlock();
+        updateRenderer();
     }
-}
-
-void RTSPServer::getImage(AVFrame *frame, PImage &obj)
-{
-    if(!obj.get())
-        obj.reset(new Image);
-    if(frame->format == AV_PIX_FMT_NV12){
-        obj->setNV12(frame->data, frame->linesize, frame->width, frame->height);
-    }else{
-        obj->setYUV(frame->data, frame->linesize, frame->width, frame->height);
-	}
 }
 
 void RTSPServer::updateRenderer()
@@ -663,157 +370,6 @@ void RTSPServer::updateRenderer()
 		mRenderer->loadImage(m_fvImage, m_bytesReaded);
 		mRenderer->update();
 	}
-}
-
-//bool RTSPServer::assemblyImages(AVPacket *pkt)
-//{
-//    if(pkt->size < rtp_packet_add_header::sizeof_header + 2)
-//        return false;
-
-//    size_t xOff, yOff, cntX, cntY;
-//    unsigned short width, height;
-//    if(!rtp_packet_add_header::getHeader(pkt->data + pkt->size - rtp_packet_add_header::sizeof_header - 2,
-//                                     xOff, yOff, cntX, cntY, width, height)){
-//        return false;
-//    }
-//    m_cntX = cntX;
-//    m_cntY = cntY;
-//    m_width = width;
-//    m_height = height;
-//    m_partImages.resize(m_cntX * m_cntY);
-//    m_encodedData.resize(m_cntX * m_cntY);
-//    size_t off = yOff * cntX + xOff;
-
-//    if(!m_partImages[off].get()){
-//        m_partImages[off].reset(new Image);
-//    }
-//    getEncodedData(pkt, m_encodedData[off]);
-//    //decode_packet(pkt, m_partImages[off]);
-
-//    //qDebug("%d %d %d %d %d", xOff, yOff, cntX, cntY, off);
-
-//    if(off == m_partImages.size() - 1 && m_width && m_height){
-//        assemplyOutput();
-//    }
-//    return true;
-//}
-
-//void RTSPServer::assemplyOutput()
-//{
-//    PImage obj;
-//    obj.reset(new Image);
-//    obj->setRGB((int)m_width, (int)m_height);
-
-//    std::vector< pthread > threads;
-//    threads.resize(m_encodedData.size());
-
-////   #pragma omp parallel for num_threads(8)
-//    for(size_t y = 0; y < m_encodedData.size(); ++y){
-////        QFile f(QString::number(y) + ".jpeg");
-////        if(f.open(QIODevice::WriteOnly)){
-////            f.write((char*)m_encodedData[y].data(), m_encodedData[y].size());
-////            f.close();
-////        }
-//        threads[y].reset(new std::thread([&](size_t t){
-//            jpegenc dec;
-//            dec.decode(m_encodedData[t], m_partImages[t]);
-//        }, y));
-//    }
-
-//    for(int y = 0; y < m_encodedData.size(); ++y){
-//        threads[y]->join();
-//    }
-
-//    std::vector<QPoint> offsets;
-//    offsets.resize(m_encodedData.size());
-//    int xOff = 0, yOff = 0, off = 0;
-//    for(int y = 0; y < m_cntY; ++y){
-//        xOff = 0;
-//        for(int x = 0; x < m_cntX; ++x){
-//            off = y * (int)m_cntX + x;
-
-//            offsets[off] = QPoint(xOff, yOff);
-
-//            xOff += (int)m_partImages[off]->width;
-//        }
-//        yOff += m_partImages[y * m_cntX]->height;
-//    }
-
-////#pragma omp parallel for num_threads(8)
-//    for(int k = 0; k < m_cntX * m_cntY; ++k){
-//        size_t x = k % m_cntX;
-//        size_t y = k / m_cntX;
-//        size_t off = y * m_cntX + x;
-//        if(offsets[off].x() < obj->width && offsets[off].y() < obj->height)
-//			copyRect(m_partImages[off], offsets[off].x(), offsets[off].y(), m_fvImage);
-//    }
-//	m_image_updated = true;
-
-//	if(mRenderer){
-//		mRenderer->loadImage(m_fvImage);
-//	}
-////    m_mutex.lock();
-////    m_frames.push(obj);
-////    m_mutex.unlock();
-
-//    m_updatedImages = true;
-//}
-
-/**
- * @brief copyRect
- * copy image as part of other image
- * @param part
- * @param xOff
- * @param yOff
- * @param out
- */
-void copyRect(const PImage &part, size_t xOff, size_t yOff, PImage &out)
-{
-    if(!part.get() || !out.get())
-        return;
-//    if(xOff + part->width > out->width || yOff + part->height > out->height)
-//        return;
-
-    if(part->type == Image::YUV){
-        int linesizeYP = part->width;
-        int linesizeUVP = part->width/2;
-        int linesizeYO = out->width;
-        int linesizeUVO = out->width/2;
-		uchar *pY = part->yuv.data();
-		uchar *oY = out->yuv.data();
-		for(int y = 0; y < part->height; ++y){
-			unsigned char * yp = pY + linesizeYP * y;
-			unsigned char * yo = oY + linesizeYO * (y + yOff) + xOff;
-            std::copy(yp, yp + linesizeYP, yo);
-        }
-
-		uchar *pU = pY + part->width * part->height;
-		uchar *oU = oY + out->width * out->height;
-		uchar *pV = pU + part->width/2 * part->height/2;
-		uchar *oV = oU + out->width/2 * out->height/2;
-		for(int y = 0; y < part->height/2; ++y){
-			unsigned char * up = pU + linesizeUVP * y;
-			unsigned char * uo = oU + linesizeUVO * (y + yOff/2) + xOff/2;
-
-            std::copy(up, up + linesizeUVP, uo);
-
-			unsigned char * vp = pV + linesizeUVP * y;
-			unsigned char * vo = oV + linesizeUVO * (y + yOff/2) + xOff/2;
-            std::copy(vp, vp + linesizeUVP, vo);
-        }
-    }else if(part->type == Image::RGB){
-        int linesizeRGBP = part->width * 3;
-        int linesizeRGBO = out->width * 3;
-
-        int h = min(int(part->height), int(out->height - yOff));
-        int w = min(int(part->width), int(out->width - xOff));
-        int cp = w * 3;
-        for(int y = 0; y < h; ++y){
-            unsigned char * yp = part->rgb.data() + linesizeRGBP * y;
-            unsigned char * yo = out->rgb.data() + linesizeRGBO * (y + yOff) + xOff * 3;
-            std::copy(yp, yp + cp, yo);
-        }
-    }
 }
 
 void RTSPServer::doServerCustom()
@@ -828,7 +384,7 @@ void RTSPServer::doServerCustom()
 
     QHostAddress addr;
     ushort port;
-    if(!extratAddress(m_url, addr, port)){
+    if(!extractAddress(m_url, addr, port)){
         return;
     }
 
@@ -958,6 +514,8 @@ void RTSPServer::parseLines()
 
 void RTSPServer::parseSdp(const QByteArray &sdp)
 {
+    if(!mVDecoder.get())
+        return;
     QStringList sl = QString(sdp).split("\n");
 
     for(QString s: sl){
@@ -967,9 +525,9 @@ void RTSPServer::parseSdp(const QByteArray &sdp)
             if(pos >= 0){
                 QString fmt = s.right(s.size() - pos - QString("RTP/AVP").size()).trimmed();
                 if(fmt == "26"){
-                    m_idCodec = CODEC_JPEG;         /// select jpeg codec
+                    mVDecoder->setCodec(VDecoder::CODEC_JPEG);         /// select jpeg codec
                 }else if(fmt == "96"){
-                    m_idCodec = CODEC_H264;         /// select h264 codec
+                    mVDecoder->setCodec(VDecoder::CODEC_H264);         /// select h264 codec
                 }
             }
             m_state = SETUP;
@@ -1050,34 +608,8 @@ void RTSPServer::sendSetup()
 
 void RTSPServer::sendPlay()
 {
-    int ret = 0;
-
-    if(m_idCodec == CODEC_H264){
-		m_codec = avcodec_find_decoder_by_name(m_codecH264.toLatin1().data());
-        if(!m_codec){
-            m_codec = avcodec_find_decoder_by_name("h264");
-            if(!m_codec){
-                m_codec = avcodec_find_decoder_by_name("libx264");
-                if(!m_codec){
-                    m_error = "Codec not found";
-                    return;
-                }
-            }
-        }
-
-        m_cdcctx = avcodec_alloc_context3(m_codec);
-		m_cdcctx->flags |= AV_CODEC_FLAG_LOW_DELAY;
-		m_cdcctx->flags2 |= AV_CODEC_FLAG2_FAST;
-
-		AVDictionary *dict = nullptr;
-		av_dict_set(&dict, "threads", "auto", 0);
-        av_dict_set(&dict, "zerolatency", "1", 0);
-
-		if((ret = avcodec_open2(m_cdcctx, m_codec, &dict)) < 0){
-            m_error = "Codec not open";
-            avcodec_free_context(&m_cdcctx);
-            return;
-        }
+    if(mVDecoder.get() == nullptr || !mVDecoder->initDecoder()){
+        return;
     }
 
     m_udpThread.reset(new std::thread([this](){
@@ -1202,56 +734,26 @@ void RTSPServer::doDecode()
 
 void RTSPServer::decode_packet(const QByteArray &enc)
 {
-	if(!m_isStartDecode)
+    m_timerStartServer.restart();
+    if(!m_isStartDecode)
 		return;
 	//PImage obj;
-
-    if(m_partImages.empty()){
-        m_partImages.resize(1);
-    }
 
 	std::lock_guard<std::mutex> lg(m_mutexDecoder);
 
     double duration = -1;
 
-	auto starttime = getNow();
 	QString name;
 
-    if(m_idCodec == CODEC_JPEG){
-        if(m_useFastvideo){
-			name = "Fastvideo";
-			if(!m_decoderFv.get())
-				m_decoderFv.reset(new fastvideo_decoder);
+    if(mVDecoder->decodePacket(enc, m_fvImage, name, duration)){
+        if(!name.isEmpty()){
+            m_durations[name] = duration;
+        }
 
-			m_decoderFv->decode((uchar*)enc.data(), enc.size(), m_fvImage, true);
-			m_image_updated = true;
-        }else{
-			name = "JpegTurbo";
-			jpegenc dec;
-			dec.decode((uchar*)enc.data(), enc.size(), m_fvImage);
-			m_image_updated = true;
-		}
-    }else{
-		name = "";
-        AVPacket pkt;
-        av_init_packet(&pkt);
-        av_new_packet(&pkt, enc.size());
-        std::copy(enc.data(), enc.data() + enc.size(), pkt.data);
-		decode_packet(&pkt, m_fvImage);
-        av_packet_unref(&pkt);
-		m_image_updated = true;
+        updateRenderer();
+
+        qDebug("decode duration(ms): %f         \r", duration);
     }
-
-	duration = getDuration(starttime);
-
-	if(!name.isEmpty()){
-		QString out = "decode (" + name + "):";
-		m_durations[out] = duration;
-	}
-
-	updateRenderer();
-
-    qDebug("decode duration(ms): %f         \r", duration);
 
 //    if(!m_useFastvideo){
 //        if(obj.get()){
