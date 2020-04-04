@@ -32,7 +32,7 @@ private:
     qint32 m_SN = 0;
 
 	QMap<QString, double> m_durations;
-	std::chrono::steady_clock::time_point m_starttime;
+    timepoint m_starttime;
 
     struct Udp{
         QByteArray d;

@@ -74,4 +74,6 @@ win32: QMAKE_CXXFLAGS += /openmp
 RESOURCES += \
     resorces.qrc
 
-include(cuviddecoder/cuviddecoder.pri)
+!contains(TARGET_ARCH, arm64 ){
+    include(cuviddecoder/cuviddecoder.pri)
+}

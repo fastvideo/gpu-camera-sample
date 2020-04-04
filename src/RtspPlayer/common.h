@@ -53,12 +53,19 @@ public:
     virtual uint64_t bytesReaded() = 0;
 };
 
-inline std::chrono::steady_clock::time_point getNow()
+
+#ifdef _MSC_VER
+typedef std::chrono::steady_clock::time_point timepoint;
+#else
+typedef std::chrono::system_clock::time_point timepoint;
+#endif
+
+inline timepoint getNow()
 {
 	return std::chrono::high_resolution_clock::now();
 }
 
-inline double getDuration(std::chrono::steady_clock::time_point start)
+inline double getDuration(timepoint start)
 {
 	auto dur = std::chrono::high_resolution_clock::now() - start;
 	double duration = std::chrono::duration_cast<std::chrono::microseconds>(dur).count()/1000.;

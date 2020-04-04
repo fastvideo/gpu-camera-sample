@@ -4,8 +4,18 @@
 #include <mutex>
 
 #include "fastvideo_decoder.h"
-#include "cuviddecoder.h"
 #include "jpegenc.h"
+
+#ifndef __ARM_ARCH
+#include "cuviddecoder.h"
+#else
+class CuvidDecoder{
+public:
+    bool decode(uint8_t* data, size_t size, PImage& image){
+        return false;
+    }
+};
+#endif
 
 const int STREAM_TYPE_VIDEO     = 0;
 const int MAXIMUM_WAIT          = 1500;

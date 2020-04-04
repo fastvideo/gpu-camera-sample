@@ -106,7 +106,7 @@ private:
 #ifdef _MSC_VER
     uint64_t mHSocket = 0;
 #else
-    void *mHSocket = nullptr;
+    int mHSocket = 0;
 #endif
     std::unique_ptr<QTcpSocket> m_socketTcp;
     QByteArray m_buffer;

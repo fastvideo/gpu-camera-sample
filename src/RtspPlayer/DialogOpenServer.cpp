@@ -1,5 +1,5 @@
 #include "DialogOpenServer.h"
-#include "ui_dialogopenserver.h"
+#include "ui_DialogOpenServer.h"
 
 DialogOpenServer::DialogOpenServer(QWidget *parent) :
     QDialog(parent),

@@ -1,5 +1,5 @@
 #include "MainWindow.h"
-#include "ui_mainwindow.h"
+#include "ui_MainWindow.h"
 
 #include "DialogOpenServer.h"
 
@@ -43,7 +43,7 @@ void MainWindow::on_actionOpen_RTSP_server_triggered()
 
 void MainWindow::openServer(const QString &url)
 {
-	m_rtspServer.reset(new RTSPServer(mRendererPtr.get()));
+    m_rtspServer.reset(new RTSPServer(mRendererPtr.data()));
 
     connect(m_rtspServer.get(), SIGNAL(startStopServer(bool)), this, SLOT(onStartStopServer(bool)), Qt::QueuedConnection);
 
@@ -53,7 +53,7 @@ void MainWindow::openServer(const QString &url)
 
 void MainWindow::openClient(const QString &url)
 {
-	m_rtspServer.reset(new RTSPServer(mRendererPtr.get()));
+    m_rtspServer.reset(new RTSPServer(mRendererPtr.data()));
 
     connect(m_rtspServer.get(), SIGNAL(startStopServer(bool)), this, SLOT(onStartStopServer(bool)), Qt::QueuedConnection);
 
@@ -147,7 +147,7 @@ void MainWindow::onTimeout()
 
 		QMap<QString, double> durations = m_rtspServer->durations();
 
-        if(mRendererPtr.get()){
+        if(mRendererPtr.data()){
             sdur += QString("Output image: %1x%2 pixels\n").arg(mRendererPtr->imageSize().width()).arg(mRendererPtr->imageSize().height());
         }
 

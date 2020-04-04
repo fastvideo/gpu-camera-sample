@@ -13,13 +13,25 @@
 #pragma comment(lib, "WS2_32.lib")
 #else
 #include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netinet/ip.h>
+#include <netinet/in.h>
+#include <unistd.h>
+#include <errno.h>
+
+#define SOCKET_ERROR (-1)
+#define closesocket(x) close((int)x)
 #endif
 
 #include "GLImageViewer.h"
 #include "vdecoder.h"
 #include "common_utils.h"
-#include "cuviddecoder.h"
 #include "jpegenc.h"
+
+#ifndef __ARM_ARCH
+#include "cuviddecoder.h"
+#else
+#endif
 
 ////////////////////////////
 void copyRect(const PImage &part, size_t xOff, size_t yOff, PImage &out);
@@ -658,7 +670,7 @@ void RTSPServer::doPlay()
     struct timeval tv;
     tv.tv_sec = 0;
     tv.tv_usec = timeout_in_mseconds * 1000;
-    setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
+    setsockopt(mHSocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
 
 #endif
 
@@ -666,7 +678,7 @@ void RTSPServer::doPlay()
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = inet_addr("0.0.0.0");
     addr.sin_port = htons(m_clientPort1);
-    int res = bind(mHSocket, (SOCKADDR*)&addr, sizeof(addr));
+    int res = bind(mHSocket, (sockaddr*)&addr, sizeof(addr));
     if(res == SOCKET_ERROR){
         qDebug("Socket bind error");
         return;
