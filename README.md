@@ -17,10 +17,11 @@ That software is based on the following image processing pipeline for camera app
 * Debayer with HQLI (5&times;5 window), DFPD (11&times;11), MG (23&times;23) algorithms
 * Wavelet-based denoiser
 * Gamma (linear, sRGB)
-* JPEG / MJPEG encoding
+* JPEG / MJPEG encoding/decoding
+* Optional H.264 encoding/decoding
 * Output to monitor
 * Export from GPU to CPU memory
-* Storage of compressed data to SSD or streaming via FFmpeg RTSP
+* Storage of compressed images/video to SSD or MJPEG/H.264 streaming
 
 Processing is done on NVIDIA GPU to speedup the performance. The software could also work with raw images in PGM format and you can utilize these images for testing or if you don't have a camera or if your camera is not supported. More info about that project you can find <a href="https://www.fastcompression.com/blog/gpu-software-machine-vision-cameras.htm" target="_blank">here</a>.
 
@@ -106,6 +107,16 @@ export LD_LIBRARY_PATH=`pwd`
 ./GPUCameraSample
 ```
 
+## Glass-to-Glass Time Measurements
+To check system latency we've implemented the software to run G2G tests in the gpu-camera-sample application. 
+
+We have the following choices for G2G tests:
+* Camera captures frame with current time from high resolution timer at the monitor, we send data from camera to the software, do image processing on GPU and then show processed image at the same monitor close to the window with the timer. If we stop the software, we see two different times and their difference is system latency.
+* We have implemented more compicated solution: after image processing on GPU we've done JPEG encoding (MJPEG on CPU or on GPU), then send MJPEG stream to receiver process, where we do MJPEG parcing and decoding, then frame output to the monitor. Both processes (sender and receiver) are running at the same PC.
+* The same solution as in the previous approach, but with H.264 encoding/decoding (CPU or GPU), both processes are at the same PC.
+
+We can also measure the latency for the case when we stream compressed data from one PC to another over network. Latency depends on camera frame rate, monitor fps, NVIDIA GPU performance, network bandwidth, complexity of image processing pipeline, etc.
+
 
 ## Software architecture
 
@@ -156,13 +167,10 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 * Software for NVIDIA Jetson hardware and L4T for CUDA-10.0 (Jetson Nano, TX2, Xavier) - done
 * Glass-to-Glass (G2G) test for latency measurements - done
 * Support for XIMEA, Basler, JAI, Daheng Imaging cameras - done
-* MJPEG streaming via FFmpeg RTSP - in progress
+* MJPEG or H.264 streaming with or without FFmpeg RTSP - done
 * Support for Imperx, Baumer, FLIR cameras
 * LCP support (undistortion)
 * DCP support
-* H.264/H.265 encoders (NVIDIA NVENC)
-* JPEG2000 encoder (Fastvideo J2K on GPU)
-* Curves and Levels via 1D LUT
 * Color correction with 3&times;3 matrix
 * Support of other color spaces
 * Transforms to Rec.601 (SD), Rec.709 (HD), Rec.2020 (4K)
