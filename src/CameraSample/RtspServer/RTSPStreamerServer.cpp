@@ -62,7 +62,11 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
 
     if(mEncoderType == etNVENC)
     {
+#ifdef __ARM_ARCH
+        mCodec = avcodec_find_encoder_by_name("h264_omx");
+#else
         mCodec = avcodec_find_encoder_by_name("h264_nvenc");
+#endif
         if(!mCodec)
         {
             mCodec = avcodec_find_encoder_by_name("libx264");
@@ -85,7 +89,9 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
 			mErrStr = "Codec not found";
 			return;
 		}
+#ifndef __ARM_ARCH
         mPixFmt = AV_PIX_FMT_YUVJ420P;
+#endif
 	}
 
     mCodecId = mCodec->id;
@@ -94,7 +100,7 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
 
     mCtx->bit_rate = mBitrate;
 
-    if(mCodecId == AV_CODEC_ID_MJPEG)
+    if(mEncoderType == etJPEG)
     {
         if(mWidth > MAX_WIDTH_RTP_JPEG || mHeight > MAX_HEIGHT_RTP_JPEG)
         {
@@ -119,7 +125,7 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
 	mCtx->gop_size = 0;
     mCtx->pix_fmt = mPixFmt;
 
-    if(mCodecId != AV_CODEC_ID_MJPEG)
+    if(mEncoderType == etNVENC)
     {
         mCtx->max_b_frames = 0;        // codec do not open for mjpeg
 		mCtx->keyint_min = 0;
@@ -136,7 +142,7 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
 		av_dict_set(&dict, "force_duplicated_matrix", "1", 0);      // remove warnings where mjpeg sending
 	}
 
-    if(mCodecId == AV_CODEC_ID_H264)
+    if(mCodecId == AV_CODEC_ID_H264 || mCodecId == AV_CODEC_ID_INDEO3)
     {
         av_dict_set(&dict, "zerolatency", "1", 0);
         //av_dict_set(&dict, "preset", "fast", 0);
@@ -150,10 +156,14 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
 	{
 		char buf[100];
 		av_make_error_string(buf, sizeof(buf), ret);
-		mErrStr = QString(QStringLiteral("avcodec_open2 failed, code: %1 (%2)")).arg(ret, 0, 16).arg(buf);
-        mIsError = true;
-		return;
-	}
+        if(mEncoderType != etJPEG){
+            mErrStr = QString(QStringLiteral("avcodec_open2 failed, code: %1 (%2)")).arg(ret, 0, 16).arg(buf);
+            mIsError = true;
+            return;
+        }else{
+            qDebug("Can use only ctp protocol");
+        }
+    }
 
 	mDelayFps = 1000 / mFps;
 
@@ -175,11 +185,14 @@ RTSPStreamerServer::~RTSPStreamerServer()
         mThread->quit();
         mThread->wait();
 	}
-
-    if(mCtx)
-    {
-        avcodec_close(mCtx);
-        avcodec_free_context(&mCtx);
+    try{
+        if(mCtx)
+        {
+            avcodec_close(mCtx);
+            avcodec_free_context(&mCtx);
+        }
+    }catch(...){
+        qDebug("unknown error when close codec and context");
     }
 }
 
@@ -332,7 +345,7 @@ void RTSPStreamerServer::newConnection()
     QTcpSocket* sock = mServer->nextPendingConnection();
     if(sock)
     {
-        TcpClient *client = new TcpClient(sock, mUrl, mCtx);
+        TcpClient *client = new TcpClient(sock, mUrl, mCtx, (TcpClient::EncoderType)mEncoderType);
         mClients.push_back(client);
 		connect(client, SIGNAL(removeClient(TcpClient*)), this, SLOT(removeClient(TcpClient*)));
 //		connect(sock, SIGNAL(disconnected()),
@@ -417,7 +430,7 @@ bool RTSPStreamerServer::addBigFrame(unsigned char* rgbPtr, size_t linesize)
     if(!mIsInitialized || mClients.empty())
 		return false;
 
-    if(mCodecId != AV_CODEC_ID_MJPEG || (mWidth <= MAX_WIDTH_RTP_JPEG && mHeight <= MAX_HEIGHT_RTP_JPEG))
+    if(mEncoderType != etJPEG || (mWidth <= MAX_WIDTH_RTP_JPEG && mHeight <= MAX_HEIGHT_RTP_JPEG))
 		return addFrame(rgbPtr);
 
     size_t cntW = std::round(1. * mWidth/MAX_WIDTH_JPEG), cntH = std::round(mHeight/MAX_HEIGHT_JPEG);
@@ -595,8 +608,8 @@ bool RTSPStreamerServer::addInternalFrame(uchar *rgbPtr)
         return false;
 	int ret = 0;
 
-	if((mCodecId == AV_CODEC_ID_H264 && !mUseCustomEncodeH264)
-			|| (mCodecId == AV_CODEC_ID_MJPEG && !mUseCustomEncodeJpeg))
+    if(((mCodecId == AV_CODEC_ID_H264 || mCodecId == AV_CODEC_ID_INDEO3) && !mUseCustomEncodeH264)
+            || (mEncoderType == etJPEG && !mUseCustomEncodeJpeg))
 	{
 		AVFrame* frm = av_frame_alloc();
 		frm->width = mWidth;
@@ -613,7 +626,7 @@ bool RTSPStreamerServer::addInternalFrame(uchar *rgbPtr)
 //            QDateTime dt = QDateTime::currentDateTime();
 //            drawTimeToImage(rgbPtr, mWidth, mHeight, dt);
 
-            if(mNv12Encode != nullptr){
+            if(mNv12Encode != nullptr && mPixFmt == AV_PIX_FMT_NV12){
                 frm->format = AV_PIX_FMT_NV12;
                 mNv12Encode(mEncoderBuffer.data(), rgbPtr, mWidth, mHeight);
 //                drawTimeToImageGray(mEncoderBuffer.data(), mWidth, mHeight, dt);
@@ -634,7 +647,7 @@ bool RTSPStreamerServer::addInternalFrame(uchar *rgbPtr)
 
 		int t = 0;
 
-		if(mCodecId == AV_CODEC_ID_MJPEG)
+        if(mEncoderType == etJPEG)
 		{
 			if(mJpegData.empty())
 				mJpegData.resize(1);
@@ -668,7 +681,7 @@ bool RTSPStreamerServer::addInternalFrame(uchar *rgbPtr)
 
 void RTSPStreamerServer::encodeWriteFrame(AVFrame *frame)
 {
-    int ret, got;
+    int ret = 0, got;
 	AVPacket enc_pkt;
     enc_pkt.data = nullptr;
 	enc_pkt.size = 0;

@@ -147,8 +147,12 @@ void RawProcessor::startWorking()
         mProcessorPtr->Transform(img, mOptions);
         if(mRenderer)
         {
+/// on arm processor cannot show 60 fps
+#ifdef __ARM_ARCH
+            const qint64 frameTime = 32;
             qint64 curTime = tm.elapsed();
-            //if(curTime - lastTime >= frameTime)
+            if(curTime - lastTime >= frameTime)
+#endif
             {
                 mRenderer->loadImage(mProcessorPtr->GetFrameBuffer(), mOptions.Width, mOptions.Height);
                 mRenderer->update();
@@ -171,10 +175,10 @@ void RawProcessor::startWorking()
         {
             if(mRtspServer && mRtspServer->isConnected())
             {
-//                unsigned char* data = (uchar*)buffer.data();
-//                mProcessorPtr->export8bitData((void*)data, true);
+                unsigned char* data = (uchar*)buffer.data();
+                mProcessorPtr->export8bitData((void*)data, true);
 
-                mRtspServer->addFrame(nullptr);
+                mRtspServer->addFrame(data);
             }
         }
 

@@ -60,6 +60,13 @@ class TcpClient : public QObject
 {
 	Q_OBJECT
 public:
+    typedef enum
+    {
+        etNVENC,
+        etJPEG,
+        etJ2K
+    } EncoderType;
+
     enum {NONE,
           CONNECT,
           CONNECTED,
@@ -77,7 +84,7 @@ public:
           PAUSE};
 
 	explicit TcpClient(QTcpSocket *sock, const QString& url,
-					   AVCodecContext *codec, QObject *parent = nullptr);
+                       AVCodecContext *codec, EncoderType encType, QObject *parent = nullptr);
 	~TcpClient();
 	/**
 	 * @brief sendpkt
@@ -119,6 +126,7 @@ private:
 	QString m_Session;
 	QString m_url;
     QString m_fmtSdp = "26";
+    EncoderType mEncoderType;
 
     qint64 m_frameCnt = 0;
 

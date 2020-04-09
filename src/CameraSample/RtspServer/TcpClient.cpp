@@ -50,15 +50,16 @@
 #define RTSP_RTP_PORT_MIN 5000
 #define RTSP_RTP_PORT_MAX 65000
 
-TcpClient::TcpClient(QTcpSocket *sock, const QString &url, AVCodecContext *codec, QObject *parent)
+TcpClient::TcpClient(QTcpSocket *sock, const QString &url, AVCodecContext *codec, EncoderType encType, QObject *parent)
 	: QObject(parent)
 	, m_socket(sock)
 	, m_url(url)
 	, m_ctx_main(codec)
+    , mEncoderType(encType)
 {
-    if(m_ctx_main){
+    if(m_ctx_main && m_ctx_main->codec){
         m_codec = avcodec_find_encoder_by_name(m_ctx_main->codec->name);
-        if(m_codec && m_codec->id == AV_CODEC_ID_H264){
+        if(m_codec && mEncoderType == etNVENC){
             m_fmtSdp = "96";
         }
     }
@@ -69,7 +70,7 @@ TcpClient::TcpClient(QTcpSocket *sock, const QString &url, AVCodecContext *codec
 
 //	sock->moveToThread(m_thread.get());
 
-    m_serverPort1 = (rand() % 55000) - 5000;
+    m_serverPort1 = (rand() % 55000) + 5000;
     m_serverPort2 = m_serverPort1 + 1;
 
 	connect(m_socket, SIGNAL(connected()), this, SLOT(connected()));
@@ -551,10 +552,10 @@ QString TcpClient::generateSDP(ushort portudp)
     QString ip = m_socket->localAddress().toString();
     //ushort port = m_socket->localPort();
 
-    if(!m_codec)
+    if(!m_codec && mEncoderType != etJPEG)
         return "";
 
-    if(m_codec->id == AV_CODEC_ID_MJPEG){
+    if(mEncoderType == etJPEG){
         QString sdp =
                 QString(
                 "v=0\r\n"
@@ -567,7 +568,7 @@ QString TcpClient::generateSDP(ushort portudp)
                 "b=AS:200\r\n"
                 "a=control:streamid=0").arg(ip).arg(portudp);
         return sdp;
-    }else if(m_codec->id == AV_CODEC_ID_H264){
+    }else if(mEncoderType == etNVENC){
         QString sdp = QString(
                     "v=0\r\n"
                     "o=- 0 0 IN IP4 %1\r\n"
