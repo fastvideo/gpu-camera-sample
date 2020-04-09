@@ -148,9 +148,9 @@ void RawProcessor::startWorking()
         if(mRenderer)
         {
 /// on arm processor cannot show 60 fps
-#ifdef __ARM_ARCH
             const qint64 frameTime = 32;
             qint64 curTime = tm.elapsed();
+#ifdef __ARM_ARCH
             if(curTime - lastTime >= frameTime)
 #endif
             {
