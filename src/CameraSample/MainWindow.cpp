@@ -166,6 +166,10 @@ MainWindow::MainWindow(QWidget *parent) :
     mTimerStatusRtsp.start(400);
     connect(&mTimerStatusRtsp, SIGNAL(timeout()), this, SLOT(onTimeoutStatusRtsp()));
 
+#ifdef __ARM_ARCH
+    ui->txtRtspServer->setText("rtsp://0.0.0.0:1234/live.sdp"); // guess to use a global address on the jetson platform
+#endif
+
 #if defined SUPPORT_XIMEA || defined SUPPORT_GENICAM
 
     ui->mainToolBar->insertAction(ui->actionOpenBayerPGM, ui->actionOpenCamera);
