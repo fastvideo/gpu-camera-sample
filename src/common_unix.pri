@@ -19,6 +19,9 @@ CUDA_LIB += -lnpps
 CUDA_LIB += -lnppc
 CUDA_LIB += -lcudart
 #
+FFMPEG_PATH = $$OTHER_LIB_PATH/ffmpeg
+FFMPEG_LIB_PATH  = $$FFMPEG_PATH/lib/
+
 contains( DEFINES, SUPPORT_XIMEA ){
     XI_API_PATH = /opt/XIMEA/
     INCLUDEPATH += $$XI_API_PATH/include
@@ -94,21 +97,21 @@ FASTVIDEO_EXTRA_DLLS += $$(_PRO_FILE_PWD_)/GPUCameraSample.sh
 #FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libfastvideo_sdk.so.15.0.0.015000.so
 #FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libfastvideo_sdk.so.18
 
-FFMPEG_PATH = $$OTHER_LIB_PATH/FastvideoSDK/libs/ffmpeg
+#FFMPEG_PATH = $$OTHER_LIB_PATH/FastvideoSDK/libs/ffmpeg
 #contains(TARGET_ARCH, arm64 ) {
 #    FFMPEG_LIB = -L$$FFMPEG_PATH/lib/linux/aarch64/
 #}
 #else {
 #    FFMPEG_LIB = -L$$FFMPEG_PATH/lib/linux/x86_64/
 #}
-FFMPEG_LIB += -lavcodec -lavformat -lavutil -lswresample
+FFMPEG_LIB += -l:libavformat.a -l:libavcodec.a -l:libavutil.a -l:libswresample.a -lm -lz -lx264
 #
 INCLUDEPATH += $$FASTVIDEO_INC
-INCLUDEPATH += $$FFMPEG_PATH/inc
+INCLUDEPATH += $$FFMPEG_PATH/include
 #
 LIBS += $$FASTVIDEO_LIB
 LIBS += $$CUDA_LIB
-LIBS += $$FFMPEG_LIB
+LIBS += -L$$FFMPEG_LIB_PATH/ $$FFMPEG_LIB
 LIBS += -ldl
 LIBS += -ljpeg
 
