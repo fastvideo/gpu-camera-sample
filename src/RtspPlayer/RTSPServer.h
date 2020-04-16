@@ -160,7 +160,7 @@ private:
 
 	GLRenderer* mRenderer = nullptr;
 
-    qint64 max_server_waiting_ms = 2000;
+    qint64 max_server_waiting_ms = 20000;
 
     void doServer();
     void closeAV();
