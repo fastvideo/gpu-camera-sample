@@ -63,7 +63,7 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
     if(mEncoderType == etNVENC)
     {
 #ifdef __ARM_ARCH
-        mCodec = avcodec_find_encoder_by_name("h264_omx");
+//        mCodec = avcodec_find_encoder_by_name("h264_v4l2m2m");
 #else
         mCodec = avcodec_find_encoder_by_name("h264_nvenc");
 #endif
@@ -76,9 +76,8 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
                 mErrStr = "Codec not found";
                 return;
 			}
-        }else{
-            mPixFmt = AV_PIX_FMT_NV12;
         }
+        mPixFmt = AV_PIX_FMT_NV12;
 	}
     if(mEncoderType == etJPEG)
     {
@@ -89,10 +88,9 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
 			mErrStr = "Codec not found";
 			return;
 		}
-#ifndef __ARM_ARCH
+
         mPixFmt = AV_PIX_FMT_YUVJ420P;
-#endif
-	}
+    }
 
     mCodecId = mCodec->id;
 
