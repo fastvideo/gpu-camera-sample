@@ -34,6 +34,7 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QElapsedTimer>
+#include <QScopedPointer>
 #include <QTimer>
 #include <memory>
 #include <list>
@@ -55,6 +56,10 @@ extern "C" {
 
 #include "common_utils.h"
 #include "TcpClient.h"
+
+#ifdef __ARM_ARCH
+#include "v4l2encoder.h"
+#endif
 
 class RTSPStreamerServer : public QObject
 {
@@ -165,6 +170,12 @@ private:
     std::shared_ptr<QThread>    mThread;
 
 	std::shared_ptr< std::thread > mFrameThread;
+
+#ifdef __ARM_ARCH
+    userbuffer mUserBuffer;
+    QScopedPointer<v4l2Encoder> mV4L2Encoder;
+    void encodeWriteFrame(uint8_t *buf, int width, int height);
+#endif
 
 	struct FrameBuffer{
 		uchar *buffer = nullptr;

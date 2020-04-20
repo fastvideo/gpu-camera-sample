@@ -134,6 +134,11 @@ win32:copyPluginsToDestdir(imageformats)
 
 copyQtDllsToDestdir($$QT_DLLS)
 unix {
+
+    contains(TARGET_ARCH, arm64){
+        include($$PWD/jetson_api/jetson_api.pri)
+    }
+
     copyPluginsToDestdir(xcbglintegrations)
     copyQtIcuDllsToDestdir($$QT_ICU_DLLS)
 }

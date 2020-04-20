@@ -63,6 +63,7 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
     if(mEncoderType == etNVENC)
     {
 #ifdef __ARM_ARCH
+        mV4L2Encoder.reset(new v4l2Encoder());
 //        mCodec = avcodec_find_encoder_by_name("h264_v4l2m2m");
 #else
         mCodec = avcodec_find_encoder_by_name("h264_nvenc");
@@ -632,9 +633,16 @@ bool RTSPStreamerServer::addInternalFrame(uchar *rgbPtr)
                 RGB2Yuv420p(mEncoderBuffer.data(), rgbPtr, mWidth, mHeight);
             }
         }
-        ret = av_image_fill_arrays(frm->data, frm->linesize, mEncoderBuffer.data(), (AVPixelFormat)frm->format, frm->width, frm->height, 1);
-	//	ret = encode_write_frame(frm, 0, &got_frame);
-		encodeWriteFrame(frm);
+#ifdef __ARM_ARCH
+        if(mEncoderType == etNVENC){
+            encodeWriteFrame(mEncoderBuffer.data(), mWidth, mHeight);
+        }else
+#endif
+        {
+            ret = av_image_fill_arrays(frm->data, frm->linesize, mEncoderBuffer.data(), (AVPixelFormat)frm->format, frm->width, frm->height, 1);
+//      	ret = encode_write_frame(frm, 0, &got_frame);
+            encodeWriteFrame(frm);
+        }
 
 		av_frame_free(&frm);
 	}
@@ -676,6 +684,30 @@ bool RTSPStreamerServer::addInternalFrame(uchar *rgbPtr)
 
 	return false;
 }
+
+#ifdef __ARM_ARCH
+void RTSPStreamerServer::encodeWriteFrame(uint8_t *buf, int width, int height)
+{
+    if(mV4L2Encoder.data()){
+        if(mV4L2Encoder->encodeFrame(buf, width, height, mUserBuffer, true)){
+            if(!mUserBuffer.empty()){
+                AVPacket enc_pkt;
+                enc_pkt.data = nullptr;
+                enc_pkt.size = 0;
+                av_init_packet(&enc_pkt);
+
+                av_new_packet(&enc_pkt, static_cast<int>(mUserBuffer.size()));
+                enc_pkt.pts = enc_pkt.dts = mFramesProcessed;
+                enc_pkt.flags = AV_PKT_FLAG_KEY;
+                std::copy(mUserBuffer.data(),mUserBuffer.data() + mUserBuffer.size(), enc_pkt.data);
+
+                sendPkt(&enc_pkt);
+                av_packet_unref(&enc_pkt);
+            }
+        }
+    }
+}
+#endif
 
 void RTSPStreamerServer::encodeWriteFrame(AVFrame *frame)
 {
