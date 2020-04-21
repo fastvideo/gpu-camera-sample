@@ -96,6 +96,12 @@ public:
     int setOutputPlaneFormat(uint32_t pixfmt, uint32_t width, uint32_t height);
     int setProfile(uint32_t val);
     int setLevel(uint32_t val);
+    int setExtControls(struct v4l2_ext_controls &ctl);
+    int setEnableAllIFrameEncode(bool val);
+    int setInsertSpsPpsAtIdrEnabled(bool val);
+    int setIDRInterval(int val);
+    int setInsertVuiEnabled(bool enabled);
+    int forceIDR();
 
     uint32_t pixFmt() const { return mPixFmt; }
 

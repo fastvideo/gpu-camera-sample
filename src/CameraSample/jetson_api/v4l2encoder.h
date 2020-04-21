@@ -14,6 +14,10 @@ public:
     v4l2Encoder();
     ~v4l2Encoder();
 
+    void setInsertSpsPpsAtIdrEnabled(bool val);
+    void setIDRInterval(int val);
+    void setInsertVuiEnabled(bool enabled);
+    void setEnableAllIFrameEncode(bool val);
     void setIFrameInterval(int val);
     void setNumBFrames(int val);
     void setFrameRate(int fps);
