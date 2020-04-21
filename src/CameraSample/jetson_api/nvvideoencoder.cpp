@@ -434,7 +434,7 @@ int NvPlane::setFormat(v4l2_format &format)
     if(ret == 0){
         n_planes = format.fmt.pix_mp.num_planes;
         for(int i = 0; i < n_planes; ++i){
-            planefmts[i].height = format.fmt.pix_mp.height;
+            planefmts[i].height = height;
             planefmts[i].bytesperline = format.fmt.pix_mp.plane_fmt[i].bytesperline;
             planefmts[i].sizeimage = format.fmt.pix_mp.plane_fmt[i].sizeimage;
         }
