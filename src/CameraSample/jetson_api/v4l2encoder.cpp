@@ -257,19 +257,22 @@ public:
                 uint32_t bpy1 = lines[0];
                 uint32_t bpuv1 = lines[1];
 
+#pragma omp parallel for
                 for(int i = 0; i < mHeight; ++i){
-                    std::copy(y, y + bpy0, datas[0] + i * bpy1);
-                    y += bpy0;
+                    uint8_t *dy = y + i * bpy0;
+                    std::copy(dy, dy + bpy0, datas[0] + i * bpy1);
+                    //y += bpy0;
                 }
+#pragma omp parallel for
                 for(int i = 0; i < mHeight/2; ++i){
-                    uint8_t *duv = uv;
+                    uint8_t *duv = uv + i * bpuv0;
                     uint8_t *du = (uint8_t*)(datas[1] + i * bpuv1);
                     uint8_t *dv = (uint8_t*)(datas[2] + i * bpuv1);
                     for(int j = 0; j < mWidth/2; ++j){
                         du[j] = duv[2 * j + 0];
                         dv[j] = duv[2 * j + 1];
                     }
-                    uv += bpuv0;
+                    //uv += bpuv0;
                 }
 
                 buffer->planes[0].bytesused = buffer->planes[0].fmt.sizeimage;
