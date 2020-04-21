@@ -136,12 +136,14 @@ public:
 
     void sequence(CUVIDEOFORMAT *fmt){
 
-        if(!mDecoder || fmt->coded_width != mWidth || fmt->coded_height != mHeight){
+        int w = fmt->display_area.right - fmt->display_area.left;
+        int h = fmt->display_area.bottom - fmt->display_area.top;
+        if(!mDecoder || w != mWidth || h != mHeight){
             release_decoder();
         }
 
-        mWidth = fmt->coded_width;
-        mHeight = fmt->coded_height;
+        mWidth  = w;
+        mHeight = h;
         mFmt = *fmt;
 
         if(!mDecoder){
