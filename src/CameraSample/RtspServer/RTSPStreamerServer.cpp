@@ -64,6 +64,11 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
     {
 #ifdef __ARM_ARCH
         mV4L2Encoder.reset(new v4l2Encoder());
+        mV4L2Encoder->setIDRInterval(1);
+        mV4L2Encoder->setEnableAllIFrameEncode(true);
+        mV4L2Encoder->setInsertSpsPpsAtIdrEnabled(true);
+        mV4L2Encoder->setInsertVuiEnabled(true);
+        mV4L2Encoder->setIFrameInterval(1);
 //        mCodec = avcodec_find_encoder_by_name("h264_v4l2m2m");
 #else
         mCodec = avcodec_find_encoder_by_name("h264_nvenc");
