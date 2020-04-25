@@ -11,8 +11,3 @@ HEADERS += \
 SOURCES += \
     $$PWD/cuviddecoder.cpp
 
-NVCODECS = $$OTHER_LIB_PATH/nvcodecs
-
-INCLUDEPATH += $$NVCODECS/include
-LIBS += -L$$NVCODECS/Lib/$$PLATFORM -lnvcuvid
-

@@ -70,6 +70,11 @@ CUDA_DLL += $$CUDA_DLL_PATH/nppif64_10.dll
 CUDA_DLL += $$CUDA_DLL_PATH/nppicc64_10.dll
 CUDA_DLL += $$CUDA_DLL_PATH/nppig64_10.dll
 
+# NVIDIA VIDEO CODEC SDK
+# https://developer.nvidia.com/nvidia-video-codec-sdk/download
+NVCODECS = $$OTHER_LIB_PATH/nvcodecs
+INCLUDEPATH += $$NVCODECS/include
+LIBS += -L$$NVCODECS/Lib/$$PLATFORM -lnvcuvid
 
 INCLUDEPATH += $$CUDAINC
 INCLUDEPATH += $$FASTVIDEO_INC

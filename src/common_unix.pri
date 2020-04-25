@@ -76,6 +76,7 @@ FASTVIDEO_INC += $$FASTVIDEOPATH/common
 FASTVIDEO_INC += $$FASTVIDEOPATH/libs/OpenGL/inc
 #
 FASTVIDEO_LIB += -L$$FASTVIDEOPATH/fastvideo_sdk/lib/$$PLATFORM
+#For ubuntu x64 need to create the dir fastvideo_sdk/lib/Linux64
 FASTVIDEO_LIB += -lfastvideo_sdk -lfastvideo_denoise
 #
 # -lfastvideo_mjpeg -lfastvideo_denoise -lfastvideo_nppFilter -lfastvideo_nppResize -lfastvideo_nppGeometry
@@ -97,6 +98,21 @@ FASTVIDEO_EXTRA_DLLS += $$(_PRO_FILE_PWD_)/GPUCameraSample.sh
 #FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libfastvideo_sdk.so.15.0.0.015000.so
 #FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libfastvideo_sdk.so.18
 
+# NVIDIA VIDEO CODEC SDK
+# https://developer.nvidia.com/nvidia-video-codec-sdk/download
+
+!contains(TARGET_ARCH, arm64){
+    NVCODECS = $$OTHER_LIB_PATH/nvcodecs
+    INCLUDEPATH += $$NVCODECS/include
+    LIBS += -L$$NVCODECS/Lib/$$PLATFORM -lnvcuvid -lcuda
+    FFMPEG_LIB += -lavformat -lavcodec -lavutil -lswresample -lm -lz -lx264
+}
+
+contains(TARGET_ARCH, arm64){
+    #to work with ffmpeg on nvidia jetson need compile it from source (default not work correctly)
+    FFMPEG_LIB += -l:libavformat.a -l:libavcodec.a -l:libavutil.a -l:libswresample.a -lm -lz -lx264
+}
+
 #FFMPEG_PATH = $$OTHER_LIB_PATH/FastvideoSDK/libs/ffmpeg
 #contains(TARGET_ARCH, arm64 ) {
 #    FFMPEG_LIB = -L$$FFMPEG_PATH/lib/linux/aarch64/
@@ -104,7 +120,6 @@ FASTVIDEO_EXTRA_DLLS += $$(_PRO_FILE_PWD_)/GPUCameraSample.sh
 #else {
 #    FFMPEG_LIB = -L$$FFMPEG_PATH/lib/linux/x86_64/
 #}
-FFMPEG_LIB += -l:libavformat.a -l:libavcodec.a -l:libavutil.a -l:libswresample.a -lm -lz -lx264
 #
 INCLUDEPATH += $$FASTVIDEO_INC
 INCLUDEPATH += $$FFMPEG_PATH/include
