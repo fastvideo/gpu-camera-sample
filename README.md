@@ -44,7 +44,7 @@ Currently the software is working with <a href="https://www.ximea.com" target="_
 
 * Ubuntu 18.04 (x64 or Arm64)
 * Camera SDK or GenICam package + camera vendor GenTL producer (.cti). Currently XIMEA, Basler, JAI, Daheng Imaging cameras are supported
-* Fastvideo SDK (demo) ver.0.15.0.0
+* Fastvideo SDK (demo) ver.0.15.2.x
 * NVIDIA CUDA-10.1 for x64 platform
 * NVIDIA CUDA-10.0 for ARM64 platform
 * Qt 5 (qtbase5-dev)
@@ -54,7 +54,7 @@ sudo apt-get install qtbase5-dev qtbase5-dev-tools qtcreator
 * Compiler gcc 7.4
 * FFmpeg libraries
 ``` console 
-sudo apt-get install  libavutil-dev libavcodec-dev libavdevice-dev libavfilter-dev libavformat-dev libavresample-dev
+sudo apt-get install  libavutil-dev libavcodec-dev libavdevice-dev libavfilter-dev libavformat-dev libavresample-dev libx264-dev
 ```
 
 
@@ -76,6 +76,9 @@ For Windows users
    * Create \<Project root\>\OtherLibs\GenICam folder.
    * Unpack GenICam_V3_2_0-Win64_x64_VC141-Release-SDK.zip into \<Project root\>\OtherLibs\GenICam folder.
    * Unpack GenICam_V3_2_0-Win64_x64_VC141-Release-Runtime.zip into \<Project root\>\OtherLibs\GenICam\library\CPP
+
+You also can download precompiled libs from <a href="https://drive.google.com/open?id=1ZMOWXPctzdONz7kAylv3A6BNmyKQ8tfc" target="_blank">here</a>
+
 * Open src\GPUCameraSample.pro in Qt Creator.
 * By default the application will be built with no camera support. The only option is camera simulator which is working with PGM files. To enable XIMEA camera support, open common_defs.pri and uncomment line DEFINES += SUPPORT_XIMEA.
 * Build the project.
@@ -107,6 +110,8 @@ ldconfig -n .
 export LD_LIBRARY_PATH=`pwd`
 ./GPUCameraSample
 ```
+
+You also can download precompiled libs from <a href="https://drive.google.com/open?id=1V92grA-8x3l8u73VOUrQ8KUGxEtaCTFV" target="_blank">here</a>
 
 ## Glass-to-Glass Time Measurements
 To check system latency we've implemented the software to run G2G tests in the gpu-camera-sample application. 
@@ -186,7 +191,7 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 ## Downloads
 
 * Download <a href="https://www.fastcinemadng.com/download/download.html" target="_blank">Fast CinemaDNG Processor</a> software for Windows, manual and test DNG footages
-* Download <a href="https://drive.google.com/open?id=1p21TXXC7SCw5PdDVEhayRdMQEN6X11ge">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a> (valid till March 23, 2020)
-* Download <a href="https://drive.google.com/open?id=1GNcQtGmz-FBrKqrsSnMENMCbg44xxWQn">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a> (valid till March 23, 2020)
-* Download <a href="https://drive.google.com/file/d/1gBfPkazCiHLHc4piPHSJA2_Rm52CnoKD/view?usp=sharing">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> (valid till April 12, 2020)
+* Download <a href="https://drive.google.com/open?id=1H_zzt9N-3a-dd7j1jhvGjp5rBDBGayDV">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a> (valid till March 23, 2021)
+* Download <a href="https://drive.google.com/open?id=1ZQ8fWYRKTuvLbF3mhkJFc2pSz7kkLk_m">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a> (valid till July 07, 2020)
+* Download <a href="https://drive.google.com/open?id=1AsvMlnp-SpIEsxzkg3WpR--mzCPDw6mi">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> (valid till August 01, 2020)
 * Download <a href="https://www.fastcompression.com/download/Fastvideo_SDK_manual.pdf" target="_blank">Fastvideo SDK Manual</a>
