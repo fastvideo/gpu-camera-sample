@@ -116,28 +116,26 @@ namespace rtp_packet_add_header
 typedef std::unique_ptr< std::thread > pthread;
 
 /// get duration of exectute function
-#define GETDUR(fun)    [&](){                                                                   \
-  auto starttime = std::chrono::high_resolution_clock::now();                                   \
-  fun;                                                                                          \
-  auto dur = std::chrono::high_resolution_clock::now() - starttime;                             \
-  double tm = std::chrono::duration_cast<std::chrono::microseconds>(dur).count()/1000.;         \
-  return tm;                                                                                    \
-}();
+template< typename F, class... Types >
+double GETDUR(F fun, Types ...args)
+{
+  auto starttime = std::chrono::steady_clock::now();
+  fun(args...);
+  auto dur = std::chrono::steady_clock::now() - starttime;
+  double tm = std::chrono::duration_cast<std::chrono::microseconds>(dur).count()/1000.;
+  return tm;
+}
 
-#ifdef _MSC_VER
 typedef std::chrono::steady_clock::time_point timepoint;
-#else
-typedef std::chrono::system_clock::time_point timepoint;
-#endif
 
 inline timepoint getNow()
 {
-	return std::chrono::high_resolution_clock::now();
+    return std::chrono::steady_clock::now();
 }
 
 inline double getDuration(timepoint start)
 {
-	auto dur = std::chrono::high_resolution_clock::now() - start;
+    auto dur = std::chrono::steady_clock::now() - start;
 	double duration = std::chrono::duration_cast<std::chrono::microseconds>(dur).count()/1000.;
 	return duration;
 }

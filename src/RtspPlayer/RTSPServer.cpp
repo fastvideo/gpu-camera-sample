@@ -739,7 +739,7 @@ void RTSPServer::doDecode()
             m_encodecPkts.pop();
             m_mutexDec.unlock();
 
-			decode_packet(enc);
+            decode_packet(enc);
         }
     }
 }
