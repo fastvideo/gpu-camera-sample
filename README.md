@@ -26,15 +26,15 @@ That software is based on the following image processing pipeline for camera app
 
 Processing is done on NVIDIA GPU to speedup the performance. The software could also work with raw images in PGM format and you can utilize these images for testing or if you don't have a camera or if your camera is not supported. More info about that project you can find <a href="https://www.fastcompression.com/blog/gpu-software-machine-vision-cameras.htm" target="_blank">here</a>.
 
-From the benchmarks on <strong>NVIDIA GeForce RTX 2080ti</strong> we can see that GPU-based raw image processing is very fast and it could offer high image quality at the same time. The total performance could reach <strong>4 GPix/s</strong> for color cameras. The performance strongly depends on complexity of the pipeline. Multiple GPU solutions could significanly improve the performance.
+From the benchmarks on <strong>NVIDIA GeForce RTX 2080ti</strong> we can see that GPU-based raw image processing is very fast and it could offer high image quality at the same time. The total performance could reach <strong>4 GPix/s</strong> for color cameras. The performance strongly depends on complexity of the pipeline. Multiple GPU solutions could significantly improve the performance.
 
-Currently the software is working with <a href="https://www.ximea.com" target="_blank">XIMEA</a> cameras via XIMEA SDK. Via GenICam the software can work with <a href="https://www.ximea.com" target="_blank">XIMEA</a>, <a href="https://www.baslerweb.com" target="_blank">Basler</a>, <a href="https://www.jai.com" target="_blank">JAI</a>, <a href="https://dahengimaging.com/" target="_blank">Daheng Imaging</a> cameras. Soon we are going to add support for <a href="https://www.imperx.com" target="_blank">Imperx</a>, Baumer and FLIR cameras. You can add support for desired cameras by yourself. The software is working with demo version of Fastvideo SDK, that is why you can see a watermark on the screen. To get a Fastvideo SDK license for develoment and for deployment, please contact <a href="https://www.fastcompression.com/" target="_blank">Fastvideo company</a>.
+Currently the software is working with <a href="https://www.ximea.com" target="_blank">XIMEA</a> cameras via XIMEA SDK. Via GenICam the software can work with <a href="https://www.ximea.com" target="_blank">XIMEA</a>, <a href="https://www.matrix-vision.com" target="_blank">MATRIX VISION</a>, <a href="https://www.baslerweb.com" target="_blank">Basler</a>, <a href="https://www.jai.com" target="_blank">JAI</a>, <a href="https://dahengimaging.com/" target="_blank">Daheng Imaging</a> cameras. Soon we are going to add support for <a href="https://www.imperx.com" target="_blank">Imperx</a>, Baumer and FLIR cameras. You can add support for desired cameras by yourself. The software is working with demo version of Fastvideo SDK, that is why you can see a watermark on the screen. To get a Fastvideo SDK license for develoment and for deployment, please contact <a href="https://www.fastcompression.com/" target="_blank">Fastvideo company</a>.
 
 ## How to build gpu-camera-sample
 
 ### Requirements for Windows
 
-* Camera SDK or GenICam package + camera vendor GenTL producer (.cti). Сurrently XIMEA, Basler, JAI, Daheng Imaging cameras are supported
+* Camera SDK or GenICam package + camera vendor GenTL producer (.cti). Сurrently XIMEA, MATRIX VISION, Basler, JAI, Daheng Imaging cameras are supported
 * Fastvideo SDK (demo) ver.0.15.0.0
 * NVIDIA CUDA-10.1
 * Qt ver.5.13.1
@@ -43,7 +43,7 @@ Currently the software is working with <a href="https://www.ximea.com" target="_
 ### Requirements for Linux
 
 * Ubuntu 18.04 (x64 or Arm64)
-* Camera SDK or GenICam package + camera vendor GenTL producer (.cti). Currently XIMEA, Basler, JAI, Daheng Imaging cameras are supported
+* Camera SDK or GenICam package + camera vendor GenTL producer (.cti). Currently XIMEA, MATRIX VISION, Basler, JAI, Daheng Imaging cameras are supported
 * Fastvideo SDK (demo) ver.0.15.2.x
 * NVIDIA CUDA-10.1 for x64 platform
 * NVIDIA CUDA-10.0 for ARM64 platform
@@ -68,7 +68,7 @@ git clone https://github.com/fastvideo/gpu-camera-sample.git
 For Windows users
 
 * Create OtherLibs folder in the project root folder. This folder will contains external libraries, used in gpu-camera-sample application.
-* Download Fastvideo SDK from <a href="https://drive.google.com/open?id=1p21TXXC7SCw5PdDVEhayRdMQEN6X11ge">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a> (valid till March 23, 2020), unpack it into \<Project root\>\OtherLibs\fastvideoSDK folder.
+* Download Fastvideo SDK from <a href="https://drive.google.com/open?id=1p21TXXC7SCw5PdDVEhayRdMQEN6X11ge">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a>, unpack it into \<Project root\>\OtherLibs\fastvideoSDK folder. If the trial period is expired, please send an inquery to Fastvideo to obtain the latest version.
 * If you need direct XIMEA camera support, download XiAPI from https://www.ximea.com/support/documents/4. Install downloaded package (by default into C:\XIMEA). Copy API folder from XIAPI installation folder into \<Project root\>\OtherLibs folder.
 * If you need GenICam support
    * Download GenICamTM Package Version 2019.11 (https://www.emva.org/wp-content/uploads/GenICam_Package_2019.11.zip).
@@ -87,7 +87,7 @@ You also can download precompiled libs from <a href="https://drive.google.com/op
 For Linux users
 
 * Create OtherLibsLinux folder in the project root folder. This folder will contains external libraries, used in gpu-camera-sample application.
-* Download Fastvideo SDK x64 platform from <a href="https://drive.google.com/open?id=1GNcQtGmz-FBrKqrsSnMENMCbg44xxWQn">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a> (valid till March 23, 2020), or Fastvideo SDK Arm64 platform from <a href="https://drive.google.com/file/d/1gBfPkazCiHLHc4piPHSJA2_Rm52CnoKD/view?usp=sharing">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> unpack it into \<Project root\>\OtherLibsLinux\fastvideoSDK folder. Copy all files from \<Project root\>/OtherLibsLinux/fastvideoSDK/fastvideo_sdk/lib to \<Project root\>/OtherLibsLinux/fastvideoSDK/fastvideo_sdk/lib/x64 for x64 platform and to \<Project root\>/OtherLibsLinux/fastvideoSDK/fastvideo_sdk/lib/Arm64 for Arm64 platform. CD to created folder and run
+* Download Fastvideo SDK x64 platform from <a href="https://drive.google.com/open?id=1GNcQtGmz-FBrKqrsSnMENMCbg44xxWQn">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a>, or Fastvideo SDK Arm64 platform from <a href="https://drive.google.com/file/d/1gBfPkazCiHLHc4piPHSJA2_Rm52CnoKD/view?usp=sharing">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> unpack it into \<Project root\>\OtherLibsLinux\fastvideoSDK folder. Copy all files from \<Project root\>/OtherLibsLinux/fastvideoSDK/fastvideo_sdk/lib to \<Project root\>/OtherLibsLinux/fastvideoSDK/fastvideo_sdk/lib/x64 for x64 platform and to \<Project root\>/OtherLibsLinux/fastvideoSDK/fastvideo_sdk/lib/Arm64 for Arm64 platform. CD to created folder and run
 ``` console
 ldconfig -n .
 link libfastvideo_denoise.so.2 libfastvideo_denoise.so
@@ -161,7 +161,7 @@ We also recommend to check PCI-Express bandwidth for Host-to-Device and Device-t
 
 If you are working with images which reside on HDD, please place them on SSD or M2.
 
-For testing purposes you can utilize the latest NVIDIA GeForce RTX 2060, 2070, 2080ti.
+For testing purposes you can utilize the latest NVIDIA GeForce RTX 2060, 2070, 2080ti or Jetson Nano, TX2, Xavier.
 
 For continuous high performance applications we recommend professional NVIDIA Quadro and Tesla GPUs.
 
@@ -172,7 +172,7 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 * Linux version - done
 * Software for NVIDIA Jetson hardware and L4T for CUDA-10.0 (Jetson Nano, TX2, Xavier) - done
 * Glass-to-Glass (G2G) test for latency measurements - done
-* Support for XIMEA, Basler, JAI, Daheng Imaging cameras - done
+* Support for XIMEA, MATRIX VISION, Basler, JAI, Daheng Imaging cameras - done
 * MJPEG or H.264 streaming with or without FFmpeg RTSP - done
 * Support for Imperx, Baumer, FLIR cameras - in progress
 * Transforms to Rec.601 (SD), Rec.709 (HD), Rec.2020 (4K)
