@@ -8,6 +8,7 @@
 #include <QImage>
 #include <QPainter>
 #include <QTimer>
+#include <QPainterPath>
 
 GtGWidget::GtGWidget(QWidget* parent) :
     QWidget(parent)

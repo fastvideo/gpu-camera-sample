@@ -239,7 +239,7 @@ void GLImageViewer::wheelEvent(QWheelEvent * event)
     Qt::KeyboardModifiers keyState = QApplication::queryKeyboardModifiers();
     if(keyState.testFlag(Qt::ControlModifier))
     {
-        qreal newZoom = getZoom() * std::pow(1.125, numSteps);
+        qreal newZoom = getZoom() * pow(1.125, numSteps);
         setZoomInternal(newZoom, event->pos());
         update();
     }

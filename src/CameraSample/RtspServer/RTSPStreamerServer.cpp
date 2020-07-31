@@ -32,6 +32,7 @@
 
 #include <thread>
 #include <exception>
+#include <cmath>
 
 #include "common_utils.h"
 #include "vutils.h"
