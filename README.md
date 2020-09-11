@@ -5,7 +5,7 @@ Camera sample application with realtime GPU image processing
 <img src="https://www.fastcompression.com/img/blog/machine-vision/gpu-software-machine-vision-cameras.png" alt="gpu software machine vision genicam" style="max-width:100%"/></a></p>
 
 That software is based on the following image processing pipeline for camera applications that includes:
-* Raw image capture (8-bit, 12-bit packed/unpacked, 16-bit)
+* Raw image capture (bayer 8-bit, 12-bit packed/unpacked, 16-bit)
 * Import to GPU
 * Raw data convert and unpack
 * Linearization curve
@@ -14,21 +14,21 @@ That software is based on the following image processing pipeline for camera app
 * Flat-Field Correction
 * White Balance
 * Exposure Correction (brightness control)
-* Debayer with HQLI (5&times;5 window), DFPD (11&times;11), MG (23&times;23) algorithms
+* Debayer with HQLI (5&times;5 window), L7 (7&times;7 window), DFPD (11&times;11), MG (23&times;23) algorithms
 * Wavelet-based denoiser
 * Gamma (linear, sRGB)
 * JPEG / MJPEG encoding/decoding
 * H.264 encoding/decoding
-* Output to monitor
+* Output to monitor via OpenGL
 * Export from GPU to CPU memory
 * MJPEG or H.264 streaming
 * Storage of compressed images/video to SSD
 
-Processing is done on NVIDIA GPU to speedup the performance. The software could also work with raw images in PGM format and you can utilize these images for testing or if you don't have a camera or if your camera is not supported. More info about that project you can find <a href="https://www.fastcompression.com/blog/gpu-software-machine-vision-cameras.htm" target="_blank">here</a>.
+Processing is done on NVIDIA GPU to speedup the performance. The software could also work with raw bayer images in PGM format and you can utilize these images for testing or if you don't have a camera or if your camera is not supported. More info about that project you can find <a href="https://www.fastcompression.com/blog/gpu-software-machine-vision-cameras.htm" target="_blank">here</a>.
 
 From the benchmarks on <strong>NVIDIA GeForce RTX 2080ti</strong> we can see that GPU-based raw image processing is very fast and it could offer high image quality at the same time. The total performance could reach <strong>4 GPix/s</strong> for color cameras. The performance strongly depends on complexity of the pipeline. Multiple GPU solutions could significantly improve the performance.
 
-Currently the software is working with <a href="https://www.ximea.com" target="_blank">XIMEA</a> cameras via XIMEA SDK. Via GenICam the software can work with <a href="https://www.ximea.com" target="_blank">XIMEA</a>, <a href="https://www.matrix-vision.com" target="_blank">MATRIX VISION</a>, <a href="https://www.baslerweb.com" target="_blank">Basler</a>, <a href="https://www.jai.com" target="_blank">JAI</a>, <a href="https://dahengimaging.com/" target="_blank">Daheng Imaging</a> cameras. Soon we are going to add support for <a href="https://www.imperx.com" target="_blank">Imperx</a>, Baumer and FLIR cameras. You can add support for desired cameras by yourself. The software is working with demo version of Fastvideo SDK, that is why you can see a watermark on the screen. To get a Fastvideo SDK license for develoment and for deployment, please contact <a href="https://www.fastcompression.com/" target="_blank">Fastvideo company</a>.
+Currently the software is working with <a href="https://www.ximea.com" target="_blank">XIMEA</a> cameras via XIMEA SDK. Via GenICam the software can work with <a href="https://www.ximea.com" target="_blank">XIMEA</a>, <a href="https://www.matrix-vision.com" target="_blank">MATRIX VISION</a>, <a href="https://www.baslerweb.com" target="_blank">Basler</a>, <a href="https://www.jai.com" target="_blank">JAI</a>, <a href="https://dahengimaging.com/" target="_blank">Daheng Imaging</a> cameras. Soon we are going to add support for <a href="https://www.imperx.com" target="_blank">Imperx</a>, Baumer, IDS and FLIR cameras. You can add support for desired cameras by yourself. The software is working with demo version of Fastvideo SDK, that is why you can see a watermark on the screen. To get a Fastvideo SDK license for develoment and for deployment, please contact <a href="https://www.fastcompression.com/" target="_blank">Fastvideo company</a>.
 
 ## How to build gpu-camera-sample
 
@@ -174,6 +174,7 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 * Glass-to-Glass (G2G) test for latency measurements - done
 * Support for XIMEA, MATRIX VISION, Basler, JAI, Daheng Imaging cameras - done
 * MJPEG or H.264 streaming with or without FFmpeg RTSP - done
+* Software for CUDA-10.2 - in progress
 * Support for Imperx, Baumer, FLIR cameras - in progress
 * Transforms to Rec.601 (SD), Rec.709 (HD), Rec.2020 (4K)
 * Interoperability with external FFmpeg and GStreamer
@@ -181,16 +182,16 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 ## Info
 
 * <a href="https://www.fastcompression.com/products/sdk.htm" target="_blank">Fastvideo SDK for Image & Video Processing on GPU</a>
-* <a href="https://www.fastcinemadng.com/" target="_blank">Full description of image processing pipeline on GPU for digital cinema applications</a>
+* <a href="https://www.fastcinemadng.com/" target="_blank">Full image processing pipeline on GPU for digital cinema applications</a>
 
 ## Fastvideo SDK Benchmarks
 
-* <a href="https://www.fastcompression.com/pub/2019/Fastvideo_SDK_benchmarks.pdf" target="_blank">Fastvideo SDK Benchmarks 2019</a>
+* <a href="https://www.fastcompression.com/pub/2019/Fastvideo_SDK_benchmarks.pdf" target="_blank">Fastvideo SDK Benchmarks</a>
 * <a href="https://www.fastcompression.com/blog/jetson-benchmark-comparison.htm" target="_blank">Jetson Benchmark Comparison for Image Processing: Nano vs TX1 vs TX2 vs Xavier</a>
 
 ## Downloads
 
-* Download <a href="https://www.fastcinemadng.com/download/download.html" target="_blank">Fast CinemaDNG Processor</a> software for Windows, manual and test DNG footages
+* Download <a href="https://www.fastcinemadng.com/download/download.html" target="_blank">Fast CinemaDNG Processor</a> software for Windows or Linux, manual and test DNG and BRAW footages
 * Download <a href="https://drive.google.com/open?id=1H_zzt9N-3a-dd7j1jhvGjp5rBDBGayDV">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a> (valid till March 23, 2021)
 * Download <a href="https://drive.google.com/open?id=1ZQ8fWYRKTuvLbF3mhkJFc2pSz7kkLk_m">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a> (valid till July 07, 2020)
 * Download <a href="https://drive.google.com/open?id=1AsvMlnp-SpIEsxzkg3WpR--mzCPDw6mi">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> (valid till August 01, 2020)
