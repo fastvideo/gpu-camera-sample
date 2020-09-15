@@ -17,7 +17,7 @@ That software is based on the following image processing pipeline for camera app
 * Debayer with HQLI (5&times;5 window), L7 (7&times;7 window), DFPD (11&times;11), MG (23&times;23) algorithms
 * Color correction with 3&times;3 matrix
 * Wavelet-based denoiser
-* Resize / Crop / Rotate
+* Crop / Resize / Flip / Flop / Rotate
 * Gamma (linear, sRGB)
 * JPEG / MJPEG encoding/decoding
 * H.264 and HEVC encoding/decoding
