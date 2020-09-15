@@ -15,18 +15,20 @@ That software is based on the following image processing pipeline for camera app
 * White Balance
 * Exposure Correction (brightness control)
 * Debayer with HQLI (5&times;5 window), L7 (7&times;7 window), DFPD (11&times;11), MG (23&times;23) algorithms
+* Color correction with 3&times;3 matrix
 * Wavelet-based denoiser
+* Resize / Crop / Rotate
 * Gamma (linear, sRGB)
 * JPEG / MJPEG encoding/decoding
-* H.264 encoding/decoding
+* H.264 and HEVC encoding/decoding
 * Output to monitor via OpenGL
 * Export from GPU to CPU memory
-* MJPEG or H.264 streaming
+* MJPEG or H.264/H.265 streaming
 * Storage of compressed images/video to SSD
 
 Processing is done on NVIDIA GPU to speedup the performance. The software could also work with raw bayer images in PGM format and you can utilize these images for testing or if you don't have a camera or if your camera is not supported. More info about that project you can find <a href="https://www.fastcompression.com/blog/gpu-software-machine-vision-cameras.htm" target="_blank">here</a>.
 
-From the benchmarks on <strong>NVIDIA GeForce RTX 2080ti</strong> we can see that GPU-based raw image processing is very fast and it could offer high image quality at the same time. The total performance could reach <strong>4 GPix/s</strong> for color cameras. The performance strongly depends on complexity of the pipeline. Multiple GPU solutions could significantly improve the performance.
+From the benchmarks on <strong>NVIDIA Quadro RTX 6000</strong> or <strong>GeForce RTX 2080ti</strong> we can see that GPU-based raw image processing is very fast and it could offer high image quality at the same time. The total performance could reach <strong>4 GPix/s</strong> for color cameras. The performance strongly depends on complexity of the pipeline. Multiple GPU solutions could significantly improve the performance.
 
 Currently the software is working with <a href="https://www.ximea.com" target="_blank">XIMEA</a> cameras via XIMEA SDK. Via GenICam the software can work with <a href="https://www.ximea.com" target="_blank">XIMEA</a>, <a href="https://www.matrix-vision.com" target="_blank">MATRIX VISION</a>, <a href="https://www.baslerweb.com" target="_blank">Basler</a>, <a href="https://www.jai.com" target="_blank">JAI</a>, <a href="https://dahengimaging.com/" target="_blank">Daheng Imaging</a> cameras. Soon we are going to add support for <a href="https://www.imperx.com" target="_blank">Imperx</a>, Baumer, IDS and FLIR cameras. You can add support for desired cameras by yourself. The software is working with demo version of Fastvideo SDK, that is why you can see a watermark on the screen. To get a Fastvideo SDK license for develoment and for deployment, please contact <a href="https://www.fastcompression.com/" target="_blank">Fastvideo company</a>.
 
@@ -35,8 +37,8 @@ Currently the software is working with <a href="https://www.ximea.com" target="_
 ### Requirements for Windows
 
 * Camera SDK or GenICam package + camera vendor GenTL producer (.cti). Сurrently XIMEA, MATRIX VISION, Basler, JAI, Daheng Imaging cameras are supported
-* Fastvideo SDK (demo) ver.0.15.0.0
-* NVIDIA CUDA-10.1
+* Fastvideo SDK (demo) ver.0.16.0.0
+* NVIDIA CUDA-10.2
 * Qt ver.5.13.1
 * Compiler MSVC 2017
 
@@ -44,9 +46,9 @@ Currently the software is working with <a href="https://www.ximea.com" target="_
 
 * Ubuntu 18.04 (x64 or Arm64)
 * Camera SDK or GenICam package + camera vendor GenTL producer (.cti). Currently XIMEA, MATRIX VISION, Basler, JAI, Daheng Imaging cameras are supported
-* Fastvideo SDK (demo) ver.0.15.2.x
-* NVIDIA CUDA-10.1 for x64 platform
-* NVIDIA CUDA-10.0 for ARM64 platform
+* Fastvideo SDK (demo) ver.0.16.0.0
+* NVIDIA CUDA-10.2 for x64 platform
+* NVIDIA CUDA-10.2 for ARM64 platform
 * Qt 5 (qtbase5-dev)
 ``` console
 sudo apt-get install qtbase5-dev qtbase5-dev-tools qtcreator
@@ -154,7 +156,7 @@ In general case, Fastvideo SDK can import/export data from/to SSD / CPU memory /
 * NVIDIA GPU with Kepler architecture, 6xx series minimum
 * NVIDIA GPU with 4-8 GB memory or better
 * Intel Core i5 or better
-* NVIDIA CUDA-10.1
+* NVIDIA CUDA-10.2
 * Compiler MSVC 2017 (MSVC 2015 is not compatible with CUDA-10.1) for Windows or gcc 7.4.0 for Linux
 
 We also recommend to check PCI-Express bandwidth for Host-to-Device and Device-to-Host transfers. For GPU with Gen3 x16 it should be in the range of 10-12 GB/s. GPU memory size could be a bottleneck for image processing from high resolution cameras, so please check GPU memory usage in the software.
@@ -174,8 +176,9 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 * Glass-to-Glass (G2G) test for latency measurements - done
 * Support for XIMEA, MATRIX VISION, Basler, JAI, Daheng Imaging cameras - done
 * MJPEG or H.264 streaming with or without FFmpeg RTSP - done
-* Software for CUDA-10.2 - in progress
-* Support for Imperx, Baumer, FLIR cameras - in progress
+* Software for CUDA-10.2 - done
+* HEVC encoder/decoder - done
+* Support for Imperx, Baumer, FLIR, IDS cameras - in progress
 * Transforms to Rec.601 (SD), Rec.709 (HD), Rec.2020 (4K)
 * Interoperability with external FFmpeg and GStreamer
 
