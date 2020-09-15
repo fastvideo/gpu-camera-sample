@@ -530,6 +530,7 @@ void RTSPServer::parseSdp(const QByteArray &sdp)
         return;
     QStringList sl = QString(sdp).split("\n");
 
+    bool search_codec = false;
     for(QString s: sl){
         int pos = s.indexOf("m=video");
         if(pos >= 0){
@@ -539,12 +540,28 @@ void RTSPServer::parseSdp(const QByteArray &sdp)
                 if(fmt == "26"){
                     mVDecoder->setCodec(VDecoder::CODEC_JPEG);         /// select jpeg codec
                 }else if(fmt == "96"){
-                    mVDecoder->setCodec(VDecoder::CODEC_H264);         /// select h264 codec
+                    search_codec = true;
                 }
             }
-            m_state = SETUP;
-            sendSetup();
-            break;
+            if(!search_codec){
+                m_state = SETUP;
+                sendSetup();
+                break;
+            }
+        }
+        if(search_codec){
+            pos = s.indexOf("a=rtpmap");
+            if(pos >= 0){
+                pos = s.toUpper().indexOf("H265");
+                if(pos >= 0){
+                    mVDecoder->setCodec(VDecoder::CODEC_HEVC);         /// select h265 codec
+                }else{
+                    pos = s.toUpper().indexOf("H264");
+                    if(pos >= 0){
+                        mVDecoder->setCodec(VDecoder::CODEC_H264);         /// select h264 codec
+                    }
+                }
+            }
         }
     }
 }

@@ -49,7 +49,8 @@ public:
         vcH264,
         vcMJPG,
         vcJPG,
-        vcPGM
+        vcPGM,
+        vcHEVC
     };
 
     CUDAProcessorOptions()

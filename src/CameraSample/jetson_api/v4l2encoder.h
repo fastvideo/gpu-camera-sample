@@ -14,6 +14,12 @@ public:
     v4l2Encoder();
     ~v4l2Encoder();
 
+    enum {
+        eH264,
+        eHEVC
+    };
+
+    void setEncoder(int enc);
     void setInsertSpsPpsAtIdrEnabled(bool val);
     void setIDRInterval(int val);
     void setInsertVuiEnabled(bool enabled);
