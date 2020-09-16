@@ -86,14 +86,30 @@ bool VDecoder::initDecoder(bool use_stream)
         }
     }
 
+    if(!m_codec){
+        AVCodecParameters *pc = m_fmtctx->streams[STREAM_TYPE_VIDEO]->codecpar;
+        if(pc){
+            if(pc->codec_id == AV_CODEC_ID_H264){
+                m_codec = avcodec_find_decoder_by_name("h264_nvenc");
+            }
+            if(pc->codec_id == AV_CODEC_ID_HEVC){
+                m_codec = avcodec_find_decoder_by_name("hevc_nvenc");
+            }
+        }
+    }
+
     m_cdcctx = avcodec_alloc_context3(m_codec);
     if(use_stream){
-         ret = avcodec_parameters_to_context(m_cdcctx, m_fmtctx->streams[STREAM_TYPE_VIDEO]->codecpar);
-         if(ret < 0){
-             m_error = QString("error copy paramters to context %1").arg(ret);
-             m_is_open = false;
-             return false;
-         }
+
+        ret = avcodec_parameters_to_context(m_cdcctx, m_fmtctx->streams[STREAM_TYPE_VIDEO]->codecpar);
+        if(ret < 0){
+            m_error = QString("error copy paramters to context %1").arg(ret);
+            m_is_open = false;
+            return false;
+        }else{
+            if(m_cdcctx->codec)
+                qDebug("codec name %s", m_cdcctx->codec->name);
+        }
     }
 
     m_cdcctx->flags |= AV_CODEC_FLAG_LOW_DELAY;
@@ -283,8 +299,9 @@ bool VDecoder::decodePacket(PImage& image, QString& decodeName, quint64 &sizeRea
 
             av_frame_free(&frame);
         }else{
-            if(!mCuvidDecoder.get())
-                mCuvidDecoder.reset(new CuvidDecoder);
+            if(!mCuvidDecoder.get()){
+                mCuvidDecoder.reset(new CuvidDecoder(m_idCodec == CODEC_H264? CuvidDecoder::eH264 : CuvidDecoder::eHEVC));
+            }
 
             decodeName = "cuvid_nvcodec";
             mCuvidDecoder->decode(m_pkt.data, m_pkt.size, image);

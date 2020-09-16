@@ -638,7 +638,7 @@ bool RTSPStreamerServer::addInternalFrame(uchar *rgbPtr)
         return false;
 	int ret = 0;
 
-    if(((mCodecId == AV_CODEC_ID_H264 || mCodecId == AV_CODEC_ID_INDEO3) && !mUseCustomEncodeH264)
+    if(((mCodecId == AV_CODEC_ID_H264 || mCodecId == AV_CODEC_ID_INDEO3 || mCodecId == AV_CODEC_ID_HEVC) && !mUseCustomEncodeH264)
             || (mEncoderType == etJPEG && !mUseCustomEncodeJpeg))
 	{
 		AVFrame* frm = av_frame_alloc();

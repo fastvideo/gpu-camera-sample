@@ -591,6 +591,7 @@ QString TcpClient::generateSDP(ushort portudp)
                     "a=tool:libavformat 58.29.100\r\n"
                     "m=video %2 RTP/AVP 96\r\n"
                     "a=rtpmap:96 H265/90000\r\n").arg(ip).arg(portudp);
+        return sdp;
     }
     return "";
 }
