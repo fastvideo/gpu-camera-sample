@@ -92,3 +92,10 @@ defineTest(copyQtDllsToDestdir) {
     }
     unix: export(QMAKE_POST_LINK)
 }
+
+defineTest(makeLinks) {
+    unix {
+        QMAKE_POST_LINK += cd $${PWD}/../../Scripts; $${PWD}/../../Scripts/make_links.sh $${DESTDIR}; $$escape_expand(\\n\\t)
+        export(QMAKE_POST_LINK)
+    }
+}

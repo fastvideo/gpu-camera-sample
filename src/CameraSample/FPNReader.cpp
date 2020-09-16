@@ -31,6 +31,7 @@
 
 #include <QVector>
 #include <QElapsedTimer>
+#include <MallocAllocator.h>
 
 void FPNTIFFHandler(const char* module, const char* fmt, const va_list ap)
 {

@@ -1,6 +1,14 @@
 # gpu-camera-sample
 Camera sample application with realtime GPU image processing (Windows, Linux, Jetson)
 
+<html lang="en-US" prefix="og: http://ogp.me/ns#">
+<meta property="og:url" content="https://www.fastcompression.com/blog/gpu-software-machine-vision-cameras.htm" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="&#9989; GPU Software for Machine Vision Cameras | fastcompression.com" />
+<meta property="og:description" content="&#9989; GPU Software for Machine Vision Cameras. &#9989; GPU processing for machine vision, industrial and scientific camera applications with genicam. &#9989; GPU Software for XIMEA, MATRIX VISION, Basler, Imperx, JAI, Baumer, Flir, Daheng Imaging cameras." />
+<meta property="og:image" content="https://www.fastcompression.com/img/blog/machine-vision/gpu-software-machine-vision-cameras.png" />
+<meta property="og:image:alt" content="gpu software machine vision camera genicam" />
+
 <p><a target="_blank" href="https://www.fastcompression.com/blog/gpu-software-machine-vision-cameras.htm">
 <img src="https://www.fastcompression.com/img/blog/machine-vision/gpu-software-machine-vision-cameras.png" alt="gpu software machine vision genicam" style="max-width:100%"/></a></p>
 
@@ -56,7 +64,7 @@ sudo apt-get install qtbase5-dev qtbase5-dev-tools qtcreator
 * Compiler gcc 7.4
 * FFmpeg libraries
 ``` console 
-sudo apt-get install  libavutil-dev libavcodec-dev libavdevice-dev libavfilter-dev libavformat-dev libavresample-dev libx264-dev
+sudo apt-get install  libavutil-dev libavcodec-dev libavdevice-dev libavfilter-dev libavformat-dev libavresample-dev libx264-dev libv4l-dev libjpeg-turbo8-dev
 ```
 
 
