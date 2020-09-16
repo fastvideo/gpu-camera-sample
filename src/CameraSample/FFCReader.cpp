@@ -34,6 +34,7 @@
 #include <QString>
 #include <QFileInfo>
 #include <QElapsedTimer>
+#include <MallocAllocator.h>
 
 #ifndef WIN32
 //#include <xmmintrin.h> //SSE Intrinsic Functions

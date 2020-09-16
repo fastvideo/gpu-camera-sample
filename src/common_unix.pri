@@ -1,13 +1,13 @@
 # contains(TARGET_ARCH, arm64 ): QMAKE_CXXFLAGS += -msse3 -m64
 OTHER_LIB_PATH = $$dirname(PWD)/OtherLibsLinux
 
-#
+
 # CUDA
 #
 contains(TARGET_ARCH, arm64 ) {
-    CUDA_TOOLKIT_PATH = "/usr/local/cuda-10.0"
+    CUDA_TOOLKIT_PATH = "/usr/local/cuda-10.2"
 } else {
-    CUDA_TOOLKIT_PATH = "/usr/local/cuda-10.1"
+    CUDA_TOOLKIT_PATH = "/usr/local/cuda-10.2"
 }
 
 INCLUDEPATH += $${CUDA_TOOLKIT_PATH}/include
@@ -81,52 +81,37 @@ FASTVIDEO_LIB += -lfastvideo_sdk -lfastvideo_denoise
 #
 # -lfastvideo_mjpeg -lfastvideo_denoise -lfastvideo_nppFilter -lfastvideo_nppResize -lfastvideo_nppGeometry
 #
-FASTVIDEO_EXTRA_DLLS += $$(_PRO_FILE_PWD_)/GPUCameraSample.sh
-#FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libavcodec.so
-#FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libavcodec.so.58
-#FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libavcodec.so.58.18.100
-#FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libavformat.so
-#FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libavformat.so.58
-#FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libavformat.so.58.12.100
-#FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libavutil.so
-#FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libavutil.so.56
-#FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libavutil.so.56.14.100
-#FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libfastvideo_denoise.so
-#FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libfastvideo_denoise.so.1.0.1.015000
-#FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libfastvideo_denoise.so.2
-#FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libfastvideo_sdk.so
-#FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libfastvideo_sdk.so.15.0.0.015000.so
-#FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/bin/libfastvideo_sdk.so.18
+
+FASTVIDEO_EXTRA_DLLS += $$FASTVIDEO_SDK/lib/$$PLATFORM/libfastvideo_sdk.so.16.0.0.016000
+FASTVIDEO_EXTRA_DLLS += $$FASTVIDEO_SDK/lib/$$PLATFORM/libfastvideo_denoise.so.1.0.1.016000
 
 # NVIDIA VIDEO CODEC SDK
 # https://developer.nvidia.com/nvidia-video-codec-sdk/download
 
-!contains(TARGET_ARCH, arm64){
+contains(TARGET_ARCH, arm64){
+    #to work with ffmpeg on nvidia jetson one need to compile it from source (default not work correctly)
+    FFMPEG_PATH = $$OTHER_LIB_PATH/ffmpeg
+    FFMPEG_LIB = -L$$FFMPEG_PATH/lib/linux/aarch64
+    FFMPEG_LIB += -lavformat -lavcodec -lavutil -lswresample -lm -lz -lx264
+    FASTVIDEO_EXTRA_DLLS += $$FFMPEG_PATH/lib/linux/aarch64/libavcodec.so.58.106.100
+    FASTVIDEO_EXTRA_DLLS += $$FFMPEG_PATH/lib/linux/aarch64/libavformat.so.58.56.100
+    FASTVIDEO_EXTRA_DLLS += $$FFMPEG_PATH/lib/linux/aarch64/libavutil.so.56.59.100
+    FASTVIDEO_EXTRA_DLLS += $$FFMPEG_PATH/lib/linux/aarch64/libswresample.so.3.8.100
+}
+else {
     NVCODECS = $$OTHER_LIB_PATH/nvcodecs
     INCLUDEPATH += $$NVCODECS/include
     LIBS += -L$$NVCODECS/Lib/$$PLATFORM -lnvcuvid -lcuda
     FFMPEG_LIB += -lavformat -lavcodec -lavutil -lswresample -lm -lz -lx264
 }
 
-contains(TARGET_ARCH, arm64){
-    #to work with ffmpeg on nvidia jetson need compile it from source (default not work correctly)
-    FFMPEG_LIB += -l:libavformat.a -l:libavcodec.a -l:libavutil.a -l:libswresample.a -lm -lz -lx264
-}
-
-#FFMPEG_PATH = $$OTHER_LIB_PATH/FastvideoSDK/libs/ffmpeg
-#contains(TARGET_ARCH, arm64 ) {
-#    FFMPEG_LIB = -L$$FFMPEG_PATH/lib/linux/aarch64/
-#}
-#else {
-#    FFMPEG_LIB = -L$$FFMPEG_PATH/lib/linux/x86_64/
-#}
 #
 INCLUDEPATH += $$FASTVIDEO_INC
 INCLUDEPATH += $$FFMPEG_PATH/include
 #
 LIBS += $$FASTVIDEO_LIB
 LIBS += $$CUDA_LIB
-LIBS += -L$$FFMPEG_LIB_PATH/ $$FFMPEG_LIB
+LIBS += $$FFMPEG_LIB
 LIBS += -ldl
 LIBS += -ljpeg
 

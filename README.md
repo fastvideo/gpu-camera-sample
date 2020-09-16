@@ -54,7 +54,7 @@ sudo apt-get install qtbase5-dev qtbase5-dev-tools qtcreator
 * Compiler gcc 7.4
 * FFmpeg libraries
 ``` console 
-sudo apt-get install  libavutil-dev libavcodec-dev libavdevice-dev libavfilter-dev libavformat-dev libavresample-dev libx264-dev
+sudo apt-get install  libavutil-dev libavcodec-dev libavdevice-dev libavfilter-dev libavformat-dev libavresample-dev libx264-dev libv4l-dev libjpeg-turbo8-dev
 ```
 
 
