@@ -1,5 +1,5 @@
 # gpu-camera-sample
-Camera sample application with realtime GPU image processing
+Camera sample application with realtime GPU image processing (Windows, Linux, Jetson)
 
 <p><a target="_blank" href="https://www.fastcompression.com/blog/gpu-software-machine-vision-cameras.htm">
 <img src="https://www.fastcompression.com/img/blog/machine-vision/gpu-software-machine-vision-cameras.png" alt="gpu software machine vision genicam" style="max-width:100%"/></a></p>
@@ -40,7 +40,7 @@ Currently the software is working with <a href="https://www.ximea.com" target="_
 * Fastvideo SDK (demo) ver.0.16.0.0
 * NVIDIA CUDA-10.2
 * Qt ver.5.13.1
-* Compiler MSVC 2017
+* Compiler MSVC 2019
 
 ### Requirements for Linux
 
@@ -154,10 +154,10 @@ In general case, Fastvideo SDK can import/export data from/to SSD / CPU memory /
 * Windows-7/10, Ubuntu 18.04 64-bit
 * The latest NVIDIA driver
 * NVIDIA GPU with Kepler architecture, 6xx series minimum
-* NVIDIA GPU with 4-8 GB memory or better
+* NVIDIA GPU with 4-8-12 GB memory or better
 * Intel Core i5 or better
 * NVIDIA CUDA-10.2
-* Compiler MSVC 2017 (MSVC 2015 is not compatible with CUDA-10.1) for Windows or gcc 7.4.0 for Linux
+* Compiler MSVC 2019 for Windows or gcc 7.4.0 for Linux
 
 We also recommend to check PCI-Express bandwidth for Host-to-Device and Device-to-Host transfers. For GPU with Gen3 x16 it should be in the range of 10-12 GB/s. GPU memory size could be a bottleneck for image processing from high resolution cameras, so please check GPU memory usage in the software.
 
