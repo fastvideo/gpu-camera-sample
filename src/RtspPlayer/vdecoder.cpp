@@ -72,7 +72,7 @@ bool VDecoder::initDecoder(bool use_stream)
             }
         }
         if(m_idCodec == CODEC_HEVC){
-            m_codec = avcodec_find_decoder_by_name("nvenc_hevc");
+            m_codec = avcodec_find_decoder_by_name("nvdec_hevc");
             if(!m_codec){
                 m_codec = avcodec_find_decoder_by_name("h265");
                 if(!m_codec){
@@ -86,18 +86,6 @@ bool VDecoder::initDecoder(bool use_stream)
         }
     }
 
-    if(!m_codec){
-        AVCodecParameters *pc = m_fmtctx->streams[STREAM_TYPE_VIDEO]->codecpar;
-        if(pc){
-            if(pc->codec_id == AV_CODEC_ID_H264){
-                m_codec = avcodec_find_decoder_by_name("h264_nvenc");
-            }
-            if(pc->codec_id == AV_CODEC_ID_HEVC){
-                m_codec = avcodec_find_decoder_by_name("hevc_nvenc");
-            }
-        }
-    }
-
     m_cdcctx = avcodec_alloc_context3(m_codec);
     if(use_stream){
 
@@ -106,9 +94,6 @@ bool VDecoder::initDecoder(bool use_stream)
             m_error = QString("error copy paramters to context %1").arg(ret);
             m_is_open = false;
             return false;
-        }else{
-            if(m_cdcctx->codec)
-                qDebug("codec name %s", m_cdcctx->codec->name);
         }
     }
 
@@ -127,7 +112,7 @@ bool VDecoder::initDecoder(bool use_stream)
             if(c) m_codec = c;
             m_idCodec = CODEC_H264;
         }else if(m_codec->id == AV_CODEC_ID_HEVC){
-            AVCodec *c = avcodec_find_decoder_by_name("nvenc_hevc");
+            AVCodec *c = avcodec_find_decoder_by_name("hevc_cuvid");
             if(c) m_codec = c;
             m_idCodec = CODEC_HEVC;
         }else{
