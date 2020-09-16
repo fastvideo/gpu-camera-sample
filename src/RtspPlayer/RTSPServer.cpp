@@ -272,7 +272,10 @@ void RTSPServer::stopDecode()
 
 QMap<QString, double> RTSPServer::durations()
 {
-	return m_durations;
+    mMutexDurs.lock();
+    QMap<QString, double> durs = m_durations;
+    mMutexDurs.unlock();
+    return durs;
 }
 
 bool RTSPServer::done() const
@@ -368,8 +371,11 @@ void RTSPServer::decodePacket()
 
     QString str;
     if(mVDecoder->decodePacket(m_fvImage, str, m_bytesReaded, duration)){
-        if(!str.isEmpty())
+        if(!str.isEmpty()){
+            mMutexDurs.lock();
             m_durations[str] = duration;
+            mMutexDurs.unlock();
+        }
 
         updateRenderer();
     }
@@ -561,6 +567,8 @@ void RTSPServer::parseSdp(const QByteArray &sdp)
                         mVDecoder->setCodec(VDecoder::CODEC_H264);         /// select h264 codec
                     }
                 }
+                m_state = SETUP;
+                sendSetup();
             }
         }
     }
@@ -721,7 +729,9 @@ void RTSPServer::doPlay()
                     m_encodecPkts.push(data);
                     m_mutexDec.unlock();
 
+                    mMutexDurs.lock();
 					m_durations = mergeMaps(m_durations, m_ctpTransport.durations());
+                    mMutexDurs.unlock();
 
                     m_bytesReaded += data.size();
                 }else{
@@ -776,7 +786,9 @@ void RTSPServer::decode_packet(const QByteArray &enc)
 
     if(mVDecoder->decodePacket(enc, m_fvImage, name, duration)){
         if(!name.isEmpty()){
+            mMutexDurs.lock();
             m_durations[name] = duration;
+            mMutexDurs.unlock();
         }
 
         updateRenderer();

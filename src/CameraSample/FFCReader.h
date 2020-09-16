@@ -33,6 +33,7 @@
 #include <QMap>
 
 #include "FastAllocator.h"
+#include "MallocAllocator.h"
 #include "fastvideo_sdk.h"
 #include <memory>
 

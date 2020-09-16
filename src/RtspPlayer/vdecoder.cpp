@@ -72,9 +72,9 @@ bool VDecoder::initDecoder(bool use_stream)
             }
         }
         if(m_idCodec == CODEC_HEVC){
-            m_codec = avcodec_find_decoder_by_name("nvdec_hevc");
+            m_codec = avcodec_find_decoder_by_name("hevc_cuvid");
             if(!m_codec){
-                m_codec = avcodec_find_decoder_by_name("h265");
+                m_codec = avcodec_find_decoder_by_name("hevc");
                 if(!m_codec){
                     m_codec = avcodec_find_decoder_by_name("libx265");
                     if(!m_codec){
