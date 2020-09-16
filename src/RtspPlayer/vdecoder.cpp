@@ -11,6 +11,11 @@
 #else
 class CuvidDecoder{
 public:
+    enum ET{
+        eH264,
+        eHEVC
+    };
+    CuvidDecoder(ET et){}
     bool decode(uint8_t* data, size_t size, PImage& image){
         return false;
     }

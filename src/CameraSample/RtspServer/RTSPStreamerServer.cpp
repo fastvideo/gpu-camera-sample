@@ -88,7 +88,7 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
     }else if(mEncoderType == etNVENC_HEVC){
 #ifdef __ARM_ARCH
         mV4L2Encoder.reset(new v4l2Encoder());
-        mV4l2Encoder->setEncoder(v4l2Encoder::eHEVC);
+        mV4L2Encoder->setEncoder(v4l2Encoder::eHEVC);
         mV4L2Encoder->setIDRInterval(1);
         mV4L2Encoder->setEnableAllIFrameEncode(true);
         mV4L2Encoder->setInsertSpsPpsAtIdrEnabled(true);
