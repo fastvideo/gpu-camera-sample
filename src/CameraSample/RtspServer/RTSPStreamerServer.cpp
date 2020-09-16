@@ -85,7 +85,32 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
 			}
         }
         mPixFmt = AV_PIX_FMT_NV12;
-	}
+    }else if(mEncoderType == etNVENC_HEVC){
+#ifdef __ARM_ARCH
+        mV4L2Encoder.reset(new v4l2Encoder());
+        mV4l2Encoder->setEncoder(v4l2Encoder::eHEVC);
+        mV4L2Encoder->setIDRInterval(1);
+        mV4L2Encoder->setEnableAllIFrameEncode(true);
+        mV4L2Encoder->setInsertSpsPpsAtIdrEnabled(true);
+        mV4L2Encoder->setInsertVuiEnabled(true);
+        mV4L2Encoder->setIFrameInterval(1);
+//        mCodec = avcodec_find_encoder_by_name("h264_v4l2m2m");
+#else
+        mCodec = avcodec_find_encoder_by_name("hevc_nvenc");
+#endif
+        if(!mCodec)
+        {
+            mCodec = avcodec_find_encoder_by_name("libx265");
+            if(!mCodec)
+            {
+                mIsError = true;
+                mErrStr = "Codec not found";
+                return;
+            }
+        }
+        mPixFmt = AV_PIX_FMT_NV12;
+
+    }else
     if(mEncoderType == etJPEG)
     {
         mCodec = avcodec_find_encoder_by_name("mjpeg");
@@ -130,7 +155,7 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
 	mCtx->gop_size = 0;
     mCtx->pix_fmt = mPixFmt;
 
-    if(mEncoderType == etNVENC)
+    if(mEncoderType == etNVENC || mEncoderType == etNVENC_HEVC)
     {
         mCtx->max_b_frames = 0;        // codec do not open for mjpeg
 		mCtx->keyint_min = 0;
@@ -613,7 +638,7 @@ bool RTSPStreamerServer::addInternalFrame(uchar *rgbPtr)
         return false;
 	int ret = 0;
 
-    if(((mCodecId == AV_CODEC_ID_H264 || mCodecId == AV_CODEC_ID_INDEO3) && !mUseCustomEncodeH264)
+    if(((mCodecId == AV_CODEC_ID_H264 || mCodecId == AV_CODEC_ID_INDEO3 || mCodecId == AV_CODEC_ID_HEVC) && !mUseCustomEncodeH264)
             || (mEncoderType == etJPEG && !mUseCustomEncodeJpeg))
 	{
 		AVFrame* frm = av_frame_alloc();
@@ -640,7 +665,7 @@ bool RTSPStreamerServer::addInternalFrame(uchar *rgbPtr)
             }
         }
 #ifdef __ARM_ARCH
-        if(mEncoderType == etNVENC){
+        if(mEncoderType == etNVENC || mEncoderType == etNVENC_HEVC){
             encodeWriteFrame(mEncoderBuffer.data(), mWidth, mHeight);
         }else
 #endif

@@ -68,6 +68,7 @@ public:
 	typedef enum
 	{
 		etNVENC,
+        etNVENC_HEVC,
 		etJPEG,
 		etJ2K
 	} EncoderType;

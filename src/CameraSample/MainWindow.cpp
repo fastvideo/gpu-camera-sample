@@ -1086,9 +1086,12 @@ void MainWindow::on_btnStartRtspServer_clicked()
     {
         mOptions.Codec = CUDAProcessorOptions::vcJPG;
     }
-    else
+    else if(ui->cboFormatEnc->currentIndex() == 1)
     {
         mOptions.Codec = CUDAProcessorOptions::vcH264;
+    }else
+    {
+        mOptions.Codec = CUDAProcessorOptions::vcHEVC;
     }
 
 	mOptions.bitrate = getBitrate(ui->cbBitrateRtsp->currentText());

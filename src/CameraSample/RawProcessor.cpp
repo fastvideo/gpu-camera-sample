@@ -171,7 +171,7 @@ void RawProcessor::startWorking()
                 mRtspServer->addFrame(nullptr);
             }
         }
-        if(mOptions.Codec == CUDAProcessorOptions::vcH264)
+        if(mOptions.Codec == CUDAProcessorOptions::vcH264 || mOptions.Codec == CUDAProcessorOptions::vcHEVC)
         {
             if(mRtspServer && mRtspServer->isConnected())
             {
@@ -535,6 +535,8 @@ void RawProcessor::setRtspServer(const QString &url)
     RTSPStreamerServer::EncoderType encType = RTSPStreamerServer::etJPEG;
     if(mOptions.Codec == CUDAProcessorOptions::vcH264)
         encType = RTSPStreamerServer::etNVENC;
+    if(mOptions.Codec == CUDAProcessorOptions::vcHEVC)
+        encType = RTSPStreamerServer::etNVENC_HEVC;
 
     mRtspServer.reset(new RTSPStreamerServer(mOptions.Width, mOptions.Height, 3, url, encType, mOptions.bitrate));
 

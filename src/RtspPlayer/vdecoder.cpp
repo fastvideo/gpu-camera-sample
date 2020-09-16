@@ -71,16 +71,30 @@ bool VDecoder::initDecoder(bool use_stream)
                 }
             }
         }
+        if(m_idCodec == CODEC_HEVC){
+            m_codec = avcodec_find_decoder_by_name("nvdec_hevc");
+            if(!m_codec){
+                m_codec = avcodec_find_decoder_by_name("h265");
+                if(!m_codec){
+                    m_codec = avcodec_find_decoder_by_name("libx265");
+                    if(!m_codec){
+                        m_error = "Codec not found";
+                        return false;
+                    }
+                }
+            }
+        }
     }
 
     m_cdcctx = avcodec_alloc_context3(m_codec);
     if(use_stream){
-         ret = avcodec_parameters_to_context(m_cdcctx, m_fmtctx->streams[STREAM_TYPE_VIDEO]->codecpar);
-         if(ret < 0){
-             m_error = QString("error copy paramters to context %1").arg(ret);
-             m_is_open = false;
-             return false;
-         }
+
+        ret = avcodec_parameters_to_context(m_cdcctx, m_fmtctx->streams[STREAM_TYPE_VIDEO]->codecpar);
+        if(ret < 0){
+            m_error = QString("error copy paramters to context %1").arg(ret);
+            m_is_open = false;
+            return false;
+        }
     }
 
     m_cdcctx->flags |= AV_CODEC_FLAG_LOW_DELAY;
@@ -97,6 +111,10 @@ bool VDecoder::initDecoder(bool use_stream)
             AVCodec *c = avcodec_find_decoder_by_name(m_codecH264.toLatin1().data());
             if(c) m_codec = c;
             m_idCodec = CODEC_H264;
+        }else if(m_codec->id == AV_CODEC_ID_HEVC){
+            AVCodec *c = avcodec_find_decoder_by_name("hevc_cuvid");
+            if(c) m_codec = c;
+            m_idCodec = CODEC_HEVC;
         }else{
             m_idCodec = CODEC_JPEG;
         }
@@ -231,7 +249,7 @@ void VDecoder::setH264Codec(const QString &codec)
 
 bool VDecoder::isCuvidFound() const
 {
-    return m_codec && QString(m_codec->name) == "h264_cuvid";
+    return m_codec && (QString(m_codec->name) == "h264_cuvid" || QString(m_codec->name) == "hevc_cuvid");
 }
 
 bool VDecoder::isMJpeg() const
@@ -266,8 +284,9 @@ bool VDecoder::decodePacket(PImage& image, QString& decodeName, quint64 &sizeRea
 
             av_frame_free(&frame);
         }else{
-            if(!mCuvidDecoder.get())
-                mCuvidDecoder.reset(new CuvidDecoder);
+            if(!mCuvidDecoder.get()){
+                mCuvidDecoder.reset(new CuvidDecoder(m_idCodec == CODEC_H264? CuvidDecoder::eH264 : CuvidDecoder::eHEVC));
+            }
 
             decodeName = "cuvid_nvcodec";
             mCuvidDecoder->decode(m_pkt.data, m_pkt.size, image);
