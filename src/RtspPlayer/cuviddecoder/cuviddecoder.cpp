@@ -59,7 +59,7 @@ public:
         params.ulErrorThreshold = 100;
         params.ulClockRate = 0;
         params.ulMaxDisplayDelay = 0;
-        params.ulMaxNumDecodeSurfaces = 1;
+        params.ulMaxNumDecodeSurfaces = 2;
         params.pUserData = this;
         params.pfnDecodePicture = decodeCallback;
         params.pfnDisplayPicture = displayCallback;
