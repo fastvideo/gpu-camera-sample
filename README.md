@@ -1,6 +1,7 @@
 # gpu-camera-sample
 Camera sample application with realtime GPU image processing (Windows, Linux, Jetson)
 
+<html lang="en-US" prefix="og: http://ogp.me/ns#">
 <meta property="og:url" content="https://www.fastcompression.com/blog/gpu-software-machine-vision-cameras.htm" />
 <meta property="og:type" content="article" />
 <meta property="og:title" content="&#9989; GPU Software for Machine Vision Cameras | fastcompression.com" />
