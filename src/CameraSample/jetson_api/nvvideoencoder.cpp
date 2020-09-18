@@ -27,7 +27,8 @@ const char* nvhostenc = "/dev/nvhost-msenc";
 
 using namespace v4l2encoder;
 
-NvVideoEncoder::NvVideoEncoder()
+NvVideoEncoder::NvVideoEncoder(ET et)
+    : mEt(et)
 {
     int res = v4l2_open(nvhostenc, O_RDWR);
     mInit = res >= 0;
@@ -198,7 +199,7 @@ int NvVideoEncoder::setProfile(uint32_t val)
     ctrls.controls = &control;
     ctrls.ctrl_class = V4L2_CTRL_CLASS_MPEG;
 
-    control.id = V4L2_CID_MPEG_VIDEO_H264_PROFILE;
+    control.id = mEt == etH264? V4L2_CID_MPEG_VIDEO_H264_PROFILE : V4L2_CID_MPEG_VIDEO_H265_PROFILE;
     control.value = val;
 
     int ret = v4l2_ioctl(mFD, VIDIOC_S_EXT_CTRLS, &ctrls);
@@ -220,7 +221,7 @@ int NvVideoEncoder::setLevel(uint32_t val)
     ctrls.controls = &control;
     ctrls.ctrl_class = V4L2_CTRL_CLASS_MPEG;
 
-    control.id = V4L2_CID_MPEG_VIDEO_H264_LEVEL;
+    control.id = mEt == etH264? V4L2_CID_MPEG_VIDEO_H264_LEVEL : V4L2_CID_MPEG_VIDEOENC_H265_LEVEL;
     control.value = val;
 
     int ret = v4l2_ioctl(mFD, VIDIOC_S_EXT_CTRLS, &ctrls);
@@ -357,9 +358,9 @@ void NvVideoEncoder::release()
     }
 }
 
-NvVideoEncoder *NvVideoEncoder::createVideoEncoder(const char *name)
+NvVideoEncoder *NvVideoEncoder::createVideoEncoder(const char *name, ET et)
 {
-    return new NvVideoEncoder();
+    return new NvVideoEncoder(et);
 }
 
 ///////////////////////////////////////

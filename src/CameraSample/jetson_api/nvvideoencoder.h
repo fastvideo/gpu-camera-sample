@@ -85,7 +85,12 @@ struct NvPlane{
 class NvVideoEncoder
 {
 public:
-    NvVideoEncoder();
+    enum ET{
+        etH264,
+        etH265
+    };
+
+    NvVideoEncoder(ET et = etH264);
     ~NvVideoEncoder();
 
     int setBitrate(uint32_t bitrate);
@@ -111,7 +116,7 @@ public:
     NvPlane capture_plane;
     NvPlane output_plane;
 
-    static NvVideoEncoder *createVideoEncoder(const char* name);
+    static NvVideoEncoder *createVideoEncoder(const char* name, ET et = etH264);
 
 private:
     uint32_t mWidthCapture = 0;
@@ -128,6 +133,8 @@ private:
     uint32_t mNumBFrames = 0;
     uint32_t mGopSIze = 1;
     bool mInit = false;
+
+    ET mEt = etH264;
 };
 
 }

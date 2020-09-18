@@ -64,7 +64,7 @@ public:
         mInit = false;
         int ret = 0;
 
-        mNVEncoder.reset(NvVideoEncoder::createVideoEncoder("enc0"));
+        mNVEncoder.reset(NvVideoEncoder::createVideoEncoder("enc0", mEnc == v4l2Encoder::eH264? NvVideoEncoder::etH264 : NvVideoEncoder::etH265));
 
         uint32_t sz = mWidth * mHeight + mWidth * mHeight/2;
 
@@ -96,7 +96,7 @@ public:
         }else if(mEnc == v4l2Encoder::eHEVC){
             ret = mNVEncoder->setProfile(V4L2_MPEG_VIDEO_H265_PROFILE_MAIN);
             CHECK(ret);
-            ret = mNVEncoder->setLevel(V4L2_MPEG_VIDEO_H264_LEVEL_5_0);
+            ret = mNVEncoder->setLevel(V4L2_MPEG_VIDEO_H265_LEVEL_6_0_MAIN_TIER);
             CHECK(ret);
         }
 
