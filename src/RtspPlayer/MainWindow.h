@@ -58,6 +58,9 @@ private:
 
     void openServer(const QString &url);
     void openClient(const QString &url);
+
+    void loadSettings();
+    void saveSettings();
 };
 
 #endif // MAINWINDOW_H

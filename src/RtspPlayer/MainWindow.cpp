@@ -4,6 +4,7 @@
 #include "DialogOpenServer.h"
 
 #include <QMapIterator>
+#include <QSettings>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -22,6 +23,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	mRendererPtr->setRenderWnd(mMediaViewer.data());
 	mRendererPtr->showImage(true);
 
+    loadSettings();
+
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(onTimeout()));
     m_timer.start(300);
 }
@@ -37,6 +40,7 @@ void MainWindow::on_actionOpen_RTSP_server_triggered()
     if(m_rtspServer.get())
         dlg.setUrl(m_rtspServer->url());
     if(dlg.exec()){
+        saveSettings();
         openServer(dlg.url());
     }
 }
@@ -76,6 +80,27 @@ void MainWindow::openClient(const QString &url)
     ui->statusbar->showMessage("Try to open remote server", 2000);
 }
 
+void MainWindow::loadSettings()
+{
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "rtspplayer");
+
+    settings.beginGroup("pref");
+    QString url = settings.value("url").toString();
+    if(!url.isEmpty()){
+        ui->le_rtsp_address->setText(url);
+    }
+    settings.endGroup();
+}
+
+void MainWindow::saveSettings()
+{
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "rtspplayer");
+    settings.beginGroup("pref");
+    settings.setValue("url", ui->le_rtsp_address->text());
+    settings.endGroup();
+    settings.sync();
+}
+
 void MainWindow::on_actionClose_RTSP_server_triggered()
 {
     m_rtspServer.reset();
@@ -95,6 +120,7 @@ void MainWindow::on_actionOpen_RTSP_client_triggered()
     else
         dlg.setUrl("");
     if(dlg.exec()){
+        saveSettings();
         openClient(dlg.url());
 		ui->actionPlay->setChecked(true);
 		ui->gtgWidget->start();
@@ -109,7 +135,8 @@ void MainWindow::on_pb_openRtsp_clicked()
         return;
     }
 
-	openClient(url);
+    saveSettings();
+    openClient(url);
 }
 
 void MainWindow::onTimeout()
