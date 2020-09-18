@@ -103,9 +103,12 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
             mCodec = avcodec_find_encoder_by_name("libx265");
             if(!mCodec)
             {
-                mIsError = true;
-                mErrStr = "Codec not found";
+                mCodec = avcodec_find_encoder(AV_CODEC_ID_HEVC);
+                if(!mCodec){
+                    mIsError = true;
+                    mErrStr = "Codec not found";
                 return;
+                }
             }
         }
         mPixFmt = AV_PIX_FMT_NV12;
@@ -172,7 +175,7 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
 		av_dict_set(&dict, "force_duplicated_matrix", "1", 0);      // remove warnings where mjpeg sending
 	}
 
-    if(mCodecId == AV_CODEC_ID_H264 || mCodecId == AV_CODEC_ID_INDEO3)
+    if(mCodecId == AV_CODEC_ID_H264 || mCodecId == AV_CODEC_ID_HEVC || mCodecId == AV_CODEC_ID_INDEO3)
     {
         av_dict_set(&dict, "zerolatency", "1", 0);
         //av_dict_set(&dict, "preset", "fast", 0);
