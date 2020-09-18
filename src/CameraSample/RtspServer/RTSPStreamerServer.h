@@ -137,6 +137,8 @@ public:
 
 	bool startServer();
 
+    double duration() const;
+
 signals:
 
 public slots:
@@ -158,6 +160,7 @@ private:
     bool        mMultithreading = true;
     bool        mUseCustomEncodeJpeg = true;
     bool        mUseCustomEncodeH264 = false;
+    double      mDuration = 0;
 
 	QElapsedTimer mTimerCtrlFps;
 	int mFps = 60;

@@ -282,6 +282,10 @@ QMap<QString, float> RawProcessor::getStats()
             ret[QStringLiteral("droppedFrames")] = -1;
         }
         ret[QStringLiteral("acqTime")] = acqTimeNsec;
+
+        if(mRtspServer){
+            ret[QStringLiteral("encoding")] = mRtspServer->duration();
+        }
     }
 
     return ret;

@@ -357,7 +357,12 @@ bool RTSPStreamerServer::startServer()
 		return false;
 	}
     mIsError = true;
-	return false;
+    return false;
+}
+
+double RTSPStreamerServer::duration() const
+{
+    return mDuration;
 }
 
 void RTSPStreamerServer::removeClient(TcpClient *client)
@@ -709,6 +714,7 @@ bool RTSPStreamerServer::addInternalFrame(uchar *rgbPtr)
 
 	double duration = getDuration(starttime);
 	qDebug("encode duration %f", duration);
+    mDuration = duration;
 
 	if(ret == 0)
 	{

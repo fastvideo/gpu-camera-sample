@@ -860,6 +860,12 @@ void MainWindow::onGPUFinished()
         strInfo += trUtf8("Total GPU = %1 ms\n").arg(double(totalGPU), 0, 'f', 2);
     }
 
+    float encoding = stats[QStringLiteral("encoding")];
+    if(encoding > 0){
+        totalGPU += stats[QStringLiteral("encoding")] > 0 ? stats[QStringLiteral("encoding")] : 0;
+        strInfo += trUtf8("Encoding duration = %1 ms\n").arg(double(encoding), 0, 'f', 2);
+    }
+
     totalGPU = stats[QStringLiteral("totalGPUCPUTime")];
     if(totalGPU > 0)
     {
