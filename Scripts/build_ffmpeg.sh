@@ -8,7 +8,7 @@ echo "Installing prerequisites"
 sudo apt-get update
 sudo apt-get -y install autoconf automake build-essential nasm libass-dev libfreetype6-dev libgpac-dev \
   libtool libva-dev libvdpau-dev libxcb1-dev libxcb-shm0-dev \
-  libxcb-xfixes0-dev pkg-config texi2html zlib1g-dev libx264-dev
+  libxcb-xfixes0-dev pkg-config texi2html zlib1g-dev libx264-dev libx265-dev
 
 #Install nvidia SDK
 echo "Installing the nVidia NVENC SDK."
@@ -37,6 +37,7 @@ cd FFmpeg
   --extra-ldflags=-L/usr/local/cuda/lib64/ \
   --enable-gpl \
   --enable-libx264 \
+  --enable-libx265 \
   --enable-nonfree \
   --enable-nvenc
 

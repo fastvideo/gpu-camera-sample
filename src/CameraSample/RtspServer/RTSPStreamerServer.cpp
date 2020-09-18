@@ -111,7 +111,7 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
                 }
             }
         }
-        mPixFmt = AV_PIX_FMT_NV12;
+        //mPixFmt = AV_PIX_FMT_NV12;
 
     }else
     if(mEncoderType == etJPEG)
@@ -729,7 +729,7 @@ bool RTSPStreamerServer::addInternalFrame(uchar *rgbPtr)
 void RTSPStreamerServer::encodeWriteFrame(uint8_t *buf, int width, int height)
 {
     if(mV4L2Encoder.data()){
-        if(mV4L2Encoder->encodeFrame(buf, width, height, mUserBuffer, true)){
+        if(mV4L2Encoder->encodeFrame(buf, width, height, mUserBuffer, mEncoderType == etNVENC_HEVC)){
             if(!mUserBuffer.empty()){
                 AVPacket enc_pkt;
                 enc_pkt.data = nullptr;
