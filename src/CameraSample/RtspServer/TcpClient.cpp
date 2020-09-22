@@ -59,7 +59,7 @@ TcpClient::TcpClient(QTcpSocket *sock, const QString &url, AVCodecContext *codec
 {
     if(m_ctx_main && m_ctx_main->codec){
         m_codec = avcodec_find_encoder_by_name(m_ctx_main->codec->name);
-        if(m_codec && mEncoderType == etNVENC){
+        if(m_codec && (mEncoderType == etNVENC || mEncoderType == etNVENC_HEVC)){
             m_fmtSdp = "96";
         }
     }
@@ -580,6 +580,17 @@ QString TcpClient::generateSDP(ushort portudp)
                     "a=rtpmap:96 H264/90000\r\n"
                     "a=fmtp:96 packetization-mode=1; sprop-parameter-sets=Z2QAHqzZQLQnsBEAAZdPAExLQA8WLZY=,aOvjyyLA; profile-level-id=64001E\r\n"
                     "a=control:streamid=0\r\n").arg(ip).arg(portudp);
+        return sdp;
+    }else if(mEncoderType == etNVENC_HEVC){
+        QString sdp = QString(
+                    "v=0\r\n"
+                    "o=- 0 0 IN IP4 %1\r\n"
+                    "s=No Name\r\n"
+                    "c=IN IP4 %1\r\n"
+                    "t=0 0\r\n"
+                    "a=tool:libavformat 58.29.100\r\n"
+                    "m=video %2 RTP/AVP 96\r\n"
+                    "a=rtpmap:96 H265/90000\r\n").arg(ip).arg(portudp);
         return sdp;
     }
     return "";

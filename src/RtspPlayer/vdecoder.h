@@ -20,7 +20,8 @@ public:
     enum {
         NONE,
         CODEC_JPEG,
-        CODEC_H264
+        CODEC_H264,
+        CODEC_HEVC
     };
 
     VDecoder();

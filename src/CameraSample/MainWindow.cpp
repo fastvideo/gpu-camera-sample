@@ -860,6 +860,12 @@ void MainWindow::onGPUFinished()
         strInfo += trUtf8("Total GPU = %1 ms\n").arg(double(totalGPU), 0, 'f', 2);
     }
 
+    float encoding = stats[QStringLiteral("encoding")];
+    if(encoding > 0){
+        totalGPU += stats[QStringLiteral("encoding")] > 0 ? stats[QStringLiteral("encoding")] : 0;
+        strInfo += trUtf8("Encoding duration = %1 ms\n").arg(double(encoding), 0, 'f', 2);
+    }
+
     totalGPU = stats[QStringLiteral("totalGPUCPUTime")];
     if(totalGPU > 0)
     {
@@ -1086,9 +1092,12 @@ void MainWindow::on_btnStartRtspServer_clicked()
     {
         mOptions.Codec = CUDAProcessorOptions::vcJPG;
     }
-    else
+    else if(ui->cboFormatEnc->currentIndex() == 1)
     {
         mOptions.Codec = CUDAProcessorOptions::vcH264;
+    }else
+    {
+        mOptions.Codec = CUDAProcessorOptions::vcHEVC;
     }
 
 	mOptions.bitrate = getBitrate(ui->cbBitrateRtsp->currentText());

@@ -4,6 +4,7 @@
 #include <QDataStream>
 #include <QList>
 #include <QMap>
+#include <QMutex>
 
 #include "common.h"
 #include "common_utils.h"
@@ -33,6 +34,8 @@ private:
 
 	QMap<QString, double> m_durations;
     timepoint m_starttime;
+
+    QMutex mMutex;
 
     struct Udp{
         QByteArray d;

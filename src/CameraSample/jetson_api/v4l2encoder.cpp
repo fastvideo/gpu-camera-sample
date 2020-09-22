@@ -43,14 +43,19 @@ public:
     bool mInsertSpsPpsAtIdrEnabled = false;
     bool mInsertVuiEnabled = false;
     int mIDRInterval = 256;
+    int mEnc;
 
     std::shared_ptr<NvVideoEncoder> mNVEncoder;
 
     v4l2EncoderPrivate(){
-
+        mEnc = v4l2Encoder::eH264;
     }
     ~v4l2EncoderPrivate(){
         release();
+    }
+
+    void setEncoder(int enc){
+        mEnc = enc;
     }
 
     bool init(uint32_t width, uint32_t height){
@@ -59,26 +64,42 @@ public:
         mInit = false;
         int ret = 0;
 
-        mNVEncoder.reset(NvVideoEncoder::createVideoEncoder("enc0"));
+        mNVEncoder.reset(NvVideoEncoder::createVideoEncoder("enc0", mEnc == v4l2Encoder::eH264? NvVideoEncoder::etH264 : NvVideoEncoder::etH265));
 
         uint32_t sz = mWidth * mHeight + mWidth * mHeight/2;
 
         ret = mNVEncoder->setBitrate(mBitrate);
         CHECK(ret);
-        ret = mNVEncoder->setCapturePlaneFormat(V4L2_PIX_FMT_H264, mWidth, mHeight, sz);
-        CHECK(ret);
-        ret = mNVEncoder->setOutputPlaneFormat(V4L2_PIX_FMT_YUV420M, mWidth, mHeight);
-        CHECK(ret);
+
+        if(mEnc == v4l2Encoder::eH264){
+            ret = mNVEncoder->setCapturePlaneFormat(V4L2_PIX_FMT_H264, mWidth, mHeight, sz);
+            CHECK(ret);
+            ret = mNVEncoder->setOutputPlaneFormat(V4L2_PIX_FMT_YUV420M, mWidth, mHeight);
+            CHECK(ret);
+        }else if(mEnc == v4l2Encoder::eHEVC){
+            ret = mNVEncoder->setCapturePlaneFormat(V4L2_PIX_FMT_H265, mWidth, mHeight, sz);
+            CHECK(ret);
+            ret = mNVEncoder->setOutputPlaneFormat(V4L2_PIX_FMT_YUV420M, mWidth, mHeight);
+        }
         ret = mNVEncoder->setFrameRate(mFrameRate, 1);
         CHECK(ret);
         ret = mNVEncoder->setNumBFrames(mNumBFrames);
         CHECK(ret);
         ret = mNVEncoder->setIFrameInterval(mIFrameInterval);
         CHECK(ret);
-        ret = mNVEncoder->setProfile(V4L2_MPEG_VIDEO_H264_PROFILE_HIGH);
-        CHECK(ret);
-        ret = mNVEncoder->setLevel(V4L2_MPEG_VIDEO_H264_LEVEL_5_0);
-        CHECK(ret);
+
+        if(mEnc == v4l2Encoder::eH264){
+            ret = mNVEncoder->setProfile(V4L2_MPEG_VIDEO_H264_PROFILE_HIGH);
+            CHECK(ret);
+            ret = mNVEncoder->setLevel(V4L2_MPEG_VIDEO_H264_LEVEL_5_0);
+            CHECK(ret);
+        }else if(mEnc == v4l2Encoder::eHEVC){
+            ret = mNVEncoder->setProfile(V4L2_MPEG_VIDEO_H265_PROFILE_MAIN);
+            CHECK(ret);
+            ret = mNVEncoder->setLevel(V4L2_MPEG_VIDEO_H265_LEVEL_6_0_MAIN_TIER);
+            CHECK(ret);
+        }
+
         ret = mNVEncoder->output_plane.setupPlane(V4L2_MEMORY_MMAP, mNumOutputBuffers, true, false);
         CHECK(ret);
         ret = mNVEncoder->capture_plane.setupPlane(V4L2_MEMORY_MMAP, mNumCaptureBuffers, true, false);
@@ -323,6 +344,11 @@ v4l2Encoder::v4l2Encoder()
 v4l2Encoder::~v4l2Encoder()
 {
     mD.reset();
+}
+
+void v4l2Encoder::setEncoder(int enc)
+{
+   mD->setEncoder(enc);
 }
 
 void v4l2Encoder::setInsertSpsPpsAtIdrEnabled(bool val)

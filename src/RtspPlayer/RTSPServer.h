@@ -94,6 +94,7 @@ private:
 	//size_t m_max_frames = 10;
     std::mutex m_mutex;
     std::mutex m_mutexDecoder;
+    std::mutex mMutexDurs;
 
     std::unique_ptr<VDecoder> mVDecoder;
     PImage m_fvImage;

@@ -88,7 +88,9 @@ bool CTPTransport::addUdpPacket(const uchar *dataPtr, int len)
 
     if(off + l == pkt.size){
         assemplyPacket();
+        mMutex.lock();
 		m_durations["assembly_packet"] = getDuration(m_starttime);
+        mMutex.unlock();
     }
 
     return true;
@@ -107,7 +109,10 @@ void CTPTransport::clearPacket()
 
 QMap<QString, double> CTPTransport::durations()
 {
-	return m_durations;
+    mMutex.lock();
+    QMap<QString, double> durs = m_durations;
+    mMutex.unlock();
+    return durs;
 }
 
 void CTPTransport::assemplyPacket()

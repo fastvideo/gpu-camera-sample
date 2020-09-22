@@ -30,7 +30,13 @@ class CuvidPrivate;
 class CuvidDecoder
 {
 public:
-    CuvidDecoder();
+
+    enum ET{
+        eH264,
+        eHEVC
+    };
+
+    CuvidDecoder(ET et = eH264);
     ~CuvidDecoder();
 
     size_t maximumQueueSize();

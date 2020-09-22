@@ -38,7 +38,7 @@
      <x>0</x>
      <y>0</y>
      <width>1571</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuCamera">
@@ -1133,6 +1133,11 @@ QSlider::handle:horizontal {
          <item>
           <property name="text">
            <string>H264</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>H265</string>
           </property>
          </item>
         </widget>

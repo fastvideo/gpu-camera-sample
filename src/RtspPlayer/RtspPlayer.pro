@@ -9,6 +9,8 @@ unix:  include(../common_unix.pri)
 TARGET = RtspPlayer
 TEMPLATE = app
 
+FASTVIDEO_EXTRA_DLLS += $$PWD/RtspPlayer.sh
+
 SOURCES = main.cpp \
     $$OTHER_LIB_PATH/FastvideoSDK/common/helper_jpeg/helper_jpeg_load.cpp \
     $$OTHER_LIB_PATH/FastvideoSDK/common/helper_jpeg/helper_jpeg_store.cpp \
@@ -77,3 +79,5 @@ RESOURCES += \
 !contains(TARGET_ARCH, arm64 ){
     include(cuviddecoder/cuviddecoder.pri)
 }
+
+copyToDestdir($$FASTVIDEO_EXTRA_DLLS)

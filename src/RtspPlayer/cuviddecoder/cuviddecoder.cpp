@@ -28,7 +28,7 @@ public:
 //    std::list<PImage> mFrames;
     size_t mMaximumQueueSize = 2;
 
-    CuvidPrivate(int device = 0){
+    CuvidPrivate(CuvidDecoder::ET et, int device = 0){
         CUresult res;
         CUdevice dev;
 
@@ -50,11 +50,16 @@ public:
 
         CUVIDPARSERPARAMS params;
         memset(&params, 0, sizeof(params));
-        params.CodecType = cudaVideoCodec_H264;
+
+        if(et == CuvidDecoder::eH264)
+            params.CodecType = cudaVideoCodec_H264;
+        else
+            params.CodecType = cudaVideoCodec_HEVC;
+
         params.ulErrorThreshold = 100;
         params.ulClockRate = 0;
         params.ulMaxDisplayDelay = 0;
-        params.ulMaxNumDecodeSurfaces = 1;
+        params.ulMaxNumDecodeSurfaces = 2;
         params.pUserData = this;
         params.pfnDecodePicture = decodeCallback;
         params.pfnDisplayPicture = displayCallback;
@@ -237,9 +242,9 @@ int displayCallback(void *obj, CUVIDPARSERDISPINFO *params)
 
 //////////////////////////////
 
-CuvidDecoder::CuvidDecoder()
+CuvidDecoder::CuvidDecoder(ET et)
 {
-    mD.reset(new CuvidPrivate);
+    mD.reset(new CuvidPrivate(et));
 }
 
 CuvidDecoder::~CuvidDecoder()

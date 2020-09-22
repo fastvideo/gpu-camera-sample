@@ -1,5 +1,4 @@
-QT += core gui widgets network
-#opengl
+QT += core gui widgets network opengl
 
 include(../common_defs.pri)
 include(../common_funcs.pri)
@@ -8,6 +7,8 @@ unix:  include(../common_unix.pri)
 
 TARGET = $$PROJECT_NAME
 TEMPLATE = app
+
+FASTVIDEO_EXTRA_DLLS += $$PWD/GPUCameraSample.sh
 
 #INCLUDEPATH += ./CUDASupport
 #INCLUDEPATH += ./Camera
@@ -114,7 +115,7 @@ HEADERS  += MainWindow.h \
     RtspServer/TcpClient.h \
     RtspServer/vutils.h \
     CUDASupport/CudaAllocator.h \
-    CUDASupport/GPUImage.h
+    CUDASupport/GPUImage.h \
     version.h
 
 FORMS    += MainWindow.ui \
@@ -153,6 +154,7 @@ win32 {
     copyToDestdir($$CUDA_DLL)
 }
 copyToDestdir($$FASTVIDEO_EXTRA_DLLS)
+makeLinks()
 
 RESOURCES += \
     Resorces.qrc
