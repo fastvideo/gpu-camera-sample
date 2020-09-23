@@ -24,6 +24,12 @@ extern "C" {
 #include <libavutil/avstring.h>
 }
 
+#include <mutex>
+
+#ifdef __ARM_ARCH
+#include "v4l2encoder.h"
+#endif
+
 class TSEncoder;
 
 class AVFileWriter : public AsyncWriter
