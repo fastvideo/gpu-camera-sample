@@ -53,6 +53,8 @@
 QVector<unsigned short> gammaLin(16384);
 QVector<unsigned short> gammaSRGB(16384);
 
+int getBitrate(const QString& text, int minimum = 10000);
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -130,6 +132,8 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->cboOutFormat->addItem(QStringLiteral("JPEG"), CUDAProcessorOptions::vcJPG);
         ui->cboOutFormat->addItem(QStringLiteral("Motion JPEG"), CUDAProcessorOptions::vcMJPG);
         ui->cboOutFormat->addItem(QStringLiteral("PGM"), CUDAProcessorOptions::vcPGM);
+        ui->cboOutFormat->addItem(QStringLiteral("H264"), CUDAProcessorOptions::vcH264);
+        ui->cboOutFormat->addItem(QStringLiteral("H265"), CUDAProcessorOptions::vcHEVC);
     }
 
     QSignalBlocker b3(ui->cboGamma);
@@ -651,6 +655,7 @@ void MainWindow::on_actionRecord_toggled(bool arg1)
         mOptions.Codec = (CUDAProcessorOptions::VideoCodec)(ui->cboOutFormat->currentData().toInt());
         mOptions.JpegQuality = ui->spnJpegQty->value();
         mOptions.JpegSamplingFmt = (fastJpegFormat_t)(ui->cboSamplingFmt->currentData().toInt());
+        mOptions.bitrate = getBitrate(ui->cbBitrate->currentText());
 
         mProcessorPtr->setOutputPath(ui->txtOutPath->text());
         mProcessorPtr->setFilePrefix(ui->txtFilePrefix->text());
@@ -862,7 +867,7 @@ void MainWindow::onGPUFinished()
 
     float encoding = stats[QStringLiteral("encoding")];
     if(encoding > 0){
-        totalGPU += stats[QStringLiteral("encoding")] > 0 ? stats[QStringLiteral("encoding")] : 0;
+        //totalGPU += stats[QStringLiteral("encoding")] > 0 ? stats[QStringLiteral("encoding")] : 0;
         strInfo += trUtf8("Encoding duration = %1 ms\n").arg(double(encoding), 0, 'f', 2);
     }
 
@@ -1050,7 +1055,7 @@ void MainWindow::onNewWBFromPoint(const QPoint& pt)
     mProcessorPtr->updateOptions(mOptions);
 }
 
-int getBitrate(const QString& text, int minimum = 10000)
+int getBitrate(const QString& text, int minimum)
 {
 	int res = 0;
 

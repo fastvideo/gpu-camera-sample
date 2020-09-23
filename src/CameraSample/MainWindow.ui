@@ -952,16 +952,6 @@ QSlider::handle:horizontal {
      <property name="spacing">
       <number>6</number>
      </property>
-     <item row="0" column="1" colspan="3">
-      <widget class="QComboBox" name="cboOutFormat"/>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="label_7">
-       <property name="text">
-        <string>File prefix</string>
-       </property>
-      </widget>
-     </item>
      <item row="0" column="0">
       <widget class="QLabel" name="label_3">
        <property name="sizePolicy">
@@ -975,7 +965,14 @@ QSlider::handle:horizontal {
        </property>
       </widget>
      </item>
-     <item row="3" column="0" colspan="4">
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>Sampling</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0" colspan="4">
       <layout class="QHBoxLayout" name="horizontalLayout_4">
        <property name="spacing">
         <number>6</number>
@@ -999,18 +996,12 @@ QSlider::handle:horizontal {
        </item>
       </layout>
      </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_4">
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_7">
        <property name="text">
-        <string>Sampling</string>
+        <string>File prefix</string>
        </property>
       </widget>
-     </item>
-     <item row="2" column="1" colspan="3">
-      <widget class="QLineEdit" name="txtFilePrefix"/>
-     </item>
-     <item row="1" column="1">
-      <widget class="QComboBox" name="cboSamplingFmt"/>
      </item>
      <item row="1" column="3">
       <widget class="QSpinBox" name="spnJpegQty">
@@ -1025,6 +1016,41 @@ QSlider::handle:horizontal {
        </property>
       </widget>
      </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_17">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Bitrate</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1" colspan="3">
+      <widget class="QLineEdit" name="txtFilePrefix"/>
+     </item>
+     <item row="1" column="1">
+      <widget class="QComboBox" name="cboSamplingFmt"/>
+     </item>
+     <item row="5" column="0">
+      <spacer name="verticalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="0" column="1" colspan="3">
+      <widget class="QComboBox" name="cboOutFormat"/>
+     </item>
      <item row="1" column="2">
       <widget class="QLabel" name="label_5">
        <property name="sizePolicy">
@@ -1038,18 +1064,45 @@ QSlider::handle:horizontal {
        </property>
       </widget>
      </item>
-     <item row="4" column="0">
-      <spacer name="verticalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
+     <item row="2" column="1" colspan="3">
+      <widget class="QComboBox" name="cbBitrate">
+       <property name="editable">
+        <bool>true</bool>
        </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
+       <property name="currentIndex">
+        <number>2</number>
        </property>
-      </spacer>
+       <item>
+        <property name="text">
+         <string>100 MB</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>50 MB</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>20 MB</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>10 MB</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>5 MB</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>1 MB</string>
+        </property>
+       </item>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -1153,7 +1206,7 @@ QSlider::handle:horizontal {
         </sizepolicy>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="page">
         <property name="sizePolicy">
