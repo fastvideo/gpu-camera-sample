@@ -347,7 +347,7 @@ void AVFileWriter::close()
 
 void AVFileWriter::processTask(FileWriterTask *task)
 {
-    if(task == nullptr || task->data == nullptr)
+    if(task == nullptr || task->data == nullptr || !mIsInitialized)
         return;
 
     std::lock_guard<std::mutex> lg(mFrameMutex);
