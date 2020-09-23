@@ -505,7 +505,7 @@ void AVFileWriter::Gray2Yuv420p(unsigned char *yuv, unsigned char *gray, int wid
 void AVFileWriter::encodeWriteFrame(uint8_t *buf, int width, int height)
 {
     if(mV4L2Encoder.data()){
-        if(mV4L2Encoder->encodeFrame(buf, width, height, mUserBuffer, mEncoderType == etNVENC_HEVC)){
+        if(mV4L2Encoder->encodeFrame(buf, width, height, mUserBuffer)){
             if(!mUserBuffer.empty()){
                 AVPacket enc_pkt;
                 enc_pkt.data = nullptr;
