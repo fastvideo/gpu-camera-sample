@@ -91,6 +91,7 @@ public:
         }
 
         timer.restart();
+        mTimer.restart();
     }
 
     int idstreams[10] = {0};
@@ -141,7 +142,8 @@ public:
 
         //printf("Packet size %d\n", size);
 
-        pkt.pts = (m_frameNum += 900./mFps);
+        //pkt.pts = (m_frameNum += 900./mFps);
+        pkt.pts = mTimer.elapsed();
         pkt.dts = pkt.pts;
         pkt.stream_index = idstreams[stream_index];
 
@@ -163,13 +165,16 @@ public:
         }
     }
 
-    QElapsedTimer timer;
-    uint64_t m_frameNum = 0;
     bool isInit = false;
+
+private:
+    QElapsedTimer mTimer;
     AVCodec *codec = nullptr;
     AVCodecContext *ctx = nullptr;
     AVFormatContext *fmt = nullptr;
     AVStream *stream = nullptr;
+    QElapsedTimer timer;
+    uint64_t m_frameNum = 0;
 };
 
 //////////////////////////////////////////////
