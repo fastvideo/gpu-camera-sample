@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019, NVIDIA CORPORATION.  All rights reserved.
+ * Copyright (c) 2016-2020, NVIDIA CORPORATION.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions
@@ -850,8 +850,8 @@ struct v4l2_ctrl_vp8_frame_hdr {
 /**
  * Defines the Control ID to set number of B frames to be encoded between two P frames.
  *
- * This works only with H.264 encoder. An integer value must be supplied with this
- * control.
+ * This works with H.264 encoder. This also works with H.265 encoder for Jetson Xavier and
+ * Jetson Xavier NX platforms. An integer value must be supplied with this control.
  *
  * @attention This control must be set after setting formats on both the planes
  * and before requesting buffers on either plane.
@@ -1217,17 +1217,6 @@ enum v4l2_cuda_mem_type {
     V4L2_CUDA_MEM_TYPE_PINNED = 1,
     /** Memory type unified. */
     V4L2_CUDA_MEM_TYPE_UNIFIED = 2,
-};
-
-/**
- * Enum v4l2_dec_instanceid, possible methods for decode instances. */
-enum v4l2_dec_instance_type {
-    /** Select NVDEC 0 IP. */
-    V4L2_DEC_INSTANCE_0 = 0,
-    /** Select NVDEC 1 IP. */
-    V4L2_DEC_INSTANCE_1 = 1,
-    /** Select AUTO Mode */
-    V4L2_DEC_INSTANCE_AUTO = 2,
 };
 
 /**

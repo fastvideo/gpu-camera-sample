@@ -35,6 +35,8 @@
 #include "FPNReader.h"
 #include "FFCReader.h"
 
+#include "avfilewriter/avfilewriter.h"
+
 #include <QElapsedTimer>
 #include <QDateTime>
 #include <QDebug>
@@ -240,6 +242,30 @@ void RawProcessor::startWorking()
                     mFrameCnt++;
                 }
 
+            }else if(mOptions.Codec == CUDAProcessorOptions::vcH264 || mOptions.Codec == CUDAProcessorOptions::vcHEVC)
+            {
+                unsigned char* buf = mFileWriterPtr->getBuffer();
+                if(buf != nullptr){
+                    unsigned char* data = (uchar*)buffer.data();
+                    mProcessorPtr->export8bitData((void*)data, true);
+
+                    int w = mOptions.Width;
+                    int h = mOptions.Height;
+                    int pitch = w * (mProcessorPtr->isGrayscale()? 1 : 3);
+                    int sz = pitch * h;
+
+                    FileWriterTask* task = new FileWriterTask();
+                    task->fileName =  QStringLiteral("%1/%2%3.mkv").arg(mOutputPath,mFilePrefix).arg(mFrameCnt);
+                    task->size = sz;
+
+                    task->data = buf;
+                    memcpy(task->data, data, sz);
+
+                    mFileWriterPtr->put(task);
+                    mFileWriterPtr->wake();
+
+                    //mRtspServer->addFrame(data);
+                }
             }
         }
     }
@@ -321,6 +347,23 @@ void RawProcessor::startWriting()
                      fileName);
         mFileWriterPtr.reset(writer);
     }
+    else if(mCodec == CUDAProcessorOptions::vcH264 || mCodec == CUDAProcessorOptions::vcHEVC){
+        AVFileWriter *writer = new AVFileWriter();
+
+        auto funEncodeNv12 = [this](unsigned char* yuv, unsigned char*, int , int ){
+            //int channels = dynamic_cast<CUDAProcessorGray*>(mProcessorPtr.data()) == nullptr? 3 : 1;
+
+            mProcessorPtr->exportNV12Data(yuv);
+        };
+        writer->setEncodeNv12Fun(funEncodeNv12);
+
+        writer->open(mCamera->width(),
+                     mCamera->height(),
+                     mOptions.bitrate,
+                     60,
+                     mCodec == CUDAProcessorOptions::vcHEVC);
+        mFileWriterPtr.reset(writer);
+    }
     else
         mFileWriterPtr.reset(new AsyncFileWriter());
 
@@ -344,6 +387,10 @@ void RawProcessor::stopWriting()
     if(mCodec == CUDAProcessorOptions::vcMJPG)
     {
         AsyncMJPEGWriter* writer = static_cast<AsyncMJPEGWriter*>(mFileWriterPtr.data());
+        writer->close();
+    }
+    if(mCodec == CUDAProcessorOptions::vcH264 || mCodec == CUDAProcessorOptions::vcHEVC){
+        AVFileWriter *writer = static_cast<AVFileWriter*>(mFileWriterPtr.data());
         writer->close();
     }
 

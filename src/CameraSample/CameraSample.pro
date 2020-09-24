@@ -10,6 +10,8 @@ TEMPLATE = app
 
 unix:  FASTVIDEO_EXTRA_DLLS += $$PWD/GPUCameraSample.sh
 
+#CONFIG += console
+
 #INCLUDEPATH += ./CUDASupport
 #INCLUDEPATH += ./Camera
 #INCLUDEPATH += ./Widgets
@@ -28,6 +30,7 @@ SOURCES += main.cpp\
     CUDASupport/CUDAProcessorBase.cpp \
     FFCReader.cpp \
     FPNReader.cpp \
+    avfilewriter/avfilewriter.cpp \
     ppm.cpp \
     helper_jpeg_load.cpp \
     helper_jpeg_store.cpp \
@@ -93,6 +96,7 @@ HEADERS  += MainWindow.h \
     CUDASupport/CUDAProcessorBase.h \
     FFCReader.h \
     FPNReader.h \
+    avfilewriter/avfilewriter.h \
     ppm.h \
     helper_jpeg.hpp \
     Widgets/DenoiseController.h \
