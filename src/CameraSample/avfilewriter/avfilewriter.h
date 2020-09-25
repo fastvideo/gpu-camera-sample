@@ -49,7 +49,12 @@ public:
      * @brief setEncodeNv12Fun
      * @param fun
      */
-    void setEncodeNv12Fun(TEncodeNv12 fun);
+    void setEncodeNv12Fun(TEncodeFun fun);
+    /**
+     * @brief setEncodeP010Fun
+     * @param fun
+     */
+    void setEncodeYUV420Fun(TEncodeFun fun);
 
     bool open(int w, int h, int bitrate, int fps, bool isHEVC);
     void close();
@@ -75,7 +80,8 @@ private:
     int64_t mFramesProcessed = 0;
     int mChannels = 3;
     bool mIsInitialized = 0;
-    TEncodeNv12 mNv12Encode;
+    TEncodeFun mNv12Encode;
+    TEncodeFun mYUV420Encode;
     QString mFileName;
     QString mCodecName;
 
@@ -84,6 +90,7 @@ private:
 
     AVCodecContext* mCtx = nullptr;
     AVCodec*        mCodec = nullptr;
+    AVBufferRef*    mHwDeviceCtx = NULL;
 
     std::shared_ptr< std::thread > mFrameThread;
     std::shared_ptr< std::thread > mPacketThread;
@@ -98,8 +105,11 @@ private:
         QByteArray buffer;
         FrameBuffer(){}
         FrameBuffer(uchar *buf, int size){
-            buffer.resize(size);
-            memcpy(buffer.data(), buf, buffer.size()); }
+            if(size > 0){
+                buffer.resize(size);
+                memcpy(buffer.data(), buf, buffer.size());
+            }
+        }
     };
     // very unsafe
     size_t mMaxFrameBuffers = 2;

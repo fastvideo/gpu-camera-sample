@@ -2,6 +2,13 @@
 
 #include "common_utils.h"
 
+extern "C"{
+#include <libavutil/hwcontext.h>
+#include <libavutil/hwcontext_cuda.h>
+};
+
+#include <fastvideo_sdk.h>
+
 //////////////////////////////////////////////
 
 #define GOP_SIZE    3;
@@ -96,43 +103,6 @@ public:
 
     int idstreams[10] = {0};
 
-//    void open_encoder(int id, AVStream* stream_in){
-//        AVCodec *codec = avcodec_find_encoder(stream_in->codecpar->codec_id);
-//        if(!codec)
-//            return;
-//        AVStream *stream = avformat_new_stream(fmt, codec);
-//        stream->id = fmt->nb_streams - 1;
-
-//        AVCodecContext *c = stream->codec;
-//        /* put sample parameters */
-//        c->bit_rate = stream_in->codec->bit_rate_tolerance;
-
-//        c->gop_size = stream_in->codec->gop_size;
-//        c->i_quant_factor = stream_in->codec->i_quant_factor;
-//        c->i_quant_offset = stream_in->codec->i_quant_offset;
-
-//        /* check that the encoder supports s16 pcm input */
-//        c->sample_fmt = AV_SAMPLE_FMT_S32;
-
-//        /* select other audio parameters supported by the encoder */
-//        c->sample_rate    = 48000;
-//        c->channel_layout = AV_CH_LAYOUT_QUAD;
-//        c->channels       = 4;
-
-//        idstreams[2] = 1;
-//        idstreams[3] = 2;
-//        idstreams[4] = 3;
-//        idstreams[5] = 4;
-
-//        AVDictionary *dict = nullptr;
-//        av_dict_set(&dict, "strict", "-2", 0);
-//        /* open it */
-//        if (avcodec_open2(c, codec, &dict) < 0) {
-//            printf("Could not open codec\n");
-//            //exit(1);
-//        }
-//    }
-
     void write_pkt(const uint8_t* data, size_t size, int stream_index = 0){
         AVPacket pkt;
         av_init_packet(&pkt);
@@ -174,8 +144,40 @@ private:
     AVFormatContext *fmt = nullptr;
     AVStream *stream = nullptr;
     QElapsedTimer timer;
-    uint64_t m_frameNum = 0;
+    //uint64_t m_frameNum = 0;
 };
+
+//////////////////////////////////////////////
+
+static int set_hwframe_ctx(AVCodecContext *ctx, AVBufferRef *hw_device_ctx, int width, int height, AVPixelFormat pixfmt)
+{
+    AVBufferRef *hw_frames_ref;
+    AVHWFramesContext *frames_ctx = NULL;
+    int err = 0;
+
+    if (!(hw_frames_ref = av_hwframe_ctx_alloc(hw_device_ctx))) {
+        fprintf(stderr, "Failed to create VAAPI frame context.\n");
+        return -1;
+    }
+    frames_ctx = (AVHWFramesContext *)(hw_frames_ref->data);
+    frames_ctx->format    = AV_PIX_FMT_CUDA;
+    frames_ctx->sw_format = pixfmt;
+    frames_ctx->width     = width;
+    frames_ctx->height    = height;
+    frames_ctx->initial_pool_size = 20;
+    if ((err = av_hwframe_ctx_init(hw_frames_ref)) < 0) {
+        printf("Failed to initialize CUDA frame context. Error code: %d\n", err);
+        av_buffer_unref(&hw_frames_ref);
+        return err;
+    }
+    ctx->hw_frames_ctx = av_buffer_ref(hw_frames_ref);
+    if (!ctx->hw_frames_ctx)
+        err = AVERROR(ENOMEM);
+
+    av_buffer_unref(&hw_frames_ref);
+    return err;
+}
+
 
 //////////////////////////////////////////////
 
@@ -192,14 +194,22 @@ AVFileWriter::~AVFileWriter()
     close();
 }
 
-void AVFileWriter::setEncodeNv12Fun(TEncodeNv12 fun)
+void AVFileWriter::setEncodeNv12Fun(TEncodeFun fun)
 {
     mNv12Encode = fun;
 }
 
+void AVFileWriter::setEncodeYUV420Fun(TEncodeFun fun)
+{
+    mYUV420Encode = fun;
+}
+
 bool AVFileWriter::open(int w, int h, int bitrate, int fps, bool isHEVC)
 {
+    //av_log_set_level(AV_LOG_TRACE);
+
     mDone = false;
+    int ret = 0;
 
     mWidth = w;
     mHeight = h;
@@ -258,7 +268,7 @@ bool AVFileWriter::open(int w, int h, int bitrate, int fps, bool isHEVC)
                 }
             }
         }
-        //mPixFmt = AV_PIX_FMT_NV12;
+        mPixFmt = AV_PIX_FMT_P010;
 
     }
 
@@ -279,7 +289,15 @@ bool AVFileWriter::open(int w, int h, int bitrate, int fps, bool isHEVC)
     mCtx->framerate = {mFps, 1};         // for test. maybe do not affect
     mCtx->gop_size = GOP_SIZE;
     mCtx->max_b_frames = GOP_SIZE;
-    mCtx->pix_fmt = mPixFmt;
+    mCtx->pix_fmt = AV_PIX_FMT_CUDA;
+
+    ret = av_hwdevice_ctx_create(&mHwDeviceCtx, AV_HWDEVICE_TYPE_CUDA, nullptr, nullptr, 0);
+
+    ret = set_hwframe_ctx(mCtx, mHwDeviceCtx, mWidth, mHeight, mPixFmt);
+
+    if(ret < 0){
+        return false;
+    }
 
     if(mEncoderType == etNVENC || mEncoderType == etNVENC_HEVC)
     {
@@ -301,7 +319,7 @@ bool AVFileWriter::open(int w, int h, int bitrate, int fps, bool isHEVC)
         av_dict_set(&dict, "rc", "cbr_ld_hq", 0);
     }
 
-    int ret = avcodec_open2(mCtx, mCodec, &dict);
+    ret = avcodec_open2(mCtx, mCodec, &dict);
     if(ret < 0)
     {
         char buf[100];
@@ -345,6 +363,10 @@ void AVFileWriter::close()
             avcodec_close(mCtx);
             avcodec_free_context(&mCtx);
         }
+        if(mHwDeviceCtx){
+            av_buffer_unref(&mHwDeviceCtx);
+            mHwDeviceCtx = nullptr;
+        }
     }catch(...){
         qDebug("unknown error when close codec and context");
     }
@@ -352,7 +374,7 @@ void AVFileWriter::close()
 
 void AVFileWriter::processTask(FileWriterTask *task)
 {
-    if(task == nullptr || task->data == nullptr || !mIsInitialized)
+    if(task == nullptr || !mIsInitialized)
         return;
 
     std::lock_guard<std::mutex> lg(mFrameMutex);
@@ -401,22 +423,62 @@ bool AVFileWriter::addInternalFrame(uchar *rgbPtr)
         frm->format = mPixFmt;
         frm->pts = mFramesProcessed++;
         //Set frame->data pointers manually
-        if(mChannels == 1)
+        if(mChannels == 1 && rgbPtr != nullptr)
         {
             Gray2Yuv420p((unsigned char*)mEncoderBuffer.data(), rgbPtr, mWidth, mHeight);
         }
         else
         {
-//            QDateTime dt = QDateTime::currentDateTime();
-//            drawTimeToImage(rgbPtr, mWidth, mHeight, dt);
+             ret = av_hwframe_get_buffer(mCtx->hw_frames_ctx, frm, 0);
 
-            if(mNv12Encode != nullptr && mPixFmt == AV_PIX_FMT_NV12){
-                frm->format = AV_PIX_FMT_NV12;
-                mNv12Encode((unsigned char*)mEncoderBuffer.data(), rgbPtr, mWidth, mHeight);
-//                drawTimeToImageGray(mEncoderBuffer.data(), mWidth, mHeight, dt);
-            }else{
-                RGB2Yuv420p((unsigned char*)mEncoderBuffer.data(), rgbPtr, mWidth, mHeight);
+            {
+                if(mNv12Encode != nullptr && mCodecId == AV_CODEC_ID_H264){
+                    frm->format = AV_PIX_FMT_NV12;
+
+                    fastChannelDescription_t fs[3];
+                    fs[0].data = frm->data[0];
+                    fs[0].pitch = frm->linesize[0];
+                    fs[0].height = mHeight;
+                    fs[0].width = mWidth;
+
+                    fs[1].data = frm->data[1];
+                    fs[1].pitch = frm->linesize[1];
+                    fs[1].height = mHeight/2;
+                    fs[1].width = mWidth;
+
+                    fs[2].data = frm->data[2];
+                    fs[2].pitch = frm->linesize[2];
+                    fs[2].height = mHeight;
+                    fs[2].width = mWidth;
+
+                    mNv12Encode((unsigned char*)&fs, nullptr, mWidth, mHeight);
+                }
+                else if(mYUV420Encode != nullptr && mCodecId == AV_CODEC_ID_HEVC){
+                    fastChannelDescription_t fs[3];
+                    fs[0].data = frm->data[0];
+                    fs[0].pitch = frm->linesize[0];
+                    fs[0].height = mHeight;
+                    fs[0].width = mWidth;
+
+                    fs[1].data = frm->data[1];
+                    fs[1].pitch = frm->linesize[1];
+                    fs[1].height = mHeight/2;
+                    fs[1].width = mWidth;
+
+                    fs[2].data = frm->data[2];
+                    fs[2].pitch = frm->linesize[2];
+                    fs[2].height = mHeight/2;
+                    fs[2].width = mWidth;
+
+                    mYUV420Encode((unsigned char*)&fs, nullptr, mWidth, mHeight);
+                }
             }
+//            if(rgbPtr != nullptr)
+//            {
+//                RGB2Yuv420p((unsigned char*)mEncoderBuffer.data(), rgbPtr, mWidth, mHeight);
+//            }else{
+//                return false;
+//            }
         }
 #ifdef __ARM_ARCH
         if(mEncoderType == etNVENC || mEncoderType == etNVENC_HEVC){
@@ -424,7 +486,7 @@ bool AVFileWriter::addInternalFrame(uchar *rgbPtr)
         }else
 #endif
         {
-            ret = av_image_fill_arrays(frm->data, frm->linesize, (unsigned char*)mEncoderBuffer.data(), (AVPixelFormat)frm->format, frm->width, frm->height, 1);
+            //ret = av_image_fill_arrays(frm->data, frm->linesize, (unsigned char*)mEncoderBuffer.data(), (AVPixelFormat)frm->format, frm->width, frm->height, 1);
 //      	ret = encode_write_frame(frm, 0, &got_frame);
             encodeWriteFrame(frm);
         }

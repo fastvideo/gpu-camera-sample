@@ -246,22 +246,22 @@ void RawProcessor::startWorking()
 
             }else if(mOptions.Codec == CUDAProcessorOptions::vcH264 || mOptions.Codec == CUDAProcessorOptions::vcHEVC)
             {
-                unsigned char* buf = mFileWriterPtr->getBuffer();
-                if(buf != nullptr){
-                    unsigned char* data = (uchar*)buffer.data();
-                    mProcessorPtr->export8bitData((void*)data, true);
+                //unsigned char* buf = mFileWriterPtr->getBuffer();
+                /*if(buf != nullptr)*/{
+//                    unsigned char* data = (uchar*)buffer.data();
+//                    mProcessorPtr->export8bitData((void*)data, true);
 
-                    int w = mOptions.Width;
-                    int h = mOptions.Height;
-                    int pitch = w * (mProcessorPtr->isGrayscale()? 1 : 3);
-                    int sz = pitch * h;
+//                    int w = mOptions.Width;
+//                    int h = mOptions.Height;
+//                    int pitch = w * (mProcessorPtr->isGrayscale()? 1 : 3);
+//                    int sz = pitch * h;
 
                     FileWriterTask* task = new FileWriterTask();
                     task->fileName =  QStringLiteral("%1/%2%3.mkv").arg(mOutputPath,mFilePrefix).arg(mFrameCnt);
-                    task->size = sz;
+                    task->size = 0;
 
-                    task->data = buf;
-                    memcpy(task->data, data, sz);
+                    task->data = nullptr;
+                    //memcpy(task->data, data, sz);
 
                     mFileWriterPtr->put(task);
                     mFileWriterPtr->wake();
@@ -355,9 +355,16 @@ void RawProcessor::startWriting()
         auto funEncodeNv12 = [this](unsigned char* yuv, unsigned char*, int , int ){
             //int channels = dynamic_cast<CUDAProcessorGray*>(mProcessorPtr.data()) == nullptr? 3 : 1;
 
-            mProcessorPtr->exportNV12Data(yuv);
+            mProcessorPtr->exportNV12DataDevice(yuv);
         };
         writer->setEncodeNv12Fun(funEncodeNv12);
+
+        auto funEncodeP010 = [this](unsigned char* yuv, unsigned char*, int , int ){
+            //int channels = dynamic_cast<CUDAProcessorGray*>(mProcessorPtr.data()) == nullptr? 3 : 1;
+
+            mProcessorPtr->exportP010DataDevice(yuv);
+        };
+        writer->setEncodeYUV420Fun(funEncodeP010);
 
         writer->open(mCamera->width(),
                      mCamera->height(),

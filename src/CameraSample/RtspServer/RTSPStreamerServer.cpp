@@ -239,7 +239,7 @@ void RTSPStreamerServer::setEncodeFun(TEncodeRgb fun)
     mJpegEncode = fun;
 }
 
-void RTSPStreamerServer::setEncodeNv12Fun(TEncodeNv12 fun)
+void RTSPStreamerServer::setEncodeNv12Fun(TEncodeFun fun)
 {
     mNv12Encode = fun;
 }

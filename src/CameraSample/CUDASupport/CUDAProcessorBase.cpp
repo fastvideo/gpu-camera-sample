@@ -232,6 +232,21 @@ void CUDAProcessorBase::freeFilters()
         hSdiExportToHost = nullptr;
     }
 
+    if(hSdiExportToHost10bit){
+        fastSDIExportToHostDestroy(hSdiExportToHost10bit);
+        hSdiExportToHost10bit = nullptr;
+    }
+
+    if(hSdiExportToDevice){
+        fastSDIExportToDeviceDestroy(hSdiExportToDevice);
+        hSdiExportToDevice = nullptr;
+    }
+
+    if(hSdiExportToDevice10bit){
+        fastSDIExportToDeviceDestroy(hSdiExportToDevice10bit);
+        hSdiExportToDevice10bit = nullptr;
+    }
+
     if(hBitmapExport != nullptr)
     {
         fastExportToHostDestroy( hBitmapExport );
@@ -810,6 +825,31 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
         }
     }
 
+    {
+        fastSurfaceFormat_t fmt = FAST_RGB16;
+        ret = fastSDIExportToHostCreate(&hSdiExportToHost10bit, FAST_SDI_P010_BT709, &fmt, maxWidth, maxHeight, outLutBuffer);
+        if(ret != FAST_OK){
+            return InitFailed("fastSDIExportToHostCreate failed",ret);
+        }
+    }
+
+    {
+        //fastSurfaceFormat_t fmt;
+        ret = fastSDIExportToDeviceCreate(&hSdiExportToDevice, FAST_SDI_NV12_BT601, nullptr, maxWidth, maxHeight, dstBuffer);
+        if(ret != FAST_OK){
+            return InitFailed("fastSDIExportToDeviceCreate failed",ret);
+        }
+    }
+
+    {
+        //fastSurfaceFormat_t fmt = FAST_RGB16;
+        ret = fastSDIExportToDeviceCreate(&hSdiExportToDevice10bit, FAST_SDI_P010_BT709, nullptr, maxWidth, maxHeight, outLutBuffer);
+        if(ret != FAST_OK){
+            return InitFailed("fastSDIExportToDeviceCreate failed",ret);
+        }
+    }
+
+
     size_t  requestedMemSpace = 0;
     unsigned tmp = 0;
     if(hDebayer)
@@ -869,6 +909,22 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
         fastSDIExportToHostGetAllocatedGpuMemorySize(hSdiExportToHost, &tmp);
         requestedMemSpace += tmp;
     }
+
+    if(hSdiExportToHost10bit != nullptr){
+        fastSDIExportToHostGetAllocatedGpuMemorySize(hSdiExportToHost10bit, &tmp);
+        requestedMemSpace += tmp;
+    }
+
+    if(hSdiExportToDevice != nullptr){
+        ret = fastSDIExportToDeviceGetAllocatedGpuMemorySize(hSdiExportToDevice, &tmp);
+        requestedMemSpace += tmp;
+    }
+
+    if(hSdiExportToDevice10bit != nullptr){
+        ret = fastSDIExportToDeviceGetAllocatedGpuMemorySize(hSdiExportToDevice10bit, &tmp);
+        requestedMemSpace += tmp;
+    }
+
 
     size_t freeMem  = 0;
     size_t totalMem = 0;
@@ -1635,6 +1691,155 @@ fastStatus_t CUDAProcessorBase::exportNV12Data(void *dstPtr)
     else
     {
         stats[QStringLiteral("fastSDIExportToHostCopy")] = -1;
+    }
+
+    if(profileTimer)
+    {
+        fastGpuTimerDestroy(profileTimer);
+        profileTimer = nullptr;
+    }
+
+    return FAST_OK;
+}
+
+fastStatus_t CUDAProcessorBase::exportP010Data(void *dstPtr)
+{
+    if(!hSdiExportToHost10bit){
+        return FAST_INVALID_HANDLE;
+    }
+
+    fastStatus_t ret;
+
+    float elapsedTimeGpu = 0.;
+    fastGpuTimerHandle_t profileTimer = nullptr;
+    if(info)
+        fastGpuTimerCreate(&profileTimer);
+
+    if(info)
+    {
+        fastGpuTimerStart(profileTimer);
+    }
+
+    fastDeviceSurfaceBufferInfo_t bufferInfo;
+    fastGetDeviceSurfaceBufferInfo(outLutBuffer, &bufferInfo);
+
+    unsigned width = bufferInfo.width, height = bufferInfo.height;
+
+    ret = fastSDIExportToHostCopy(hSdiExportToHost10bit, dstPtr, &width, &height);
+
+    if(ret != FAST_OK){
+        return TransformFailed("fastExportToHostCopy P010 failed", ret, profileTimer);
+    }
+
+    if(info)
+    {
+        fastGpuTimerStop(profileTimer);
+        fastGpuTimerGetTime(profileTimer, &elapsedTimeGpu);
+        stats[QStringLiteral("fastSDIExportToHostCopyP010")] = elapsedTimeGpu;
+    }
+    else
+    {
+        stats[QStringLiteral("fastSDIExportToHostCopyP010")] = -1;
+    }
+
+    if(profileTimer)
+    {
+        fastGpuTimerDestroy(profileTimer);
+        profileTimer = nullptr;
+    }
+
+    return FAST_OK;
+}
+
+fastStatus_t CUDAProcessorBase::exportNV12DataDevice(void *dstPtr)
+{
+    if(!hSdiExportToDevice){
+        return FAST_INVALID_HANDLE;
+    }
+
+    fastStatus_t ret;
+
+    float elapsedTimeGpu = 0.;
+    fastGpuTimerHandle_t profileTimer = nullptr;
+    if(info)
+        fastGpuTimerCreate(&profileTimer);
+
+    if(info)
+    {
+        fastGpuTimerStart(profileTimer);
+    }
+
+    fastDeviceSurfaceBufferInfo_t bufferInfo;
+    fastGetDeviceSurfaceBufferInfo(dstBuffer, &bufferInfo);
+
+    fastChannelDescription_t* d = static_cast<fastChannelDescription_t*>(dstPtr);
+
+    ret = fastSDIExportToDeviceCopy3(hSdiExportToDevice, &d[0], &d[1], &d[2]);
+
+    if(ret != FAST_OK){
+        return TransformFailed("fastExportToHostDevice failed", ret, profileTimer);
+    }
+
+    cudaDeviceSynchronize();
+    if(info)
+    {
+        fastGpuTimerStop(profileTimer);
+        fastGpuTimerGetTime(profileTimer, &elapsedTimeGpu);
+        stats[QStringLiteral("fastSDIExportToDeviceCopy")] = elapsedTimeGpu;
+    }
+    else
+    {
+        stats[QStringLiteral("fastSDIExportToDeviceCopy")] = -1;
+    }
+
+    if(profileTimer)
+    {
+        fastGpuTimerDestroy(profileTimer);
+        profileTimer = nullptr;
+    }
+
+    return FAST_OK;
+}
+
+fastStatus_t CUDAProcessorBase::exportP010DataDevice(void *dstPtr)
+{
+    if(!hSdiExportToDevice10bit){
+        return FAST_INVALID_HANDLE;
+    }
+
+    fastStatus_t ret;
+
+    float elapsedTimeGpu = 0.;
+    fastGpuTimerHandle_t profileTimer = nullptr;
+    if(info)
+        fastGpuTimerCreate(&profileTimer);
+
+    if(info)
+    {
+        fastGpuTimerStart(profileTimer);
+    }
+
+    fastDeviceSurfaceBufferInfo_t bufferInfo;
+    fastGetDeviceSurfaceBufferInfo(outLutBuffer, &bufferInfo);
+
+    fastChannelDescription_t* d = static_cast<fastChannelDescription_t*>(dstPtr);
+
+    ret = fastSDIExportToDeviceCopy3(hSdiExportToDevice10bit, &d[0], &d[1], &d[2]);
+
+    if(ret != FAST_OK){
+        return TransformFailed("fastExportToDeviceCopy P010 failed", ret, profileTimer);
+    }
+
+    cudaDeviceSynchronize();
+    if(info)
+    {
+        fastGpuTimerStop(profileTimer);
+        fastGpuTimerGetTime(profileTimer, &elapsedTimeGpu);
+        stats[QStringLiteral("fastSDIExportToDeviceCopyP010")] = elapsedTimeGpu;
+    }
+    else
+    {
+        stats[QStringLiteral("fastSDIExportToDeviceCopyP010")] = -1;
     }
 
     if(profileTimer)

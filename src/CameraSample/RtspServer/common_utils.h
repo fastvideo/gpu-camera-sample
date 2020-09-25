@@ -58,7 +58,7 @@ typedef std::function<void(int, unsigned char* data, int width, int height, int 
 typedef std::function<void(/* out */unsigned char *yuv,
                            /* int */unsigned char *rgb,
                            int width,
-                           int height)> TEncodeNv12;
+                           int height)> TEncodeFun;
 
 namespace rtp_packet_add_header
 {
