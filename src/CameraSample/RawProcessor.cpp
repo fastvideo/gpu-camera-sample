@@ -70,8 +70,6 @@ fastStatus_t RawProcessor::init()
     if(!mProcessorPtr)
         return FAST_INVALID_VALUE;
 
-
-
     return mProcessorPtr->Init(mOptions);
 }
 
@@ -121,13 +119,17 @@ void RawProcessor::startWorking()
 {
     mWorking = true;
 
-//    int frameTime = qRound(1000.F / mRenderFps);
     qint64 lastTime = 0;
     QElapsedTimer tm;
     tm.start();
 
     QByteArray buffer;
     buffer.resize(mOptions.Width * mOptions.Height * 4);
+
+    int bpc = GetBitsPerChannelFromSurface(mCamera->surfaceFormat());
+    int maxVal = (1 << bpc) - 1;
+    QString pgmHeader = QString("P5\n%1 %2\n%3\n").arg(mOptions.Width).arg(mOptions.Height).arg(maxVal);
+
     mWake = false;
 
     while(mWorking)
@@ -149,10 +151,10 @@ void RawProcessor::startWorking()
         mProcessorPtr->Transform(img, mOptions);
         if(mRenderer)
         {
-/// on arm processor cannot show 60 fps
-            const qint64 frameTime = 32;
             qint64 curTime = tm.elapsed();
+/// arm processor cannot show 60 fps
 #ifdef __ARM_ARCH
+            const qint64 frameTime = 32;
             if(curTime - lastTime >= frameTime)
 #endif
             {
@@ -204,8 +206,6 @@ void RawProcessor::startWorking()
             }
             else if(mOptions.Codec == CUDAProcessorOptions::vcPGM)
             {
-                int bpc = GetBitsPerChannelFromSurface(img->surfaceFmt);
-                int maxVal = (1 << bpc) - 1;
                 unsigned char* buf = mFileWriterPtr->getBuffer();
                 if(buf != nullptr)
                 {
@@ -214,17 +214,15 @@ void RawProcessor::startWorking()
                     unsigned pitch = 0;
                     mProcessorPtr->exportRawData(nullptr, w, h, pitch);
 
-                    QString header = QString("P5\n%1 %2\n%3\n").arg(w).arg(h).arg(maxVal);
-
-                    int sz = header.size() + pitch * h;
+                    int sz = pgmHeader.size() + pitch * h;
 
                     FileWriterTask* task = new FileWriterTask();
                     task->fileName =  QStringLiteral("%1/%2%3.pgm").arg(mOutputPath,mFilePrefix).arg(mFrameCnt);
                     task->size = sz;
 
                     task->data = buf;
-                    memcpy(task->data, header.toStdString().c_str(), header.size());
-                    unsigned char* data = task->data + header.size();
+                    memcpy(task->data, pgmHeader.toStdString().c_str(), pgmHeader.size());
+                    unsigned char* data = task->data + pgmHeader.size();
                     mProcessorPtr->exportRawData((void*)data, w, h, pitch);
 
                     //Not 8 bit pgm requires big endian byte order
@@ -615,8 +613,6 @@ void RawProcessor::setRtspServer(const QString &url)
     mRtspServer->setEncodeFun(funEncode);
 
     auto funEncodeNv12 = [this](unsigned char* yuv, unsigned char*, int , int ){
-        //int channels = dynamic_cast<CUDAProcessorGray*>(mProcessorPtr.data()) == nullptr? 3 : 1;
-
         mProcessorPtr->exportNV12Data(yuv);
     };
     mRtspServer->setEncodeNv12Fun(funEncodeNv12);

@@ -8,7 +8,7 @@ unix:  include(../common_unix.pri)
 TARGET = $$PROJECT_NAME
 TEMPLATE = app
 
-FASTVIDEO_EXTRA_DLLS += $$PWD/GPUCameraSample.sh
+unix:  FASTVIDEO_EXTRA_DLLS += $$PWD/GPUCameraSample.sh
 
 CONFIG += console
 
@@ -146,6 +146,7 @@ unix {
 
     copyPluginsToDestdir(xcbglintegrations)
     copyQtIcuDllsToDestdir($$QT_ICU_DLLS)
+    makeLinks()
 }
 
 win32 {
@@ -158,7 +159,7 @@ win32 {
     copyToDestdir($$CUDA_DLL)
 }
 copyToDestdir($$FASTVIDEO_EXTRA_DLLS)
-makeLinks()
+
 
 RESOURCES += \
     Resorces.qrc

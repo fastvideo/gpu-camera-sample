@@ -9,7 +9,7 @@ unix:  include(../common_unix.pri)
 TARGET = RtspPlayer
 TEMPLATE = app
 
-FASTVIDEO_EXTRA_DLLS += $$PWD/RtspPlayer.sh
+unix:  FASTVIDEO_EXTRA_DLLS += $$PWD/RtspPlayer.sh
 
 SOURCES = main.cpp \
     $$OTHER_LIB_PATH/FastvideoSDK/common/helper_jpeg/helper_jpeg_load.cpp \
