@@ -31,6 +31,7 @@ public:
     void setNumCaptureBuffers(int val);
     void setNumOutputBuffers(int val);
     bool encodeFrame(uint8_t *buf, int width, int height, userbuffer &output, bool nv12 = false);
+    bool encodeFrame3(uint8_t **buf, int width, int height, userbuffer &output);
 
 private:
     std::unique_ptr<v4l2EncoderPrivate> mD;

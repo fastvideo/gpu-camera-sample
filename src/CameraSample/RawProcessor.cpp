@@ -357,12 +357,21 @@ void RawProcessor::startWriting()
         };
         writer->setEncodeNv12Fun(funEncodeNv12);
 
+#ifdef __ARM_ARCH
+        auto funEncodeYuv = [this](unsigned char* yuv, unsigned char*, int , int ){
+            //int channels = dynamic_cast<CUDAProcessorGray*>(mProcessorPtr.data()) == nullptr? 3 : 1;
+
+            mProcessorPtr->exportYuv8Data(yuv);
+        };
+        writer->setEncodeYUV420Fun(funEncodeYuv);
+#else
         auto funEncodeP010 = [this](unsigned char* yuv, unsigned char*, int , int ){
             //int channels = dynamic_cast<CUDAProcessorGray*>(mProcessorPtr.data()) == nullptr? 3 : 1;
 
             mProcessorPtr->exportP010DataDevice(yuv);
         };
         writer->setEncodeYUV420Fun(funEncodeP010);
+#endif
 
         writer->open(mCamera->width(),
                      mCamera->height(),

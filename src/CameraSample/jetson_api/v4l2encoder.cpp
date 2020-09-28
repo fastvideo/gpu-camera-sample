@@ -261,6 +261,50 @@ public:
         return ret == 0;
     }
 
+    bool encode3(uint8_t** data, uint32_t width, uint32_t height, userbuffer& output){
+        if(!width || !height){
+            return false;
+        }
+        if(!mInit || width != mWidth || height != mHeight){
+            release();
+            init(width, height);
+        }
+        if(!mInit){
+            return false;
+        }
+
+        int ret = 0;
+
+        //std::cout << "output plane\n";
+        int ret1 = set_plane_dq(&mNVEncoder->output_plane, [this, data](mapbuffer* buffer){
+            copyframe3(buffer, data);
+        });
+
+        mNumFrame++;
+
+        if(ret1 != 0){
+            return -1;
+        }
+        //std::cout << "capture plane\n";
+        ret1 = capture_plane_dq(&mNVEncoder->capture_plane,
+
+        [&](mapbuffer* buffer)
+        {
+            Buffer &b = buffer->planes[0];
+            output.resize(b.bytesused);
+            std::copy(b.buf, b.buf + b.bytesused, output.begin());
+//            std::cout << "bytes write " << b.bytesused << "; numframe " << mNumFrame << std::endl;
+//            size_t s = std::min((size_t)10, output.size());
+//            for(int i = 0; i < s; ++i){
+//                std::cout << (ushort) output[i] << " ";
+//            }
+//            std::cout << "\n";
+        }
+        );
+
+        return ret == 0;
+    }
+
     int copyframe(mapbuffer* buffer, uint8_t *data, bool nv12){
         if(buffer == nullptr || data == nullptr)
             return -1;
@@ -329,6 +373,43 @@ public:
                 buffer->planes[2].bytesused = buffer->planes[2].fmt.sizeimage;
             }
         }
+        return 0;
+    }
+
+    int copyframe3(mapbuffer* buffer, uint8_t **data){
+        if(buffer == nullptr || data == nullptr)
+            return -1;
+
+        uint8_t *datas[3] = {buffer->planes[0].buf, buffer->planes[1].buf, buffer->planes[2].buf};
+        uint32_t lines[3] = {buffer->planes[0].fmt.bytesperline, buffer->planes[1].fmt.bytesperline, buffer->planes[2].fmt.bytesperline};
+
+        uint8_t *y = data[0];
+        uint8_t *u = data[1];
+        uint8_t *v = data[2];
+        uint32_t bpy0 = mWidth;
+        uint32_t bpuv0 = mWidth;
+        uint32_t bpy1 = lines[0];
+        uint32_t bpu1 = lines[1];
+        uint32_t bpv1 = lines[2];
+
+#pragma omp parallel for
+        for(int i = 0; i < mHeight; ++i){
+            uint8_t *dy = y + i * bpy0;
+            std::copy(dy, dy + bpy0, datas[0] + i * bpy1);
+            //y += bpy0;
+        }
+#pragma omp parallel for
+        for(int i = 0; i < mHeight/2; ++i){
+            uint8_t *du_ = u + i * bpuv0;
+            uint8_t *dv_ = v + i * bpuv0;
+            std::copy(du_, du_ + bpuv0, datas[1] + i * bpu1);
+            std::copy(dv_, dv_ + bpuv0, datas[2] + i * bpv1);
+            //uv += bpuv0;
+        }
+
+        buffer->planes[0].bytesused = buffer->planes[0].fmt.sizeimage;
+        buffer->planes[1].bytesused = buffer->planes[1].fmt.sizeimage;
+        buffer->planes[2].bytesused = buffer->planes[2].fmt.sizeimage;
         return 0;
     }
 };
@@ -404,4 +485,9 @@ void v4l2Encoder::setNumOutputBuffers(int val)
 bool v4l2Encoder::encodeFrame(uint8_t *buf, int width, int height, userbuffer& output, bool nv12)
 {
     return mD->encode(buf, width, height, output, nv12);
+}
+
+bool v4l2Encoder::encodeFrame3(uint8_t **buf, int width, int height, userbuffer &output)
+{
+    return mD->encode3(buf, width, height, output);
 }

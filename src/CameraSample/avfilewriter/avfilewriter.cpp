@@ -227,9 +227,11 @@ bool AVFileWriter::open(int w, int h, int bitrate, int fps, bool isHEVC)
         mV4L2Encoder->setInsertSpsPpsAtIdrEnabled(true);
         mV4L2Encoder->setInsertVuiEnabled(true);
         mV4L2Encoder->setIFrameInterval(1);
+        mPixFmt = AV_PIX_FMT_YUV420P;
 //        mCodec = avcodec_find_encoder_by_name("h264_v4l2m2m");
 #else
         mCodec = avcodec_find_encoder_by_name("h264_nvenc");
+        mPixFmt = AV_PIX_FMT_NV12;
 #endif
         if(!mCodec)
         {
@@ -241,7 +243,6 @@ bool AVFileWriter::open(int w, int h, int bitrate, int fps, bool isHEVC)
                 return false;
             }
         }
-        mPixFmt = AV_PIX_FMT_NV12;
     }else if(mEncoderType == etNVENC_HEVC){
 #ifdef __ARM_ARCH
         mV4L2Encoder.reset(new v4l2Encoder());
@@ -251,9 +252,11 @@ bool AVFileWriter::open(int w, int h, int bitrate, int fps, bool isHEVC)
         mV4L2Encoder->setInsertSpsPpsAtIdrEnabled(true);
         mV4L2Encoder->setInsertVuiEnabled(true);
         mV4L2Encoder->setIFrameInterval(1);
+        mPixFmt = AV_PIX_FMT_YUV420P;
 //        mCodec = avcodec_find_encoder_by_name("h264_v4l2m2m");
 #else
         mCodec = avcodec_find_encoder_by_name("hevc_nvenc");
+        mPixFmt = AV_PIX_FMT_P010;
 #endif
         if(!mCodec)
         {
@@ -268,8 +271,6 @@ bool AVFileWriter::open(int w, int h, int bitrate, int fps, bool isHEVC)
                 }
             }
         }
-        mPixFmt = AV_PIX_FMT_P010;
-
     }
 
     mCodecName = mCodec->name;
@@ -289,6 +290,9 @@ bool AVFileWriter::open(int w, int h, int bitrate, int fps, bool isHEVC)
     mCtx->framerate = {mFps, 1};         // for test. maybe do not affect
     mCtx->gop_size = GOP_SIZE;
     mCtx->max_b_frames = GOP_SIZE;
+#ifdef __ARM_ARCH
+    mCtx->pix_fmt = mPixFmt;
+#else
     mCtx->pix_fmt = AV_PIX_FMT_CUDA;
 
     ret = av_hwdevice_ctx_create(&mHwDeviceCtx, AV_HWDEVICE_TYPE_CUDA, nullptr, nullptr, 0);
@@ -298,6 +302,7 @@ bool AVFileWriter::open(int w, int h, int bitrate, int fps, bool isHEVC)
     if(ret < 0){
         return false;
     }
+#endif
 
     if(mEncoderType == etNVENC || mEncoderType == etNVENC_HEVC)
     {
@@ -334,6 +339,11 @@ bool AVFileWriter::open(int w, int h, int bitrate, int fps, bool isHEVC)
     mTimerCtrlFps.restart();
 
     mEncoderBuffer.resize(mWidth * mHeight * 4);
+
+    for(int i = 0; i < 3; i++)
+    {
+        mEncoderBufferYuv[i].resize(mWidth * mHeight);
+    }
 
     mIsInitialized = true;
 
@@ -429,9 +439,30 @@ bool AVFileWriter::addInternalFrame(uchar *rgbPtr)
         }
         else
         {
+#ifdef __ARM_ARCH
+             {
+                 fastChannelDescription_t fs[3];
+                 fs[0].data = (unsigned char*)mEncoderBufferYuv[0].data();
+                 fs[0].pitch = mWidth;
+                 fs[0].height = mHeight;
+                 fs[0].width = mWidth;
+
+                 fs[1].data = (unsigned char*)mEncoderBufferYuv[1].data();
+                 fs[1].pitch = mWidth;
+                 fs[1].height = mHeight/2;
+                 fs[1].width = mWidth;
+
+                 fs[2].data = (unsigned char*)mEncoderBufferYuv[2].data();
+                 fs[2].pitch = mWidth;
+                 fs[2].height = mHeight/2;
+                 fs[2].width = mWidth;
+
+                 mYUV420Encode((unsigned char*)&fs, nullptr, mWidth, mHeight);
+             }
+#else
              ret = av_hwframe_get_buffer(mCtx->hw_frames_ctx, frm, 0);
 
-            {
+             {
                 if(mNv12Encode != nullptr && mCodecId == AV_CODEC_ID_H264){
                     frm->format = AV_PIX_FMT_NV12;
 
@@ -479,17 +510,20 @@ bool AVFileWriter::addInternalFrame(uchar *rgbPtr)
 //            }else{
 //                return false;
 //            }
+#endif
         }
 #ifdef __ARM_ARCH
         if(mEncoderType == etNVENC || mEncoderType == etNVENC_HEVC){
-            encodeWriteFrame((unsigned char*)mEncoderBuffer.data(), mWidth, mHeight);
-        }else
-#endif
+            char *data[3] = {mEncoderBufferYuv[0].data(), mEncoderBufferYuv[1].data(), mEncoderBufferYuv[2].data()};
+            encodeWriteFrame((unsigned char*)data, mWidth, mHeight);
+        }
+#else
         {
             //ret = av_image_fill_arrays(frm->data, frm->linesize, (unsigned char*)mEncoderBuffer.data(), (AVPixelFormat)frm->format, frm->width, frm->height, 1);
 //      	ret = encode_write_frame(frm, 0, &got_frame);
             encodeWriteFrame(frm);
         }
+#endif
 
         av_frame_free(&frm);
     }
@@ -572,7 +606,7 @@ void AVFileWriter::Gray2Yuv420p(unsigned char *yuv, unsigned char *gray, int wid
 void AVFileWriter::encodeWriteFrame(uint8_t *buf, int width, int height)
 {
     if(mV4L2Encoder.data()){
-        if(mV4L2Encoder->encodeFrame(buf, width, height, mUserBuffer)){
+        if(mV4L2Encoder->encodeFrame3((uint8_t**)buf, width, height, mUserBuffer)){
             if(!mUserBuffer.empty()){
                 AVPacket enc_pkt;
                 enc_pkt.data = nullptr;

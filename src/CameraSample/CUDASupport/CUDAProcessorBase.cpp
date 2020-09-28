@@ -237,6 +237,11 @@ void CUDAProcessorBase::freeFilters()
         hSdiExportToHost10bit = nullptr;
     }
 
+    if(hSdiExportToHostYuv8bit){
+        fastSDIExportToHostDestroy(hSdiExportToHostYuv8bit);
+        hSdiExportToHostYuv8bit = nullptr;
+    }
+
     if(hSdiExportToDevice){
         fastSDIExportToDeviceDestroy(hSdiExportToDevice);
         hSdiExportToDevice = nullptr;
@@ -245,6 +250,11 @@ void CUDAProcessorBase::freeFilters()
     if(hSdiExportToDevice10bit){
         fastSDIExportToDeviceDestroy(hSdiExportToDevice10bit);
         hSdiExportToDevice10bit = nullptr;
+    }
+
+    if(hSdiExportToDeviceYuv8bit){
+        fastSDIExportToDeviceDestroy(hSdiExportToDeviceYuv8bit);
+        hSdiExportToDeviceYuv8bit = nullptr;
     }
 
     if(hBitmapExport != nullptr)
@@ -834,6 +844,14 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
     }
 
     {
+        fastSurfaceFormat_t fmt;
+        ret = fastSDIExportToHostCreate(&hSdiExportToHostYuv8bit, FAST_SDI_420_8_YCbCr_PLANAR_BT709, &fmt, maxWidth, maxHeight, dstBuffer);
+        if(ret != FAST_OK){
+            return InitFailed("fastSDIExportToHostCreate failed",ret);
+        }
+    }
+
+    {
         //fastSurfaceFormat_t fmt;
         ret = fastSDIExportToDeviceCreate(&hSdiExportToDevice, FAST_SDI_NV12_BT601, nullptr, maxWidth, maxHeight, dstBuffer);
         if(ret != FAST_OK){
@@ -849,6 +867,13 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
         }
     }
 
+    {
+        //fastSurfaceFormat_t fmt = FAST_RGB16;
+        ret = fastSDIExportToDeviceCreate(&hSdiExportToDeviceYuv8bit, FAST_SDI_420_8_YCbCr_PLANAR_BT709, nullptr, maxWidth, maxHeight, dstBuffer);
+        if(ret != FAST_OK){
+            return InitFailed("fastSDIExportToDeviceCreate failed",ret);
+        }
+    }
 
     size_t  requestedMemSpace = 0;
     unsigned tmp = 0;
@@ -915,6 +940,11 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
         requestedMemSpace += tmp;
     }
 
+    if(hSdiExportToHostYuv8bit != nullptr){
+        fastSDIExportToHostGetAllocatedGpuMemorySize(hSdiExportToHostYuv8bit, &tmp);
+        requestedMemSpace += tmp;
+    }
+
     if(hSdiExportToDevice != nullptr){
         ret = fastSDIExportToDeviceGetAllocatedGpuMemorySize(hSdiExportToDevice, &tmp);
         requestedMemSpace += tmp;
@@ -925,6 +955,10 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
         requestedMemSpace += tmp;
     }
 
+    if(hSdiExportToDeviceYuv8bit != nullptr){
+        ret = fastSDIExportToDeviceGetAllocatedGpuMemorySize(hSdiExportToDeviceYuv8bit, &tmp);
+        requestedMemSpace += tmp;
+    }
 
     size_t freeMem  = 0;
     size_t totalMem = 0;
@@ -1751,6 +1785,56 @@ fastStatus_t CUDAProcessorBase::exportP010Data(void *dstPtr)
     return FAST_OK;
 }
 
+fastStatus_t CUDAProcessorBase::exportYuv8Data(void *dstPtr)
+{
+    if(!hSdiExportToHostYuv8bit){
+        return FAST_INVALID_HANDLE;
+    }
+
+    fastStatus_t ret;
+
+    float elapsedTimeGpu = 0.;
+    fastGpuTimerHandle_t profileTimer = nullptr;
+    if(info)
+        fastGpuTimerCreate(&profileTimer);
+
+    if(info)
+    {
+        fastGpuTimerStart(profileTimer);
+    }
+
+    fastDeviceSurfaceBufferInfo_t bufferInfo;
+    fastGetDeviceSurfaceBufferInfo(outLutBuffer, &bufferInfo);
+
+    fastChannelDescription_t* d = static_cast<fastChannelDescription_t*>(dstPtr);
+
+    ret = fastSDIExportToHostCopy3(hSdiExportToHostYuv8bit, &d[0], &d[1], &d[2]);
+
+    if(ret != FAST_OK){
+        return TransformFailed("fastSDIExportToHostCopy3 Yuv failed", ret, profileTimer);
+    }
+
+    cudaDeviceSynchronize();
+    if(info)
+    {
+        fastGpuTimerStop(profileTimer);
+        fastGpuTimerGetTime(profileTimer, &elapsedTimeGpu);
+        stats[QStringLiteral("exportYuv8DataHost")] = elapsedTimeGpu;
+    }
+    else
+    {
+        stats[QStringLiteral("exportYuv8DataHost")] = -1;
+    }
+
+    if(profileTimer)
+    {
+        fastGpuTimerDestroy(profileTimer);
+        profileTimer = nullptr;
+    }
+
+    return FAST_OK;
+}
+
 fastStatus_t CUDAProcessorBase::exportNV12DataDevice(void *dstPtr)
 {
     if(!hSdiExportToDevice){
@@ -1840,6 +1924,56 @@ fastStatus_t CUDAProcessorBase::exportP010DataDevice(void *dstPtr)
     else
     {
         stats[QStringLiteral("fastSDIExportToDeviceCopyP010")] = -1;
+    }
+
+    if(profileTimer)
+    {
+        fastGpuTimerDestroy(profileTimer);
+        profileTimer = nullptr;
+    }
+
+    return FAST_OK;
+}
+
+fastStatus_t CUDAProcessorBase::exportYuv8DataDevice(void *dstPtr)
+{
+    if(!hSdiExportToDeviceYuv8bit){
+        return FAST_INVALID_HANDLE;
+    }
+
+    fastStatus_t ret;
+
+    float elapsedTimeGpu = 0.;
+    fastGpuTimerHandle_t profileTimer = nullptr;
+    if(info)
+        fastGpuTimerCreate(&profileTimer);
+
+    if(info)
+    {
+        fastGpuTimerStart(profileTimer);
+    }
+
+    fastDeviceSurfaceBufferInfo_t bufferInfo;
+    fastGetDeviceSurfaceBufferInfo(outLutBuffer, &bufferInfo);
+
+    fastChannelDescription_t* d = static_cast<fastChannelDescription_t*>(dstPtr);
+
+    ret = fastSDIExportToDeviceCopy3(hSdiExportToDeviceYuv8bit, &d[0], &d[1], &d[2]);
+
+    if(ret != FAST_OK){
+        return TransformFailed("fastExportToDeviceCopy Yuv failed", ret, profileTimer);
+    }
+
+    cudaDeviceSynchronize();
+    if(info)
+    {
+        fastGpuTimerStop(profileTimer);
+        fastGpuTimerGetTime(profileTimer, &elapsedTimeGpu);
+        stats[QStringLiteral("exportYuv8DataDevice")] = elapsedTimeGpu;
+    }
+    else
+    {
+        stats[QStringLiteral("exportYuv8DataDevice")] = -1;
     }
 
     if(profileTimer)

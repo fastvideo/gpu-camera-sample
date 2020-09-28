@@ -93,9 +93,10 @@ public:
     virtual fastStatus_t exportJPEGData(void* dstPtr, unsigned jpegQuality, unsigned &size);
     virtual fastStatus_t exportNV12Data(void* dstPtr);
     virtual fastStatus_t exportP010Data(void* dstPtr);
+    virtual fastStatus_t exportYuv8Data(void* dstPtr);
     virtual fastStatus_t exportNV12DataDevice(void* dstPtr);
     virtual fastStatus_t exportP010DataDevice(void* dstPtr);
-
+    virtual fastStatus_t exportYuv8DataDevice(void* dstPtr);
 
     fastStatus_t exportRawData(void* dstPtr, unsigned int &w, unsigned int &h, unsigned int &pitch);
     fastStatus_t export16bitData(void* dstPtr, unsigned int &w, unsigned int &h, unsigned int &pitch);
@@ -174,9 +175,11 @@ protected:
 
     fastSDIExportToHostHandle_t     hSdiExportToHost = nullptr;
     fastSDIExportToHostHandle_t     hSdiExportToHost10bit = nullptr;
+    fastSDIExportToHostHandle_t     hSdiExportToHostYuv8bit = nullptr;
 
     fastSDIExportToDeviceHandle_t   hSdiExportToDevice = nullptr;
     fastSDIExportToDeviceHandle_t   hSdiExportToDevice10bit = nullptr;
+    fastSDIExportToDeviceHandle_t   hSdiExportToDeviceYuv8bit = nullptr;
 
     fastDeviceSurfaceBufferHandle_t dstBuffer = nullptr;
 
