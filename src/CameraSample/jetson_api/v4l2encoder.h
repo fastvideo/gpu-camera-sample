@@ -33,6 +33,13 @@ public:
     bool encodeFrame(uint8_t *buf, int width, int height, userbuffer &output, bool nv12 = false);
     bool encodeFrame3(uint8_t **buf, int width, int height, userbuffer &output);
 
+    // 1 get buffer for copy
+    bool getInputBuffers3(uint8_t **data, int *lines, uint32_t width, uint32_t height);
+    // 2 put to v4l2
+    bool putInputBuffers3();
+    // 3 get encoded data
+    bool getEncodedData(userbuffer& output);
+
 private:
     std::unique_ptr<v4l2EncoderPrivate> mD;
 };

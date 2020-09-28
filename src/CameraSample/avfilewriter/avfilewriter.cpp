@@ -441,24 +441,30 @@ bool AVFileWriter::addInternalFrame(uchar *rgbPtr)
         {
 #ifdef __ARM_ARCH
              {
-                 fastChannelDescription_t fs[3];
-                 fs[0].data = (unsigned char*)mEncoderBufferYuv[0].data();
-                 fs[0].pitch = mWidth;
-                 fs[0].height = mHeight;
-                 fs[0].width = mWidth;
+                uint8_t *data[3] = {nullptr, nullptr, nullptr};
+                int lines[3] = {0, 0, 0};
+                if(mV4L2Encoder->getInputBuffers3(data, lines, mWidth, mHeight)){
+                    fastChannelDescription_t fs[3];
+                    fs[0].data = (unsigned char*)data[0];
+                    fs[0].pitch = lines[0];
+                    fs[0].height = mHeight;
+                    fs[0].width = mWidth;
 
-                 fs[1].data = (unsigned char*)mEncoderBufferYuv[1].data();
-                 fs[1].pitch = mWidth;
-                 fs[1].height = mHeight/2;
-                 fs[1].width = mWidth;
+                    fs[1].data = (unsigned char*)data[1];
+                    fs[1].pitch = lines[1];
+                    fs[1].height = mHeight/2;
+                    fs[1].width = mWidth;
 
-                 fs[2].data = (unsigned char*)mEncoderBufferYuv[2].data();
-                 fs[2].pitch = mWidth;
-                 fs[2].height = mHeight/2;
-                 fs[2].width = mWidth;
+                    fs[2].data = (unsigned char*)data[2];
+                    fs[2].pitch = lines[2];
+                    fs[2].height = mHeight/2;
+                    fs[2].width = mWidth;
 
-                 mYUV420Encode((unsigned char*)&fs, nullptr, mWidth, mHeight);
-             }
+                     mYUV420Encode((unsigned char*)&fs, nullptr, mWidth, mHeight);
+
+                     mV4L2Encoder->putInputBuffers3();
+                }
+            }
 #else
              ret = av_hwframe_get_buffer(mCtx->hw_frames_ctx, frm, 0);
 
@@ -606,7 +612,7 @@ void AVFileWriter::Gray2Yuv420p(unsigned char *yuv, unsigned char *gray, int wid
 void AVFileWriter::encodeWriteFrame(uint8_t *buf, int width, int height)
 {
     if(mV4L2Encoder.data()){
-        if(mV4L2Encoder->encodeFrame3((uint8_t**)buf, width, height, mUserBuffer)){
+        if(mV4L2Encoder->getEncodedData(mUserBuffer)){
             if(!mUserBuffer.empty()){
                 AVPacket enc_pkt;
                 enc_pkt.data = nullptr;

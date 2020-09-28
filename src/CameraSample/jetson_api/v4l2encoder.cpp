@@ -261,6 +261,95 @@ public:
         return ret == 0;
     }
 
+    struct v4l2_buffer mV4l2_buf;
+    struct v4l2_plane mPlanes[MAX_PLANES];
+    mapbuffer *mBuffer = nullptr;
+
+    bool getInputBuffers3(uint8_t **data, int *lines, uint32_t width, uint32_t height){
+        if(!width || !height){
+            return false;
+        }
+        if(!mInit || width != mWidth || height != mHeight){
+            release();
+            init(width, height);
+        }
+        if(!mInit){
+            return false;
+        }
+
+        int ret = 0;
+
+        memset(&mV4l2_buf, 0, sizeof(mV4l2_buf));
+        memset(mPlanes, 0, sizeof(mPlanes));
+
+        NvPlane* plane = &mNVEncoder->output_plane;
+
+        mV4l2_buf.m.planes = mPlanes;
+        mV4l2_buf.length = plane->n_planes;
+
+        if(mNumFrame < plane->getNumBuffers()){
+            mBuffer = plane->getNthBuffer(mNumFrame);
+            mV4l2_buf.index = mNumFrame;
+        }else{
+            ret = plane->dqBuffer(mV4l2_buf, &mBuffer);
+            if(ret){
+                return ret;
+            }
+        }
+
+        data[0] = mBuffer->planes[0].buf;
+        data[1] = mBuffer->planes[1].buf;
+        data[2] = mBuffer->planes[2].buf;
+
+        lines[0] = mBuffer->planes[0].fmt.bytesperline;
+        lines[1] = mBuffer->planes[1].fmt.bytesperline;
+        lines[2] = mBuffer->planes[2].fmt.bytesperline;
+
+        mBuffer->planes[0].bytesused = mBuffer->planes[0].fmt.sizeimage;
+        mBuffer->planes[1].bytesused = mBuffer->planes[1].fmt.sizeimage;
+        mBuffer->planes[2].bytesused = mBuffer->planes[2].fmt.sizeimage;
+
+        return true;
+    }
+
+    bool putInputBuffers3(){
+        int ret;
+
+        if(!mBuffer)
+            return false;
+
+        NvPlane* plane = &mNVEncoder->output_plane;
+        int fd = mBuffer->planes[0].fd;
+        for (uint32_t j = 0 ; j < mBuffer->n_planes ; j++){
+            void** dat = (void **)&mBuffer->planes[j].buf;
+            ret = NvBufferMemSyncForDevice (fd, j, dat);
+            if (ret < 0){
+                return ret;
+            }
+        }
+
+        ret = plane->qBuffer(mV4l2_buf);
+
+        mNumFrame++;
+
+        mBuffer = nullptr;
+
+        return ret == 0;
+    }
+
+    bool getEncodedData(userbuffer& output){
+        int ret = capture_plane_dq(&mNVEncoder->capture_plane,
+
+            [&](mapbuffer* buffer)
+            {
+                Buffer &b = buffer->planes[0];
+                output.resize(b.bytesused);
+                std::copy(b.buf, b.buf + b.bytesused, output.begin());
+            }
+        );
+        return ret == 0;
+    }
+
     bool encode3(uint8_t** data, uint32_t width, uint32_t height, userbuffer& output){
         if(!width || !height){
             return false;
@@ -490,4 +579,19 @@ bool v4l2Encoder::encodeFrame(uint8_t *buf, int width, int height, userbuffer& o
 bool v4l2Encoder::encodeFrame3(uint8_t **buf, int width, int height, userbuffer &output)
 {
     return mD->encode3(buf, width, height, output);
+}
+
+bool v4l2Encoder::getInputBuffers3(uint8_t **data, int *lines, uint32_t width, uint32_t height)
+{
+    return mD->getInputBuffers3(data, lines, width, height);
+}
+
+bool v4l2Encoder::putInputBuffers3()
+{
+    return mD->putInputBuffers3();
+}
+
+bool v4l2Encoder::getEncodedData(userbuffer &output)
+{
+    return mD->getEncodedData(output);
 }
