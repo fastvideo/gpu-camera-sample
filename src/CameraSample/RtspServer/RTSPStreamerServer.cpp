@@ -666,7 +666,7 @@ bool RTSPStreamerServer::addInternalFrame(uchar *rgbPtr)
 
             if(mNv12Encode != nullptr && mPixFmt == AV_PIX_FMT_NV12){
                 frm->format = AV_PIX_FMT_NV12;
-                mNv12Encode(mEncoderBuffer.data(), rgbPtr, mWidth, mHeight);
+                mNv12Encode(mEncoderBuffer.data(), 8);
 //                drawTimeToImageGray(mEncoderBuffer.data(), mWidth, mHeight, dt);
             }else{
                 RGB2Yuv420p(mEncoderBuffer.data(), rgbPtr, mWidth, mHeight);

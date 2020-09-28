@@ -1757,9 +1757,9 @@ fastStatus_t CUDAProcessorBase::exportP010Data(void *dstPtr)
     fastDeviceSurfaceBufferInfo_t bufferInfo;
     fastGetDeviceSurfaceBufferInfo(outLutBuffer, &bufferInfo);
 
-    unsigned width = bufferInfo.width, height = bufferInfo.height;
+    fastChannelDescription_t* d = static_cast<fastChannelDescription_t*>(dstPtr);
 
-    ret = fastSDIExportToHostCopy(hSdiExportToHost10bit, dstPtr, &width, &height);
+    ret = fastSDIExportToHostCopy3(hSdiExportToHost10bit, &d[0], &d[1], &d[2]);
 
     if(ret != FAST_OK){
         return TransformFailed("fastExportToHostCopy P010 failed", ret, profileTimer);

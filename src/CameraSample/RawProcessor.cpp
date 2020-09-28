@@ -350,7 +350,7 @@ void RawProcessor::startWriting()
     else if(mCodec == CUDAProcessorOptions::vcH264 || mCodec == CUDAProcessorOptions::vcHEVC){
         AVFileWriter *writer = new AVFileWriter();
 
-        auto funEncodeNv12 = [this](unsigned char* yuv, unsigned char*, int , int ){
+        auto funEncodeNv12 = [this](unsigned char* yuv, int ){
             //int channels = dynamic_cast<CUDAProcessorGray*>(mProcessorPtr.data()) == nullptr? 3 : 1;
 
             mProcessorPtr->exportNV12DataDevice(yuv);
@@ -358,10 +358,13 @@ void RawProcessor::startWriting()
         writer->setEncodeNv12Fun(funEncodeNv12);
 
 #ifdef __ARM_ARCH
-        auto funEncodeYuv = [this](unsigned char* yuv, unsigned char*, int , int ){
+        auto funEncodeYuv = [this](unsigned char* yuv, int bitdepth){
             //int channels = dynamic_cast<CUDAProcessorGray*>(mProcessorPtr.data()) == nullptr? 3 : 1;
 
-            mProcessorPtr->exportYuv8Data(yuv);
+            if(bitdepth == 8)
+                mProcessorPtr->exportYuv8Data(yuv);
+            else
+                mProcessorPtr->exportP010Data(yuv);
         };
         writer->setEncodeYUV420Fun(funEncodeYuv);
 #else
@@ -621,7 +624,7 @@ void RawProcessor::setRtspServer(const QString &url)
     mRtspServer->setUseCustomEncodeJpeg(true);
     mRtspServer->setEncodeFun(funEncode);
 
-    auto funEncodeNv12 = [this](unsigned char* yuv, unsigned char*, int , int ){
+    auto funEncodeNv12 = [this](unsigned char* yuv, int ){
         mProcessorPtr->exportNV12Data(yuv);
     };
     mRtspServer->setEncodeNv12Fun(funEncodeNv12);

@@ -460,7 +460,7 @@ bool AVFileWriter::addInternalFrame(uchar *rgbPtr)
                     fs[2].height = mHeight/2;
                     fs[2].width = mWidth;
 
-                     mYUV420Encode((unsigned char*)&fs, nullptr, mWidth, mHeight);
+                     mYUV420Encode((unsigned char*)&fs, 8);
 
                      mV4L2Encoder->putInputBuffers3();
                 }
@@ -488,7 +488,7 @@ bool AVFileWriter::addInternalFrame(uchar *rgbPtr)
                     fs[2].height = mHeight;
                     fs[2].width = mWidth;
 
-                    mNv12Encode((unsigned char*)&fs, nullptr, mWidth, mHeight);
+                    mNv12Encode((unsigned char*)&fs, 8);
                 }
                 else if(mYUV420Encode != nullptr && mCodecId == AV_CODEC_ID_HEVC){
                     fastChannelDescription_t fs[3];
@@ -507,7 +507,7 @@ bool AVFileWriter::addInternalFrame(uchar *rgbPtr)
                     fs[2].height = mHeight/2;
                     fs[2].width = mWidth;
 
-                    mYUV420Encode((unsigned char*)&fs, nullptr, mWidth, mHeight);
+                    mYUV420Encode((unsigned char*)&fs, 10);
                 }
             }
 //            if(rgbPtr != nullptr)

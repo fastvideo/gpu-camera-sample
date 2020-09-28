@@ -56,9 +56,7 @@ struct Buffer{
 typedef std::function<void(int, unsigned char* data, int width, int height, int channels, Buffer& output)> TEncodeRgb;
 
 typedef std::function<void(/* out */unsigned char *yuv,
-                           /* int */unsigned char *rgb,
-                           int width,
-                           int height)> TEncodeFun;
+                           int bitdepth)> TEncodeFun;
 
 namespace rtp_packet_add_header
 {
