@@ -371,7 +371,8 @@ void VDecoder::analyzeFrame(AVFrame *frame, PImage &image)
 
         if(frame->format == AV_PIX_FMT_YUV420P ||
                 frame->format == AV_PIX_FMT_YUVJ420P ||
-                frame->format == AV_PIX_FMT_NV12){
+                frame->format == AV_PIX_FMT_NV12 ||
+                frame->format == AV_PIX_FMT_P010){
 
             getImage(frame, image);
         }
@@ -389,6 +390,8 @@ void VDecoder::getImage(AVFrame *frame, PImage &obj)
         obj.reset(new Image);
     if(frame->format == AV_PIX_FMT_NV12){
         obj->setNV12(frame->data, frame->linesize, frame->width, frame->height);
+    }else if(frame->format == AV_PIX_FMT_P010){
+        obj->setP010(frame->data, frame->linesize, frame->width, frame->height);
     }else{
         obj->setYUV(frame->data, frame->linesize, frame->width, frame->height);
     }

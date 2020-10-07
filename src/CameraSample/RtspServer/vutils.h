@@ -31,10 +31,28 @@
 
 #include "common_utils.h"
 
+extern "C"{
+#include <libavformat/avformat.h>
+#include <libavutil/hwcontext.h>
+#include <libavutil/hwcontext_cuda.h>
+};
+
+
 void encodeJpeg(int idthread, unsigned char* data, int width, int height, int channels, Buffer& output);
 
 void copyPartImage(unsigned char *input, size_t xoff, size_t yoff, size_t sizeEl, size_t linesize,
 				   size_t hpart, size_t linesizepart, unsigned char *output);
 
+/**
+ * @brief set_hwframe_ctx
+ * create cuda context for ffmpeg
+ * @param ctx
+ * @param hw_device_ctx
+ * @param width
+ * @param height
+ * @param pixfmt
+ * @return
+ */
+int set_hwframe_ctx(AVCodecContext *ctx, AVBufferRef *hw_device_ctx, int width, int height, AVPixelFormat pixfmt);
 
 #endif // VUTILS_H

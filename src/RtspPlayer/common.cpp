@@ -11,7 +11,9 @@ Image::Image(int w, int h, Image::TYPE tp){
 		setYUV(w, h);
 	else if(tp == NV12)
 		setNV12(w, h);
-	else if(tp == RGB)
+    else if(tp == P010)
+        setP010(w, h);
+    else if(tp == RGB)
 		setRGB(w, h);
 	else if(tp == GRAY)
 		setGray(w, h);
@@ -34,7 +36,8 @@ Image::~Image(){
 	releaseCudaRgbBuffer();
 }
 
-void Image::setYUV(uint8_t *data[], int linesize[], int w, int h){
+void Image::setYUV(uint8_t *data[], int linesize[], int w, int h)
+{
 	type = YUV;
 	width = w;
 	height = h;
@@ -68,12 +71,13 @@ void Image::setYUV(uint8_t *data[], int linesize[], int w, int h){
 //	std::copy(data[2], data[2] + size2, yuv.data() + size1 + size2);
 }
 
-void Image::setNV12(uint8_t *data[], int linesize[], int w, int h){
+void Image::setNV12(uint8_t *data[], int linesize[], int w, int h)
+{
 	type = NV12;
 	width = w;
 	height = h;
     size_t size1 = static_cast<size_t>(w * h);
-    size_t size2 = static_cast<size_t>(w/2 * h/2);
+    size_t size2 = static_cast<size_t>(w * h/2);
 	//size_t size3 = static_cast<size_t>(linesize[1]/2 * h/2);
 	yuv.resize(size1 + size2 * 2);
 
@@ -94,6 +98,34 @@ void Image::setNV12(uint8_t *data[], int linesize[], int w, int h){
 
     //std::copy(data[0], data[0] + size1, yuv.data());
     //std::copy(data[1], data[1] + size2 * 2, yuv.data() + size1);
+}
+
+void Image::setP010(uint8_t *data[], int linesize[], int w, int h)
+{
+    type = P010;
+    width = w;
+    height = h;
+    size_t size1 = static_cast<size_t>(w * h * 2);
+    size_t size2 = static_cast<size_t>(w * h/2 * 2);
+    //size_t size3 = static_cast<size_t>(linesize[1]/2 * h/2);
+    yuv.resize(size1 + size2 * 2);
+
+    int l1 = linesize[0];
+    int l2 = linesize[1];
+
+    int bpl = w * 2;
+
+    for(int i = 0; i < h; ++i){
+        uchar *dY = data[0] + i * l1;
+        uchar *dOY = yuv.data() + i * bpl;
+        std::copy(dY, dY + bpl, dOY);
+    }
+    uchar *offUV = yuv.data() + size1;
+    for(int i = 0; i < h/2; ++i){
+        uchar *dUV = data[1] + i * l2;
+        uchar *dOUV = offUV + i * bpl;
+        std::copy(dUV, dUV + bpl, dOUV);
+    }
 }
 
 bool Image::setCudaRgb(int w, int h){
@@ -139,7 +171,15 @@ void Image::setNV12(int w, int h){
     type = NV12;
 	width = w;
 	height = h;
-	yuv.resize(w * h + w/2 * h/2 * 2);
+    yuv.resize(w * h + w/2 * h/2 * 2);
+}
+
+void Image::setP010(int w, int h)
+{
+    type = P010;
+    width = w;
+    height = h;
+    yuv.resize(w * h * 2 + w/2 * h/2 * 2 * 2);
 }
 
 void Image::setRGB(int w, int h){

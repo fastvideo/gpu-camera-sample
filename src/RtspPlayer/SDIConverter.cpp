@@ -1,5 +1,7 @@
 #include "SDIConverter.h"
 
+#include <cuda_runtime.h>
+
 SDIConverter::SDIConverter()
 {
 	fastStatus_t ret;
@@ -54,7 +56,8 @@ unsigned GetPitchFromSurface(fastSurfaceFormat_t fmt, int width)
 
 bool SDIConverter::initSdiConvert(PImage image)
 {
-	if(m_hImport && m_hExport && image->width == m_prevWidth && image->height == m_prevHeight){
+    if(m_hImport && m_hExport && image->width == m_prevWidth && image->height == m_prevHeight
+            && image->type == m_prevType){
 		return true;
 	}
 
@@ -71,7 +74,9 @@ bool SDIConverter::initSdiConvert(PImage image)
 		SDIFormat = FAST_SDI_NV12_BT601;
 	}else if(image->type == Image::NV12){
 		SDIFormat = FAST_SDI_NV12_BT601;
-	}
+    }else {
+        SDIFormat = FAST_SDI_P010_BT709;
+    }
 
 	res = (fastSDIImportFromHostCreate(
 		&m_hImport,
@@ -84,6 +89,25 @@ bool SDIConverter::initSdiConvert(PImage image)
 		&srcBuffer
 	));
 
+    if(res != FAST_OK){
+        return false;
+    }
+
+    if(image->type == Image::P010){
+        fastBitDepthConverter_t bitDepthParam;
+        bitDepthParam.isOverrideSourceBitsPerChannel = false;
+        bitDepthParam.targetBitsPerChannel = 8;
+
+        res = fastSurfaceConverterCreate(&mSurfaceConverter, FAST_BIT_DEPTH, &bitDepthParam,
+                                         width, height, srcBuffer, &dstBuffer);
+
+        if(res != FAST_OK){
+            return false;
+        }
+    }else{
+        dstBuffer = srcBuffer;
+    }
+
 	surfaceFmt = FAST_RGB8;
 
 	res = (fastExportToDeviceCreate(
@@ -91,8 +115,12 @@ bool SDIConverter::initSdiConvert(PImage image)
 
 		&surfaceFmt,
 
-		srcBuffer
+        dstBuffer
 	));
+
+    if(res != FAST_OK){
+        return false;
+    }
 
 	unsigned requestedMemSpace = 0;
 	unsigned tmp = 0;
@@ -102,6 +130,11 @@ bool SDIConverter::initSdiConvert(PImage image)
 		res = (fastSDIImportFromHostGetAllocatedGpuMemorySize(m_hImport, &tmp));
 		requestedMemSpace += tmp;
 	}
+
+    if(mSurfaceConverter != nullptr){
+        res = fastSurfaceConverterGetAllocatedGpuMemorySize(mSurfaceConverter, &tmp);
+        requestedMemSpace += tmp;
+    }
 
 	if( m_hExport != nullptr )
 	{
@@ -118,6 +151,10 @@ void SDIConverter::releaseSdiConvert()
 		fastSDIImportFromHostDestroy(m_hImport);
 		m_hImport = nullptr;
 	}
+    if(mSurfaceConverter){
+        fastSurfaceConverterDestroy(mSurfaceConverter);
+        mSurfaceConverter = nullptr;
+    }
 	if(m_hExport){
 		fastExportToDeviceDestroy(m_hExport);
 		m_hExport = nullptr;
@@ -131,7 +168,7 @@ bool SDIConverter::sdiConvert(PImage image, void *cudaRgb)
 
 	fastStatus_t res;
 
-	if(image->type == Image::NV12){
+    if(image->type == Image::NV12 || image->type == Image::P010){
 		res = (fastSDIImportFromHostCopy(
 			m_hImport,
 
@@ -152,12 +189,25 @@ bool SDIConverter::sdiConvert(PImage image, void *cudaRgb)
 		));
 	}
 
-	if(res != FAST_OK){
-		qDebug("Error fastSDIImportFromHostCopy %d", res);
-		return false;
-	}
+    if(res != FAST_OK){
+        qDebug("Error fastSDIImportFromHostCopy %d", res);
+        return false;
+    }
 
-	bool convertToBGR = false;
+    if(image->type == Image::P010){
+        fastBitDepthConverter_t bitDepthParam;
+        bitDepthParam.isOverrideSourceBitsPerChannel = false;
+        bitDepthParam.targetBitsPerChannel = 8;
+
+        res = fastSurfaceConverterTransform(mSurfaceConverter, &bitDepthParam, width, height);
+
+        if(res != FAST_OK){
+            qDebug("Error fastSurfaceConverterTransform %d", res);
+            return false;
+        }
+    }
+
+    bool convertToBGR = false;
 
 	fastExportParameters_t exportParameters;
     exportParameters.convert = convertToBGR ? FAST_CONVERT_BGR : FAST_CONVERT_NONE;
@@ -170,6 +220,11 @@ bool SDIConverter::sdiConvert(PImage image, void *cudaRgb)
 
 		&exportParameters
 	));
+
+    char mem[4096];
+    cudaError_t err = cudaMemcpy(mem, cudaRgb, sizeof(mem), cudaMemcpyDeviceToHost);
+
+    Q_UNUSED(err)
 
 	if(res != FAST_OK){
 		qDebug("Error fastExportToDeviceCopy %d", res);

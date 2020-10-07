@@ -368,7 +368,7 @@ void RawProcessor::startWriting()
         };
         writer->setEncodeYUV420Fun(funEncodeYuv);
 #else
-        auto funEncodeP010 = [this](unsigned char* yuv, unsigned char*, int , int ){
+        auto funEncodeP010 = [this](unsigned char* yuv, int){
             //int channels = dynamic_cast<CUDAProcessorGray*>(mProcessorPtr.data()) == nullptr? 3 : 1;
 
             mProcessorPtr->exportP010DataDevice(yuv);
@@ -625,9 +625,28 @@ void RawProcessor::setRtspServer(const QString &url)
     mRtspServer->setEncodeFun(funEncode);
 
     auto funEncodeNv12 = [this](unsigned char* yuv, int ){
-        mProcessorPtr->exportNV12Data(yuv);
+        mProcessorPtr->exportNV12DataDevice(yuv);
     };
     mRtspServer->setEncodeNv12Fun(funEncodeNv12);
+
+#ifdef __ARM_ARCH
+        auto funEncodeYuv = [this](unsigned char* yuv, int bitdepth){
+            //int channels = dynamic_cast<CUDAProcessorGray*>(mProcessorPtr.data()) == nullptr? 3 : 1;
+
+            if(bitdepth == 8)
+                mProcessorPtr->exportYuv8Data(yuv);
+            else
+                mProcessorPtr->exportP010Data(yuv);
+        };
+        mRtspServer->setEncodeYUV420Fun(funEncodeYuv);
+#else
+        auto funEncodeP010 = [this](unsigned char* yuv, int){
+            //int channels = dynamic_cast<CUDAProcessorGray*>(mProcessorPtr.data()) == nullptr? 3 : 1;
+
+            mProcessorPtr->exportP010DataDevice(yuv);
+        };
+        mRtspServer->setEncodeYUV420Fun(funEncodeP010);
+#endif
 
     mRtspServer->startServer();
 }

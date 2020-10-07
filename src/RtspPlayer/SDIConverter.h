@@ -26,6 +26,7 @@ private:
 	fastDeviceSurfaceBufferHandle_t srcBuffer = nullptr;
 	fastDeviceSurfaceBufferHandle_t dstBuffer = nullptr;
 	fastExportToDeviceHandle_t m_hExport = nullptr;
+    fastSurfaceConverterHandle_t mSurfaceConverter = nullptr;
 	fastSurfaceFormat_t surfaceFmt;
 
 	bool initSdiConvert(PImage image);

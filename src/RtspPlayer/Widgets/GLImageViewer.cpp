@@ -613,7 +613,7 @@ void GLRenderer::loadImageInternal(PImage image)
 
 	void *img = m_cudaRgb;
 
-	if(image->type == Image::YUV || image->type == Image::NV12){
+    if(image->type == Image::YUV || image->type == Image::NV12 || image->type == Image::P010){
 		if(!m_sdiConverter.convertToRgb(image, m_cudaRgb)){
 			return;
 		}

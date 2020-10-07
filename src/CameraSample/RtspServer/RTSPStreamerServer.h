@@ -91,6 +91,11 @@ public:
      */
     void setEncodeNv12Fun(TEncodeFun fun);
     /**
+     * @brief setEncodeP010Fun
+     * @param fun
+     */
+    void setEncodeYUV420Fun(TEncodeFun fun);
+    /**
      * @brief setMultithreading
      * set use multithreading
      * @param val
@@ -121,14 +126,6 @@ public:
 
 	/**
 	 * @brief addRGBFrame
-	 * the function to split rgb frame to tiles
-	 * @param rgbPtr
-	 * @param linesize - size of one line in bytes
-	 * @return
-	 */
-	bool addBigFrame (unsigned char* rgbPtr, size_t linesize);
-	/**
-	 * @brief addRGBFrame
 	 * default function to add rgb frame
 	 * @param rgbPtr
 	 * @return
@@ -157,6 +154,7 @@ private:
     EncoderType mEncoderType = etNVENC;
     TEncodeRgb  mJpegEncode;
     TEncodeFun mNv12Encode;
+    TEncodeFun mYUV420Encode;
     bool        mMultithreading = true;
     bool        mUseCustomEncodeJpeg = true;
     bool        mUseCustomEncodeH264 = false;
@@ -203,7 +201,7 @@ private:
 
     AVCodecContext* mCtx = nullptr;
     AVCodec*        mCodec = nullptr;
-
+    AVBufferRef*    mHwDeviceCtx = NULL;
 
     QVector<unsigned char> mEncoderBuffer;
     std::list<TcpClient*>  mClients;

@@ -41,6 +41,13 @@
 #include <QImage>
 #include <QDateTime>
 
+extern "C"{
+#include <libavutil/hwcontext.h>
+#include <libavutil/hwcontext_cuda.h>
+};
+
+#include <fastvideo_sdk.h>
+
 RTSPStreamerServer::RTSPStreamerServer(int width, int height,
                                        int channels,
                                        const QString &url,
@@ -55,6 +62,8 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
     , mBitrate(bitrate)
     , mUrl(url)
 {
+    int ret = 0;
+
 	avcodec_register_all();
 	av_register_all();
     avformat_network_init();
@@ -70,9 +79,11 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
         mV4L2Encoder->setInsertSpsPpsAtIdrEnabled(true);
         mV4L2Encoder->setInsertVuiEnabled(true);
         mV4L2Encoder->setIFrameInterval(1);
+        mPixFmt = AV_PIX_FMT_YUV420P;
 //        mCodec = avcodec_find_encoder_by_name("h264_v4l2m2m");
 #else
         mCodec = avcodec_find_encoder_by_name("h264_nvenc");
+        mPixFmt = AV_PIX_FMT_NV12;
 #endif
         if(!mCodec)
         {
@@ -94,9 +105,11 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
         mV4L2Encoder->setInsertSpsPpsAtIdrEnabled(true);
         mV4L2Encoder->setInsertVuiEnabled(true);
         mV4L2Encoder->setIFrameInterval(1);
+        mPixFmt = AV_PIX_FMT_YUV420P;
 //        mCodec = avcodec_find_encoder_by_name("h264_v4l2m2m");
 #else
         mCodec = avcodec_find_encoder_by_name("hevc_nvenc");
+        mPixFmt = AV_PIX_FMT_P010;
 #endif
         if(!mCodec)
         {
@@ -107,11 +120,10 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
                 if(!mCodec){
                     mIsError = true;
                     mErrStr = "Codec not found";
-                return;
+                    return;
                 }
             }
         }
-        //mPixFmt = AV_PIX_FMT_NV12;
 
     }else
     if(mEncoderType == etJPEG)
@@ -133,30 +145,29 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
 
     mCtx->bit_rate = mBitrate;
 
-    if(mEncoderType == etJPEG)
-    {
-        if(mWidth > MAX_WIDTH_RTP_JPEG || mHeight > MAX_HEIGHT_RTP_JPEG)
-        {
-            mCtx->width = MAX_WIDTH_JPEG;
-            mCtx->height = MAX_HEIGHT_JPEG;
-        }
-        else
-        {
-            mCtx->width = mWidth;
-            mCtx->height = mHeight;
-        }
-    }
-    else
     {
         mCtx->width = mWidth;
         mCtx->height = mHeight;
-	}
+    }
 
 	//frames per second
-    mCtx->time_base = {1, 60};         // for test. maybe do not affect
-    mCtx->framerate = {60, 1};         // for test. maybe do not affect
+    mCtx->time_base = {1, mFps};         // for test. maybe do not affect
+    mCtx->framerate = {mFps, 1};         // for test. maybe do not affect
 	mCtx->gop_size = 0;
     mCtx->pix_fmt = mPixFmt;
+#ifdef __ARM_ARCH
+    mCtx->pix_fmt = mPixFmt;
+#else
+    mCtx->pix_fmt = AV_PIX_FMT_CUDA;
+
+    ret = av_hwdevice_ctx_create(&mHwDeviceCtx, AV_HWDEVICE_TYPE_CUDA, nullptr, nullptr, 0);
+
+    ret = set_hwframe_ctx(mCtx, mHwDeviceCtx, mWidth, mHeight, mPixFmt);
+
+    if(ret < 0){
+        return;
+    }
+#endif
 
     if(mEncoderType == etNVENC || mEncoderType == etNVENC_HEVC)
     {
@@ -184,7 +195,7 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
         av_dict_set(&dict, "rc", "cbr_ld_hq", 0);
 	}
 
-    int ret = avcodec_open2(mCtx, mCodec, &dict);
+    ret = avcodec_open2(mCtx, mCodec, &dict);
 	if(ret < 0)
 	{
 		char buf[100];
@@ -224,6 +235,10 @@ RTSPStreamerServer::~RTSPStreamerServer()
             avcodec_close(mCtx);
             avcodec_free_context(&mCtx);
         }
+        if(mHwDeviceCtx){
+            av_buffer_unref(&mHwDeviceCtx);
+            mHwDeviceCtx = nullptr;
+        }
     }catch(...){
         qDebug("unknown error when close codec and context");
     }
@@ -242,6 +257,11 @@ void RTSPStreamerServer::setEncodeFun(TEncodeRgb fun)
 void RTSPStreamerServer::setEncodeNv12Fun(TEncodeFun fun)
 {
     mNv12Encode = fun;
+}
+
+void RTSPStreamerServer::setEncodeYUV420Fun(TEncodeFun fun)
+{
+    mYUV420Encode = fun;
 }
 
 void RTSPStreamerServer::setMultithreading(bool val)
@@ -463,113 +483,6 @@ void RTSPStreamerServer::Gray2Yuv420p(unsigned char *yuv, unsigned char *gray, i
 	  }
 }
 
-bool RTSPStreamerServer::addBigFrame(unsigned char* rgbPtr, size_t linesize)
-{
-    if(!mIsInitialized || mClients.empty())
-		return false;
-
-    if(mEncoderType != etJPEG || (mWidth <= MAX_WIDTH_RTP_JPEG && mHeight <= MAX_HEIGHT_RTP_JPEG))
-		return addFrame(rgbPtr);
-
-    size_t cntW = std::round(1. * mWidth/MAX_WIDTH_JPEG), cntH = std::round(mHeight/MAX_HEIGHT_JPEG);
-    while(cntW * MAX_WIDTH_JPEG < mWidth)cntW++;
-    while(cntH * MAX_HEIGHT_JPEG < mHeight)cntH++;
-	const size_t cntAll = cntW * cntH;
-
-	if(!linesize)
-        linesize = mWidth * mChannels;
-
-    mData.resize(cntAll);
-
-    size_t xOff = 0, yOff = 0, w = std::min((size_t)mWidth, MAX_WIDTH_JPEG), h = std::min((size_t)mHeight, MAX_HEIGHT_JPEG);
-	std::vector< QRect > sizes;
-	sizes.resize(cntAll);
-    for(size_t y = 0; y < cntH; ++y)
-    {
-        h = std::min((size_t)mHeight - yOff, MAX_HEIGHT_JPEG);
-		xOff = 0;
-        for(size_t x = 0; x < cntW; ++x)
-        {
-            w = std::min((size_t)mWidth - xOff, MAX_WIDTH_JPEG);
-			size_t k = y * cntW + x;
-            sizes[k] = QRect(static_cast<int>(xOff), static_cast<int>(yOff),
-                             static_cast<int>(w), static_cast<int>(h));
-			xOff += w;
-		}
-		yOff += h;
-	}
-
-//#pragma omp parallel for num_threads(8)
-    for(size_t k = 0; k < cntAll; ++k)
-    {
-        //size_t w = static_cast<size_t>(sizes[k].width());
-        size_t h = static_cast<size_t>(sizes[k].height());
-
-        mData[k].resize(MAX_WIDTH_JPEG * MAX_HEIGHT_JPEG * mChannels);
-//        m_yuv[k].resize(w * h + w/2 * h/2 * 2);
-
-        copyPartImage(rgbPtr, sizes[k].x(), sizes[k].y(), mChannels, linesize, h, MAX_WIDTH_JPEG * mChannels, mData[k].data());
-//        RGB2Yuv420p(m_yuv[k].data(), m_data[k].data(), w, h);
-	}
-
-    std::vector<AVPacket> pkts;
-	pkts.resize(cntAll);
-    mJpegData.resize(cntAll);
-
-    auto fun = [&](size_t t)
-    {
-        av_init_packet(&pkts[t]);
-        pkts[t].pts = mFramesProcessed + t;
-
-        mJpegEncode(static_cast<int>(t), mData[t].data(), MAX_WIDTH_JPEG, MAX_HEIGHT_JPEG, mChannels, mJpegData[t]);
-
-		av_new_packet(&pkts[t], static_cast<int>(mJpegData[t].size + rtp_packet_add_header::sizeof_header));
-        pkts[t].pts = mFramesProcessed + t;
-
-        uchar x = static_cast<uchar>(t % cntW);
-        uchar y = static_cast<uchar>(t / cntW);
-
-		std::copy(mJpegData[t].buffer.data(), mJpegData[t].buffer.data() + mJpegData[t].size, pkts[t].data);
-        rtp_packet_add_header::setHeader(pkts[t].data + pkts[t].size - rtp_packet_add_header::sizeof_header - 2,
-                                         x, y, cntW, cntH, mWidth, mHeight);
-    };
-
-    if(mMultithreading)
-    {
-        std::vector<pthread> threads;
-        threads.resize(mJpegData.size());
-
-    //#pragma omp parallel for num_threads(4)
-        for(size_t k = 0; k < cntAll; ++k)
-        {
-            threads[k].reset(new std::thread(fun, k));
-        }
-
-        for(int y = 0; y < cntAll; ++y)
-        {
-            threads[y]->join();
-            threads[y].reset();
-        }
-    }
-    else
-    {
-        for(size_t k = 0; k < cntAll; ++k)
-        {
-            fun(k);
-        }
-    }
-
-    for(int k = 0; k < cntAll; ++k)
-    {
-        sendPkt(&pkts[k]);
-		av_packet_unref(&pkts[k]);
-	}
-
-	mFramesProcessed += cntAll + 1;
-
-	return true;
-}
-
 bool RTSPStreamerServer::addFrame(unsigned char *rgbPtr)
 {
 //	if(mTimerCtrlFps.elapsed() - mDelayFps < mCurrentTimeElapsed){
@@ -661,27 +574,95 @@ bool RTSPStreamerServer::addInternalFrame(uchar *rgbPtr)
 		}
 		else
 		{
-//            QDateTime dt = QDateTime::currentDateTime();
-//            drawTimeToImage(rgbPtr, mWidth, mHeight, dt);
+#ifdef __ARM_ARCH
+             {
+                uint8_t *data[3] = {nullptr, nullptr, nullptr};
+                int lines[3] = {0, 0, 0};
+                if(mV4L2Encoder->getInputBuffers3(data, lines, mWidth, mHeight)){
+                    fastChannelDescription_t fs[3];
+                    fs[0].data = (unsigned char*)data[0];
+                    fs[0].pitch = lines[0];
+                    fs[0].height = mHeight;
+                    fs[0].width = mWidth;
 
-            if(mNv12Encode != nullptr && mPixFmt == AV_PIX_FMT_NV12){
-                frm->format = AV_PIX_FMT_NV12;
-                mNv12Encode(mEncoderBuffer.data(), 8);
-//                drawTimeToImageGray(mEncoderBuffer.data(), mWidth, mHeight, dt);
-            }else{
-                RGB2Yuv420p(mEncoderBuffer.data(), rgbPtr, mWidth, mHeight);
+                    fs[1].data = (unsigned char*)data[1];
+                    fs[1].pitch = lines[1];
+                    fs[1].height = mHeight/2;
+                    fs[1].width = mWidth;
+
+                    fs[2].data = (unsigned char*)data[2];
+                    fs[2].pitch = lines[2];
+                    fs[2].height = mHeight/2;
+                    fs[2].width = mWidth;
+
+                     mYUV420Encode((unsigned char*)&fs, 8);
+
+                     mV4L2Encoder->putInputBuffers3();
+                }
             }
+#else
+             ret = av_hwframe_get_buffer(mCtx->hw_frames_ctx, frm, 0);
+
+             {
+                if(mNv12Encode != nullptr && mCodecId == AV_CODEC_ID_H264){
+                    frm->format = AV_PIX_FMT_NV12;
+
+                    fastChannelDescription_t fs[3];
+                    fs[0].data = frm->data[0];
+                    fs[0].pitch = frm->linesize[0];
+                    fs[0].height = mHeight;
+                    fs[0].width = mWidth;
+
+                    fs[1].data = frm->data[1];
+                    fs[1].pitch = frm->linesize[1];
+                    fs[1].height = mHeight/2;
+                    fs[1].width = mWidth;
+
+                    fs[2].data = frm->data[2];
+                    fs[2].pitch = frm->linesize[2];
+                    fs[2].height = mHeight;
+                    fs[2].width = mWidth;
+
+                    mNv12Encode((unsigned char*)&fs, 8);
+                }
+                else if(mYUV420Encode != nullptr && mCodecId == AV_CODEC_ID_HEVC){
+                    fastChannelDescription_t fs[3];
+                    fs[0].data = frm->data[0];
+                    fs[0].pitch = frm->linesize[0];
+                    fs[0].height = mHeight;
+                    fs[0].width = mWidth;
+
+                    fs[1].data = frm->data[1];
+                    fs[1].pitch = frm->linesize[1];
+                    fs[1].height = mHeight/2;
+                    fs[1].width = mWidth;
+
+                    fs[2].data = frm->data[2];
+                    fs[2].pitch = frm->linesize[2];
+                    fs[2].height = mHeight/2;
+                    fs[2].width = mWidth;
+
+                    mYUV420Encode((unsigned char*)&fs, 10);
+                }
+            }
+//            if(rgbPtr != nullptr)
+//            {
+//                RGB2Yuv420p((unsigned char*)mEncoderBuffer.data(), rgbPtr, mWidth, mHeight);
+//            }else{
+//                return false;
+//            }
+#endif
         }
 #ifdef __ARM_ARCH
         if(mEncoderType == etNVENC || mEncoderType == etNVENC_HEVC){
-            encodeWriteFrame(mEncoderBuffer.data(), mWidth, mHeight);
-        }else
-#endif
+            char *data[3] = {mEncoderBufferYuv[0].data(), mEncoderBufferYuv[1].data(), mEncoderBufferYuv[2].data()};
+            encodeWriteFrame((unsigned char*)data, mWidth, mHeight);
+        }
+#else
         {
-            ret = av_image_fill_arrays(frm->data, frm->linesize, mEncoderBuffer.data(), (AVPixelFormat)frm->format, frm->width, frm->height, 1);
-//      	ret = encode_write_frame(frm, 0, &got_frame);
             encodeWriteFrame(frm);
         }
+#endif
 
 		av_frame_free(&frm);
 	}
@@ -729,7 +710,7 @@ bool RTSPStreamerServer::addInternalFrame(uchar *rgbPtr)
 void RTSPStreamerServer::encodeWriteFrame(uint8_t *buf, int width, int height)
 {
     if(mV4L2Encoder.data()){
-        if(mV4L2Encoder->encodeFrame(buf, width, height, mUserBuffer, mEncoderType == etNVENC_HEVC)){
+        if(mV4L2Encoder->getEncodedData(mUserBuffer)){
             if(!mUserBuffer.empty()){
                 AVPacket enc_pkt;
                 enc_pkt.data = nullptr;

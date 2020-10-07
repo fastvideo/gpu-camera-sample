@@ -13,7 +13,7 @@ typedef std::vector< unsigned char > bytearray;
 
 class Image: public std::enable_shared_from_this<Image>{
 public:
-	enum TYPE{YUV, NV12, RGB, GRAY, CUDA_RGB, CUDA_GRAY};
+    enum TYPE{YUV, NV12, P010, RGB, GRAY, CUDA_RGB, CUDA_GRAY};
 
 	Image();
 	Image(int w, int h, TYPE tp);
@@ -22,11 +22,13 @@ public:
 
 	void setYUV(uint8_t *data[], int linesize[], int w, int h);
 	void setNV12(uint8_t *data[], int linesize[], int w, int h);
-	bool setCudaRgb(int w, int h);
+    void setP010(uint8_t *data[], int linesize[], int w, int h);
+    bool setCudaRgb(int w, int h);
 	bool setCudaGray(int w, int h);
 	void setYUV(int w, int h);
 	void setNV12(int w, int h);
-	void setRGB(int w, int h);
+    void setP010(int w, int h);
+    void setRGB(int w, int h);
 	void setGray(int w, int h);
 
 	void releaseCudaRgbBuffer();
