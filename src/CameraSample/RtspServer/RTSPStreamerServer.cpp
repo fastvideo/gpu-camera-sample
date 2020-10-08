@@ -655,8 +655,7 @@ bool RTSPStreamerServer::addInternalFrame(uchar *rgbPtr)
         }
 #ifdef __ARM_ARCH
         if(mEncoderType == etNVENC || mEncoderType == etNVENC_HEVC){
-            char *data[3] = {mEncoderBufferYuv[0].data(), mEncoderBufferYuv[1].data(), mEncoderBufferYuv[2].data()};
-            encodeWriteFrame((unsigned char*)data, mWidth, mHeight);
+            encodeWriteFrame(nullptr, mWidth, mHeight);
         }
 #else
         {

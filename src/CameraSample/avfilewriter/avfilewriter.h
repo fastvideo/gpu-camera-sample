@@ -76,7 +76,6 @@ private:
     float mDelayFps = 0;
     EncoderType mEncoderType = etNVENC;
     QByteArray mEncoderBuffer;
-    QByteArray mEncoderBufferYuv[3];
     QElapsedTimer mTimerCtrlFps;
     int64_t mFramesProcessed = 0;
     int mChannels = 3;

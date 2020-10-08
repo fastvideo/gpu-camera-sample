@@ -310,11 +310,6 @@ bool AVFileWriter::open(int w, int h, int bitrate, int fps, bool isHEVC)
 
     mEncoderBuffer.resize(mWidth * mHeight * 4);
 
-    for(int i = 0; i < 3; i++)
-    {
-        mEncoderBufferYuv[i].resize(mWidth * mHeight);
-    }
-
     mIsInitialized = true;
 
     return true;
@@ -490,13 +485,10 @@ bool AVFileWriter::addInternalFrame(uchar *rgbPtr)
         }
 #ifdef __ARM_ARCH
         if(mEncoderType == etNVENC || mEncoderType == etNVENC_HEVC){
-            char *data[3] = {mEncoderBufferYuv[0].data(), mEncoderBufferYuv[1].data(), mEncoderBufferYuv[2].data()};
-            encodeWriteFrame((unsigned char*)data, mWidth, mHeight);
+            encodeWriteFrame(nullptr, mWidth, mHeight);
         }
 #else
         {
-            //ret = av_image_fill_arrays(frm->data, frm->linesize, (unsigned char*)mEncoderBuffer.data(), (AVPixelFormat)frm->format, frm->width, frm->height, 1);
-//      	ret = encode_write_frame(frm, 0, &got_frame);
             encodeWriteFrame(frm);
         }
 #endif
