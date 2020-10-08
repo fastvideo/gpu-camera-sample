@@ -136,6 +136,8 @@ private slots:
 
 	void on_cboFormatEnc_currentIndexChanged(int index);
 
+    void on_actionShowImage_triggered(bool checked);
+
 private:
     Ui::MainWindow *ui;
 

@@ -1097,6 +1097,10 @@ fastStatus_t CUDAProcessorGray::Transform(ImageT *image, CUDAProcessorOptions &o
         profileTimer = nullptr;
     }
 
+    mut2.lock();
+    stats2 = stats;
+    mut2.unlock();
+
     emit finished();
 
     return FAST_OK;

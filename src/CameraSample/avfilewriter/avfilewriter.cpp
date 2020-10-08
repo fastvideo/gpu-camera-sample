@@ -196,7 +196,8 @@ bool AVFileWriter::open(int w, int h, int bitrate, int fps, bool isHEVC)
         mV4L2Encoder->setEnableAllIFrameEncode(true);
         mV4L2Encoder->setInsertSpsPpsAtIdrEnabled(true);
         mV4L2Encoder->setInsertVuiEnabled(true);
-        mV4L2Encoder->setIFrameInterval(1);
+        mV4L2Encoder->setIFrameInterval(3);
+        mV4L2Encoder->setNumBFrames(3);
         mPixFmt = AV_PIX_FMT_YUV420P;
 //        mCodec = avcodec_find_encoder_by_name("h264_v4l2m2m");
 #else

@@ -1144,3 +1144,13 @@ void MainWindow::on_cboFormatEnc_currentIndexChanged(int index)
 {
 	ui->swRtspOptions->setCurrentIndex(index);
 }
+
+void MainWindow::on_actionShowImage_triggered(bool checked)
+{
+    if(!mCameraPtr || !mProcessorPtr)
+        return;
+
+    updateOptions(mOptions);
+    mOptions.ShowPicture = checked;
+    mProcessorPtr->updateOptions(mOptions);
+}

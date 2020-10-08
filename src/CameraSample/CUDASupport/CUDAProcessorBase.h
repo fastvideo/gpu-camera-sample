@@ -127,7 +127,9 @@ public:
 
     fastBayerPattern_t       BayerFormat;
     QMutex                   mut;
+    QMutex                   mut2;
     QMap<QString, float>     stats;
+    QMap<QString, float>     stats2;
     fastExportToHostHandle_t hBitmapExport = nullptr;
     fastLut_16_t             outLut;
 

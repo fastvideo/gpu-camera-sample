@@ -38,7 +38,7 @@
      <x>0</x>
      <y>0</y>
      <width>1571</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuCamera">
@@ -74,6 +74,8 @@
    <addaction name="actionPlay"/>
    <addaction name="actionRecord"/>
    <addaction name="actionWB_picker"/>
+   <addaction name="separator"/>
+   <addaction name="actionShowImage"/>
    <addaction name="separator"/>
    <addaction name="actionExit"/>
    <addaction name="separator"/>
@@ -1526,6 +1528,21 @@ border-radius: 9px;</string>
    </property>
    <property name="text">
     <string>Open Gray PGM</string>
+   </property>
+  </action>
+  <action name="actionShowImage">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="Resorces.qrc">
+     <normaloff>:/res/PicturesPlace.svg</normaloff>:/res/PicturesPlace.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Show Image</string>
    </property>
   </action>
  </widget>

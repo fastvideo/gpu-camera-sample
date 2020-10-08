@@ -158,8 +158,10 @@ void RawProcessor::startWorking()
             if(curTime - lastTime >= frameTime)
 #endif
             {
-                mRenderer->loadImage(mProcessorPtr->GetFrameBuffer(), mOptions.Width, mOptions.Height);
-                mRenderer->update();
+                if(mOptions.ShowPicture){
+                    mRenderer->loadImage(mProcessorPtr->GetFrameBuffer(), mOptions.Width, mOptions.Height);
+                    mRenderer->update();
+                }
                 lastTime = curTime;
 
                 emit finished();
@@ -291,14 +293,19 @@ QMap<QString, float> RawProcessor::getStats()
     if(mProcessorPtr)
     {
         {
-            QMutexLocker l(&mProcessorPtr->mut);
-            ret = mProcessorPtr->stats;
+            // to minimize delay in main thread
+            mProcessorPtr->mut2.lock();
+            ret = mProcessorPtr->stats2;
+            mProcessorPtr->mut2.unlock();
         }
 
         if(mWriting)
         {
             ret[QStringLiteral("procFrames")] = mFileWriterPtr->getProcessedFrames();
             ret[QStringLiteral("droppedFrames")] = mFileWriterPtr->getDroppedFrames();
+            AVFileWriter *obj = dynamic_cast<AVFileWriter*>(mFileWriterPtr.data());
+            if(obj)
+                ret[QStringLiteral("encoding")] = obj->duration();
         }
         else
         {

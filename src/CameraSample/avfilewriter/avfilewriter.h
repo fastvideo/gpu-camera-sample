@@ -59,6 +59,10 @@ public:
     bool open(int w, int h, int bitrate, int fps, bool isHEVC);
     void close();
 
+    double duration() const {
+        return mDuration;
+    }
+
 signals:
 
 

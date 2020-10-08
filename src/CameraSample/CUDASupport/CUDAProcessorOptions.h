@@ -106,6 +106,8 @@ public:
         HorFlip = false;
         Angle = 0;
 
+        ShowPicture = true;
+
         EnableBPC = false;
     }
 
@@ -155,6 +157,8 @@ public:
         HorFlip = other.HorFlip;
         Angle = other.Angle;
 
+        ShowPicture = other.ShowPicture;
+
         EnableDenoise = other.EnableDenoise;
         memcpy(&DenoiseParams, &other.DenoiseParams, sizeof(denoise_parameters_t));
         memcpy(&DenoiseStaticParams, &other.DenoiseStaticParams, sizeof(denoise_static_parameters_t));
@@ -177,6 +181,8 @@ public:
 
     bool Info;
     unsigned DeviceId;
+
+    bool ShowPicture;
 
     bool Packed;
 

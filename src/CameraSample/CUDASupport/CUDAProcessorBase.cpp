@@ -1485,6 +1485,12 @@ fastStatus_t CUDAProcessorBase::Transform(ImageT *image, CUDAProcessorOptions &o
     }
 
     locker.unlock();
+
+    // to minimize delay in main thread
+    mut2.lock();
+    stats2 = stats;
+    mut2.unlock();
+
     emit finished();
     return FAST_OK;
 }
