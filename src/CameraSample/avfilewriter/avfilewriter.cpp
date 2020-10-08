@@ -373,16 +373,16 @@ void AVFileWriter::doEncodeFrame()
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }else{
             mFrameMutex.lock();
-            FrameBuffer fb = mFrameBuffers.front();
+            //FrameBuffer fb = mFrameBuffers.front();
             mFrameBuffers.pop_front();
             mFrameMutex.unlock();
 
-            addInternalFrame((uchar*)fb.buffer.data());
+            addInternalFrame();
         }
     }
 }
 
-bool AVFileWriter::addInternalFrame(uchar *rgbPtr)
+bool AVFileWriter::addInternalFrame()
 {
     auto starttime = getNow();
 
@@ -398,9 +398,10 @@ bool AVFileWriter::addInternalFrame(uchar *rgbPtr)
         frm->format = mPixFmt;
         frm->pts = mFramesProcessed++;
         //Set frame->data pointers manually
-        if(mChannels == 1 && rgbPtr != nullptr)
+        if(mChannels == 1/* && rgbPtr != nullptr*/)
         {
-            Gray2Yuv420p((unsigned char*)mEncoderBuffer.data(), rgbPtr, mWidth, mHeight);
+            // did not supported yet
+            //Gray2Yuv420p((unsigned char*)mEncoderBuffer.data(), rgbPtr, mWidth, mHeight);
         }
         else
         {

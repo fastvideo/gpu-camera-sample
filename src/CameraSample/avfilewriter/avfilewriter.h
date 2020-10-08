@@ -106,8 +106,8 @@ private:
         FrameBuffer(){}
         FrameBuffer(uchar *buf, int size){
             if(size > 0){
-                buffer.resize(size);
-                memcpy(buffer.data(), buf, buffer.size());
+                //buffer.resize(size);
+                //memcpy(buffer.data(), buf, buffer.size());
             }
         }
     };
@@ -124,7 +124,7 @@ private:
     QScopedPointer<TSEncoder> mFileWriter;
 
     void doEncodeFrame();
-    bool addInternalFrame(uchar *rgbPtr);
+    bool addInternalFrame();
 
     void RGB2Yuv420p(unsigned char *destination, unsigned char *rgba, int width, int height);
     void Gray2Yuv420p(unsigned char *destination, unsigned char *rgba, int width, int height);
