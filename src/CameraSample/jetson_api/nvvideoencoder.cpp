@@ -164,7 +164,6 @@ int NvVideoEncoder::setOutputPlaneFormat(uint32_t pixfmt, uint32_t width, uint32
     case V4L2_PIX_FMT_YUV444:
     case V4L2_PIX_FMT_YUV444M:
     case V4L2_PIX_FMT_YUV422M:
-    case V4L2_PIX_FMT_P010:
     default:
         numplanes = 3;
         break;
@@ -173,6 +172,7 @@ int NvVideoEncoder::setOutputPlaneFormat(uint32_t pixfmt, uint32_t width, uint32
     case V4L2_PIX_FMT_NV21:
     case V4L2_PIX_FMT_NV21M:
     case V4L2_PIX_FMT_P010M:
+    case V4L2_PIX_FMT_P010:
         numplanes = 2;
         break;
     }
