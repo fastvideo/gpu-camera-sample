@@ -109,10 +109,12 @@ private:
         QByteArray buffer;
         FrameBuffer(){}
         FrameBuffer(uchar *buf, int size){
-            if(size > 0){
-                //buffer.resize(size);
-                //memcpy(buffer.data(), buf, buffer.size());
-            }
+            Q_UNUSED(buf)
+            Q_UNUSED(size)
+//            if(size > 0){
+//                buffer.resize(size);
+//                memcpy(buffer.data(), buf, buffer.size());
+//            }
         }
     };
     // very unsafe
