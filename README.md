@@ -47,13 +47,12 @@ Currently the software is working with <a href="https://www.ximea.com" target="_
 * Ubuntu 18.04 (x64 or Arm64)
 * Camera SDK or GenICam package + camera vendor GenTL producer (.cti). Currently XIMEA, MATRIX VISION, Basler, JAI, Daheng Imaging cameras are supported
 * Fastvideo SDK (demo) ver.0.16.0.0
-* NVIDIA CUDA-10.2 for x64 platform
-* NVIDIA CUDA-10.2 for ARM64 platform
+* NVIDIA CUDA-10.2 for x64 and ARM64 platform
+* Compiler gcc 7.4 or later
 * Qt 5 (qtbase5-dev)
 ``` console
 sudo apt-get install qtbase5-dev qtbase5-dev-tools qtcreator
 ```
-* Compiler gcc 7.4
 * FFmpeg libraries
 ``` console 
 sudo apt-get install  libavutil-dev libavcodec-dev libavdevice-dev libavfilter-dev libavformat-dev libavresample-dev libx264-dev
