@@ -59,7 +59,10 @@ sudo apt-get install qtbase5-dev qtbase5-dev-tools qtcreator
 sudo apt-get install  libavutil-dev libavcodec-dev libavdevice-dev libavfilter-dev libavformat-dev libavresample-dev libx264-dev
 ```
 Jetson users have to build FFmpeg libraries from sources. See [this shell script](Scripts/build_ffmpeg.sh) for details.
-
+* Libjpeg libraries
+``` console 
+sudo apt-get install libjpeg-dev
+```
 ### Build instructions
 
 * Obtain source code: 
