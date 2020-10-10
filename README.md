@@ -23,7 +23,7 @@ That software is based on the following image processing pipeline for camera app
 * H.264 and HEVC encoding/decoding
 * Output to monitor via OpenGL
 * Export from GPU to CPU memory
-* MJPEG or H.264/H.265 streaming
+* MJPEG and H.264/H.265 streaming
 * Storage of compressed images/video to SSD
 
 Processing is done on NVIDIA GPU to speedup the performance. The software could also work with raw bayer images in PGM format and you can utilize these images for testing or if you don't have a camera or if your camera is not supported. More info about that project you can find <a href="https://www.fastcompression.com/blog/gpu-software-machine-vision-cameras.htm" target="_blank">here</a>.
@@ -72,7 +72,7 @@ git clone https://github.com/fastvideo/gpu-camera-sample.git
 For Windows users
 
 * Create OtherLibs folder in the project root folder. This folder will contains external libraries, used in gpu-camera-sample application.
-* Download Fastvideo SDK from <a href="https://drive.google.com/open?id=1p21TXXC7SCw5PdDVEhayRdMQEN6X11ge">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a>, unpack it into \<Project root\>\OtherLibs\fastvideoSDK folder. If the trial period is expired, please send an inquery to Fastvideo to obtain the latest version.
+* Download Fastvideo SDK from <a href="https://drive.google.com/file/d/1KDpVZCL9ljk8zZvzLKRdxXUDgO74USts/view?usp=sharing">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a>, unpack it into \<Project root\>\OtherLibs\fastvideoSDK folder. If the trial period is expired, please send an inquery to Fastvideo to obtain the latest version.
 * If you need direct XIMEA camera support, download XiAPI from https://www.ximea.com/support/documents/4. Install downloaded package (by default into C:\XIMEA). Copy API folder from XIAPI installation folder into \<Project root\>\OtherLibs folder.
 * If you need GenICam support
    * Download GenICamTM Package Version 2019.11 (https://www.emva.org/wp-content/uploads/GenICam_Package_2019.11.zip).
@@ -91,7 +91,7 @@ You also can download precompiled libs from <a href="https://drive.google.com/fi
 For Linux users
 
 * Create OtherLibsLinux folder in the project root folder. This folder will contains external libraries, used in gpu-camera-sample application.
-* Download Fastvideo SDK x64 platform from <a href="https://drive.google.com/open?id=1GNcQtGmz-FBrKqrsSnMENMCbg44xxWQn">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a>, or Fastvideo SDK Arm64 platform from <a href="https://drive.google.com/file/d/1gBfPkazCiHLHc4piPHSJA2_Rm52CnoKD/view?usp=sharing">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> unpack it into \<Project root\>\OtherLibsLinux\fastvideoSDK folder. Copy all files from \<Project root\>/OtherLibsLinux/fastvideoSDK/fastvideo_sdk/lib to \<Project root\>/OtherLibsLinux/fastvideoSDK/fastvideo_sdk/lib/x64 for x64 platform and to \<Project root\>/OtherLibsLinux/fastvideoSDK/fastvideo_sdk/lib/Arm64 for Arm64 platform.
+* Download Fastvideo SDK x64 platform from <a href="https://drive.google.com/file/d/1tZPaYMa2Te831htZUMVX_IAIoZbGNzZd/view?usp=sharing">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a>, or Fastvideo SDK Arm64 platform from <a href="https://drive.google.com/file/d/12XYCRcXTLXFAOCKeV5F_j2bICDTqdUSL/view?usp=sharing">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> unpack it into \<Project root\>\OtherLibsLinux\fastvideoSDK folder. Copy all files from \<Project root\>/OtherLibsLinux/fastvideoSDK/fastvideo_sdk/lib to \<Project root\>/OtherLibsLinux/fastvideoSDK/fastvideo_sdk/lib/x64 for x64 platform and to \<Project root\>/OtherLibsLinux/fastvideoSDK/fastvideo_sdk/lib/Arm64 for Arm64 platform.
 * If you need direct XIMEA camera support, download XiAPI from https://www.ximea.com/support/documents/4. Unpack and install downloaded package .
 * If you need GenICam support
    * Download GenICamTM Package Version 2019.11 (https://www.emva.org/wp-content/uploads/GenICam_Package_2019.11.zip).
@@ -166,9 +166,9 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 * Software for NVIDIA Jetson hardware and L4T for CUDA-10.0 (Jetson Nano, TX2, Xavier) - done
 * Glass-to-Glass (G2G) test for latency measurements - done
 * Support for XIMEA, MATRIX VISION, Basler, JAI, Daheng Imaging cameras - done
-* MJPEG or H.264 streaming with or without FFmpeg RTSP - done
+* MJPEG and H.264 streaming with or without FFmpeg RTSP - done
 * Software for CUDA-10.2 - done
-* HEVC encoder/decoder - done
+* HEVC (H.265) encoder/decoder - done
 * Support for Imperx, Baumer, FLIR, IDS cameras - in progress
 * Transforms to Rec.601 (SD), Rec.709 (HD), Rec.2020 (4K)
 * Interoperability with external FFmpeg and GStreamer
@@ -188,7 +188,7 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 ## Downloads
 
 * Download <a href="https://www.fastcinemadng.com/download/download.html" target="_blank">Fast CinemaDNG Processor</a> software for Windows or Linux, manual and test DNG and BRAW footages
-* Download <a href="https://drive.google.com/file/d/1KDpVZCL9ljk8zZvzLKRdxXUDgO74USts/view?usp=sharing">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a> (valid till Sep 02, 2021)
-* Download <a href="https://drive.google.com/file/d/1tZPaYMa2Te831htZUMVX_IAIoZbGNzZd/view?usp=sharing">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a> (valid till Sep 02, 2021)
-* Download <a href="https://drive.google.com/file/d/12XYCRcXTLXFAOCKeV5F_j2bICDTqdUSL/view?usp=sharing">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> (valid till Sep 02, 2021)
+* Download <a href="https://drive.google.com/file/d/1KDpVZCL9ljk8zZvzLKRdxXUDgO74USts/view?usp=sharing">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a> (valid till Sept. 02, 2021)
+* Download <a href="https://drive.google.com/file/d/1tZPaYMa2Te831htZUMVX_IAIoZbGNzZd/view?usp=sharing">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a> (valid till Sept. 02, 2021)
+* Download <a href="https://drive.google.com/file/d/12XYCRcXTLXFAOCKeV5F_j2bICDTqdUSL/view?usp=sharing">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> (valid till Sept. 02, 2021)
 * Download <a href="https://www.fastcompression.com/download/Fastvideo_SDK_manual.pdf" target="_blank">Fastvideo SDK Manual</a>
