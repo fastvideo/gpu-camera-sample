@@ -177,8 +177,8 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 
 * <a href="https://www.fastcompression.com/products/sdk.htm" target="_blank">Fastvideo SDK for Image & Video Processing on GPU</a>
 * <a href="https://www.fastcinemadng.com/" target="_blank">Full image processing pipeline on GPU for digital cinema applications</a>
-* <a href="https://en.wikipedia.org/wiki/Nvidia_NVENC#Versions">Parameters and constrictions of Nvidia NVENC</a> 
-* <a href="https://en.wikipedia.org/wiki/Nvidia_NVDEC#GPU_support">Parameters and constrictions of Nvidia NVDEC</a>
+* <a href="https://en.wikipedia.org/wiki/Nvidia_NVENC#Versions">Parameters and restrictions of Nvidia NVENC</a> 
+* <a href="https://en.wikipedia.org/wiki/Nvidia_NVDEC#GPU_support">Parameters and restrictions of Nvidia NVDEC</a>
 
 ## Fastvideo SDK Benchmarks
 
