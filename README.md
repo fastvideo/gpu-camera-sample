@@ -169,7 +169,7 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 * MJPEG and H.264 streaming with or without FFmpeg RTSP - done
 * Software for CUDA-10.2 - done
 * HEVC (H.265) encoder/decoder - done
-* Support for Imperx, Baumer, FLIR, IDS cameras - in progress
+* Support for Imperx, Baumer, SVS-Vistek, FLIR, IDS cameras - in progress
 * Transforms to Rec.601 (SD), Rec.709 (HD), Rec.2020 (4K)
 * Interoperability with external FFmpeg and GStreamer
 
