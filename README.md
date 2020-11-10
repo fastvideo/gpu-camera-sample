@@ -62,6 +62,7 @@ Jetson users have to build FFmpeg libraries from sources. See [this shell script
 ``` console 
 sudo apt-get install libjpeg-dev
 ```
+
 ### Build instructions
 
 * Obtain source code: 
@@ -105,6 +106,31 @@ For Linux users
 * Binaries will be placed into \<Project root\>\GPUCameraSample_Arm64 or GPUCameraSample_Linux64 folder. To run application from terminal run GPUCameraSample.sh. Nesessary symbolyc links will be made during compile time.
 
 You also can download precompiled libs from <a href="https://drive.google.com/file/d/1vS3zh63pzlm9RXlhdTKFtBxJeWQBgbEa/view?usp=sharing" target="_blank">here</a>
+
+### How to work with NVIDIA Jetson to get maximum performance
+
+NVIDIA Jetson provide many features related to power management, thermal management, and electrical management. These features deliver the best user experience possible given the constraints of a particular platform. The target user experience ensures the perception that the device provides:
+
+* Uniformly high performance
+* Excellent battery life
+* Perfect stability
+
+Utility <strong>nvpmodel</strong> has to been used to change the power mode. Mode with power consumption is MAXN. To activate this mode call 
+``` console
+sudo /usr/sbin/nvpmodel –m 0
+```
+
+Also you have to call <strong>jetson_clocks</strong> script to maximize Jetson performance by setting the static maximum frequencies of the CPU, GPU, and EMC clocks. You can also use the script to show current clock settings, store current clock settings into a file, and restore clock settings from a file.
+``` console
+sudo /usr/bin/jetson_clocks
+```
+
+NVIDIA Jetson TX2 has two CPU core types. These are Denver2 and A57. During benchmarking of <a href="https://www.fastcompression.com/products/sdk.htm" target="_blank">Fastvideo SDK</a> we have realized that better performance for J2K encoder and <a href="https://www.fastcompression.com/blog/j2k-codec-on-jetson-tx2.htm" target="_blank">decoder</a> could be achieved with A57 core type. Affinity mask has to be assigned to run only on A57 cores. Linux command taskset assign process affinity. 
+``` console
+taskset -c 3,4,5 myprogram
+```
+
+TX2 has the following core numbers: 0 – A57; 1, 2 – Denver2; 3, 4, 5 – A57. Core 0 is used by Linux for interrupt processing. We do not recommend include it in the user affinity mask. 
 
 ## Glass-to-Glass Time Measurements
 To check system latency we've implemented the software to run G2G tests in the gpu-camera-sample application. 
