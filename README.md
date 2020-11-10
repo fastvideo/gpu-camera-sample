@@ -197,7 +197,9 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 * HEVC (H.265) encoder/decoder - done
 * Support for Emergent Vision Technologies, IDS Imaging, Imperx, Baumer, Kaya Instruments, SVS-Vistek, FLIR cameras - in progress
 * Transforms to Rec.601 (SD), Rec.709 (HD), Rec.2020 (4K)
-* Interoperability with external FFmpeg and GStreamer
+* RAW Bayer codec
+* JPEG2000 encoder and decoder on GPU for camera applications
+* Interoperability with FFmpeg, UltraGrid, and GStreamer
 
 ## Info
 
@@ -205,10 +207,11 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 * <a href="https://www.fastcinemadng.com/" target="_blank">Full image processing pipeline on GPU for digital cinema applications</a>
 * <a href="https://en.wikipedia.org/wiki/Nvidia_NVENC#Versions">Parameters and restrictions of Nvidia NVENC</a> 
 * <a href="https://en.wikipedia.org/wiki/Nvidia_NVDEC#GPU_support">Parameters and restrictions of Nvidia NVDEC</a>
+* <a href="https://www.fastcompression.com/blog/content.htm" target="_blank">Fastvideo Blog</a>
 
 ## Fastvideo SDK Benchmarks
 
-* <a href="https://www.fastcompression.com/pub/2019/Fastvideo_SDK_benchmarks.pdf" target="_blank">Fastvideo SDK Benchmarks</a>
+* <a href="https://www.fastcompression.com/pub/2020/Fastvideo_SDK_benchmarks.pdf" target="_blank">Fastvideo SDK Benchmarks</a>
 * <a href="https://www.fastcompression.com/blog/jetson-benchmark-comparison.htm" target="_blank">Jetson Benchmark Comparison for Image Processing: Nano vs TX1 vs TX2 vs Xavier</a>
 * JPEG2000 benchmarks for <a href="https://www.fastcompression.com/benchmarks/benchmarks-j2k.htm" target="_blank">encoding</a> and <a href="https://www.fastcompression.com/benchmarks/decoder-benchmarks-j2k.htm" target="_blank">decoding</a>
 
