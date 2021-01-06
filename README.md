@@ -205,9 +205,10 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 
 * <a href="https://www.fastcompression.com/products/sdk.htm" target="_blank">Fastvideo SDK for Image & Video Processing on GPU</a>
 * <a href="https://www.fastcinemadng.com/" target="_blank">Full image processing pipeline on GPU for digital cinema applications</a>
-* <a href="https://en.wikipedia.org/wiki/Nvidia_NVENC#Versions">Parameters and restrictions of Nvidia NVENC</a> 
-* <a href="https://en.wikipedia.org/wiki/Nvidia_NVDEC#GPU_support">Parameters and restrictions of Nvidia NVDEC</a>
+* <a href="https://en.wikipedia.org/wiki/Nvidia_NVENC#Versions" target="_blank">Parameters and restrictions of Nvidia NVENC</a> 
+* <a href="https://en.wikipedia.org/wiki/Nvidia_NVDEC#GPU_support" target="_blank">Parameters and restrictions of Nvidia NVDEC</a>
 * <a href="https://www.fastcompression.com/blog/content.htm" target="_blank">Fastvideo Blog</a>
+* <a href="https://www.fastcompression.com/blog/gpu-vs-cpu-fast-image-processing.htm" target="_blank">GPU vs CPU at Image Processing. Why GPU is much faster than CPU?</a>
 
 ## Fastvideo SDK Benchmarks
 
@@ -218,7 +219,7 @@ For continuous high performance applications we recommend professional NVIDIA Qu
 ## Downloads
 
 * Download <a href="https://www.fastcinemadng.com/download/download.html" target="_blank">Fast CinemaDNG Processor</a> software for Windows or Linux, manual and test DNG and BRAW footages
-* Download <a href="https://drive.google.com/file/d/1KDpVZCL9ljk8zZvzLKRdxXUDgO74USts/view?usp=sharing">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a> (valid till Sept. 02, 2021)
-* Download <a href="https://drive.google.com/file/d/1tZPaYMa2Te831htZUMVX_IAIoZbGNzZd/view?usp=sharing">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a> (valid till Sept. 02, 2021)
-* Download <a href="https://drive.google.com/file/d/12XYCRcXTLXFAOCKeV5F_j2bICDTqdUSL/view?usp=sharing">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> (valid till Sept. 02, 2021)
+* Download <a href="https://drive.google.com/file/d/1KDpVZCL9ljk8zZvzLKRdxXUDgO74USts/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a> (valid till Sept. 02, 2021)
+* Download <a href="https://drive.google.com/file/d/1tZPaYMa2Te831htZUMVX_IAIoZbGNzZd/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a> (valid till Sept. 02, 2021)
+* Download <a href="https://drive.google.com/file/d/12XYCRcXTLXFAOCKeV5F_j2bICDTqdUSL/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> (valid till Sept. 02, 2021)
 * Download <a href="https://www.fastcompression.com/download/Fastvideo_SDK_manual.pdf" target="_blank">Fastvideo SDK Manual</a>
