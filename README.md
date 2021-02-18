@@ -184,6 +184,12 @@ For testing purposes you can utilize the latest NVIDIA GeForce RTX 2060, 2070, 2
 
 For continuous high performance applications we recommend professional NVIDIA Quadro and Tesla GPUs.
 
+## Multi-camera applications
+
+To run the software for multi-camera setups, we recommend to run one process per camera. If you have enough GPU memory and processing performance is ok, this is the simplest solution, which was tested in many applications. This is also a good choice for Linux solutions, please don't forget to turn on CUDA MPS.
+
+You can also create a software module to collect frames from different cameras and process them at the same pipeline with gpu-camera-sample application. In that case you will need less GPU memory which could be important for embedded solutions.
+
 ## Roadmap
 
 * GPU pipeline for monochrome cameras - done
