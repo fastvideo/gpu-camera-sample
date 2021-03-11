@@ -37,7 +37,7 @@ Currently the software is working with <a href="https://www.ximea.com" target="_
 ### Requirements for Windows
 
 * Camera SDK or GenICam package + camera vendor GenTL producer (.cti). Сurrently XIMEA, MATRIX VISION, Basler, JAI, Daheng Imaging cameras are supported
-* Fastvideo SDK (demo) ver.0.16.0.0
+* Fastvideo SDK (demo) ver.0.16.3.0
 * NVIDIA CUDA-10.2
 * Qt ver.5.13.1
 * Compiler MSVC 2017 or later
@@ -199,7 +199,6 @@ You can also create a software module to collect frames from different cameras a
 * Glass-to-Glass (G2G) test for latency measurements - done
 * Support for XIMEA, MATRIX VISION, Basler, JAI, Daheng Imaging cameras - done
 * MJPEG and H.264 streaming with or without FFmpeg RTSP - done
-* Software for CUDA-10.2 - done
 * HEVC (H.265) encoder/decoder - done
 * <a href="https://imaginghub.com/projects/455-real-time-image-processing-on-nvidia-gpu-with-basler-pylon-and-fastvideo" target="_blank">Real-time Image Processing on NVIDIA GPU with Basler pylon</a> - done
 * Benchmarks for Jetson Xavier NX - in progress
