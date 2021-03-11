@@ -200,7 +200,6 @@ You can also create a software module to collect frames from different cameras a
 * Support for XIMEA, MATRIX VISION, Basler, JAI, Daheng Imaging cameras - done
 * MJPEG and H.264 streaming with or without FFmpeg RTSP - done
 * HEVC (H.265) encoder/decoder - done
-* <a href="https://imaginghub.com/projects/455-real-time-image-processing-on-nvidia-gpu-with-basler-pylon-and-fastvideo" target="_blank">Real-time Image Processing on NVIDIA GPU with Basler pylon</a> - done
 * Benchmarks for Jetson Xavier NX - in progress
 * Support for Emergent Vision Technologies, IDS Imaging, Imperx, Baumer, Kaya Instruments, SVS-Vistek, FLIR cameras - in progress
 * Transforms to Rec.601 (SD), Rec.709 (HD), Rec.2020 (4K)
@@ -230,3 +229,4 @@ You can also create a software module to collect frames from different cameras a
 * Download <a href="https://drive.google.com/file/d/1tZPaYMa2Te831htZUMVX_IAIoZbGNzZd/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a> (valid till Sept. 02, 2021)
 * Download <a href="https://drive.google.com/file/d/12XYCRcXTLXFAOCKeV5F_j2bICDTqdUSL/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> (valid till Sept. 02, 2021)
 * Download <a href="https://www.fastcompression.com/download/Fastvideo_SDK_manual.pdf" target="_blank">Fastvideo SDK Manual</a>
+* <a href="https://imaginghub.com/projects/455-real-time-image-processing-on-nvidia-gpu-with-basler-pylon-and-fastvideo" target="_blank">Real-time Image Processing on NVIDIA GPU with Basler pylon</a> - done
