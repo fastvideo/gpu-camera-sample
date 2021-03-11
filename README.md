@@ -180,7 +180,7 @@ We also recommend to check PCI-Express bandwidth for Host-to-Device and Device-t
 
 If you are working with images which reside on HDD, please place them on SSD or M2.
 
-For testing purposes you can utilize the latest NVIDIA GeForce RTX 2060, 2070, 2080ti or Jetson Nano, TX2, AGX Xavier.
+For testing purposes you can utilize the latest NVIDIA GeForce RTX 2060, 2070, 2080ti or Jetson Nano, TX2, NX/AGX Xavier.
 
 For continuous high performance applications we recommend professional NVIDIA Quadro and Tesla GPUs.
 
@@ -195,12 +195,14 @@ You can also create a software module to collect frames from different cameras a
 * GPU pipeline for monochrome cameras - done
 * GenICam Standard support - done
 * Linux version - done
-* Software for NVIDIA Jetson hardware and L4T for CUDA-10.0 (Jetson Nano, TX2, Xavier) - done
+* Software for NVIDIA Jetson hardware and L4T for CUDA-10.2 (Jetson Nano, TX2, Xavier AGX and NX) - done
 * Glass-to-Glass (G2G) test for latency measurements - done
 * Support for XIMEA, MATRIX VISION, Basler, JAI, Daheng Imaging cameras - done
 * MJPEG and H.264 streaming with or without FFmpeg RTSP - done
 * Software for CUDA-10.2 - done
 * HEVC (H.265) encoder/decoder - done
+* <a href="https://imaginghub.com/projects/455-real-time-image-processing-on-nvidia-gpu-with-basler-pylon-and-fastvideo" target="_blank">Real-time Image Processing on NVIDIA GPU with Basler pylon</a> - done
+* Benchmarks for Jetson Xavier NX - in progress
 * Support for Emergent Vision Technologies, IDS Imaging, Imperx, Baumer, Kaya Instruments, SVS-Vistek, FLIR cameras - in progress
 * Transforms to Rec.601 (SD), Rec.709 (HD), Rec.2020 (4K)
 * RAW Bayer codec
