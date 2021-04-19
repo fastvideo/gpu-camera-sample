@@ -1,84 +1,118 @@
-#include "GeniCamCamera.h"
+/*
+ Copyright 2011-2019 Fastvideo, LLC.
+ All rights reserved.
 
-#ifdef SUPPORT_GENICAM
+ This file is a part of the GPUCameraSample project
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
 
-#include <QVector>
+ 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+ 3. Any third-party SDKs from that project (XIMEA SDK, Fastvideo SDK, etc.) are licensed on different terms. Please see their corresponding license terms.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+ The views and conclusions contained in the software and documentation are those
+ of the authors and should not be interpreted as representing official policies,
+ either expressed or implied, of the FreeBSD Project.
+*/
+
+#ifdef SUPPORT_FLIR
+#include "FLIRCamera.h"
+
+#include "MainWindow.h"
+#include "RawProcessor.h"
+
+#include <QTimer>
 #include <QElapsedTimer>
+#include <QDebug>
 
-#include <RawProcessor.h>
-
-GeniCamCamera::GeniCamCamera()
+FLIRCamera::FLIRCamera()
 {
-    mCameraThread.setObjectName(QStringLiteral("GeniCamThread"));
-    moveToThread(&mCameraThread);
-    mCameraThread.start();
+    try
+    {
+        mSystem = System::GetInstance();
+        mCamList = mSystem->GetCameras();
+        const unsigned int numCameras = mCamList.GetSize();
+        if (numCameras == 0)
+        {
+            // Clear camera list before releasing system
+            mCamList.Clear();
+
+            // Release system
+            mSystem->ReleaseInstance();
+            return;
+        }
+
+        mCam = mCamList.GetByIndex(0);
+    }
+    catch (Spinnaker::Exception& e)
+    {
+        qDebug() << "Error: " << e.what();
+        return;
+    }
+
 }
 
-GeniCamCamera::~GeniCamCamera()
+FLIRCamera::~FLIRCamera()
 {
-    mCameraThread.quit();
-    mCameraThread.wait(3000);
+    mCam = nullptr;
 
-    if(mDevice)
-        mDevice->close();
-    rcg::System::clearSystems();
+    // Clear camera list before releasing system
+    mCamList.Clear();
+
+    // Release system
+    mSystem->ReleaseInstance();
 }
 
-bool GeniCamCamera::open(uint32_t devID)
+bool FLIRCamera::open(uint32_t devID)
 {
     using namespace GenApi;
 
-    std::vector<std::shared_ptr<rcg::System> > system=rcg::System::getSystems();
-    for (auto & i : system)
-    {
-        if(mDevice)
-            break;
-
-        i->open();
-        std::vector<std::shared_ptr<rcg::Interface>> interf = i->getInterfaces();
-
-        for (auto & k : interf)
-        {
-            k->open();
-            std::vector<std::shared_ptr<rcg::Device>> device = k->getDevices();
-
-            for (const auto & j : device)
-            {
-                mDevice = j;
-                break;
-            }
-
-            if(!mDevice)
-                k->close();
-        }
-        if(!mDevice)
-            i->close();
-    }
-
-    if(!mDevice)
+    mManufacturer = QStringLiteral("FLIR");
+    if(mCam == nullptr)
         return false;
 
-    mManufacturer = QString::fromStdString(mDevice->getVendor());
-    mModel = QString::fromStdString(mDevice->getModel());
-    mSerial = QString::fromStdString(mDevice->getSerialNumber());
+    // Initialize camera
+    mCam->Init();
 
-    mDevice->open(rcg::Device::CONTROL);
-    std::shared_ptr<CNodeMapRef> nodeMap = mDevice->getRemoteNodeMap();
 
-    CIntegerPtr ptrInt = nodeMap->_GetNode("Width");
+    INodeMap& nodeMap = mCam->GetNodeMap();
+    INodeMap& nodeMapTLDevice = mCam->GetTLDeviceNodeMap();
+    CStringPtr ptrStringSerial = nodeMapTLDevice.GetNode("DeviceSerialNumber");
+    GenICam::gcstring deviceSerialNumber("");
+    if(IsAvailable(ptrStringSerial) && IsReadable(ptrStringSerial))
+    {
+        deviceSerialNumber = ptrStringSerial->GetValue();
+        mSerial = QString::fromLatin1(deviceSerialNumber.c_str(), (int)deviceSerialNumber.length());
+    }
+
+
+    CIntegerPtr ptrInt = nodeMap.GetNode("Width");
     if(IsAvailable(ptrInt))
     {
         mWidth = ptrInt->GetMax();
     }
 
-    ptrInt = nodeMap->_GetNode("Height");
+    ptrInt = nodeMap.GetNode("Height");
     if (IsAvailable(ptrInt))
     {
         mHeight =  ptrInt->GetMax();
     }
 
+    mSurfaceFormat = FAST_I8;
+    mImageFormat = cif8bpp;
     //Look for available pixel formats
-    CEnumerationPtr ptrPixelFormats = nodeMap->_GetNode("PixelFormat");
+    CEnumerationPtr ptrPixelFormats = nodeMap.GetNode("PixelFormat");
     if(IsAvailable(ptrPixelFormats))
     {
 
@@ -254,13 +288,15 @@ bool GeniCamCamera::open(uint32_t devID)
         }
     }
 
-    CBooleanPtr ptrAcquisitionFrameRateEnable = nodeMap->_GetNode("AcquisitionFrameRateEnable");
+    mFPS  = 0;
+
+    CBooleanPtr ptrAcquisitionFrameRateEnable = nodeMap.GetNode("AcquisitionFrameRateEnable");
     if (IsAvailable(ptrAcquisitionFrameRateEnable) && IsWritable(ptrAcquisitionFrameRateEnable))
     {
         ptrAcquisitionFrameRateEnable->SetValue(true);
     }
 
-    CFloatPtr ptrFloat = nodeMap->_GetNode("AcquisitionFrameRate");
+    CFloatPtr ptrFloat = nodeMap.GetNode("AcquisitionFrameRate");
     if(IsAvailable(ptrInt))
     {
         mFPS =  ptrFloat->GetValue();
@@ -274,7 +310,7 @@ bool GeniCamCamera::open(uint32_t devID)
     return true;
 }
 
-bool GeniCamCamera::start()
+bool FLIRCamera::start()
 {
     mState = cstStreaming;
     emit stateChanged(cstStreaming);
@@ -282,7 +318,7 @@ bool GeniCamCamera::start()
     return true;
 }
 
-bool GeniCamCamera::stop()
+bool FLIRCamera::stop()
 {
     mState = cstStopped;
     emit stateChanged(cstStopped);
@@ -290,48 +326,56 @@ bool GeniCamCamera::stop()
     return true;
 }
 
-void GeniCamCamera::close()
+void FLIRCamera::close()
 {
     stop();
-    mDevice->close();
+    mCam->DeInit();
     mState = cstClosed;
     emit stateChanged(cstClosed);
 }
 
-void GeniCamCamera::startStreaming()
+void FLIRCamera::startStreaming()
 {
     if(mState != cstStreaming)
         return;
-
-    std::vector<std::shared_ptr<rcg::Stream>> streams = mDevice->getStreams();
-    if(streams.empty())
-        return;
-    streams[0]->open();
-    streams[0]->startStreaming();
     QElapsedTimer tmr;
+
+    mCam->BeginAcquisition();
+
     while(mState == cstStreaming)
     {
         tmr.restart();
-        const rcg::Buffer* buffer = streams[0]->grab(3000);
-        if(buffer == nullptr)
-            continue;
-
-        if(buffer->getIsIncomplete())
-            continue;
-
-        //Multy part images not supported
-        uint32_t npart = buffer->getNumberOfParts();
-        if(npart > 1)
-            continue;
-
-        //if(buffer->getImagePresent(1))
+        try
         {
-            const unsigned char* in = static_cast<const unsigned char *>(buffer->getBase(1));
-            unsigned char* out = mInputBuffer.getBuffer();
-            size_t sz = buffer->getSize(1);
-            cudaMemcpy(out, in, sz, cudaMemcpyHostToDevice);
-            mInputBuffer.release();
-        }
+             // Retrieve next received image
+             ImagePtr pResultImage = mCam->GetNextImage(1000);
+
+             // Ensure image is complete
+             if (pResultImage->IsIncomplete())
+             {
+                 // Retrieve and print the image status description
+                 //qDebug() << "Image incomplete: " << Image::GetImageStatusDescription(pResultImage->GetImageStatus());
+                 continue;
+             }
+             else
+             {
+                 unsigned char* dst = mInputBuffer.getBuffer();
+                 void* src = pResultImage->GetData();
+                 size_t sz = pResultImage->GetImageSize();
+                 cudaMemcpy(dst, src, sz, cudaMemcpyHostToDevice);
+                 mInputBuffer.release();
+             }
+
+             // Release image
+             pResultImage->Release();
+
+         }
+         catch (Spinnaker::Exception& e)
+         {
+             qDebug() << "Error: " << e.what();
+             break;
+         }
+
 
         {
             QMutexLocker l(&mLock);
@@ -340,27 +384,27 @@ void GeniCamCamera::startStreaming()
         }
     }
 
-    streams[0]->stopStreaming();
-    streams[0]->close();
+    mCam->EndAcquisition();
 }
 
-bool GeniCamCamera::getParameter(cmrCameraParameter param, float& val)
+
+bool FLIRCamera::getParameter(cmrCameraParameter param, float& val)
 {
     using namespace GenApi;
 
     if(param < 0 || param > prmLast)
         return false;
 
-    if(!mDevice)
+    if(!mCam)
         return false;
 
     CFloatPtr ptrFloat;
     CIntegerPtr ptrInt;
-    std::shared_ptr<CNodeMapRef> nodeMap = mDevice->getRemoteNodeMap();
+    INodeMap& nodeMap = mCam->GetNodeMap();
     switch (param)
     {
     case prmFrameRate:
-        ptrFloat = nodeMap->_GetNode("AcquisitionFrameRate");
+        ptrFloat = nodeMap.GetNode("AcquisitionFrameRate");
         if (IsAvailable(ptrFloat))
         {
             val = (float)ptrFloat->GetValue();
@@ -368,7 +412,7 @@ bool GeniCamCamera::getParameter(cmrCameraParameter param, float& val)
         }
         else
         {
-            ptrInt = nodeMap->_GetNode("AcquisitionFrameRate");
+            ptrInt = nodeMap.GetNode("AcquisitionFrameRate");
             if(IsAvailable(ptrInt))
             {
                 val = (float)ptrInt->GetValue();
@@ -383,7 +427,7 @@ bool GeniCamCamera::getParameter(cmrCameraParameter param, float& val)
 
 
     case prmExposureTime:
-        ptrFloat = nodeMap->_GetNode("ExposureTime");
+        ptrFloat = nodeMap.GetNode("ExposureTime");
         if (IsAvailable(ptrFloat))
         {
             val = (float)ptrFloat->GetValue();
@@ -391,7 +435,7 @@ bool GeniCamCamera::getParameter(cmrCameraParameter param, float& val)
         }
         else
         {
-            ptrInt = nodeMap->_GetNode("ExposureTime");
+            ptrInt = nodeMap.GetNode("ExposureTime");
             if(IsAvailable(ptrInt))
             {
                 val = (float)ptrInt->GetValue();
@@ -412,25 +456,25 @@ bool GeniCamCamera::getParameter(cmrCameraParameter param, float& val)
     return false;
 }
 
-bool GeniCamCamera::setParameter(cmrCameraParameter param, float val)
+bool FLIRCamera::setParameter(cmrCameraParameter param, float val)
 {
     using namespace GenApi;
 
     if(param < 0 || param > prmLast)
         return false;
 
-    if(!mDevice)
+    if(!mCam)
         return false;
 
     CFloatPtr ptrFloat;
     CIntegerPtr ptrInt;
     CBooleanPtr ptrAcquisitionFrameRateEnable;
-    std::shared_ptr<CNodeMapRef> nodeMap = mDevice->getRemoteNodeMap();
+    INodeMap& nodeMap = mCam->GetNodeMap();
     switch (param)
     {
     case prmFrameRate:
-        ptrFloat = nodeMap->_GetNode("AcquisitionFrameRate");
-        ptrAcquisitionFrameRateEnable = nodeMap->_GetNode("AcquisitionFrameRateEnable");
+        ptrFloat = nodeMap.GetNode("AcquisitionFrameRate");
+        ptrAcquisitionFrameRateEnable = nodeMap.GetNode("AcquisitionFrameRateEnable");
         if(IsAvailable(ptrAcquisitionFrameRateEnable) && IsWritable(ptrAcquisitionFrameRateEnable))
         {
             ptrAcquisitionFrameRateEnable->SetValue(true);
@@ -443,7 +487,7 @@ bool GeniCamCamera::setParameter(cmrCameraParameter param, float val)
         }
         else
         {
-            ptrInt = nodeMap->_GetNode("AcquisitionFrameRate");
+            ptrInt = nodeMap.GetNode("AcquisitionFrameRate");
             if(IsAvailable(ptrInt) && IsWritable(ptrInt))
             {
                 ptrInt->SetValue(val);
@@ -453,7 +497,7 @@ bool GeniCamCamera::setParameter(cmrCameraParameter param, float val)
         return false;
 
     case prmExposureTime:
-        ptrFloat = nodeMap->_GetNode("ExposureTime");
+        ptrFloat = nodeMap.GetNode("ExposureTime");
         if (IsAvailable(ptrFloat))
         {
             if(IsWritable(ptrFloat))
@@ -464,7 +508,7 @@ bool GeniCamCamera::setParameter(cmrCameraParameter param, float val)
         }
         else
         {
-            ptrInt = nodeMap->_GetNode("ExposureTime");
+            ptrInt = nodeMap.GetNode("ExposureTime");
             if(IsAvailable(ptrInt))
             {
                 if(IsWritable(ptrInt))
@@ -483,23 +527,23 @@ bool GeniCamCamera::setParameter(cmrCameraParameter param, float val)
     return false;
 }
 
-bool GeniCamCamera::getParameterInfo(cmrParameterInfo& info)
+bool FLIRCamera::getParameterInfo(cmrParameterInfo& info)
 {
     using namespace GenApi;
 
     if(info.param < 0 || info.param > prmLast)
         return false;
 
-    if(!mDevice)
+    if(!mCam)
         return false;
 
     CFloatPtr ptrFloat;
     CIntegerPtr ptrInt;
-    std::shared_ptr<CNodeMapRef> nodeMap = mDevice->getRemoteNodeMap();
+    INodeMap& nodeMap = mCam->GetNodeMap();
     switch (info.param)
     {
     case prmFrameRate:
-        ptrFloat = nodeMap->_GetNode("AcquisitionFrameRate");
+        ptrFloat = nodeMap.GetNode("AcquisitionFrameRate");
         if (IsAvailable(ptrFloat))
         {
             info.min = (float)ptrFloat->GetMin();
@@ -513,7 +557,7 @@ bool GeniCamCamera::getParameterInfo(cmrParameterInfo& info)
         }
         else
         {
-            ptrInt = nodeMap->_GetNode("AcquisitionFrameRate");
+            ptrInt = nodeMap.GetNode("AcquisitionFrameRate");
             if(IsAvailable(ptrInt))
             {
                 info.min = (float)ptrInt->GetMin();
@@ -528,7 +572,7 @@ bool GeniCamCamera::getParameterInfo(cmrParameterInfo& info)
         }
 
     case prmExposureTime:
-        ptrFloat = nodeMap->_GetNode("ExposureTime");
+        ptrFloat = nodeMap.GetNode("ExposureTime");
         if (IsAvailable(ptrFloat))
         {
             info.min = (float)ptrFloat->GetMin();
@@ -541,7 +585,7 @@ bool GeniCamCamera::getParameterInfo(cmrParameterInfo& info)
         }
         else
         {
-            ptrInt = nodeMap->_GetNode("ExposureTime");
+            ptrInt = nodeMap.GetNode("ExposureTime");
             if(IsAvailable(ptrInt))
             {
                 info.min = (float)ptrInt->GetMin();

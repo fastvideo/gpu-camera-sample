@@ -3,7 +3,7 @@
 
 #ifdef SUPPORT_GENICAM
 
-#include "CameraBase.h"
+#include "GPUCameraBase.h"
 #include <rc_genicam_api/system.h>
 #include <rc_genicam_api/interface.h>
 #include <rc_genicam_api/device.h>
@@ -12,7 +12,7 @@
 #include <rc_genicam_api/pixel_formats.h>
 #include <QObject>
 
-class GeniCamCamera : public CameraBase
+class GeniCamCamera : public GPUCameraBase
 {
 public:
     GeniCamCamera();

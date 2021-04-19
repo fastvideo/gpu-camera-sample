@@ -29,12 +29,12 @@
 #ifndef PGMCAMERA_H
 #define PGMCAMERA_H
 
-#include "CameraBase.h"
+#include "GPUCameraBase.h"
 #include "FrameBuffer.h"
-#include "Image.h"
+#include "core_samples/Image.h"
 #include "FastAllocator.h"
 
-class PGMCamera : public CameraBase
+class PGMCamera : public GPUCameraBase
 {
 public:
     PGMCamera(const QString& fileName, fastBayerPattern_t pattern, bool isColor = true);
@@ -48,15 +48,10 @@ public:
     virtual bool setParameter(cmrCameraParameter param, float val);
     virtual bool getParameterInfo(cmrParameterInfo& info);
 
-protected:
-
 private:
     void startStreaming();
-
     QString mFileName;
     Image<unsigned char, FastAllocator> mInputImage;
-
-
 };
 
 #endif // PGMCAMERA_H

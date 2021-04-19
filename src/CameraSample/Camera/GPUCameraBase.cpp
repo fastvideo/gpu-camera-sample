@@ -26,9 +26,9 @@
  either expressed or implied, of the FreeBSD Project.
 */
 
-#include "CameraBase.h"
+#include "GPUCameraBase.h"
 
-CameraBase::CameraBase() :
+GPUCameraBase::GPUCameraBase() :
     QObject(nullptr)
 {
 

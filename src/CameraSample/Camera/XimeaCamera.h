@@ -31,10 +31,10 @@
 
 #ifdef SUPPORT_XIMEA
 
-#include "CameraBase.h"
+#include "GPUCameraBase.h"
 #include <xiApi.h>
 
-class XimeaCamera : public CameraBase
+class XimeaCamera : public GPUCameraBase
 {
     Q_OBJECT
 public:

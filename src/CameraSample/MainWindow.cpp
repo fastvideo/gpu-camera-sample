@@ -46,6 +46,10 @@
 #include "XimeaCamera.h"
 #endif
 
+#ifdef SUPPORT_FLIR
+#include "FLIRCamera.h"
+#endif
+
 #ifdef SUPPORT_GENICAM
 #include "GeniCamCamera.h"
 #endif
@@ -165,7 +169,7 @@ MainWindow::MainWindow(QWidget *parent) :
     openButton->setPopupMode(QToolButton::MenuButtonPopup);
     openButton->addAction(ui->actionOpenGrayPGM);
 
-    qRegisterMetaType<CameraBase::cmrCameraState>("cmrCameraState");
+    qRegisterMetaType<GPUCameraBase::cmrCameraState>("cmrCameraState");
 
     mTimerStatusRtsp.start(400);
     connect(&mTimerStatusRtsp, SIGNAL(timeout()), this, SLOT(onTimeoutStatusRtsp()));
@@ -174,7 +178,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->txtRtspServer->setText("rtsp://0.0.0.0:1234/live.sdp"); // guess to use a global address on the jetson platform
 #endif
 
-#if defined SUPPORT_XIMEA || defined SUPPORT_GENICAM
+#if defined SUPPORT_XIMEA || defined SUPPORT_GENICAM ||  SUPPORT_FLIR
 
     ui->mainToolBar->insertAction(ui->actionOpenBayerPGM, ui->actionOpenCamera);
     ui->menuCamera->insertAction(ui->actionOpenBayerPGM, ui->actionOpenCamera);
@@ -190,7 +194,7 @@ MainWindow::~MainWindow()
 void MainWindow::delayInit()
 {
     readSettings();
-    onCameraStateChanged(CameraBase::cstClosed);
+    onCameraStateChanged(GPUCameraBase::cstClosed);
     mRendererPtr->update();
 }
 
@@ -221,7 +225,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 }
 
-void MainWindow::initNewCamera(CameraBase* cmr, uint32_t devID)
+void MainWindow::initNewCamera(GPUCameraBase* cmr, uint32_t devID)
 {
     ui->cameraController->setCamera(nullptr);
     mCameraPtr.reset(cmr);
@@ -229,9 +233,9 @@ void MainWindow::initNewCamera(CameraBase* cmr, uint32_t devID)
         return;
 
     connect(mCameraPtr.data(),
-            SIGNAL(stateChanged(CameraBase::cmrCameraState)),
+            SIGNAL(stateChanged(GPUCameraBase::cmrCameraState)),
             this,
-            SLOT(onCameraStateChanged(CameraBase::cmrCameraState)));
+            SLOT(onCameraStateChanged(GPUCameraBase::cmrCameraState)));
 
     if(!mCameraPtr->open(devID))
         return;
@@ -284,6 +288,12 @@ void MainWindow::openCamera(uint32_t devID)
         mCameraPtr->stop();
 
     initNewCamera(new XimeaCamera(), devID);
+
+#elif SUPPORT_FLIR
+    if(mCameraPtr)
+        mCameraPtr->stop();
+
+    initNewCamera(new FLIRCamera(), devID);
 
 
 #elif SUPPORT_GENICAM
@@ -640,7 +650,7 @@ void MainWindow::on_cboBayerType_currentIndexChanged(int index)
 
 void MainWindow::on_actionOpenCamera_triggered()
 {
-#if defined SUPPORT_XIMEA || defined SUPPORT_GENICAM
+#if defined SUPPORT_XIMEA || defined SUPPORT_GENICAM || defined SUPPORT_FLIR
     openCamera(0);
 #endif
 }
@@ -967,9 +977,9 @@ void MainWindow::on_actionOpenGrayPGM_triggered()
     openPGMFile(false);
 }
 
-void MainWindow::onCameraStateChanged(CameraBase::cmrCameraState newState)
+void MainWindow::onCameraStateChanged(GPUCameraBase::cmrCameraState newState)
 {
-    if(newState == CameraBase::cstClosed)
+    if(newState == GPUCameraBase::cstClosed)
     {
         {
             QSignalBlocker b(ui->actionPlay);
@@ -979,7 +989,7 @@ void MainWindow::onCameraStateChanged(CameraBase::cmrCameraState newState)
         ui->actionRecord->setEnabled(false);
 
     }
-    else if(newState == CameraBase::cstStopped)
+    else if(newState == GPUCameraBase::cstStopped)
     {
         ui->actionPlay->setEnabled(true);
         {
@@ -988,7 +998,7 @@ void MainWindow::onCameraStateChanged(CameraBase::cmrCameraState newState)
         }
         ui->actionRecord->setEnabled(false);
     }
-    else if(newState == CameraBase::cstStreaming)
+    else if(newState == GPUCameraBase::cstStreaming)
     {
         ui->actionPlay->setEnabled(true);
         {
@@ -1154,3 +1164,4 @@ void MainWindow::on_actionShowImage_triggered(bool checked)
     mOptions.ShowPicture = checked;
     mProcessorPtr->updateOptions(mOptions);
 }
+

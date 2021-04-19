@@ -23,6 +23,8 @@ INCLUDEPATH += $$PWD/Camera
 INCLUDEPATH += $$PWD/RtspServer
 
 SOURCES += main.cpp\
+    Camera/FLIRCamera.cpp \
+    Camera/GPUCameraBase.cpp \
         MainWindow.cpp \
     Widgets/GLImageViewer.cpp \
     Globals.cpp \
@@ -35,7 +37,6 @@ SOURCES += main.cpp\
     helper_jpeg_load.cpp \
     helper_jpeg_store.cpp \
     Widgets/DenoiseController.cpp \
-    Camera/CameraBase.cpp \
     Camera/FrameBuffer.cpp \
     Camera/PGMCamera.cpp \
     RawProcessor.cpp \
@@ -89,6 +90,8 @@ contains( DEFINES, SUPPORT_XIMEA ){
 win32: SOURCES += $$OTHER_LIB_PATH/FastvideoSDK/core_samples/SurfaceTraitsInternal.cpp
 
 HEADERS  += MainWindow.h \
+    Camera/FLIRCamera.h \
+    Camera/GPUCameraBase.h \
     Widgets/GLImageViewer.h \
     CUDASupport/CUDAProcessorOptions.h \
     Globals.h \
@@ -100,7 +103,6 @@ HEADERS  += MainWindow.h \
     ppm.h \
     helper_jpeg.hpp \
     Widgets/DenoiseController.h \
-    Camera/CameraBase.h \
     Camera/XimeaCamera.h \
     Camera/FrameBuffer.h \
     Camera/PGMCamera.h \

@@ -30,7 +30,7 @@
 #define CAMERASETUPWIDGET_H
 
 #include <QWidget>
-#include "CameraBase.h"
+#include "GPUCameraBase.h"
 
 namespace Ui {
 class CameraSetupWidget;
@@ -44,15 +44,15 @@ public:
     explicit CameraSetupWidget(QWidget *parent = 0);
     ~CameraSetupWidget();
 
-    void setCamera(CameraBase* cameraPtr);
+    void setCamera(GPUCameraBase* cameraPtr);
 
 private slots:
     void on_spnFrameRate_valueChanged(double arg1);
     void on_spnExposureTime_valueChanged(int arg1);
-    void onCameraStateChanged(CameraBase::cmrCameraState newState);
+    void onCameraStateChanged(GPUCameraBase::cmrCameraState newState);
 private:
     Ui::CameraSetupWidget *ui;
-    CameraBase* mCameraPtr = nullptr;
+    GPUCameraBase* mCameraPtr = nullptr;
 
 };
 

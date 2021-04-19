@@ -34,7 +34,7 @@
 
 #include "CUDAProcessorBase.h"
 #include "FrameBuffer.h"
-#include "CameraBase.h"
+#include "GPUCameraBase.h"
 #include "GLImageViewer.h"
 
 class GLImageViewer;
@@ -117,8 +117,8 @@ private slots:
     //Camera
     void openCamera(uint32_t devID);
     void openPGMFile(bool isBayer = true);
-    void initNewCamera(CameraBase* cmr, uint32_t devID);
-    void onCameraStateChanged(CameraBase::cmrCameraState newState);
+    void initNewCamera(GPUCameraBase* cmr, uint32_t devID);
+    void onCameraStateChanged(GPUCameraBase::cmrCameraState newState);
     void on_actionOpenBayerPGM_triggered();
     void on_actionOpenGrayPGM_triggered();
 
@@ -135,8 +135,8 @@ private slots:
 
 
 	void on_cboFormatEnc_currentIndexChanged(int index);
-
     void on_actionShowImage_triggered(bool checked);
+
 
 private:
     Ui::MainWindow *ui;
@@ -145,7 +145,7 @@ private:
     QLabel* mFpsLabel;
 
     QScopedPointer<RawProcessor> mProcessorPtr;
-    QScopedPointer<CameraBase> mCameraPtr;
+    QScopedPointer<GPUCameraBase> mCameraPtr;
 
     QScopedPointer<QWidget> mContainerPtr;
     QScopedPointer<GLImageViewer> mMediaViewer;

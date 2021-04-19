@@ -35,7 +35,7 @@
 #include <QByteArray>
 
 XimeaCamera::XimeaCamera() :
-    CameraBase()
+    GPUCameraBase()
 {
     mCameraThread.setObjectName(QStringLiteral("XimeaCameraThread"));
     moveToThread(&mCameraThread);

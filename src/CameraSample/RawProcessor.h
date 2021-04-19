@@ -45,13 +45,13 @@ class CUDAProcessorBase;
 class CircularBuffer;
 class MainWindow;
 class GLRenderer;
-class CameraBase;
+class GPUCameraBase;
 
 class RawProcessor : public QObject
 {
     Q_OBJECT
 public:
-    explicit RawProcessor(CameraBase* camera, GLRenderer* renderer);
+    explicit RawProcessor(GPUCameraBase* camera, GLRenderer* renderer);
     ~RawProcessor();
 
     fastStatus_t init();
@@ -100,7 +100,7 @@ private:
     QMutex               mWaitMutex;
     QWaitCondition       mWaitCond;
     bool                 mWake = false;
-    CameraBase*          mCamera = nullptr;
+    GPUCameraBase*          mCamera = nullptr;
     GLRenderer*          mRenderer = nullptr;
     QThread              mCUDAThread;
     float                mRenderFps = 30;

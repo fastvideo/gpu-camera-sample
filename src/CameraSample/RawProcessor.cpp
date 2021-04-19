@@ -30,7 +30,7 @@
 #include "CUDAProcessorBase.h"
 #include "CUDAProcessorGray.h"
 #include "FrameBuffer.h"
-#include "CameraBase.h"
+#include "GPUCameraBase.h"
 #include "MainWindow.h"
 #include "FPNReader.h"
 #include "FFCReader.h"
@@ -42,7 +42,7 @@
 #include <QDebug>
 #include <QPoint>
 
-RawProcessor::RawProcessor(CameraBase *camera, GLRenderer *renderer):QObject(nullptr),
+RawProcessor::RawProcessor(GPUCameraBase *camera, GLRenderer *renderer):QObject(nullptr),
     mCamera(camera),
     mRenderer(renderer)
 {

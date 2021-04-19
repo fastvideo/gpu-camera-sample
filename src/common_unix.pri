@@ -1,6 +1,6 @@
 # contains(TARGET_ARCH, arm64 ): QMAKE_CXXFLAGS += -msse3 -m64
 OTHER_LIB_PATH = $$dirname(PWD)/OtherLibsLinux
-
+FLIR_PATH = /opt/spinnaker
 
 # CUDA
 #
@@ -22,49 +22,8 @@ CUDA_LIB += -lcudart
 FFMPEG_PATH = $$OTHER_LIB_PATH/ffmpeg
 FFMPEG_LIB_PATH  = $$FFMPEG_PATH/lib/
 
-contains( DEFINES, SUPPORT_XIMEA ){
-    XI_API_PATH = /opt/XIMEA/
-    INCLUDEPATH += $$XI_API_PATH/include
-    LIBS += -lm3api
-}
 
-contains( DEFINES, SUPPORT_GENICAM ){
-    DEFINES -= UNICODE
-    DEFINES += GENICAM_NO_AUTO_IMPLIB
 
-    #Ximea Transport Layer
-    DEFINES += GENTL_INSTALL_PATH=\'\"/opt/XIMEA/lib\"\'
-
-    #Daheng transport layer
-    #DEFINES += GENTL_INSTALL_PATH=\'\"/usr/lib\"\'
-
-    GANAPIPATH = $$OTHER_LIB_PATH/GenICam/library/CPP
-
-contains(TARGET_ARCH, arm64 ) {
-    GANAPI_LIB_PATH = $$GANAPIPATH/bin/Linux64_ARM
-    GCC_VER = gcc49
-}
-else {
-    GANAPI_LIB_PATH = $$GANAPIPATH/bin/Linux64_x64
-    GCC_VER = gcc48
-}
-
-    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libGCBase_$${GCC_VER}_v3_2.so
-    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libGenApi_$${GCC_VER}_v3_2.so
-    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libLog_$${GCC_VER}_v3_2.so
-    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libMathParser_$${GCC_VER}_v3_2.so
-    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libNodeMapData_$${GCC_VER}_v3_2.so
-    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libXmlParser_$${GCC_VER}_v3_2.so
-
-#    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libCLProtocol_$${GCC_VER}_v3_2.so
-#    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libFirmwareUpdate_$${GCC_VER}_v3_2.so
-#    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/liblog4cpp_$${GCC_VER}_v3_2.so
-
-    INCLUDEPATH += $$GANAPIPATH/include
-    LIBS += -L$$GANAPI_LIB_PATH -lCLAllSerial_$${GCC_VER}_v3_2 -lGCBase_$${GCC_VER}_v3_2 -lGenApi_$${GCC_VER}_v3_2
-    LIBS += -lLog_$${GCC_VER}_v3_2 -lMathParser_$${GCC_VER}_v3_2 -lNodeMapData_$${GCC_VER}_v3_2 -lXmlParser_$${GCC_VER}_v3_2
-#    LIBS += -lFirmwareUpdate_$${GCC_VER}_v3_2 -llog4cpp_$${GCC_VER}_v3_2 -lCLProtocol_$${GCC_VER}_v3_2
-}
 
 #
 # FASTVIDEO SDK
@@ -72,6 +31,7 @@ else {
 FASTVIDEOPATH  = $$OTHER_LIB_PATH/FastvideoSDK
 FASTVIDEO_SDK  = $$FASTVIDEOPATH/fastvideo_sdk
 FASTVIDEO_INC  = $$FASTVIDEO_SDK/inc
+FASTVIDEO_INC += $$FASTVIDEOPATH
 FASTVIDEO_INC += $$FASTVIDEOPATH/common
 FASTVIDEO_INC += $$FASTVIDEOPATH/libs/OpenGL/inc
 #
@@ -114,6 +74,55 @@ LIBS += $$CUDA_LIB
 LIBS += $$FFMPEG_LIB
 LIBS += -ldl
 LIBS += -ljpeg
+
+contains( DEFINES, SUPPORT_XIMEA ){
+    XI_API_PATH = /opt/XIMEA/
+    INCLUDEPATH += $$XI_API_PATH/include
+    LIBS += -lm3api
+}
+
+contains( DEFINES, SUPPORT_FLIR ){
+    INCLUDEPATH += $$FLIR_PATH/include
+    LIBS += -L$$FLIR_PATH/lib -lSpinnaker
+}
+
+contains( DEFINES, SUPPORT_GENICAM ){
+    DEFINES -= UNICODE
+    DEFINES += GENICAM_NO_AUTO_IMPLIB
+
+    #Ximea Transport Layer
+    DEFINES += GENTL_INSTALL_PATH=\'\"/opt/XIMEA/lib\"\'
+
+    #Daheng transport layer
+    #DEFINES += GENTL_INSTALL_PATH=\'\"/usr/lib\"\'
+
+    GANAPIPATH = $$OTHER_LIB_PATH/GenICam/library/CPP
+
+contains(TARGET_ARCH, arm64 ) {
+    GANAPI_LIB_PATH = $$GANAPIPATH/bin/Linux64_ARM
+    GCC_VER = gcc49
+}
+else {
+    GANAPI_LIB_PATH = $$GANAPIPATH/bin/Linux64_x64
+    GCC_VER = gcc48
+}
+
+    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libGCBase_$${GCC_VER}_v3_2.so
+    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libGenApi_$${GCC_VER}_v3_2.so
+    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libLog_$${GCC_VER}_v3_2.so
+    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libMathParser_$${GCC_VER}_v3_2.so
+    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libNodeMapData_$${GCC_VER}_v3_2.so
+    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libXmlParser_$${GCC_VER}_v3_2.so
+
+#    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libCLProtocol_$${GCC_VER}_v3_2.so
+#    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libFirmwareUpdate_$${GCC_VER}_v3_2.so
+#    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/liblog4cpp_$${GCC_VER}_v3_2.so
+
+    INCLUDEPATH += $$GANAPIPATH/include
+    LIBS += -L$$GANAPI_LIB_PATH -lCLAllSerial_$${GCC_VER}_v3_2 -lGCBase_$${GCC_VER}_v3_2 -lGenApi_$${GCC_VER}_v3_2
+    LIBS += -lLog_$${GCC_VER}_v3_2 -lMathParser_$${GCC_VER}_v3_2 -lNodeMapData_$${GCC_VER}_v3_2 -lXmlParser_$${GCC_VER}_v3_2
+#    LIBS += -lFirmwareUpdate_$${GCC_VER}_v3_2 -llog4cpp_$${GCC_VER}_v3_2 -lCLProtocol_$${GCC_VER}_v3_2
+}
 
 #
 contains(TARGET_ARCH, arm64 ): LIBS += -lGL

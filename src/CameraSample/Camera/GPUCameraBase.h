@@ -49,7 +49,7 @@ public:
 class RawProcessor;
 
 ///Base class for camera object
-class CameraBase : public QObject
+class GPUCameraBase : public QObject
 {
     Q_OBJECT
 public:
@@ -84,7 +84,7 @@ public:
         cmrParameterInfo(cmrCameraParameter p){param = p;}
     } ;
 
-    explicit CameraBase();
+    explicit GPUCameraBase();
 
     ///Connect to camera, initialize internal variables and
     ///allocate required resources
@@ -98,6 +98,16 @@ public:
 
     ///Disconnect from camera and free allocated resources
     virtual void close() = 0;
+
+    ///Get camera parameter value. Return true on success, false otherwise.
+    virtual bool getParameter(cmrCameraParameter param, float& val) = 0;
+
+    ///Set parameter value. Return true on success, false otherwise.
+    virtual bool setParameter(cmrCameraParameter param, float val) = 0;
+
+    ///Get camera parameter information. Return true on success, false otherwise.
+    virtual bool getParameterInfo(cmrParameterInfo& info) = 0;
+
 
     ///Get current camera state
     cmrCameraState state() {return mState;}
@@ -114,14 +124,6 @@ public:
     ///Return FV SDK compatible surface format
     fastSurfaceFormat_t surfaceFormat(){return mSurfaceFormat;}
 
-    ///Get camera parameter value. Return true on success, false otherwise.
-    virtual bool getParameter(cmrCameraParameter param, float& val) = 0;
-
-    ///Set parameter value. Return true on success, false otherwise.
-    virtual bool setParameter(cmrCameraParameter param, float val) = 0;
-
-    ///Get camera parameter information. Return true on success, false otherwise.
-    virtual bool getParameterInfo(cmrParameterInfo& info) = 0;
 
     bool isPacked(){return mImageFormat == cif12bpp_p;}
     bool isColor(){return mIsColor;}
@@ -142,7 +144,7 @@ public:
     void setProcessor(RawProcessor* proc){QMutexLocker l(&mLock); mRawProc = proc;}
 
 signals:
-    void stateChanged(CameraBase::cmrCameraState newState);
+    void stateChanged(GPUCameraBase::cmrCameraState newState);
 
 protected:
     QString mModel;
