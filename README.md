@@ -30,13 +30,13 @@ Processing is done on NVIDIA GPU to speedup the performance. The software could 
 
 From the benchmarks on <strong>NVIDIA Quadro RTX 6000</strong> or <strong>GeForce RTX 2080ti</strong> we can see that GPU-based raw image processing is very fast and it could offer high image quality at the same time. The total performance could reach <strong>4 GPix/s</strong> for color cameras. The performance strongly depends on complexity of the pipeline. Multiple GPU solutions could significantly improve the performance.
 
-Currently the software is working with <a href="https://www.ximea.com" target="_blank">XIMEA</a> cameras via XIMEA SDK. Via GenICam the software can work with <a href="https://www.ximea.com" target="_blank">XIMEA</a>, <a href="https://www.matrix-vision.com" target="_blank">MATRIX VISION</a>, <a href="https://www.baslerweb.com" target="_blank">Basler</a>, <a href="https://www.jai.com" target="_blank">JAI</a>, <a href="https://dahengimaging.com/" target="_blank">Daheng Imaging</a> cameras. Soon we are going to add support for <a href="https://emergentvisiontec.com/" target="_blank">Emergent Vision Technologies</a>, <a href="https://en.ids-imaging.com/" target="_blank">IDS Imaging Development Systems</a>, <a href="https://www.imperx.com" target="_blank">Imperx</a>, <a href="https://www.baumer.com" target="_blank">Baumer</a>, <a href="https://kayainstruments.com/" target="_blank">Kaya Instruments</a>, and <a href="https://www.flir.com" target="_blank">FLIR</a> cameras. You can add support for desired cameras by yourself. The software is working with demo version of <a href="https://www.fastcompression.com/products/sdk.htm" target="_blank">Fastvideo SDK</a>, that is why you can see a watermark on the screen. To get a Fastvideo SDK license for develoment and for deployment, please contact <a href="https://www.fastcompression.com/" target="_blank">Fastvideo company</a>.
+Currently the software is working with <a href="https://www.ximea.com" target="_blank">XIMEA</a> cameras via XIMEA SDK. Via GenICam the software can work with <a href="https://www.ximea.com" target="_blank">XIMEA</a>, <a href="https://www.matrix-vision.com" target="_blank">MATRIX VISION</a>, <a href="https://www.baslerweb.com" target="_blank">Basler</a>, <a href="https://www.flir.com" target="_blank">FLIR</a>, <a href="https://www.jai.com" target="_blank">JAI</a>, <a href="https://dahengimaging.com/" target="_blank">Daheng Imaging</a> cameras. Soon we are going to add support for <a href="https://emergentvisiontec.com/" target="_blank">Emergent Vision Technologies</a>, <a href="https://en.ids-imaging.com/" target="_blank">IDS Imaging Development Systems</a>, <a href="https://www.imperx.com" target="_blank">Imperx</a>, <a href="https://www.baumer.com" target="_blank">Baumer</a>, <a href="https://kayainstruments.com/" target="_blank">Kaya Instruments</a>, and <a href="https://www.flir.com" target="_blank">FLIR</a> cameras. You can add support for desired cameras by yourself. The software is working with demo version of <a href="https://www.fastcompression.com/products/sdk.htm" target="_blank">Fastvideo SDK</a>, that is why you can see a watermark on the screen. To get a Fastvideo SDK license for develoment and for deployment, please contact <a href="https://www.fastcompression.com/" target="_blank">Fastvideo company</a>.
 
 ## How to build gpu-camera-sample
 
 ### Requirements for Windows
 
-* Camera SDK or GenICam package + camera vendor GenTL producer (.cti). Сurrently XIMEA, MATRIX VISION, Basler, JAI, Daheng Imaging cameras are supported
+* Camera SDK or GenICam package + camera vendor GenTL producer (.cti). Сurrently XIMEA, MATRIX VISION, Basler, FLIR, JAI, Daheng Imaging cameras are supported
 * Fastvideo SDK (demo) ver.0.16.3.0
 * NVIDIA CUDA-10.2
 * Qt ver.5.13.1
@@ -45,7 +45,7 @@ Currently the software is working with <a href="https://www.ximea.com" target="_
 ### Requirements for Linux
 
 * Ubuntu 18.04 (x64 or Arm64)
-* Camera SDK or GenICam package + camera vendor GenTL producer (.cti). Currently XIMEA, MATRIX VISION, Basler, JAI, Daheng Imaging cameras are supported
+* Camera SDK or GenICam package + camera vendor GenTL producer (.cti). Currently XIMEA, MATRIX VISION, Basler, FLIR, JAI, Daheng Imaging cameras are supported
 * Fastvideo SDK (demo) ver.0.16.0.0
 * NVIDIA CUDA-10.2 for x64 and ARM64 platform
 * Compiler gcc 7.4 or later
@@ -180,7 +180,7 @@ We also recommend to check PCI-Express bandwidth for Host-to-Device and Device-t
 
 If you are working with images which reside on HDD, please place them on SSD or M2.
 
-For testing purposes you can utilize the latest NVIDIA GeForce RTX 2060, 2070, 2080ti or Jetson Nano, TX2, NX/AGX Xavier.
+For testing purposes you can utilize the latest NVIDIA GeForce RTX 2060, 2070, 2080ti or Jetson Nano, TX2, NX and AGX Xavier.
 
 For continuous high performance applications we recommend professional NVIDIA Quadro and Tesla GPUs.
 
@@ -197,7 +197,7 @@ You can also create a software module to collect frames from different cameras a
 * Linux version - done
 * Software for NVIDIA Jetson hardware and L4T for CUDA-10.2 (Jetson Nano, TX2, Xavier AGX and NX) - done
 * Glass-to-Glass (G2G) test for latency measurements - done
-* Support for XIMEA, MATRIX VISION, Basler, JAI, Daheng Imaging cameras - done
+* Support for XIMEA, MATRIX VISION, Basler, FLIR, JAI, Daheng Imaging cameras - done
 * MJPEG and H.264 streaming with or without FFmpeg RTSP - done
 * HEVC (H.265) encoder/decoder - done
 * <a href="https://imaginghub.com/projects/455-real-time-image-processing-on-nvidia-gpu-with-basler-pylon-and-fastvideo" target="_blank">Real-time Image Processing on NVIDIA GPU with Basler pylon</a> - done
@@ -212,15 +212,16 @@ You can also create a software module to collect frames from different cameras a
 
 * <a href="https://www.fastcompression.com/products/sdk.htm" target="_blank">Fastvideo SDK for Image & Video Processing on GPU</a>
 * <a href="https://www.fastcinemadng.com/" target="_blank">Full image processing pipeline on GPU for digital cinema applications</a>
-* <a href="https://en.wikipedia.org/wiki/Nvidia_NVENC#Versions" target="_blank">Parameters and restrictions of Nvidia NVENC</a> 
-* <a href="https://en.wikipedia.org/wiki/Nvidia_NVDEC#GPU_support" target="_blank">Parameters and restrictions of Nvidia NVDEC</a>
+* <a href="https://en.wikipedia.org/wiki/Nvidia_NVENC#Versions" target="_blank">Parameters and restrictions of NVIDIA NVENC</a> 
+* <a href="https://en.wikipedia.org/wiki/Nvidia_NVDEC#GPU_support" target="_blank">Parameters and restrictions of NVIDIA NVDEC</a>
 * <a href="https://www.fastcompression.com/blog/content.htm" target="_blank">Fastvideo Blog</a>
+* <a href="https://www.fastcompression.com/blog/fastvideo-sdk-vs-nvidia-npp.htm" target="_blank">Fastvideo SDK vs NVIDIA NPP Library</a>
 * <a href="https://www.fastcompression.com/blog/gpu-vs-cpu-fast-image-processing.htm" target="_blank">GPU vs CPU at Image Processing. Why GPU is much faster than CPU?</a>
 
 ## Fastvideo SDK Benchmarks
 
-* <a href="https://www.fastcompression.com/pub/2020/Fastvideo_SDK_benchmarks.pdf" target="_blank">Fastvideo SDK Benchmarks</a>
-* <a href="https://www.fastcompression.com/blog/jetson-benchmark-comparison.htm" target="_blank">Jetson Benchmark Comparison for Image Processing: Nano vs TX1 vs TX2 vs Xavier</a>
+* <a href="https://www.fastcompression.com/pub/2021/Fastvideo_SDK_benchmarks.pdf" target="_blank">Fastvideo SDK Benchmarks</a>
+* <a href="https://www.fastcompression.com/blog/jetson-benchmark-comparison.htm" target="_blank">Jetson Benchmark Comparison for Image Processing: Nano vs TX2 vs Xavier NX and AGX</a>
 * JPEG2000 benchmarks for <a href="https://www.fastcompression.com/benchmarks/benchmarks-j2k.htm" target="_blank">encoding</a> and <a href="https://www.fastcompression.com/benchmarks/decoder-benchmarks-j2k.htm" target="_blank">decoding</a>
 
 ## Downloads
