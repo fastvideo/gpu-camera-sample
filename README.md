@@ -82,7 +82,7 @@ For Windows users
    * Unpack GenICam_V3_2_0-Win64_x64_VC141-Release-SDK.zip into \<Project root\>\OtherLibs\GenICam folder.
    * Unpack GenICam_V3_2_0-Win64_x64_VC141-Release-Runtime.zip into \<Project root\>\OtherLibs\GenICam\library\CPP
 
-You also can download precompiled libs from <a href="https://drive.google.com/file/d/1Ywzn7fwSb_Hn_cfnEcssBixdrYJ1NuzY/view?usp=sharing" target="_blank">here</a>
+You also can download precompiled libs from <a href="https://drive.google.com/file/d/1losPpCK75zuvkJHWGz5gICDbJz_4eD9R/view?usp=sharing" target="_blank">here</a>
 
 * Open src\GPUCameraSample.pro in Qt Creator.
 * By default the application will be built with no camera support. The only option is camera simulator which is working with PGM files. To enable XIMEA camera support, open common_defs.pri and uncomment line DEFINES += SUPPORT_XIMEA.
@@ -105,7 +105,7 @@ For Linux users
 * Build the project.
 * Binaries will be placed into \<Project root\>\GPUCameraSample_Arm64 or GPUCameraSample_Linux64 folder. To run application from terminal run GPUCameraSample.sh. Nesessary symbolyc links will be made during compile time.
 
-You also can download precompiled libs from <a href="https://drive.google.com/file/d/1vS3zh63pzlm9RXlhdTKFtBxJeWQBgbEa/view?usp=sharing" target="_blank">here</a>
+You also can download precompiled libs from <a href="https://drive.google.com/file/d/1RAE4uZxXaYB7wNmF_58tqw3R2yzxU9AT/view?usp=sharing" target="_blank">here</a>
 
 ### How to work with NVIDIA Jetson to get maximum performance
 
