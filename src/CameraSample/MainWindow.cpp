@@ -178,7 +178,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->txtRtspServer->setText("rtsp://0.0.0.0:1234/live.sdp"); // guess to use a global address on the jetson platform
 #endif
 
-#if defined SUPPORT_XIMEA || defined SUPPORT_GENICAM ||  SUPPORT_FLIR
+#if defined SUPPORT_XIMEA || defined SUPPORT_GENICAM || defined SUPPORT_FLIR
 
     ui->mainToolBar->insertAction(ui->actionOpenBayerPGM, ui->actionOpenCamera);
     ui->menuCamera->insertAction(ui->actionOpenBayerPGM, ui->actionOpenCamera);
