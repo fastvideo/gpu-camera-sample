@@ -52,7 +52,8 @@ SOURCES += main.cpp\
     RtspServer/JpegEncoder.cpp \
     RtspServer/RTSPStreamerServer.cpp \
     RtspServer/TcpClient.cpp \
-    RtspServer/vutils.cpp
+    RtspServer/vutils.cpp \
+    Camera/ImperxCamera.cpp
 
 contains( DEFINES, SUPPORT_GENICAM ){
     SOURCES += rc_genicam_api/buffer.cc \
@@ -122,7 +123,8 @@ HEADERS  += MainWindow.h \
     RtspServer/vutils.h \
     CUDASupport/CudaAllocator.h \
     CUDASupport/GPUImage.h \
-    version.h
+    version.h \
+    Camera/ImperxCamera.h
 
 FORMS    += MainWindow.ui \
     Widgets/DenoiseController.ui \

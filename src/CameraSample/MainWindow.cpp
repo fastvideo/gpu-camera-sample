@@ -50,6 +50,11 @@
 #include "FLIRCamera.h"
 #endif
 
+
+#ifdef SUPPORT_IMPERX
+#include "ImperxCamera.h"
+#endif
+
 #ifdef SUPPORT_GENICAM
 #include "GeniCamCamera.h"
 #endif
@@ -178,7 +183,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->txtRtspServer->setText("rtsp://0.0.0.0:1234/live.sdp"); // guess to use a global address on the jetson platform
 #endif
 
-#if defined SUPPORT_XIMEA || defined SUPPORT_GENICAM || defined SUPPORT_FLIR
+#if defined SUPPORT_XIMEA || defined SUPPORT_GENICAM || defined SUPPORT_FLIR || defined SUPPORT_IMPERX
 
     ui->mainToolBar->insertAction(ui->actionOpenBayerPGM, ui->actionOpenCamera);
     ui->menuCamera->insertAction(ui->actionOpenBayerPGM, ui->actionOpenCamera);
@@ -295,6 +300,12 @@ void MainWindow::openCamera(uint32_t devID)
 
     initNewCamera(new FLIRCamera(), devID);
 
+
+#elif SUPPORT_IMPERX
+    if(mCameraPtr)
+        mCameraPtr->stop();
+
+    initNewCamera(new ImperxCamera(), devID);
 
 #elif SUPPORT_GENICAM
     if(mCameraPtr)
@@ -650,7 +661,7 @@ void MainWindow::on_cboBayerType_currentIndexChanged(int index)
 
 void MainWindow::on_actionOpenCamera_triggered()
 {
-#if defined SUPPORT_XIMEA || defined SUPPORT_GENICAM || defined SUPPORT_FLIR
+#if defined SUPPORT_XIMEA || defined SUPPORT_GENICAM || defined SUPPORT_FLIR|| defined SUPPORT_IMPERX
     openCamera(0);
 #endif
 }
