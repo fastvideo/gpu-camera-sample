@@ -60,8 +60,8 @@ void CameraSetupWidget::setCamera(GPUCameraBase* cameraPtr)
         ui->spnFrameRate->setEnabled(true);
         ui->spnExposureTime->setEnabled(true);
 
-        connect(mCameraPtr, SIGNAL(stateChanged(CameraBase::cmrCameraState)),
-                this, SLOT(onCameraStateChanged(CameraBase::cmrCameraState)));
+        connect(mCameraPtr, SIGNAL(stateChanged(GPUCameraBase::cmrCameraState)),
+                this, SLOT(onCameraStateChanged(GPUCameraBase::cmrCameraState)));
 
         GPUCameraBase::cmrParameterInfo info(GPUCameraBase::prmExposureTime);
         float val = 0;

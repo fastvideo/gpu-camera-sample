@@ -31,7 +31,7 @@
 
 #include "GPUCameraBase.h"
 #include "FrameBuffer.h"
-#include "core_samples/Image.h"
+#include "Image.h"
 #include "FastAllocator.h"
 
 class PGMCamera : public GPUCameraBase
