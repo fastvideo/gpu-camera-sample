@@ -77,37 +77,37 @@ git clone https://github.com/fastvideo/gpu-camera-sample.git
 For Windows users
 
 * Create OtherLibs folder in the project root folder. This folder will contains external libraries, used in gpu-camera-sample application.
-* Download Fastvideo SDK from <a href="https://drive.google.com/file/d/1KDpVZCL9ljk8zZvzLKRdxXUDgO74USts/view?usp=sharing">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a>, unpack it into \<Project root\>\OtherLibs\fastvideoSDK folder. If the trial period is expired, please send an inquery to Fastvideo to obtain the latest version.
-* If you need direct XIMEA camera support, download XiAPI from https://www.ximea.com/support/documents/4. Install downloaded package (by default into C:\XIMEA). Copy API folder from XIAPI installation folder into \<Project root\>\OtherLibs folder.
+* Download Fastvideo SDK from <a href="https://drive.google.com/file/d/1KDpVZCL9ljk8zZvzLKRdxXUDgO74USts/view?usp=sharing">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a>, unpack it into <Project root>/OtherLibs/FastvideoSDK folder. If the trial period is expired, please send an inquery to Fastvideo to obtain the latest version.
+* If you need direct XIMEA camera support, download XiAPI from https://www.ximea.com/support/documents/4. Install downloaded package (by default into C:\XIMEA). Copy API folder from XIAPI installation folder into <Project root>/OtherLibs folder.
 * If you need GenICam support
    * Download GenICamTM Package Version 2019.11 (https://www.emva.org/wp-content/uploads/GenICam_Package_2019.11.zip).
    * Unpack it to a temporary folder and cd to Reference Implementation folder.
-   * Create \<Project root\>\OtherLibs\GenICam folder.
-   * Unpack GenICam_V3_2_0-Win64_x64_VC141-Release-SDK.zip into \<Project root\>\OtherLibs\GenICam folder.
-   * Unpack GenICam_V3_2_0-Win64_x64_VC141-Release-Runtime.zip into \<Project root\>\OtherLibs\GenICam\library\CPP
+   * Create <Project root>/OtherLibs/GenICam folder.
+   * Unpack GenICam_V3_2_0-Win64_x64_VC141-Release-SDK.zip into <Project root>/OtherLibs/GenICam folder.
+   * Unpack GenICam_V3_2_0-Win64_x64_VC141-Release-Runtime.zip into <Project root>/OtherLibs/GenICam/library/CPP
 
 You also can download precompiled libs from <a href="https://drive.google.com/file/d/1losPpCK75zuvkJHWGz5gICDbJz_4eD9R/view?usp=sharing" target="_blank">here</a>
 
 * Open src\GPUCameraSample.pro in Qt Creator.
 * By default the application will be built with no camera support. The only option is camera simulator which is working with PGM files. To enable XIMEA camera support, open common_defs.pri and uncomment line DEFINES += SUPPORT_XIMEA.
 * Build the project.
-* Binaries will be placed into \<Project root\>\GPUCameraSample_x64 folder.
+* Binaries will be placed into <Project root>/GPUCameraSample_x64 folder.
 
 For Linux users
 
-* Create OtherLibsLinux folder in the project root folder. This folder will contains external libraries, used in gpu-camera-sample application.
-* Download Fastvideo SDK x64 platform from <a href="https://drive.google.com/file/d/1tZPaYMa2Te831htZUMVX_IAIoZbGNzZd/view?usp=sharing">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a>, or Fastvideo SDK Arm64 platform from <a href="https://drive.google.com/file/d/12XYCRcXTLXFAOCKeV5F_j2bICDTqdUSL/view?usp=sharing">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> unpack it into \<Project root\>\OtherLibsLinux\fastvideoSDK folder. Copy all files from \<Project root\>/OtherLibsLinux/fastvideoSDK/fastvideo_sdk/lib to \<Project root\>/OtherLibsLinux/fastvideoSDK/fastvideo_sdk/lib/x64 for x64 platform and to \<Project root\>/OtherLibsLinux/fastvideoSDK/fastvideo_sdk/lib/Arm64 for Arm64 platform.
-* If you need direct XIMEA camera support, download XiAPI from https://www.ximea.com/support/documents/4. Unpack and install downloaded package .
+* Create OtherLibsLinux folder in the project root folder. This folder will contains external libraries, used in gpu-camera-sample application. Root folder means ./gpu-camera-sample
+* Download Fastvideo SDK x64 platform from <a href="https://drive.google.com/file/d/1tZPaYMa2Te831htZUMVX_IAIoZbGNzZd/view?usp=sharing">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a>, or Fastvideo SDK Arm64 platform from <a href="https://drive.google.com/file/d/12XYCRcXTLXFAOCKeV5F_j2bICDTqdUSL/view?usp=sharing">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> and unpack it into <Project root>/OtherLibsLinux/FastvideoSDK folder. Copy all files from <Project root>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib to <Project root>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib/x64 for x64 platform and to <Project root>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib/Arm64 for Arm64 platform.
+* If you need direct XIMEA camera support, download XiAPI from https://www.ximea.com/support/documents/4. Unpack and install downloaded package.
 * If you need GenICam support
    * Download GenICamTM Package Version 2019.11 (https://www.emva.org/wp-content/uploads/GenICam_Package_2019.11.zip).
    * Unpack it to a temporary folder and cd to Reference Implementation folder.
-   * Create \<Project root\>\OtherLibsLinux\GenICam folder.
-   * Unpack GenICam_V3_2_0-Linux64_x64_gcc48-Runtime.tgz or GenICam_V3_2_0-Linux64_ARM_gcc49-Runtime.tgz into \<Project root\>\OtherLibsLinux\GenICam folder.
-   * Unpack GenICam_V3_2_0-Linux64_x64_gcc48-SDK.tgz or GenICam_V3_2_0-Linux64_ARM_gcc49-SDK.tgz into \<Project root\>\OtherLibsLinux\GenICam\library\CPP
-* Open src\GPUCameraSample.pro in Qt Creator.
+   * Create <Project root>/OtherLibsLinux/GenICam folder.
+   * Unpack GenICam_V3_2_0-Linux64_x64_gcc48-Runtime.tgz or GenICam_V3_2_0-Linux64_ARM_gcc49-Runtime.tgz into <Project root>/OtherLibsLinux/GenICam folder.
+   * Unpack GenICam_V3_2_0-Linux64_x64_gcc48-SDK.tgz or GenICam_V3_2_0-Linux64_ARM_gcc49-SDK.tgz into <Project root>/OtherLibsLinux/GenICam/library/CPP
+* Open src/GPUCameraSample.pro in Qt Creator.
 * By default the application will be built with no camera support. The only option is camera simulator which is working with PGM files. To enable XIMEA camera support, open common_defs.pri and uncomment line DEFINES += SUPPORT_XIMEA.
 * Build the project.
-* Binaries will be placed into \<Project root\>\GPUCameraSample_Arm64 or GPUCameraSample_Linux64 folder. To run application from terminal run GPUCameraSample.sh. Nesessary symbolyc links will be made during compile time.
+* Binaries will be placed into <Project root>/GPUCameraSample_Arm64 or GPUCameraSample_Linux64 folder. To run application from terminal run GPUCameraSample.sh. Necessary symbolyc links will be made during compile time.
 
 You also can download precompiled libs from <a href="https://drive.google.com/file/d/1RAE4uZxXaYB7wNmF_58tqw3R2yzxU9AT/view?usp=sharing" target="_blank">here</a>
 
