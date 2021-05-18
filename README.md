@@ -102,7 +102,7 @@ You also can download precompiled libs from <a href="https://drive.google.com/fi
 * Build the project.
 * Binaries will be placed into <Project root>/GPUCameraSample_x64 folder.
 
-###For Linux users
+### For Linux users
 
 Here and after we assume you put source code into home directory, so project root (<Project root>) is ~/gpu-camera-sample
 * Make sure file Scripts/make_links.sh is executable
