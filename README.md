@@ -74,7 +74,7 @@ sudo apt-get install libjpeg-dev zlib1g-dev
 git clone https://github.com/fastvideo/gpu-camera-sample.git 
 ```
 
-For Windows users
+### For Windows users
 
 * Create OtherLibs folder in the project root folder. This folder will contains external libraries, used in gpu-camera-sample application.
 * Download Fastvideo SDK from <a href="https://drive.google.com/file/d/1KDpVZCL9ljk8zZvzLKRdxXUDgO74USts/view?usp=sharing">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a>, unpack it into <Project root>/OtherLibs/FastvideoSDK folder. If the trial period is expired, please send an inquery to Fastvideo to obtain the latest version.
@@ -83,7 +83,7 @@ For Windows users
    * Download Spinnaker SDK from https://www.flir.com/support-center/iis/machine-vision/downloads/spinnaker-sdk-and-firmware-download/. 
    * Install downloaded package.
    * Copy bin64, include and lib64 folders from c:/Program Files/FLIR System/Spinnaker to <Project root>/OtherLibs/FLIR
-* To work with Imperx cameras, download Imperx SDK from https://www.imperx.com/downloads/. Unpack and copy archive content to <Project root>/OtherLibs/Imperx folder.
+* To work with Imperx cameras, download Imperx SDK (IpxCameraSdk) from https://www.imperx.com/downloads/. Unpack and copy archive content to <Project root>/OtherLibs/Imperx folder.
 * If you need GenICam support
    * Download GenICamTM Package Version 2019.11 (https://www.emva.org/wp-content/uploads/GenICam_Package_2019.11.zip).
    * Unpack it to a temporary folder and cd to Reference Implementation folder.
@@ -102,7 +102,8 @@ You also can download precompiled libs from <a href="https://drive.google.com/fi
 * Build the project.
 * Binaries will be placed into <Project root>/GPUCameraSample_x64 folder.
 
-For Linux users
+###For Linux users
+
 Here and after we assume you put source code into home directory, so project root (<Project root>) is ~/gpu-camera-sample
 * Make sure file Scripts/make_links.sh is executable
 ``` console
@@ -168,7 +169,6 @@ We have the following choices for G2G tests:
 * The same solution as in the previous approach, but with H.264 encoding/decoding (CPU or GPU), both processes are at the same PC.
 
 We can also measure the latency for the case when we stream compressed data from one PC to another over network. Latency depends on camera frame rate, monitor fps, NVIDIA GPU performance, network bandwidth, complexity of image processing pipeline, etc.
-
 
 ## Software architecture
 
