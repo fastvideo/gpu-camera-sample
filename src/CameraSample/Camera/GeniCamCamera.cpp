@@ -1,7 +1,6 @@
 #include "GeniCamCamera.h"
 
 #ifdef SUPPORT_GENICAM
-
 #include <QVector>
 #include <QElapsedTimer>
 

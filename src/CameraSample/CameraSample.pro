@@ -52,7 +52,8 @@ SOURCES += main.cpp\
     RtspServer/JpegEncoder.cpp \
     RtspServer/RTSPStreamerServer.cpp \
     RtspServer/TcpClient.cpp \
-    RtspServer/vutils.cpp
+    RtspServer/vutils.cpp \
+    Camera/ImperxCamera.cpp
 
 contains( DEFINES, SUPPORT_GENICAM ){
     SOURCES += rc_genicam_api/buffer.cc \
@@ -122,7 +123,8 @@ HEADERS  += MainWindow.h \
     RtspServer/vutils.h \
     CUDASupport/CudaAllocator.h \
     CUDASupport/GPUImage.h \
-    version.h
+    version.h \
+    Camera/ImperxCamera.h
 
 FORMS    += MainWindow.ui \
     Widgets/DenoiseController.ui \
@@ -140,6 +142,8 @@ win32:copyPluginsToDestdir(platforms)
 win32:copyPluginsToDestdir(imageformats)
 
 copyQtDllsToDestdir($$QT_DLLS)
+copyToDestdir($$FASTVIDEO_EXTRA_DLLS)
+
 unix {
 
     contains(TARGET_ARCH, arm64){
@@ -160,7 +164,6 @@ win32 {
     copyToDestdir($$FASTVIDEO_DLL)
     copyToDestdir($$CUDA_DLL)
 }
-copyToDestdir($$FASTVIDEO_EXTRA_DLLS)
 
 
 RESOURCES += \

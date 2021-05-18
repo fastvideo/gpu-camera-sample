@@ -37,14 +37,14 @@ int main(int argc, char *argv[])
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
 
+    QApplication a(argc, argv);
+
     QCoreApplication::setOrganizationName(QStringLiteral(APP_ORGANIZATION_NAME));
     QCoreApplication::setOrganizationDomain(QStringLiteral(APP_ORGANIZATION_DOMAIN));
     QCoreApplication::setApplicationName(QStringLiteral(MAIN_APPLICATION_NAME));
     QCoreApplication::setApplicationVersion(QStringLiteral(APP_VERSION_STRING));
     QCoreApplication::addLibraryPath(QStringLiteral("."));
     QCoreApplication::addLibraryPath(QCoreApplication::applicationDirPath());
-
-    QApplication a(argc, argv);
 
     QApplication::setStyle(QStyleFactory::create(QStringLiteral("Fusion")));
 

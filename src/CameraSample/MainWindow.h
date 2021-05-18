@@ -59,8 +59,8 @@ public:
     ~MainWindow();
 
 protected:
-    void customEvent(QEvent* event);
-    void closeEvent(QCloseEvent* event) override;
+    void customEvent(QEvent* event) Q_DECL_OVERRIDE;
+    void closeEvent(QCloseEvent* event) Q_DECL_OVERRIDE;
 private slots:
     //Zoom
     void onZoomChanged(qreal zoom);

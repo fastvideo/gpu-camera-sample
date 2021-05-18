@@ -197,19 +197,57 @@ GenTLWrapper::GenTLWrapper(const std::string &filename)
   *reinterpret_cast<void**>(&DSQueueBuffer)=getFunction(lp, "DSQueueBuffer");
   *reinterpret_cast<void**>(&DSGetBufferInfo)=getFunction(lp, "DSGetBufferInfo");
 
-  *reinterpret_cast<void**>(&GCGetNumPortURLs)=getFunction(lp, "GCGetNumPortURLs");
-  *reinterpret_cast<void**>(&GCGetPortURLInfo)=getFunction(lp, "GCGetPortURLInfo");
-  *reinterpret_cast<void**>(&GCReadPortStacked)=getFunction(lp, "GCReadPortStacked");
-  *reinterpret_cast<void**>(&GCWritePortStacked)=getFunction(lp, "GCWritePortStacked");
+  // Get GenTL version
+  uint32_t VerMaj = 1, VerMin=1;
+  try
+  {
+      // Anything possible here
+      if(GenTL::GC_ERR_SUCCESS == GCInitLib())
+      {
+          size_t buff_sz = sizeof(VerMaj);
+          GCGetInfo(GenTL::TL_INFO_GENTL_VER_MAJOR, nullptr, &VerMaj, &buff_sz);
+          GCGetInfo(GenTL::TL_INFO_GENTL_VER_MINOR, nullptr, &VerMin, &buff_sz);
+          GCCloseLib();
+      }
+  }
+  catch (...)
+  {
+      // Catch all exceptions and then behave as it is GenTL 1.1
+      VerMaj = 1;
+      VerMin = 1;
+  }
 
-  *reinterpret_cast<void**>(&DSGetBufferChunkData)=getFunction(lp, "DSGetBufferChunkData");
 
-  *reinterpret_cast<void**>(&IFGetParentTL)=getFunction(lp, "IFGetParentTL");
-  *reinterpret_cast<void**>(&DevGetParentIF)=getFunction(lp, "DevGetParentIF");
-  *reinterpret_cast<void**>(&DSGetParentDev)=getFunction(lp, "DSGetParentDev");
+  // GenTL v1.1
+  if(VerMaj==1 && VerMin>=1)
+  {
+      *reinterpret_cast<void**>(&GCGetNumPortURLs)=getFunction(lp, "GCGetNumPortURLs");
+      *reinterpret_cast<void**>(&GCGetPortURLInfo)=getFunction(lp, "GCGetPortURLInfo");
+      *reinterpret_cast<void**>(&GCReadPortStacked)=getFunction(lp, "GCReadPortStacked");
+      *reinterpret_cast<void**>(&GCWritePortStacked)=getFunction(lp, "GCWritePortStacked");
+  }
 
-  //*reinterpret_cast<void**>(&DSGetNumBufferParts)=getFunction(lp, "DSGetNumBufferParts");
-  //*reinterpret_cast<void**>(&DSGetBufferPartInfo)=getFunction(lp, "DSGetBufferPartInfo");
+
+  // GenTL v1.3
+  if(VerMaj==1 && VerMin>=3)
+  {
+       *reinterpret_cast<void**>(&DSGetBufferChunkData)=getFunction(lp, "DSGetBufferChunkData");
+  }
+
+  // GenTL v1.4
+  if(VerMaj==1 && VerMin>=4)
+  {
+     *reinterpret_cast<void**>(&IFGetParentTL)=getFunction(lp, "IFGetParentTL");
+     *reinterpret_cast<void**>(&DevGetParentIF)=getFunction(lp, "DevGetParentIF");
+     *reinterpret_cast<void**>(&DSGetParentDev)=getFunction(lp, "DSGetParentDev");
+  }
+
+  // GenTL v1.5
+  if(VerMaj==1 && VerMin>=5)
+  {
+    *reinterpret_cast<void**>(&DSGetNumBufferParts)=getFunction(lp, "DSGetNumBufferParts");
+    *reinterpret_cast<void**>(&DSGetBufferPartInfo)=getFunction(lp, "DSGetBufferPartInfo");
+  }
 
   lib=static_cast<void *>(lp);
 }

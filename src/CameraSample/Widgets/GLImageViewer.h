@@ -141,10 +141,10 @@ protected:
     void exposeEvent(QExposeEvent *event) Q_DECL_OVERRIDE;
     void wheelEvent(QWheelEvent *event) Q_DECL_OVERRIDE;
 
-    virtual void resizeEvent(QResizeEvent * event);
-    virtual void mouseMoveEvent(QMouseEvent * event);
-    virtual void mousePressEvent(QMouseEvent * event);
-    virtual void mouseReleaseEvent(QMouseEvent * event);
+    virtual void resizeEvent(QResizeEvent * event) Q_DECL_OVERRIDE;
+    virtual void mouseMoveEvent(QMouseEvent * event) Q_DECL_OVERRIDE;
+    virtual void mousePressEvent(QMouseEvent * event) Q_DECL_OVERRIDE;
+    virtual void mouseReleaseEvent(QMouseEvent * event) Q_DECL_OVERRIDE;
 
 signals:
     void zoomChanged(qreal);
