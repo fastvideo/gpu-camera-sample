@@ -104,7 +104,7 @@ You also can download precompiled libs from <a href="https://drive.google.com/fi
 
 ### For Linux users
 
-Here and after we assume you put source code into home directory, so project root (<Project root>) is ~/gpu-camera-sample
+Here and after we assume you put source code into home directory, so project root is ~/gpu-camera-sample
 * Make sure file Scripts/make_links.sh is executable
 ``` console
 chmod 755 ~/gpu-camera-sample/Scripts/make_links.sh
