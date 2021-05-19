@@ -77,41 +77,42 @@ git clone https://github.com/fastvideo/gpu-camera-sample.git
 ### For Windows users
 
 * Create OtherLibs folder in the project root folder. This folder will contains external libraries, used in gpu-camera-sample application.
-* Download Fastvideo SDK from <a href="https://drive.google.com/file/d/1KDpVZCL9ljk8zZvzLKRdxXUDgO74USts/view?usp=sharing">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a>, unpack it into <Project root>/OtherLibs/FastvideoSDK folder. If the trial period is expired, please send an inquery to Fastvideo to obtain the latest version.
-* If you need direct XIMEA camera support, download XiAPI from https://www.ximea.com/support/wiki/apis/XIMEA_Windows_Software_Package. Install downloaded package (by default into C:\XIMEA). Copy API folder from XIAPI installation folder into <Project root>/OtherLibs folder.
+* Download Fastvideo SDK from <a href="https://drive.google.com/file/d/1KDpVZCL9ljk8zZvzLKRdxXUDgO74USts/view?usp=sharing">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a>, unpack it into \<ProjectRoot\>/OtherLibs/FastvideoSDK folder. If the trial period is expired, please send an inquery to Fastvideo to obtain the latest version.
+* If you need direct XIMEA camera support, download XiAPI from https://www.ximea.com/support/wiki/apis/XIMEA_Windows_Software_Package. Install downloaded package (by default into C:\XIMEA). Copy API folder from XIAPI installation folder into \<ProjectRoot\>/OtherLibs folder.
 * To work with FLIR cameras
    * Download Spinnaker SDK from https://www.flir.com/support-center/iis/machine-vision/downloads/spinnaker-sdk-and-firmware-download/. 
    * Install downloaded package.
-   * Copy bin64, include and lib64 folders from c:/Program Files/FLIR System/Spinnaker to <Project root>/OtherLibs/FLIR
-* To work with Imperx cameras, download Imperx SDK (IpxCameraSdk) from https://www.imperx.com/downloads/. Unpack and copy archive content to <Project root>/OtherLibs/Imperx folder.
+   * Copy bin64, include and lib64 folders from c:/Program Files/FLIR System/Spinnaker to \<ProjectRoot\>/OtherLibs/FLIR
+* To work with Imperx cameras, download Imperx SDK (IpxCameraSdk) from https://www.imperx.com/downloads/. Unpack and copy archive content to \<ProjectRoot\>/OtherLibs/Imperx folder.
 * If you need GenICam support
-   * Download GenICamTM Package Version 2019.11 (https://www.emva.org/wp-content/uploads/GenICam_Package_2019.11.zip).
+   * Download GenICamTM Package Version 2019.11 from https://www.emva.org/wp-content/uploads/GenICam_Package_2019.11.zip
+   * If you are going to use Imperx cameras, download GenICamTM Package Version 3.0.2 from https://www.emva.org/wp-content/uploads/GenICam_Package_v3_0_2.zip
    * Unpack it to a temporary folder and cd to Reference Implementation folder.
-   * Create <Project root>/OtherLibs/GenICam folder.
-   * Unpack GenICam_V3_2_0-Win64_x64_VC141-Release-SDK.zip into <Project root>/OtherLibs/GenICam folder.
-   * Unpack GenICam_V3_2_0-Win64_x64_VC141-Release-Runtime.zip into <Project root>/OtherLibs/GenICam/library/CPP
+   * Create \<ProjectRoot\>/OtherLibs/GenICam folder.
+   * Unpack GenICam_V3_2_0-Win64_x64_VC141-Release-SDK.zip into \<ProjectRoot\>/OtherLibs/GenICam folder.
+   * Unpack GenICam_V3_2_0-Win64_x64_VC141-Release-Runtime.zip into \<ProjectRoot\>/OtherLibs/GenICam/library/CPP
 
 You also can download precompiled libs from <a href="https://drive.google.com/file/d/1losPpCK75zuvkJHWGz5gICDbJz_4eD9R/view?usp=sharing" target="_blank">here</a>
 * By default the application will be built with no camera support. The only option is camera simulator which is working with PGM files. 
-* Open <Project root>/src/GPUCameraSample.pro in Qt Creator.
+* Open \<ProjectRoot\>/src/GPUCameraSample.pro in Qt Creator.
 * Open common_defs.pri
 * To enable GenICam support, uncomment DEFINES += SUPPORT_GENICAM
 * To enable XIMEA camera support, uncomment DEFINES += SUPPORT_XIMEA
 * To enable FLIR camera support, uncomment DEFINES += SUPPORT_FLIR
-* To enable Imperx camera support, uncomment DEFINES += SUPPORT_IMPERX
+* To enable Imperx camera support, uncomment DEFINES += SUPPORT_IMPERX. Since Imperx SDK uses GenApi version 3.0.2, please open common.pri, uncomment GENAPIVER = VC140_v3_0 and comment GENAPIVER = VC141_v3_2
 * Build the project
-* Binaries will be placed into <Project root>/GPUCameraSample_x64 folder.
+* Binaries will be placed into \<ProjectRoot\>/GPUCameraSample_x64 folder.
 
 ### For Linux users
 
 Here and after we assume you put source code into home directory, so project root is ~/gpu-camera-sample
-* Make sure file Scripts/make_links.sh is executable
+* Make sure file \<ProjectRoot\>/Scripts/make_links.sh is executable
 ``` console
 chmod 755 ~/gpu-camera-sample/Scripts/make_links.sh
 ```
 * Create OtherLibsLinux folder in the project root folder. This folder will contain external libraries, used in gpu-camera-sample application.
-* Download Fastvideo SDK x64 platform from <a href="https://drive.google.com/file/d/1tZPaYMa2Te831htZUMVX_IAIoZbGNzZd/view?usp=sharing">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a>, or Fastvideo SDK Arm64 platform from <a href="https://drive.google.com/file/d/12XYCRcXTLXFAOCKeV5F_j2bICDTqdUSL/view?usp=sharing">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> and unpack it into <Project root>/OtherLibsLinux/FastvideoSDK folder. Copy all files from <Project root>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib to <Project root>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib/x64 for x64 platform and to <Project root>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib/Arm64 for Arm64 platform.
-* Create links to Fastvideo SDK so files
+* Download Fastvideo SDK x64 platform from <a href="https://drive.google.com/file/d/1tZPaYMa2Te831htZUMVX_IAIoZbGNzZd/view?usp=sharing">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a>, or Fastvideo SDK Arm64 platform from <a href="https://drive.google.com/file/d/12XYCRcXTLXFAOCKeV5F_j2bICDTqdUSL/view?usp=sharing">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> and unpack it into \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK folder. Copy all files from \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib to \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib/x64 for x64 platform and to \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib/Arm64 for Arm64 platform.
+* Create links to Fastvideo SDK *.so files
 ``` console
 cd ~/gpu-camera-sample/Scripts
 ./make_links.sh ~/gpu-camera-sample/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib/Linux64
@@ -120,18 +121,18 @@ cd ~/gpu-camera-sample/Scripts
 * If you need GenICam support
    * Download GenICamTM Package Version 2019.11 (https://www.emva.org/wp-content/uploads/GenICam_Package_2019.11.zip).
    * Unpack it to a temporary folder and cd to Reference Implementation folder.
-   * Create <Project root>/OtherLibsLinux/GenICam folder.
-   * Unpack GenICam_V3_2_0-Linux64_x64_gcc48-Runtime.tgz or GenICam_V3_2_0-Linux64_ARM_gcc49-Runtime.tgz into <Project root>/OtherLibsLinux/GenICam folder.
-   * Unpack GenICam_V3_2_0-Linux64_x64_gcc48-SDK.tgz or GenICam_V3_2_0-Linux64_ARM_gcc49-SDK.tgz into <Project root>/OtherLibsLinux/GenICam/library/CPP
+   * Create \<ProjectRoot\>/OtherLibsLinux/GenICam folder.
+   * Unpack GenICam_V3_2_0-Linux64_x64_gcc48-Runtime.tgz or GenICam_V3_2_0-Linux64_ARM_gcc49-Runtime.tgz into \<ProjectRoot\>/OtherLibsLinux/GenICam folder.
+   * Unpack GenICam_V3_2_0-Linux64_x64_gcc48-SDK.tgz or GenICam_V3_2_0-Linux64_ARM_gcc49-SDK.tgz into \<ProjectRoot\>/OtherLibsLinux/GenICam/library/CPP
    * Ensure Qt uses gcc, not clang to build project.
 * By default the application will be built with no camera support. The only option is camera simulator which is working with PGM files. 
-* Open <Project root>/src/GPUCameraSample.pro in Qt Creator.
+* Open \<ProjectRoot\>/src/GPUCameraSample.pro in Qt Creator.
 * Open common_defs.pri
 * To enable GenICam support, uncomment DEFINES += SUPPORT_GENICAM
 * To enable XIMEA camera support, uncomment DEFINES += SUPPORT_XIMEA
 * FLIR and Imperx support is experimental at the moment. Use it on your own risk.
 * Build the project.
-* Binaries will be placed into <Project root>/GPUCameraSample_Arm64 or GPUCameraSample_Linux64 folder. To run application from terminal run GPUCameraSample.sh. Necessary symbolyc links will be made during compile time.
+* Binaries will be placed into \<ProjectRoot\>/GPUCameraSample_Arm64 or GPUCameraSample_Linux64 folder. To run application from terminal run GPUCameraSample.sh. Necessary symbolyc links will be made during compile time.
 
 You also can download precompiled libs from <a href="https://drive.google.com/file/d/1j3q9Tbe-haPN_Kd3aN3-27_VL7NA_qj6/view?usp=sharing" target="_blank">here</a>
 
