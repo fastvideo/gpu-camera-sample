@@ -95,11 +95,11 @@ You also can download precompiled libs from <a href="https://drive.google.com/fi
 * By default the application will be built with no camera support. The only option is camera simulator which is working with PGM files. 
 * Open <Project root>/src/GPUCameraSample.pro in Qt Creator.
 * Open common_defs.pri
-* To enable XIMEA camera support, uncomment DEFINES += SUPPORT_XIMEA.
-* To enable GenICam support, uncomment DEFINES += SUPPORT_GENICAM.
+* To enable GenICam support, uncomment DEFINES += SUPPORT_GENICAM
+* To enable XIMEA camera support, uncomment DEFINES += SUPPORT_XIMEA
 * To enable FLIR camera support, uncomment DEFINES += SUPPORT_FLIR
 * To enable Imperx camera support, uncomment DEFINES += SUPPORT_IMPERX
-* Build the project.
+* Build the project
 * Binaries will be placed into <Project root>/GPUCameraSample_x64 folder.
 
 ### For Linux users
@@ -127,8 +127,8 @@ cd ~/gpu-camera-sample/Scripts
 * By default the application will be built with no camera support. The only option is camera simulator which is working with PGM files. 
 * Open <Project root>/src/GPUCameraSample.pro in Qt Creator.
 * Open common_defs.pri
-* To enable XIMEA camera support, uncomment DEFINES += SUPPORT_XIMEA.
-* To enable GenICam support, uncomment DEFINES += SUPPORT_GENICAM.
+* To enable GenICam support, uncomment DEFINES += SUPPORT_GENICAM
+* To enable XIMEA camera support, uncomment DEFINES += SUPPORT_XIMEA
 * FLIR and Imperx support is experimental at the moment. Use it on your own risk.
 * Build the project.
 * Binaries will be placed into <Project root>/GPUCameraSample_Arm64 or GPUCameraSample_Linux64 folder. To run application from terminal run GPUCameraSample.sh. Necessary symbolyc links will be made during compile time.
@@ -137,7 +137,7 @@ You also can download precompiled libs from <a href="https://drive.google.com/fi
 
 ### How to work with NVIDIA Jetson to get maximum performance
 
-NVIDIA Jetson provide many features related to power management, thermal management, and electrical management. These features deliver the best user experience possible given the constraints of a particular platform. The target user experience ensures the perception that the device provides:
+NVIDIA Jetson provides many features related to power management, thermal management, and electrical management. These features deliver the best user experience possible given the constraints of a particular platform. The target user experience ensures the perception that the device provides:
 
 * Uniformly high performance
 * Excellent battery life
@@ -229,6 +229,7 @@ You can also create a software module to collect frames from different cameras a
 * HEVC (H.265) encoder/decoder - done
 * <a href="https://imaginghub.com/projects/455-real-time-image-processing-on-nvidia-gpu-with-basler-pylon-and-fastvideo" target="_blank">Real-time Image Processing on NVIDIA GPU with Basler pylon</a> - done
 * Benchmarks for Jetson Xavier NX - done
+* CUDA-11.3 support - in progress
 * Support for Emergent Vision Technologies, DALSA, IDS Imaging, Baumer, Kaya Instruments, SVS-Vistek cameras - in progress
 * Transforms to Rec.601 (SD), Rec.709 (HD), Rec.2020 (4K)
 * RAW Bayer codec
