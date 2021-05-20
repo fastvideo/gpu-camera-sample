@@ -1,6 +1,7 @@
 # contains(TARGET_ARCH, arm64 ): QMAKE_CXXFLAGS += -msse3 -m64
 OTHER_LIB_PATH = $$dirname(PWD)/OtherLibsLinux
 FLIR_PATH = /opt/spinnaker
+IMPERX_PATH = $$OTHER_LIB_PATH/Imperx
 
 # CUDA
 CUDA_TOOLKIT_PATH = "/usr/local/cuda-10.2"
@@ -80,6 +81,14 @@ contains( DEFINES, SUPPORT_XIMEA ){
 contains( DEFINES, SUPPORT_FLIR ){
     INCLUDEPATH += $$FLIR_PATH/include
     LIBS += -L$$FLIR_PATH/lib -lSpinnaker
+}
+
+
+contains( DEFINES, SUPPORT_IMPERX ){
+    INCLUDEPATH += $$IMPERX_PATH/inc
+    LIBS += -L$$IMPERX_PATH/lib/Linux64_x64 -lIpxCameraApi
+    FASTVIDEO_EXTRA_DLLS += $$IMPERX_PATH/lib/Linux64_x64/libIpxCameraApi.so
+    FASTVIDEO_EXTRA_DLLS += $$IMPERX_PATH/lib/Linux64_x64/libIpxCTI.cti
 }
 
 contains( DEFINES, SUPPORT_GENICAM ){
