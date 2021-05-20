@@ -52,7 +52,7 @@ contains(TARGET_ARCH, arm64){
 }
 else {
     NVCODECS = $$OTHER_LIB_PATH/nvcodecs
-    INCLUDEPATH += $$NVCODECS/include
+    INCLUDEPATH += $$NVCODECS/Interface
     LIBS += -L$$NVCODECS/Lib/$$PLATFORM -lnvcuvid -lcuda
     FFMPEG_LIB += -lavformat -lavcodec -lavutil -lswresample -lm -lz -lx264
 }
@@ -68,6 +68,8 @@ LIBS += $$CUDA_LIB
 LIBS += $$FFMPEG_LIB
 LIBS += -ldl
 LIBS += -ljpeg
+
+QMAKE_LFLAGS += "-Wl,-rpath,\\\$$ORIGIN"
 
 contains( DEFINES, SUPPORT_XIMEA ){
     XI_API_PATH = /opt/XIMEA/
@@ -93,14 +95,14 @@ contains( DEFINES, SUPPORT_GENICAM ){
     GENAPIPATH = $$OTHER_LIB_PATH/GenICam/library/CPP
 
 contains(TARGET_ARCH, arm64 ) {
-    GANAPI_LIB_PATH = $$GENAPIPATH/bin/Linux64_ARM
-    GCC_VER = gcc49
+    GANAPI_LIB_PATH = $$OTHER_LIB_PATH/GenICam/bin/Linux64_ARM
+    GCC_VER = gcc421
 }
 else {
-    GANAPI_LIB_PATH = $$GENAPIPATH/bin/Linux64_x64
-    GCC_VER = gcc48
+    GANAPI_LIB_PATH = $$OTHER_LIB_PATH/GenICam/bin/Linux64_x64
+    GCC_VER = gcc421
 }
-    GENAPIVER = v3_2
+    GENAPIVER = v3_0
 
     FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libGCBase_$${GCC_VER}_$${GENAPIVER}.so
     FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libGenApi_$${GCC_VER}_$${GENAPIVER}.so
@@ -114,7 +116,11 @@ else {
 #    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/liblog4cpp_$${GCC_VER}_v3_2.so
 
     INCLUDEPATH += $$GENAPIPATH/include
-    LIBS += -L$$GANAPI_LIB_PATH -lCLAllSerial_$${GCC_VER}_$${GENAPIVER} -lGCBase_$${GCC_VER}_$${GENAPIVER} -lGenApi_$${GCC_VER}_$${GENAPIVER}
+    LIBS += -L$$GANAPI_LIB_PATH -lGCBase_$${GCC_VER}_$${GENAPIVER} -lGenApi_$${GCC_VER}_$${GENAPIVER}
+    !contains(TARGET_ARCH, v3_0)
+    {
+        LIBS +=  -lCLAllSerial_$${GCC_VER}
+    }
     LIBS += -lLog_$${GCC_VER}_$${GENAPIVER} -lMathParser_$${GCC_VER}_$${GENAPIVER} -lNodeMapData_$${GCC_VER}_$${GENAPIVER} -lXmlParser_$${GCC_VER}_$${GENAPIVER}
 #    LIBS += -lFirmwareUpdate_$${GCC_VER}_v3_2 -llog4cpp_$${GCC_VER}_v3_2 -lCLProtocol_$${GCC_VER}_v3_2
 }
