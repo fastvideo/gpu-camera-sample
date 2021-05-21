@@ -284,6 +284,8 @@ void MainWindow::initNewCamera(GPUCameraBase* cmr, uint32_t devID)
     ui->actionPlay->setChecked(true);
 
     ui->cameraController->setCamera(mCameraPtr.data());
+
+    ui->cameraStatistics->setCamera(mCameraPtr.data());
 }
 
 void MainWindow::openCamera(uint32_t devID)

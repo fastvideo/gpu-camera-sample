@@ -32,6 +32,10 @@ private:
     bool mStreaming = false;
     void startStreaming();
     std::shared_ptr<rcg::Device> mDevice;
+
+    void UpdateStatistics(const rcg::Buffer* pb);
+
+
 };
 
 #endif // SUPPORT_GENICAM

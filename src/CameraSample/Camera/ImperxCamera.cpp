@@ -37,6 +37,7 @@
 #include <QDebug>
 
 using namespace IpxCam;
+using CameraStatEnum = GPUCameraBase::cmrCameraStatistic  ;
 
 ImperxCamera::ImperxCamera()
 {
@@ -261,6 +262,9 @@ void ImperxCamera::startStreaming()
 
     m_pParameters->ExecuteCommand("AcquisitionStart");
 
+    // Reset the Statistics
+    UpdateStatistics(nullptr);
+
     while(mState == cstStreaming)
     {
         tmr.restart();
@@ -273,6 +277,9 @@ void ImperxCamera::startStreaming()
         // Ensure image is complete
         if (pBuff)
         {
+             // Update the Statistics
+             UpdateStatistics(pBuff);
+
              if(pBuff->IsIncomplete())
              {
                  // Do not process incimplete buffers
@@ -281,6 +288,7 @@ void ImperxCamera::startStreaming()
              }
              else
              {
+                 // Process new acquired buffer
                  unsigned char* dst = mInputBuffer.getBuffer();
                  void* src = pBuff->GetBufferPtr();
                  size_t sz = pBuff->GetBufferSize();
@@ -308,7 +316,6 @@ void ImperxCamera::startStreaming()
 
 
 }
-
 
 bool ImperxCamera::getParameter(cmrCameraParameter param, float& val)
 {
@@ -419,5 +426,92 @@ bool ImperxCamera::getParameterInfo(cmrParameterInfo& info)
 
    return false;
 }
+void ImperxCamera::UpdateStatistics(IpxCam::Buffer *pBuff)
+{
+    if(pBuff)
+    {
+        if(pBuff->IsIncomplete())
+        {
+            // Update statFramesIncomplete statistics
+            mStatistics[CameraStatEnum::statFramesIncomplete]++;
+        }
+        else
+        {
+            // Update statistics
+            // Total number of frames
+            mStatistics[CameraStatEnum::statFramesTotal]++;
+            // Timestamp (we do not know the frequency!)
+            mStatistics[CameraStatEnum::statCurrTimestamp] = pBuff->GetTimestamp();
 
+            // new frame ID
+            uint64_t newFrameId = pBuff->GetFrameID();
+            mStatistics[CameraStatEnum::statCurrFrameID] = newFrameId;
+
+            // Check if frames were dropped in the Camera
+            if(mCurrFrameID!=0 && mCurrFrameID+1!=newFrameId)
+            {
+                mDropFramesNum+=(newFrameId>mCurrFrameID)?(newFrameId-mCurrFrameID-1):0;
+                mStatistics[CameraStatEnum::statFramesDropped] = mDropFramesNum;
+            }
+            mCurrFrameID = newFrameId;
+
+            // calculate FPC and thoughput
+            if(mFirstFrameTime.time_since_epoch().count()==0)
+            {
+                mFirstFrameTime = mPrevFrameTime = std::chrono::system_clock::now();
+            }
+            else
+            {
+                const bool bAverage = false; // !!! Set to true to caclulate average FPS and Thoughput, false for instant values
+                if(bAverage)
+                {
+                    // total time between the first acquired frame and the current one;
+                    auto micorsecTotal = std::chrono::duration_cast<std::chrono::microseconds> (std::chrono::system_clock::now()-mFirstFrameTime);
+                    auto usT = micorsecTotal.count();
+
+                    // FPS - average per grabbing session
+                    mStatistics[CameraStatEnum::statCurrFps100] = ((mStatistics[CameraStatEnum::statFramesTotal]-1)*100000000)/usT;
+
+                    // Throughput
+                    mTotalBytesTransferred+=pBuff->GetBufferSize();
+                    mStatistics[CameraStatEnum::statCurrTroughputMbs100] = (mTotalBytesTransferred*800)/usT;
+                }
+                else
+                {
+                    // time between the previous frame and the current one;
+                    auto currTime = std::chrono::system_clock::now();
+                    auto micorsecTotal = std::chrono::duration_cast<std::chrono::microseconds> (currTime-mPrevFrameTime);
+                    auto usT = micorsecTotal.count();
+
+                    // FPS - average per grabbing session
+                    mStatistics[CameraStatEnum::statCurrFps100] = 100000000/usT;
+
+                    // Throughput
+                    auto bytesTransferred=pBuff->GetBufferSize();
+                    mStatistics[CameraStatEnum::statCurrTroughputMbs100] = (bytesTransferred*800)/usT;
+
+                    mPrevFrameTime = currTime;
+                }
+            }
+
+        }
+    }
+    else
+    {
+        // Reset the statistics
+        mStatistics[CameraStatEnum::statCurrFps100] = 0;
+        mStatistics[CameraStatEnum::statCurrFrameID] =0;
+        mStatistics[CameraStatEnum::statCurrTimestamp] = 0;
+        mStatistics[CameraStatEnum::statCurrTroughputMbs100] = 0;
+        mStatistics[CameraStatEnum::statFramesDropped] = 0;
+        mStatistics[CameraStatEnum::statFramesIncomplete] = 0;
+        mStatistics[CameraStatEnum::statFramesTotal] = 0;
+
+        mCurrFrameID = 0;
+        mDropFramesNum = 0;
+        mFirstFrameTime = kZeroTime;
+        mPrevFrameTime = kZeroTime;
+        mTotalBytesTransferred=0;
+    }
+};
 #endif

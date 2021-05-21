@@ -6,6 +6,8 @@
 
 #include <RawProcessor.h>
 
+using CameraStatEnum = GPUCameraBase::cmrCameraStatistic  ;
+
 GeniCamCamera::GeniCamCamera()
 {
     mCameraThread.setObjectName(QStringLiteral("GeniCamThread"));
@@ -308,12 +310,18 @@ void GeniCamCamera::startStreaming()
     streams[0]->open();
     streams[0]->startStreaming();
     QElapsedTimer tmr;
+
+    // Reset the camera statistics
+    UpdateStatistics(nullptr);
+
     while(mState == cstStreaming)
     {
         tmr.restart();
         const rcg::Buffer* buffer = streams[0]->grab(3000);
         if(buffer == nullptr)
             continue;
+
+        UpdateStatistics(buffer);
 
         if(buffer->getIsIncomplete())
             continue;
@@ -421,62 +429,77 @@ bool GeniCamCamera::setParameter(cmrCameraParameter param, float val)
     if(!mDevice)
         return false;
 
-    CFloatPtr ptrFloat;
-    CIntegerPtr ptrInt;
-    CBooleanPtr ptrAcquisitionFrameRateEnable;
-    std::shared_ptr<CNodeMapRef> nodeMap = mDevice->getRemoteNodeMap();
-    switch (param)
+    try
     {
-    case prmFrameRate:
-        ptrFloat = nodeMap->_GetNode("AcquisitionFrameRate");
-        ptrAcquisitionFrameRateEnable = nodeMap->_GetNode("AcquisitionFrameRateEnable");
-        if(IsAvailable(ptrAcquisitionFrameRateEnable) && IsWritable(ptrAcquisitionFrameRateEnable))
-        {
-            ptrAcquisitionFrameRateEnable->SetValue(true);
-        }
 
-        if (IsAvailable(ptrFloat) && IsWritable(ptrFloat))
+        CFloatPtr ptrFloat;
+        CIntegerPtr ptrInt;
+        CBooleanPtr ptrAcquisitionFrameRateEnable;
+        std::shared_ptr<CNodeMapRef> nodeMap = mDevice->getRemoteNodeMap();
+        switch (param)
         {
-            ptrFloat->SetValue(val);
-            return true;
-        }
-        else
-        {
-            ptrInt = nodeMap->_GetNode("AcquisitionFrameRate");
-            if(IsAvailable(ptrInt) && IsWritable(ptrInt))
+        case prmFrameRate:
+            ptrFloat = nodeMap->_GetNode("AcquisitionFrameRate");
+            ptrAcquisitionFrameRateEnable = nodeMap->_GetNode("AcquisitionFrameRateEnable");
+            if(IsAvailable(ptrAcquisitionFrameRateEnable) && IsWritable(ptrAcquisitionFrameRateEnable))
             {
-                ptrInt->SetValue(val);
-                return true;
+                ptrAcquisitionFrameRateEnable->SetValue(true);
             }
-        }
-        return false;
 
-    case prmExposureTime:
-        ptrFloat = nodeMap->_GetNode("ExposureTime");
-        if (IsAvailable(ptrFloat))
-        {
-            if(IsWritable(ptrFloat))
+            if (IsAvailable(ptrFloat) && IsWritable(ptrFloat))
             {
                 ptrFloat->SetValue(val);
                 return true;
             }
-        }
-        else
-        {
-            ptrInt = nodeMap->_GetNode("ExposureTime");
-            if(IsAvailable(ptrInt))
+            else
             {
-                if(IsWritable(ptrInt))
+                ptrInt = nodeMap->_GetNode("AcquisitionFrameRate");
+                if(IsAvailable(ptrInt) && IsWritable(ptrInt))
                 {
                     ptrInt->SetValue(val);
                     return true;
                 }
             }
-        }
-        return false;
+            return false;
 
-    default:
-        break;
+        case prmExposureTime:
+        {
+            // Set ExposureMode=Timed to make ExposureTime writable
+            CEnumerationPtr ptrExpMode = nodeMap->_GetNode("ExposureMode");
+            if(IsAvailable(ptrExpMode) && IsWritable(ptrExpMode))
+                ptrExpMode->FromString("Timed");
+
+            ptrFloat = nodeMap->_GetNode("ExposureTime");
+            if (IsAvailable(ptrFloat))
+            {
+                if(IsWritable(ptrFloat))
+                {
+                    ptrFloat->SetValue(val);
+                    return true;
+                }
+            }
+            else
+            {
+                ptrInt = nodeMap->_GetNode("ExposureTime");
+                if(IsAvailable(ptrInt))
+                {
+                    if(IsWritable(ptrInt))
+                    {
+                        ptrInt->SetValue(val);
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        default:
+            break;
+        }
+    }
+    catch(GenICam::GenericException &ex)
+    {
+        // Show error here
+        std::cout << "GenericException: " << ex.GetDescription() << std::endl;
     }
 
     return false;
@@ -492,73 +515,174 @@ bool GeniCamCamera::getParameterInfo(cmrParameterInfo& info)
     if(!mDevice)
         return false;
 
-    CFloatPtr ptrFloat;
-    CIntegerPtr ptrInt;
-    std::shared_ptr<CNodeMapRef> nodeMap = mDevice->getRemoteNodeMap();
-    switch (info.param)
-    {
-    case prmFrameRate:
-        ptrFloat = nodeMap->_GetNode("AcquisitionFrameRate");
-        if (IsAvailable(ptrFloat))
-        {
-            info.min = (float)ptrFloat->GetMin();
-            info.max = (float)ptrFloat->GetMax();
-            if(ptrFloat->HasInc())
-                info.increment = (float)ptrFloat->GetInc();
-            else
-                info.increment = 1;
+    try {
 
-            return true;
-        }
-        else
+        CFloatPtr ptrFloat;
+        CIntegerPtr ptrInt;
+        std::shared_ptr<CNodeMapRef> nodeMap = mDevice->getRemoteNodeMap();
+        switch (info.param)
         {
-            ptrInt = nodeMap->_GetNode("AcquisitionFrameRate");
-            if(IsAvailable(ptrInt))
+        case prmFrameRate:
+            ptrFloat = nodeMap->_GetNode("AcquisitionFrameRate");
+            if (IsAvailable(ptrFloat))
             {
-                info.min = (float)ptrInt->GetMin();
-                info.max = (float)ptrInt->GetMax();
-                info.increment = (float)ptrInt->GetInc();
+                info.min = (float)ptrFloat->GetMin();
+                info.max = (float)ptrFloat->GetMax();
+                if(ptrFloat->HasInc())
+                    info.increment = (float)ptrFloat->GetInc();
+                else
+                    info.increment = 1;
+
                 return true;
             }
             else
             {
-                return false;
+                ptrInt = nodeMap->_GetNode("AcquisitionFrameRate");
+                if(IsAvailable(ptrInt))
+                {
+                    info.min = (float)ptrInt->GetMin();
+                    info.max = (float)ptrInt->GetMax();
+                    info.increment = (float)ptrInt->GetInc();
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
-        }
 
-    case prmExposureTime:
-        ptrFloat = nodeMap->_GetNode("ExposureTime");
-        if (IsAvailable(ptrFloat))
+        case prmExposureTime:
         {
-            info.min = (float)ptrFloat->GetMin();
-            info.max = (float)ptrFloat->GetMax();
-            if(ptrFloat->HasInc())
-                info.increment = (float)ptrFloat->GetInc();
-            else
-                info.increment = 10;
-            return true;
-        }
-        else
-        {
-            ptrInt = nodeMap->_GetNode("ExposureTime");
-            if(IsAvailable(ptrInt))
-            {
-                info.min = (float)ptrInt->GetMin();
-                info.max = (float)ptrInt->GetMax();
-                info.increment = (float)ptrInt->GetInc();
-            }
-            else
-            {
-                return false;
-            }
-        }
-        break;
+            // Set ExposureMode=Timed to make ExposureTime writable
+            CEnumerationPtr ptrExpMode = nodeMap->_GetNode("ExposureMode");
+            if(IsAvailable(ptrExpMode) && IsWritable(ptrExpMode))
+                ptrExpMode->FromString("Timed");
 
-    default:
-        break;
+            ptrFloat = nodeMap->_GetNode("ExposureTime");
+            if (IsAvailable(ptrFloat))
+            {
+                info.min = (float)ptrFloat->GetMin();
+                info.max = (float)ptrFloat->GetMax();
+                if(ptrFloat->HasInc())
+                    info.increment = (float)ptrFloat->GetInc();
+                else
+                    info.increment = 10;
+                return true;
+            }
+            else
+            {
+                ptrInt = nodeMap->_GetNode("ExposureTime");
+                if(IsAvailable(ptrInt))
+                {
+                    info.min = (float)ptrInt->GetMin();
+                    info.max = (float)ptrInt->GetMax();
+                    info.increment = (float)ptrInt->GetInc();
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            break;
+        }
+        default:
+            break;
+        }
     }
-
+    catch(GenICam::GenericException &ex)
+    {
+        // Show error here
+        std::cout << "GenericException: " << ex.GetDescription() << std::endl;
+    }
     return false;
 }
 
+void GeniCamCamera::UpdateStatistics(const rcg::Buffer*  pBuff)
+{
+    if(pBuff)
+    {
+        if(pBuff->getIsIncomplete())
+        {
+            // Update statFramesIncomplete statistics
+            mStatistics[CameraStatEnum::statFramesIncomplete]++;
+        }
+        else
+        {
+            // Update statistics
+            // Total number of frames
+            mStatistics[CameraStatEnum::statFramesTotal]++;
+            // Timestamp (we do not know the frequency!)
+            mStatistics[CameraStatEnum::statCurrTimestamp] = pBuff->getTimestamp();
+
+            // new frame ID
+            uint64_t newFrameId = pBuff->getFrameID();
+            mStatistics[CameraStatEnum::statCurrFrameID] = newFrameId;
+
+            // Check if frames were dropped in the Camera
+            if(mCurrFrameID!=0 && mCurrFrameID+1!=newFrameId)
+            {
+                mDropFramesNum+=(newFrameId>mCurrFrameID)?(newFrameId-mCurrFrameID-1):0;
+                mStatistics[CameraStatEnum::statFramesDropped] = mDropFramesNum;
+            }
+            mCurrFrameID = newFrameId;
+
+            // calculate FPC and thoughput
+            if(mFirstFrameTime.time_since_epoch().count()==0)
+            {
+                mFirstFrameTime = mPrevFrameTime = std::chrono::system_clock::now();
+            }
+            else
+            {
+                const bool bAverage = false; // !!! Set to true to caclulate average FPS and Thoughput, false for instant values
+                if(bAverage)
+                {
+                    // total time between the first acquired frame and the current one;
+                    auto micorsecTotal = std::chrono::duration_cast<std::chrono::microseconds> (std::chrono::system_clock::now()-mFirstFrameTime);
+                    auto usT = micorsecTotal.count();
+
+                    // FPS - average per grabbing session
+                    mStatistics[CameraStatEnum::statCurrFps100] = ((mStatistics[CameraStatEnum::statFramesTotal]-1)*100000000)/usT;
+
+                    // Throughput
+                    mTotalBytesTransferred+=pBuff->getDataSize();
+                    mStatistics[CameraStatEnum::statCurrTroughputMbs100] = (mTotalBytesTransferred*800)/usT;
+                }
+                else
+                {
+                    // time between the previous frame and the current one;
+                    auto currTime = std::chrono::system_clock::now();
+                    auto micorsecTotal = std::chrono::duration_cast<std::chrono::microseconds> (currTime-mPrevFrameTime);
+                    auto usT = micorsecTotal.count();
+
+                    // FPS - average per grabbing session
+                    mStatistics[CameraStatEnum::statCurrFps100] = 100000000/usT;
+
+                    // Throughput
+                    auto bytesTransferred=pBuff->getDataSize();
+                    mStatistics[CameraStatEnum::statCurrTroughputMbs100] = (bytesTransferred*800)/usT;
+
+                    mPrevFrameTime = currTime;
+                }
+            }
+
+        }
+    }
+    else
+    {
+        // Reset the statistics
+        mStatistics[CameraStatEnum::statCurrFps100] = 0;
+        mStatistics[CameraStatEnum::statCurrFrameID] =0;
+        mStatistics[CameraStatEnum::statCurrTimestamp] = 0;
+        mStatistics[CameraStatEnum::statCurrTroughputMbs100] = 0;
+        mStatistics[CameraStatEnum::statFramesDropped] = 0;
+        mStatistics[CameraStatEnum::statFramesIncomplete] = 0;
+        mStatistics[CameraStatEnum::statFramesTotal] = 0;
+
+        mCurrFrameID = 0;
+        mDropFramesNum = 0;
+        mFirstFrameTime = kZeroTime;
+        mPrevFrameTime = kZeroTime;
+        mTotalBytesTransferred=0;
+    }
+};
 #endif

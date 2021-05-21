@@ -32,6 +32,7 @@ SOURCES += main.cpp\
     CUDASupport/CUDAProcessorBase.cpp \
     FFCReader.cpp \
     FPNReader.cpp \
+    Widgets/camerastatistics.cpp \
     avfilewriter/avfilewriter.cpp \
     ppm.cpp \
     helper_jpeg_load.cpp \
@@ -100,6 +101,7 @@ HEADERS  += MainWindow.h \
     CUDASupport/CUDAProcessorBase.h \
     FFCReader.h \
     FPNReader.h \
+    Widgets/camerastatistics.h \
     avfilewriter/avfilewriter.h \
     ppm.h \
     helper_jpeg.hpp \
@@ -128,7 +130,8 @@ HEADERS  += MainWindow.h \
 
 FORMS    += MainWindow.ui \
     Widgets/DenoiseController.ui \
-    Widgets/CameraSetupWidget.ui
+    Widgets/CameraSetupWidget.ui \
+    Widgets/camerastatistics.ui
 
 RC_FILE = gpu-camera-sample.rc
 #resource.rc

@@ -126,8 +126,9 @@ else {
 
     INCLUDEPATH += $$GENAPIPATH/include
     LIBS += -L$$GANAPI_LIB_PATH -lGCBase_$${GCC_VER}_$${GENAPIVER} -lGenApi_$${GCC_VER}_$${GENAPIVER}
-    !contains(TARGET_ARCH, v3_0)
-    {
+    contains(GENAPIVER, v3_0){
+    }
+    else   {
         LIBS +=  -lCLAllSerial_$${GCC_VER}
     }
     LIBS += -lLog_$${GCC_VER}_$${GENAPIVER} -lMathParser_$${GCC_VER}_$${GENAPIVER} -lNodeMapData_$${GCC_VER}_$${GENAPIVER} -lXmlParser_$${GCC_VER}_$${GENAPIVER}
