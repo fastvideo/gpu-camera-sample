@@ -35,6 +35,8 @@
 #include <QEvent>
 #include <QTimer>
 #include <QThread>
+#include <QVariant>
+#include <unordered_map>
 
 #include "fastvideo_sdk.h"
 #include "FrameBuffer.h"
@@ -73,6 +75,16 @@ public:
         prmExposureTime,
         prmLast
     } cmrCameraParameter;
+
+    enum class cmrCameraStatistic {
+        statFramesTotal = 0, /// Total number of frames acquired
+        statFramesDropped ,  /// Number of dropped frames
+        statFramesIncomplete , /// Number of incomplete frames
+        statCurrFrameID,    /// Current Frame ID (blockID)
+        statCurrTimestamp,  /// Current Frame Timestamp
+        statCurrTroughputMbs100, /// Average Thoughtput in Megabits per 100 seconds
+        statCurrFps100 /// FPS multiplied by 100
+    } ;
 
     struct cmrParameterInfo{
         cmrCameraParameter param;
@@ -143,6 +155,14 @@ public:
 
     void setProcessor(RawProcessor* proc){QMutexLocker l(&mLock); mRawProc = proc;}
 
+    /// Get camera statistics
+    bool  GetStatistics(cmrCameraStatistic stat, uint64_t &outStat) {
+        if (mStatistics.find(stat)==mStatistics.end())
+            return false;
+        outStat = mStatistics[stat];
+        return true;
+    };
+
 signals:
     void stateChanged(GPUCameraBase::cmrCameraState newState);
 
@@ -172,6 +192,15 @@ protected:
 
     QThread mCameraThread;
     QMutex  mLock;
+
+    std::unordered_map<cmrCameraStatistic, uint64_t> mStatistics;
+
+    uint64_t mCurrFrameID{0};
+    uint64_t mDropFramesNum{0};
+    std::chrono::time_point<std::chrono::system_clock> mFirstFrameTime;
+    std::chrono::time_point<std::chrono::system_clock> mPrevFrameTime;
+    const std::chrono::time_point<std::chrono::system_clock> kZeroTime;
+    uint64_t mTotalBytesTransferred{0};
 };
 
 ///Base class for camera enumeration

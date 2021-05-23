@@ -34,7 +34,7 @@ Currently the software is working with <a href="https://www.ximea.com" target="_
 
 Via GenICam the software can work with <a href="https://www.ximea.com" target="_blank">XIMEA</a>, <a href="https://www.matrix-vision.com" target="_blank">MATRIX VISION</a>, <a href="https://www.baslerweb.com" target="_blank">Basler</a>, <a href="https://www.flir.com" target="_blank">FLIR</a>, <a href="https://www.imperx.com" target="_blank">Imperx</a>, <a href="https://www.jai.com" target="_blank">JAI</a>, <a href="https://dahengimaging.com/" target="_blank">Daheng Imaging</a> cameras. 
 
-Soon we are going to add support for <a href="https://emergentvisiontec.com/" target="_blank">Emergent Vision Technologies</a>, <a href="https://en.ids-imaging.com/" target="_blank">IDS Imaging Development Systems</a>, <a href="https://www.baumer.com" target="_blank">Baumer</a>, <a href="https://kayainstruments.com/" target="_blank">Kaya Instruments</a> cameras. You can add support for desired cameras by yourself. The software is working with demo version of <a href="https://www.fastcompression.com/products/sdk.htm" target="_blank">Fastvideo SDK</a>, that is why you can see a watermark on the screen. To get a Fastvideo SDK license for develoment and for deployment, please contact <a href="https://www.fastcompression.com/" target="_blank">Fastvideo company</a>.
+Soon we are going to add support for <a href="https://emergentvisiontec.com/" target="_blank">Emergent Vision Technologies</a>, <a href="https://en.ids-imaging.com/" target="_blank">IDS Imaging Development Systems</a>, <a href="https://www.baumer.com" target="_blank">Baumer</a>, <a href="https://kayainstruments.com/" target="_blank">Kaya Instruments</a> cameras. You can add support for desired cameras by yourself. The software is working with demo version of <a href="https://www.fastcompression.com/products/sdk.htm" target="_blank">Fastvideo SDK</a>, that is why you can see a watermark on the screen. To get a Fastvideo SDK license for development and for deployment, please contact <a href="https://www.fastcompression.com/" target="_blank">Fastvideo company</a>.
 
 ## How to build gpu-camera-sample
 
@@ -77,7 +77,7 @@ git clone https://github.com/fastvideo/gpu-camera-sample.git
 ### For Windows users
 
 * Create OtherLibs folder in the project root folder. This folder will contains external libraries, used in gpu-camera-sample application.
-* Download Fastvideo SDK from <a href="https://drive.google.com/file/d/1KDpVZCL9ljk8zZvzLKRdxXUDgO74USts/view?usp=sharing">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a>, unpack it into \<ProjectRoot\>/OtherLibs/FastvideoSDK folder. If the trial period is expired, please send an inquery to Fastvideo to obtain the latest version.
+* Download Fastvideo SDK from <a href="https://drive.google.com/file/d/1KDpVZCL9ljk8zZvzLKRdxXUDgO74USts/view?usp=sharing">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a>, unpack it into \<ProjectRoot\>/OtherLibs/FastvideoSDK folder. If the trial period is expired, please send an inquiry to Fastvideo to obtain the latest version.
 * If you need direct XIMEA camera support, download XiAPI from https://www.ximea.com/support/wiki/apis/XIMEA_Windows_Software_Package. Install downloaded package (by default into C:\XIMEA). Copy API folder from XIAPI installation folder into \<ProjectRoot\>/OtherLibs folder.
 * To work with FLIR cameras
    * Download Spinnaker SDK from https://www.flir.com/support-center/iis/machine-vision/downloads/spinnaker-sdk-and-firmware-download/. 
@@ -111,7 +111,7 @@ Here and after we assume you put source code into home directory, so project roo
 chmod 755 ~/gpu-camera-sample/Scripts/make_links.sh
 ```
 * Create OtherLibsLinux folder in the project root folder. This folder will contain external libraries, used in gpu-camera-sample application.
-* Download Fastvideo SDK x64 platform from <a href="https://drive.google.com/file/d/1tZPaYMa2Te831htZUMVX_IAIoZbGNzZd/view?usp=sharing">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a>, or Fastvideo SDK Arm64 platform from <a href="https://drive.google.com/file/d/12XYCRcXTLXFAOCKeV5F_j2bICDTqdUSL/view?usp=sharing">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> and unpack it into \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK folder. Copy all files from \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib to \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib/x64 for x64 platform and to \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib/Arm64 for Arm64 platform.
+* Download Fastvideo SDK x64 platform from <a href="https://drive.google.com/file/d/1tZPaYMa2Te831htZUMVX_IAIoZbGNzZd/view?usp=sharing">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a>, or Fastvideo SDK Arm64 platform from <a href="https://drive.google.com/file/d/12XYCRcXTLXFAOCKeV5F_j2bICDTqdUSL/view?usp=sharing">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> and unpack it into \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK folder. Copy all files from \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib to \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib/Linux64 for x64 platform and to \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib/Arm64 for Arm64 platform.
 * Create links to Fastvideo SDK *.so files
 ``` console
 cd ~/gpu-camera-sample/Scripts
@@ -128,11 +128,12 @@ cd ~/gpu-camera-sample/Scripts
 * By default the application will be built with no camera support. The only option is camera simulator which is working with PGM files. 
 * Open \<ProjectRoot\>/src/GPUCameraSample.pro in Qt Creator.
 * Open common_defs.pri
-* To enable GenICam support, uncomment DEFINES += SUPPORT_GENICAM
+* To enable GenICam support, uncomment DEFINES += SUPPORT_GENICAM. 
 * To enable XIMEA camera support, uncomment DEFINES += SUPPORT_XIMEA
 * FLIR and Imperx support is experimental at the moment. Use it on your own risk.
 * Build the project.
-* Binaries will be placed into \<ProjectRoot\>/GPUCameraSample_Arm64 or GPUCameraSample_Linux64 folder. To run application from terminal run GPUCameraSample.sh. Necessary symbolyc links will be made during compile time.
+* If GenICam support is enabled, set environment variable GENICAM_GENTL64_PATH with full path to the camera vendor GenTL producer (.cti) library, before run the application.
+* Binaries will be placed into \<ProjectRoot\>/GPUCameraSample_Arm64 or GPUCameraSample_Linux64 folder. To run the application from the terminal run GPUCameraSample.sh. Necessary symbolic links will be made during compile time.
 
 You also can download precompiled libs from <a href="https://drive.google.com/file/d/1j3q9Tbe-haPN_Kd3aN3-27_VL7NA_qj6/view?usp=sharing" target="_blank">here</a>
 
@@ -166,7 +167,7 @@ To check system latency we've implemented the software to run G2G tests in the g
 
 We have the following choices for G2G tests:
 * Camera captures frame with current time from high resolution timer at the monitor, we send data from camera to the software, do image processing on GPU and then show processed image at the same monitor close to the window with the timer. If we stop the software, we see two different times and their difference is system latency.
-* We have implemented more compicated solution: after image processing on GPU we've done JPEG encoding (MJPEG on CPU or on GPU), then send MJPEG stream to receiver process, where we do MJPEG parcing and decoding, then frame output to the monitor. Both processes (sender and receiver) are running at the same PC.
+* We have implemented more complicated solution: after image processing on GPU we've done JPEG encoding (MJPEG on CPU or on GPU), then send MJPEG stream to receiver process, where we do MJPEG parsing and decoding, then frame output to the monitor. Both processes (sender and receiver) are running at the same PC.
 * The same solution as in the previous approach, but with H.264 encoding/decoding (CPU or GPU), both processes are at the same PC.
 
 We can also measure the latency for the case when we stream compressed data from one PC to another over network. Latency depends on camera frame rate, monitor fps, NVIDIA GPU performance, network bandwidth, complexity of image processing pipeline, etc.
