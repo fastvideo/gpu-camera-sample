@@ -130,7 +130,8 @@ cd ~/gpu-camera-sample/Scripts
 * Open common_defs.pri
 * To enable GenICam support, uncomment DEFINES += SUPPORT_GENICAM. 
 * To enable XIMEA camera support, uncomment DEFINES += SUPPORT_XIMEA
-* FLIR and Imperx support is experimental at the moment. Use it on your own risk.
+* To enable Imperx camera support, uncomment DEFINES += SUPPORT_IMPERX. Since Imperx SDK uses GenApi version 3.0.2, please open common.pri, uncomment GENAPIVER = VC140_v3_0 and comment GENAPIVER = VC141_v3_2
+* FLIR support is experimental at the moment. Use it on your own risk.
 * Build the project.
 * If GenICam support is enabled, set environment variable GENICAM_GENTL64_PATH with full path to the camera vendor GenTL producer (.cti) library, before run the application.
 * Binaries will be placed into \<ProjectRoot\>/GPUCameraSample_Arm64 or GPUCameraSample_Linux64 folder. To run the application from the terminal run GPUCameraSample.sh. Necessary symbolic links will be made during compile time.
