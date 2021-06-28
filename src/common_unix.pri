@@ -53,7 +53,7 @@ contains(TARGET_ARCH, arm64){
 }
 else {
     NVCODECS = $$OTHER_LIB_PATH/nvcodecs
-    INCLUDEPATH += $$NVCODECS/Interface
+    INCLUDEPATH += $$NVCODECS/include
     LIBS += -L$$NVCODECS/Lib/$$PLATFORM -lnvcuvid -lcuda
     FFMPEG_LIB += -lavformat -lavcodec -lavutil -lswresample -lm -lz -lx264
 }
