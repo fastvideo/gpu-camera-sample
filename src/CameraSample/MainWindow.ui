@@ -1154,6 +1154,36 @@ QSlider::handle:horizontal {
     </layout>
    </widget>
   </widget>
+  <widget class="QDockWidget" name="cameraStatWidget">
+   <property name="windowTitle">
+    <string>Camera Statistics</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_10">
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="CameraStatistics" name="cameraStatistics" native="true"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
   <widget class="QDockWidget" name="dw_RtspServer">
    <property name="windowTitle">
     <string>RTSP Server</string>
@@ -1565,6 +1595,11 @@ border-radius: 9px;</string>
    <extends>QWidget</extends>
    <header>CameraSetupWidget.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CameraStatistics</class>
+   <extends>QWidget</extends>
+   <header>camerastatistics.h</header>
   </customwidget>
  </customwidgets>
  <resources>
