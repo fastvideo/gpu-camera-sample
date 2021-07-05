@@ -80,7 +80,17 @@ void FPNReader::readPGM(const QString& fileName)
     mBpp = bitsPerPixel;
 
     FastAllocator a;
-    mFPNBuffer.reset(static_cast<unsigned char*>(a.allocate(mPitch * mHeight)));
+
+    try
+    {
+        mFPNBuffer.reset(static_cast<unsigned char*>(a.allocate(mPitch * mHeight)));
+    }
+    catch(...)
+    {
+        alloc.deallocate(bits);
+        return;
+    }
+
     unsigned char* dst = mFPNBuffer.get();
 
     memcpy(dst, bits, mPitch * mHeight);

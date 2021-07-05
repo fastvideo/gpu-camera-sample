@@ -42,7 +42,6 @@
 #define gLcpStore LCPStore::getInstance()
 #define gCubeLutStore Lut3DStore::getInstance()
 
-
 #define MIN_DRIVER_VERSION 10000
 
 

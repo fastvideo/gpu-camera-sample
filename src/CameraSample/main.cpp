@@ -29,6 +29,7 @@
 #include "MainWindow.h"
 #include <QApplication>
 #include <QStyleFactory>
+#include <QMessageBox>
 #include "version.h"
 
 int main(int argc, char *argv[])
@@ -93,6 +94,52 @@ int main(int argc, char *argv[])
     styleSheetList << QStringLiteral("QGroupBox {background-color: transparent; border: 1px solid gray; border-radius: 3px; margin-top: 7px;}");
     styleSheetList << QStringLiteral("QGroupBox::title {subcontrol-origin: margin; top: 0px; left: 15px;}");
     qApp->setStyleSheet(styleSheetList.join(QChar('\n')));
+
+    int drvVer = 0;
+    cudaError_t err = cudaSuccess;
+    err = cudaDriverGetVersion(&drvVer);
+    if(err != cudaSuccess)
+    {
+        QMessageBox::critical(nullptr, QCoreApplication::applicationName(),
+                              QObject::trUtf8("No CUDA driver installed.\nProcessing is impossible."));
+        return 0;
+    }
+    //
+    if(drvVer < MIN_DRIVER_VERSION)
+    {
+        QMessageBox::critical(nullptr, QCoreApplication::applicationName(),
+                              QObject::trUtf8("CUDA 10.0 compatible driver required.\nPlease update NVidia drivers to the latest version."));
+        return 0;
+    }
+
+    int devCount = 0;
+    cudaGetDeviceCount(&devCount);
+
+    if(devCount == 0)
+    {
+        QMessageBox::critical(nullptr, QCoreApplication::applicationName(),
+                              QObject::trUtf8("No CUDA device found.\nProcessing is impossible."));
+        return 0;
+    }
+
+    cudaDeviceProp props{};
+    bool found = false;
+    for(int i = 0; i < devCount; i++)
+    {
+        cudaGetDeviceProperties(&props, i);
+        if(props.major >= 3)
+        {
+            found = true;
+            break;
+        }
+    }
+    if(!found)
+    {
+        QMessageBox::critical(nullptr, QCoreApplication::applicationName(),
+                              QObject::trUtf8("Kepler architecture or later GPU required.\nProcessing is impossible."));
+        return 0;
+    }
+
     MainWindow w;
     w.show();
 

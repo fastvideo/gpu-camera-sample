@@ -194,7 +194,8 @@ bool ImperxCamera::open(uint32_t devID)
         mFPS = m_pParameters->GetFloatValue("AcquisitionFrameRate");
 
         // Allocate image data buffer
-        mInputBuffer.allocate(mWidth, mHeight, mSurfaceFormat);
+        if(!mInputBuffer.allocate(mWidth, mHeight, mSurfaceFormat))
+            return false;
 
         // Set Initial state
         mDevID = devID;
@@ -204,7 +205,7 @@ bool ImperxCamera::open(uint32_t devID)
 
 
     // Return true, if camera was created successfully, false - otherwise
-    return(m_pCamera!=nullptr);
+    return(m_pCamera != nullptr);
 
 }
 

@@ -237,13 +237,18 @@ void MainWindow::initNewCamera(GPUCameraBase* cmr, uint32_t devID)
     if(!mCameraPtr)
         return;
 
+    if(!mCameraPtr->open(devID))
+    {
+        QMessageBox::critical(this, QCoreApplication::applicationName(),
+                              QObject::trUtf8("Cannot open camera\nor no camera is connected."));
+
+        return;
+    }
+
     connect(mCameraPtr.data(),
             SIGNAL(stateChanged(GPUCameraBase::cmrCameraState)),
             this,
             SLOT(onCameraStateChanged(GPUCameraBase::cmrCameraState)));
-
-    if(!mCameraPtr->open(devID))
-        return;
 
     mProcessorPtr.reset(new RawProcessor(mCameraPtr.data(), mRendererPtr.data()));
 
@@ -1023,7 +1028,15 @@ void MainWindow::onCameraStateChanged(GPUCameraBase::cmrCameraState newState)
 void MainWindow::on_actionPlay_toggled(bool arg1)
 {
     if(!mCameraPtr || !mProcessorPtr)
+    {
+        QMessageBox::critical(this, QCoreApplication::applicationName(),
+                              QObject::trUtf8("No camera connected.\nor CUDA processor is not initialized."));
+
+        QSignalBlocker b(ui->actionPlay);
+        ui->actionPlay->setChecked(false);
         return;
+    }
+
     if(arg1)
     {
         updateOptions(mOptions);

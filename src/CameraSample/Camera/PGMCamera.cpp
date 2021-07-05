@@ -116,7 +116,8 @@ bool PGMCamera::open(uint32_t devID)
     memcpy(mInputImage.data.get(), bits, pitch * height);
     a.deallocate(bits);
 
-    mInputBuffer.allocate(mWidth, mHeight, mSurfaceFormat);
+    if(!mInputBuffer.allocate(mWidth, mHeight, mSurfaceFormat))
+        return false;
 
     mState = cstStopped;
     emit stateChanged(cstStopped);

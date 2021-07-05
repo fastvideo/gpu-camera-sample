@@ -302,7 +302,8 @@ bool FLIRCamera::open(uint32_t devID)
         mFPS =  ptrFloat->GetValue();
     }
 
-    mInputBuffer.allocate(mWidth, mHeight, mSurfaceFormat);
+    if(!mInputBuffer.allocate(mWidth, mHeight, mSurfaceFormat))
+        return false;
 
     mDevID = devID;
     mState = cstStopped;

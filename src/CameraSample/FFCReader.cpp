@@ -114,7 +114,14 @@ FFCReader::FFCReader(const QString &fileName) :
         return;
 
     FastAllocator alloc;
-    mFFCBuffer.reset(static_cast<float*>(alloc.allocate(mPitch * mHeight)));
+    try
+    {
+        mFFCBuffer.reset(static_cast<float*>(alloc.allocate(mPitch * mHeight)));
+    }
+    catch(...)
+    {
+        return;
+    }
     QVector<float> cfaTmp(cfa.size());
 
     float refColor[2][2];

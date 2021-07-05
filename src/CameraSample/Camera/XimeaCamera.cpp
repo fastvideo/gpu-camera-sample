@@ -172,7 +172,8 @@ bool XimeaCamera::open(uint32_t devID)
         return false;
     }
 
-    mInputBuffer.allocate(mWidth, mHeight, mSurfaceFormat);
+    if(!mInputBuffer.allocate(mWidth, mHeight, mSurfaceFormat))
+        return false;
 
     mDevID = devID;
     mState = cstStopped;
