@@ -232,7 +232,7 @@ You can also create a software module to collect frames from different cameras a
 * HEVC (H.265) encoder/decoder - done
 * <a href="https://imaginghub.com/projects/455-real-time-image-processing-on-nvidia-gpu-with-basler-pylon-and-fastvideo" target="_blank">Real-time Image Processing on NVIDIA GPU with Basler pylon</a> - done
 * Benchmarks for Jetson Xavier NX - done
-* CUDA-11.3 support - in progress
+* CUDA-11.4 support - done
 * Support for Emergent Vision Technologies, DALSA, IDS Imaging, Baumer, Kaya Instruments, SVS-Vistek cameras - in progress
 * Transforms to Rec.601 (SD), Rec.709 (HD), Rec.2020 (4K)
 * RAW Bayer codec
