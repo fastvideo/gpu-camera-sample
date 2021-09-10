@@ -126,15 +126,15 @@ MainWindow::MainWindow(QWidget *parent) :
     }
     {
         QSignalBlocker b(ui->cboSamplingFmt);
-        ui->cboSamplingFmt->addItem(QStringLiteral("420"), JPEG_420);
-        ui->cboSamplingFmt->addItem(QStringLiteral("422"), JPEG_422);
-        ui->cboSamplingFmt->addItem(QStringLiteral("444"), JPEG_444);
+        ui->cboSamplingFmt->addItem(QStringLiteral("420"), FAST_JPEG_420);
+        ui->cboSamplingFmt->addItem(QStringLiteral("422"), FAST_JPEG_422);
+        ui->cboSamplingFmt->addItem(QStringLiteral("444"), FAST_JPEG_444);
     }
 	{
 		QSignalBlocker b(ui->cboSamplingFmtRtsp);
-		ui->cboSamplingFmtRtsp->addItem(QStringLiteral("420"), JPEG_420);
-		ui->cboSamplingFmtRtsp->addItem(QStringLiteral("422"), JPEG_422);
-		ui->cboSamplingFmtRtsp->addItem(QStringLiteral("444"), JPEG_444);
+                ui->cboSamplingFmtRtsp->addItem(QStringLiteral("420"), FAST_JPEG_420);
+                ui->cboSamplingFmtRtsp->addItem(QStringLiteral("422"), FAST_JPEG_422);
+                ui->cboSamplingFmtRtsp->addItem(QStringLiteral("444"), FAST_JPEG_444);
 	}
     {
         QSignalBlocker b(ui->cboOutFormat);
@@ -571,7 +571,7 @@ void MainWindow::readSettings()
     {
         QSignalBlocker b(ui->cboSamplingFmt);
         ui->cboOutFormat->setCurrentIndex(ui->cboOutFormat->findData(
-                                              settings.value("Record/SamplingFormat", JPEG_420)));
+                                              settings.value("Record/SamplingFormat", FAST_JPEG_420)));
     }
 
     {

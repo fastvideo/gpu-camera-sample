@@ -387,7 +387,7 @@ void VDecoder::getEncodedData(AVPacket *pkt, bytearray &data)
 void VDecoder::getImage(AVFrame *frame, PImage &obj)
 {
     if(!obj.get())
-        obj.reset(new Image);
+        obj.reset(new RTSPImage);
     if(frame->format == AV_PIX_FMT_NV12){
         obj->setNV12(frame->data, frame->linesize, frame->width, frame->height);
     }else if(frame->format == AV_PIX_FMT_P010){

@@ -195,17 +195,17 @@ void ReadSOF0(
     }
 
     if(Nf == 1 || isSOF3) {
-        samplingFmt = JPEG_Y;
+        samplingFmt = FAST_JPEG_Y;
 
         if(HV[0] != 0x11)
             throw FAST_UNSUPPORTED_FORMAT;
     } else if(Nf == 3) {
         if(HV[0] == 0x11)
-            samplingFmt = JPEG_444;
+            samplingFmt = FAST_JPEG_444;
         else if(HV[0] == 0x21)
-            samplingFmt = JPEG_422;
+            samplingFmt = FAST_JPEG_422;
         else if(HV[0] == 0x22)
-            samplingFmt = JPEG_420;
+            samplingFmt = FAST_JPEG_420;
         else
             throw FAST_UNSUPPORTED_FORMAT;
 
@@ -291,11 +291,11 @@ void ReadSOS(
         Read(Se, fd);
         Read(A, fd);
 
-        if(jpegMode == JPEG_LOSSLESS) {
+        if(jpegMode == FAST_JPEG_LOSSLESS) {
             if(Ss > 7 || Ss == 0 || Se != 0 || A > 15)
                 throw FAST_UNSUPPORTED_FORMAT;
             predictorClass = Ss;
-        } else if(jpegMode == JPEG_SEQUENTIAL_DCT) {
+        } else if(jpegMode == FAST_JPEG_SEQUENTIAL_DCT) {
             if(Ss != 0 || Se != 63 || A != 0)
                 throw FAST_UNSUPPORTED_FORMAT;
             predictorClass = -1;
@@ -414,9 +414,9 @@ fastStatus_t jfifLoadHeader(
                     case 0xC3:
 
                         if(ucurr == 0xC3)
-                            jfifInfo->jpegMode = JPEG_LOSSLESS;
+                            jfifInfo->jpegMode = FAST_JPEG_LOSSLESS;
                         else
-                            jfifInfo->jpegMode = JPEG_SEQUENTIAL_DCT;
+                            jfifInfo->jpegMode = FAST_JPEG_SEQUENTIAL_DCT;
 
 
                         ReadSOF0(jfifInfo->height, jfifInfo->width, jfifInfo->bitsPerChannel, channelMap, jfifInfo->jpegFmt, jfifInfo->scanMap, (ucurr == 0xC3), fd);
@@ -622,9 +622,9 @@ fastStatus_t jfifLoadHeaderWithoutExif(
                     case 0xC3:
 
                         if(ucurr == 0xC3)
-                            jfifInfo->jpegMode = JPEG_LOSSLESS;
+                            jfifInfo->jpegMode = FAST_JPEG_LOSSLESS;
                         else
-                            jfifInfo->jpegMode = JPEG_SEQUENTIAL_DCT;
+                            jfifInfo->jpegMode = FAST_JPEG_SEQUENTIAL_DCT;
 
 
                         ReadSOF0(jfifInfo->height, jfifInfo->width, jfifInfo->bitsPerChannel, channelMap, jfifInfo->jpegFmt, jfifInfo->scanMap, (ucurr == 0xC3), fd);

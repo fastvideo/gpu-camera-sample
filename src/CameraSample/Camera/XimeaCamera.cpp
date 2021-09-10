@@ -216,7 +216,7 @@ void XimeaCamera::startStreaming()
         return;
 
     QByteArray frameData;
-    frameData.resize(mInputBuffer.size());
+    frameData.resize((int)mInputBuffer.size());
     XI_IMG image = {0};
     image.size = sizeof(XI_IMG);
     image.bp_size = frameData.size();

@@ -63,15 +63,15 @@ FASTVIDEO_EXTRA_DLLS += $$FFMPEG_SRC
 #FASTVIDEO_EXTRA_DLLS += $$[QT_INSTALL_BINS]/icuuc58.dll
 #FASTVIDEO_EXTRA_DLLS += $$LIBTIFF_LIB/tiff.dll
 
-CUDA_TOOLKIT_PATH = "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v10.2"
+CUDA_TOOLKIT_PATH = "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.4"
 CUDAINC += $$CUDA_TOOLKIT_PATH/include
 CUDA_DLL_PATH = $$CUDA_TOOLKIT_PATH/bin
-CUDA_DLL += $$CUDA_DLL_PATH/cudart64_102.dll
+CUDA_DLL += $$CUDA_DLL_PATH/cudart64_110.dll
 
-CUDA_DLL += $$CUDA_DLL_PATH/nppc64_10.dll
-CUDA_DLL += $$CUDA_DLL_PATH/nppif64_10.dll
-CUDA_DLL += $$CUDA_DLL_PATH/nppicc64_10.dll
-CUDA_DLL += $$CUDA_DLL_PATH/nppig64_10.dll
+CUDA_DLL += $$CUDA_DLL_PATH/nppc64_11.dll
+CUDA_DLL += $$CUDA_DLL_PATH/nppif64_11.dll
+CUDA_DLL += $$CUDA_DLL_PATH/nppicc64_11.dll
+CUDA_DLL += $$CUDA_DLL_PATH/nppig64_11.dll
 
 # NVIDIA VIDEO CODEC SDK
 # https://developer.nvidia.com/nvidia-video-codec-sdk/download

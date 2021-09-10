@@ -328,12 +328,13 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
 
     if(options.Packed)
     {
+        fastSDIRaw12Import_t p = {false};
         ret = fastRawImportFromDeviceCreate(
                     &hRawUnpacker,
 
                     FAST_RAW_XIMEA12,
+                    &p,
 
-                    srcSurfaceFmt,
                     maxWidth,
                     maxHeight,
 
@@ -796,7 +797,7 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
         {
             jfifInfo.restartInterval = options.JpegRestartInterval;
             jfifInfo.jpegFmt = options.JpegSamplingFmt;
-            jfifInfo.jpegMode =  JPEG_SEQUENTIAL_DCT;
+            jfifInfo.jpegMode =  FAST_JPEG_SEQUENTIAL_DCT;
             ret = fastJpegEncoderCreate(
                         &hJpegEncoder,
 
@@ -876,7 +877,7 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
     }
 
     size_t  requestedMemSpace = 0;
-    unsigned tmp = 0;
+    size_t tmp = 0;
     if(hDebayer)
     {
         fastDebayerGetAllocatedGpuMemorySize( hDebayer, &tmp );
@@ -1008,7 +1009,7 @@ QSize CUDAProcessorBase::getMaxInputSize()
     return {int(bufferInfo.maxWidth),int(bufferInfo.maxHeight)};
 }
 
-fastStatus_t CUDAProcessorBase::Transform(ImageT *image, CUDAProcessorOptions &opts)
+fastStatus_t CUDAProcessorBase::Transform(GPUImage_t *image, CUDAProcessorOptions &opts)
 {
     QMutexLocker locker(&mut);
     if(image == nullptr)

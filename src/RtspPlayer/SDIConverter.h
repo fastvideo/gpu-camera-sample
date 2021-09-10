@@ -37,7 +37,7 @@ private:
 
 	int m_prevWidth = 0;
 	int m_prevHeight = 0;
-	Image::TYPE m_prevType;
+    RTSPImage::TYPE m_prevType;
 
 	bytearray m_Yuv;
 };

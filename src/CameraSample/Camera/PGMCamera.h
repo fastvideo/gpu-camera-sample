@@ -51,7 +51,7 @@ public:
 private:
     void startStreaming();
     QString mFileName;
-    Image<unsigned char, FastAllocator> mInputImage;
+    Image<FastAllocator> mInputImage;
 };
 
 #endif // PGMCAMERA_H

@@ -2,11 +2,11 @@
 
 #include <cuda_runtime_api.h>
 
-Image::Image(){
+RTSPImage::RTSPImage(){
 
 }
 
-Image::Image(int w, int h, Image::TYPE tp){
+RTSPImage::RTSPImage(int w, int h, RTSPImage::TYPE tp){
 	if(tp == YUV)
 		setYUV(w, h);
 	else if(tp == NV12)
@@ -24,7 +24,7 @@ Image::Image(int w, int h, Image::TYPE tp){
 	}
 }
 
-Image::Image(const Image &o){
+RTSPImage::RTSPImage(const RTSPImage &o){
 	width = o.width;
 	height = o.height;
 	type = o.type;
@@ -32,11 +32,11 @@ Image::Image(const Image &o){
 	yuv = o.yuv;
 }
 
-Image::~Image(){
+RTSPImage::~RTSPImage(){
 	releaseCudaRgbBuffer();
 }
 
-void Image::setYUV(uint8_t *data[], int linesize[], int w, int h)
+void RTSPImage::setYUV(uint8_t *data[], int linesize[], int w, int h)
 {
 	type = YUV;
 	width = w;
@@ -71,7 +71,7 @@ void Image::setYUV(uint8_t *data[], int linesize[], int w, int h)
 //	std::copy(data[2], data[2] + size2, yuv.data() + size1 + size2);
 }
 
-void Image::setNV12(uint8_t *data[], int linesize[], int w, int h)
+void RTSPImage::setNV12(uint8_t *data[], int linesize[], int w, int h)
 {
 	type = NV12;
 	width = w;
@@ -100,7 +100,7 @@ void Image::setNV12(uint8_t *data[], int linesize[], int w, int h)
     //std::copy(data[1], data[1] + size2 * 2, yuv.data() + size1);
 }
 
-void Image::setP010(uint8_t *data[], int linesize[], int w, int h)
+void RTSPImage::setP010(uint8_t *data[], int linesize[], int w, int h)
 {
     type = P010;
     width = w;
@@ -128,7 +128,7 @@ void Image::setP010(uint8_t *data[], int linesize[], int w, int h)
     }
 }
 
-bool Image::setCudaRgb(int w, int h){
+bool RTSPImage::setCudaRgb(int w, int h){
 	if(cudaRgb && w != width && h != height)
 		releaseCudaRgbBuffer();
 	type = CUDA_RGB;
@@ -139,7 +139,7 @@ bool Image::setCudaRgb(int w, int h){
 	return cudaMalloc(&cudaRgb, sz) == cudaSuccess;
 }
 
-bool Image::setCudaGray(int w, int h)
+bool RTSPImage::setCudaGray(int w, int h)
 {
 	if(cudaRgb && w != width && h != height)
 		releaseCudaRgbBuffer();
@@ -151,7 +151,7 @@ bool Image::setCudaGray(int w, int h)
 	return cudaMalloc(&cudaRgb, sz) == cudaSuccess;
 }
 
-void Image::releaseCudaRgbBuffer(){
+void RTSPImage::releaseCudaRgbBuffer(){
 	if(cudaRgb){
 		cudaFree(cudaRgb);
 		cudaRgb = nullptr;
@@ -160,21 +160,21 @@ void Image::releaseCudaRgbBuffer(){
 	cudaSize = 0;
 }
 
-void Image::setYUV(int w, int h){
+void RTSPImage::setYUV(int w, int h){
 	type = YUV;
 	width = w;
 	height = h;
 	yuv.resize(w * h + w/2 * h/2 * 2);
 }
 
-void Image::setNV12(int w, int h){
+void RTSPImage::setNV12(int w, int h){
     type = NV12;
 	width = w;
 	height = h;
     yuv.resize(w * h + w/2 * h/2 * 2);
 }
 
-void Image::setP010(int w, int h)
+void RTSPImage::setP010(int w, int h)
 {
     type = P010;
     width = w;
@@ -182,20 +182,20 @@ void Image::setP010(int w, int h)
     yuv.resize(w * h * 2 + w/2 * h/2 * 2 * 2);
 }
 
-void Image::setRGB(int w, int h){
+void RTSPImage::setRGB(int w, int h){
 	type = RGB;
 	width = w;
 	height = h;
 	rgb.resize(w * h * 3);
 }
 
-void Image::setGray(int w, int h){
+void RTSPImage::setGray(int w, int h){
 	type = GRAY;
 	width = w;
 	height = h;
 	rgb.resize(w * h);
 }
 
-bool Image::empty() const{
+bool RTSPImage::empty() const{
 	return width == 0 || height == 0;
 }

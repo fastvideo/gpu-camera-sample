@@ -56,9 +56,9 @@ AppSettings::AppSettings() //: QSettings(QSettings::SystemScope, QCoreApplicatio
     maxInputWidth = settings.value(QStringLiteral("MaxInputWidth"), 0).toUInt();
     maxInputHeight = settings.value(QStringLiteral("MaxInputHeight"), 0).toUInt();
 
-    jpegPixelFormat = fastJpegFormat_t(settings.value(QStringLiteral("JPEG/PixelFormat"), JPEG_420).toInt());
-    if(jpegPixelFormat < JPEG_444 && jpegPixelFormat > JPEG_420)
-        jpegPixelFormat = JPEG_420;
+    jpegPixelFormat = fastJpegFormat_t(settings.value(QStringLiteral("JPEG/PixelFormat"), FAST_JPEG_420).toInt());
+    if(jpegPixelFormat < FAST_JPEG_444 && jpegPixelFormat > FAST_JPEG_420)
+        jpegPixelFormat = FAST_JPEG_420;
 
     jpegQty = settings.value(QStringLiteral("JPEG/Qty"), 90).toInt();
     jpegQty = qBound<int>(40, jpegQty, 100);

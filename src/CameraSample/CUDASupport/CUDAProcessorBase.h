@@ -83,7 +83,7 @@ public:
     virtual fastStatus_t Init(CUDAProcessorOptions & options);
     virtual fastStatus_t InitFailed(const char *errStr, fastStatus_t ret);
 
-    virtual fastStatus_t Transform(ImageT *image, CUDAProcessorOptions& opts);
+    virtual fastStatus_t Transform(GPUImage_t *image, CUDAProcessorOptions& opts);
     virtual fastStatus_t TransformFailed(const char *errStr, fastStatus_t ret, fastGpuTimerHandle_t profileTimer);
 
     virtual fastStatus_t Close();

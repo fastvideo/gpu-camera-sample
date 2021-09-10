@@ -112,18 +112,18 @@ void AppendSOF0(
 	const fastJpegScanStruct_t &scanStruct,
 	fastJpegFormat_t samplingFmt
 ) {
-	const uint8_t Nf = (samplingFmt == JPEG_Y) ? 1 : 3;
+        const uint8_t Nf = (samplingFmt == FAST_JPEG_Y) ? 1 : 3;
 
 	stream << uint16_t(bitsPerChannel == 8 ? 0xFFC0 : 0xFFC1) << uint16_t(8 + 3 * Nf) << uint8_t(bitsPerChannel) << H << W << Nf;
 
 	const unsigned channelMbHeight[3] = {
-        (samplingFmt == JPEG_420) ? 2U : 1U,
+        (samplingFmt == FAST_JPEG_420) ? 2U : 1U,
         1U,
         1U
 	};
 
 	const unsigned channelMbWidth[3] = {
-        (samplingFmt == JPEG_420 || samplingFmt == JPEG_422) ? 2U : 1U,
+        (samplingFmt == FAST_JPEG_420 || samplingFmt == FAST_JPEG_422) ? 2U : 1U,
         1U,
         1U
 	};
@@ -141,7 +141,7 @@ void AppendSOS(
 	fastJpegFormat_t samplingFmt,
 	const fastJpegScanStruct_t &scanStruct
 ) {
-	const uint8_t Ns = (samplingFmt == JPEG_Y) ? 1 : 3;
+        const uint8_t Ns = (samplingFmt == FAST_JPEG_Y) ? 1 : 3;
 	stream << uint16_t(0xFFDA) << uint16_t(6 + 2 * Ns) << Ns;
 
 	for(uint8_t scanPos = 0; scanPos < Ns; scanPos++) {
@@ -217,7 +217,7 @@ void AppendHeader(
 	memset(isQuant, 0, sizeof(isQuant));
 	memset(isHuffman, 0, sizeof(isHuffman));
 
-	const unsigned ChannelCount = (samplingFmt == JPEG_Y) ? 1 : 3;
+        const unsigned ChannelCount = (samplingFmt == FAST_JPEG_Y) ? 1 : 3;
 
 	for(uint8_t channelPos = 0; channelPos < ChannelCount; channelPos++)
 		isQuant[Map_host(scanMap->quantTableMask, channelPos)] = true;

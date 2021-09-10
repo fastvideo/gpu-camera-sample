@@ -147,7 +147,7 @@ void RawProcessor::startWorking()
         if(!mProcessorPtr || mCamera == nullptr)
             continue;
 
-        ImageT* img = mCamera->getFrameBuffer()->getLastImage();
+        GPUImage_t* img = mCamera->getFrameBuffer()->getLastImage();
         mProcessorPtr->Transform(img, mOptions);
         if(mRenderer)
         {
@@ -350,7 +350,7 @@ void RawProcessor::startWriting()
         writer->open(mCamera->width(),
                      mCamera->height(),
                      25,
-                     mCamera->isColor() ? mOptions.JpegSamplingFmt : JPEG_Y,
+                     mCamera->isColor() ? mOptions.JpegSamplingFmt : FAST_JPEG_Y,
                      fileName);
         mFileWriterPtr.reset(writer);
     }

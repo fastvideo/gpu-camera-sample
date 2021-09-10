@@ -275,7 +275,7 @@ void CuvidDecoder::resetUpdateImage()
 bool CuvidDecoder::decode(uint8_t *data, size_t size, PImage& image)
 {
     if(!image){
-        image.reset(new Image());
+        image.reset(new RTSPImage());
     }
     if(mD->mFrame.get() != image.get())
         mD->mFrame = image->shared_from_this();

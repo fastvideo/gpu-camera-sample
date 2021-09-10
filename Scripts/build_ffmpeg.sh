@@ -20,7 +20,8 @@ sudo make install
 #Compile ffmpeg
 echo "Compiling ffmpeg"
 cd ~/ffmpeg_sources
-git clone https://github.com/FFmpeg/FFmpeg -b master
+git clone https://github.com/FFmpeg/FFmpeg -b n4.3.2
+
 cd FFmpeg
 ./configure \
   --prefix="$HOME/ffmpeg_build" \

@@ -92,7 +92,7 @@ public:
 
         JpegQuality = 90;
         JpegRestartInterval = 16;
-        JpegSamplingFmt = JPEG_420;
+        JpegSamplingFmt = FAST_JPEG_420;
         bitrate = 0;
 
         EnableDenoise = true;

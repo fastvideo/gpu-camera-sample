@@ -38,7 +38,7 @@
 //#include "FastAllocator.h"
 #include "GPUImage.h"
 
-typedef GPUImage<unsigned char> ImageT;
+typedef GPUImage<unsigned char> GPUImage_t;
 
 class CircularBuffer : public QObject
 {
@@ -50,13 +50,13 @@ public:
 
     bool allocate(int width, int height, fastSurfaceFormat_t format = FAST_I16);
     unsigned char* getBuffer();
-    ImageT* getLastImage();
+    GPUImage_t* getLastImage();
     void release();
 
     int width();
     int height();
     int pitch();
-    int size();
+    size_t size();
     fastSurfaceFormat_t surfaceFmt();
 
 signals:
@@ -72,9 +72,9 @@ private:
     //Last written buffer
     int mLast = -1;
 
-    QVector<ImageT> mImages;
+    QVector<GPUImage_t> mImages;
     QMutex mMutex;
-    int mAllocated = 0;
+    size_t mAllocated = 0;
 
     int mRead = 0;
     int mWritten = 0;

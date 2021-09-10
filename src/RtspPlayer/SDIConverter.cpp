@@ -70,18 +70,21 @@ bool SDIConverter::initSdiConvert(PImage image)
 
 	fastSDIFormat_t SDIFormat;
 
-	if(image->type == Image::YUV){
+        if(image->type == RTSPImage::YUV){
 		SDIFormat = FAST_SDI_NV12_BT601;
-	}else if(image->type == Image::NV12){
+        }else if(image->type == RTSPImage::NV12){
 		SDIFormat = FAST_SDI_NV12_BT601;
     }else {
         SDIFormat = FAST_SDI_P010_BT709;
     }
 
-	res = (fastSDIImportFromHostCreate(
+        fastSDIRaw12Import_t p = {false};
+
+        res = (fastSDIImportFromHostCreate(
 		&m_hImport,
 
 		SDIFormat,
+                &p,
 
 		width,
 		height,
@@ -93,7 +96,7 @@ bool SDIConverter::initSdiConvert(PImage image)
         return false;
     }
 
-    if(image->type == Image::P010){
+    if(image->type == RTSPImage::P010){
         fastBitDepthConverter_t bitDepthParam;
         bitDepthParam.isOverrideSourceBitsPerChannel = false;
         bitDepthParam.targetBitsPerChannel = 8;
@@ -122,8 +125,8 @@ bool SDIConverter::initSdiConvert(PImage image)
         return false;
     }
 
-	unsigned requestedMemSpace = 0;
-	unsigned tmp = 0;
+        size_t requestedMemSpace = 0;
+        size_t tmp = 0;
 
 	if( m_hImport != nullptr )
 	{
@@ -168,7 +171,7 @@ bool SDIConverter::sdiConvert(PImage image, void *cudaRgb)
 
 	fastStatus_t res;
 
-    if(image->type == Image::NV12 || image->type == Image::P010){
+    if(image->type == RTSPImage::NV12 || image->type == RTSPImage::P010){
 		res = (fastSDIImportFromHostCopy(
 			m_hImport,
 
@@ -194,7 +197,7 @@ bool SDIConverter::sdiConvert(PImage image, void *cudaRgb)
         return false;
     }
 
-    if(image->type == Image::P010){
+    if(image->type == RTSPImage::P010){
         fastBitDepthConverter_t bitDepthParam;
         bitDepthParam.isOverrideSourceBitsPerChannel = false;
         bitDepthParam.targetBitsPerChannel = 8;

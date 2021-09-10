@@ -10,7 +10,7 @@ TEMPLATE = app
 
 unix:  FASTVIDEO_EXTRA_DLLS += $$PWD/GPUCameraSample.sh
 
-CONFIG += console
+#CONFIG += console
 
 #INCLUDEPATH += ./CUDASupport
 #INCLUDEPATH += ./Camera

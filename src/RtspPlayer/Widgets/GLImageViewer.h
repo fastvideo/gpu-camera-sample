@@ -124,7 +124,7 @@ private:
 
 	int m_prevWidth = 0;
 	int m_prevHeight = 0;
-	Image::TYPE m_prevType;
+    RTSPImage::TYPE m_prevType;
 
     QTimer m_timer;
 	QElapsedTimer m_timeFps;

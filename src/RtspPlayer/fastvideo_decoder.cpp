@@ -32,15 +32,15 @@ bool fastvideo_decoder::init_decoder(uint32_t width, uint32_t height, fastSurfac
 		ret = fastExportToHostCreate(&m_DeviceToHost, &m_surfaceFmt, m_dHandle);
 	}
 
-	unsigned allMem = 0;
+        size_t allMem = 0;
 	{
-		unsigned reqMem = 0;
+                size_t reqMem = 0;
 		ret = fastJpegDecoderGetAllocatedGpuMemorySize(m_handle, &reqMem);
 		allMem += reqMem;
 	}
 
 	{
-		unsigned reqMem = 0;
+                size_t reqMem = 0;
 		ret = fastExportToDeviceGetAllocatedGpuMemorySize(m_DeviceToDevice, &reqMem);
 		allMem += reqMem;
 	}
@@ -85,7 +85,7 @@ bool fastvideo_decoder::decode(const uint8_t *input, uint32_t len, PImage &outpu
 
     ret = fastJfifLoadFromMemory(input, len, &info);
 
-	fastSurfaceFormat_t fmt = info.jpegFmt == JPEG_Y? FAST_I8 : FAST_RGB8;
+        fastSurfaceFormat_t fmt = info.jpegFmt == FAST_JPEG_Y? FAST_I8 : FAST_RGB8;
 
 	m_isInit &= info.width == m_width && info.height == m_height;
 
@@ -104,11 +104,11 @@ bool fastvideo_decoder::decode(const uint8_t *input, uint32_t len, PImage &outpu
     if(ret == FAST_OK){
 		if(cudaImage){
 			if(reinit || !output.get() || output->width != info.width || output->height != info.height){
-				output.reset(new Image(info.width, info.height, fmt == FAST_I8? Image::CUDA_GRAY : Image::CUDA_RGB));
+                                output.reset(new RTSPImage(info.width, info.height, fmt == FAST_I8? RTSPImage::CUDA_GRAY : RTSPImage::CUDA_RGB));
 			}
 		}else{
 			if(reinit || !output.get() || output->width != info.width || output->height != info.height){
-				output.reset(new Image(info.width, info.height, fmt == FAST_I8? Image::GRAY : Image::RGB));
+                                output.reset(new RTSPImage(info.width, info.height, fmt == FAST_I8? RTSPImage::GRAY : RTSPImage::RGB));
 			}
 		}
 
@@ -167,11 +167,11 @@ bool fastvideo_decoder::decode(const bytearray &input, PImage& output, bool cuda
     if(ret == FAST_OK){
 		if(cudaImage){
 			if(reinit || !output.get() || output->width != info.width || output->height != info.height){
-				output.reset(new Image(info.width, info.height, Image::CUDA_RGB));
+                                output.reset(new RTSPImage(info.width, info.height, RTSPImage::CUDA_RGB));
 			}
 		}else{
 			if(reinit || !output.get() || output->width != info.width || output->height != info.height){
-				output.reset(new Image(info.width, info.height, Image::RGB));
+                                output.reset(new RTSPImage(info.width, info.height, RTSPImage::RGB));
 			}
 		}
 

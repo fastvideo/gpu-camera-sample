@@ -36,7 +36,7 @@ public:
     CUDAProcessorGray(QObject *parent = nullptr);
     ~CUDAProcessorGray() override;
     virtual fastStatus_t Init(CUDAProcessorOptions& options);
-    virtual fastStatus_t Transform(ImageT *image, CUDAProcessorOptions& opts) override;
+    virtual fastStatus_t Transform(GPUImage_t *image, CUDAProcessorOptions& opts) override;
     virtual bool isGrayscale() override {return true;}
     virtual void freeFilters() override;
     virtual fastStatus_t export8bitData(void* dstPtr, bool forceRGB = true) override;

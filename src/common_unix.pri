@@ -4,8 +4,12 @@ FLIR_PATH = /opt/spinnaker
 IMPERX_PATH = $$OTHER_LIB_PATH/Imperx
 
 # CUDA
-CUDA_TOOLKIT_PATH = "/usr/local/cuda-10.2"
-
+contains(TARGET_ARCH, arm64){
+    CUDA_TOOLKIT_PATH = "/usr/local/cuda-10.2"
+}
+else {
+    CUDA_TOOLKIT_PATH = "/usr/local/cuda-11"
+}
 INCLUDEPATH += $${CUDA_TOOLKIT_PATH}/include
 CUDA_LIB  = -L$${CUDA_TOOLKIT_PATH}/lib64
 CUDA_LIB += -lnppicc
@@ -35,8 +39,8 @@ FASTVIDEO_LIB += -lfastvideo_sdk -lfastvideo_denoise
 # -lfastvideo_mjpeg -lfastvideo_denoise -lfastvideo_nppFilter -lfastvideo_nppResize -lfastvideo_nppGeometry
 #
 
-FASTVIDEO_EXTRA_DLLS += $$FASTVIDEO_SDK/lib/$$PLATFORM/libfastvideo_sdk.so.16.0.0.016000
-FASTVIDEO_EXTRA_DLLS += $$FASTVIDEO_SDK/lib/$$PLATFORM/libfastvideo_denoise.so.1.0.1.016000
+FASTVIDEO_EXTRA_DLLS += $$FASTVIDEO_SDK/lib/$$PLATFORM/libfastvideo_sdk.so.0.17.0.1.0170001
+FASTVIDEO_EXTRA_DLLS += $$FASTVIDEO_SDK/lib/$$PLATFORM/libfastvideo_denoise.so.1.0.0.0.0170001
 
 # NVIDIA VIDEO CODEC SDK
 # https://developer.nvidia.com/nvidia-video-codec-sdk/download
@@ -46,10 +50,18 @@ contains(TARGET_ARCH, arm64){
     FFMPEG_PATH = $$OTHER_LIB_PATH/ffmpeg
     FFMPEG_LIB = -L$$FFMPEG_PATH/lib/linux/aarch64
     FFMPEG_LIB += -lavformat -lavcodec -lavutil -lswresample -lm -lz -lx264
-    FASTVIDEO_EXTRA_DLLS += $$FFMPEG_PATH/lib/linux/aarch64/libavcodec.so.58.106.100
-    FASTVIDEO_EXTRA_DLLS += $$FFMPEG_PATH/lib/linux/aarch64/libavformat.so.58.58.100
-    FASTVIDEO_EXTRA_DLLS += $$FFMPEG_PATH/lib/linux/aarch64/libavutil.so.56.59.100
-    FASTVIDEO_EXTRA_DLLS += $$FFMPEG_PATH/lib/linux/aarch64/libswresample.so.3.8.100
+
+    INCLUDEPATH += $$OTHER_LIB_PATH/libjpeg-turbo/include
+    LIBS += -L/$$OTHER_LIB_PATH/libjpeg-turbo/lib64/aarch64 -ljpeg
+
+    FASTVIDEO_EXTRA_DLLS += $$FFMPEG_PATH/lib/linux/aarch64/libavcodec.so.58.18.100
+    FASTVIDEO_EXTRA_DLLS += $$FFMPEG_PATH/lib/linux/aarch64/libavformat.so.58.12.100
+    FASTVIDEO_EXTRA_DLLS += $$FFMPEG_PATH/lib/linux/aarch64/libavutil.so.56.14.100
+    FASTVIDEO_EXTRA_DLLS += $$FFMPEG_PATH/lib/linux/aarch64/libswresample.so.3.1.100
+
+    FASTVIDEO_EXTRA_DLLS += $$OTHER_LIB_PATH/libjpeg-turbo/lib64/aarch64/libjpeg.so.62.3.0
+
+    LIBS += -lGL
 }
 else {
     NVCODECS = $$OTHER_LIB_PATH/nvcodecs
@@ -105,39 +117,30 @@ contains( DEFINES, SUPPORT_GENICAM ){
 
 contains(TARGET_ARCH, arm64 ) {
     GANAPI_LIB_PATH = $$OTHER_LIB_PATH/GenICam/bin/Linux64_ARM
-    GCC_VER = gcc421
 }
 else {
     GANAPI_LIB_PATH = $$OTHER_LIB_PATH/GenICam/bin/Linux64_x64
-    GCC_VER = gcc421
 }
-    GENAPIVER = v3_0
-
-    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libGCBase_$${GCC_VER}_$${GENAPIVER}.so
-    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libGenApi_$${GCC_VER}_$${GENAPIVER}.so
-    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libLog_$${GCC_VER}_$${GENAPIVER}.so
-    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libMathParser_$${GCC_VER}_$${GENAPIVER}.so
-    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libNodeMapData_$${GCC_VER}_$${GENAPIVER}.so
-    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libXmlParser_$${GCC_VER}_$${GENAPIVER}.so
-
-#    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libCLProtocol_$${GCC_VER}_v3_2.so
-#    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libFirmwareUpdate_$${GCC_VER}_v3_2.so
-#    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/liblog4cpp_$${GCC_VER}_v3_2.so
+    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libGCBase_$${GENAPIVER}.so
+    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libGenApi_$${GENAPIVER}.so
+    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libLog_$${GENAPIVER}.so
+    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libMathParser_$${GENAPIVER}.so
+    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libNodeMapData_$${GENAPIVER}.so
+    FASTVIDEO_EXTRA_DLLS += $$GANAPI_LIB_PATH/libXmlParser_$${GENAPIVER}.so
 
     INCLUDEPATH += $$GENAPIPATH/include
-    LIBS += -L$$GANAPI_LIB_PATH -lGCBase_$${GCC_VER}_$${GENAPIVER} -lGenApi_$${GCC_VER}_$${GENAPIVER}
+    LIBS += -L$$GANAPI_LIB_PATH -lGCBase_$${GENAPIVER} -lGenApi_$${GENAPIVER}
     contains(GENAPIVER, v3_0){
     }
-    else   {
-        LIBS +=  -lCLAllSerial_$${GCC_VER}
+    else{
+        LIBS +=  -lCLAllSerial_$${GENAPIVER}
     }
-    LIBS += -lLog_$${GCC_VER}_$${GENAPIVER} -lMathParser_$${GCC_VER}_$${GENAPIVER} -lNodeMapData_$${GCC_VER}_$${GENAPIVER} -lXmlParser_$${GCC_VER}_$${GENAPIVER}
-#    LIBS += -lFirmwareUpdate_$${GCC_VER}_v3_2 -llog4cpp_$${GCC_VER}_v3_2 -lCLProtocol_$${GCC_VER}_v3_2
+    LIBS += -lLog_$${GENAPIVER} -lMathParser_$${GENAPIVER} -lNodeMapData_$${GENAPIVER} -lXmlParser_$${GENAPIVER}
+
 }
 
 #
-contains(TARGET_ARCH, arm64 ): LIBS += -lGL
-#
+
 defineTest(copyQtIcuDllsToDestdir) {
     DLLS = $$1
     for(ifile, DLLS) {

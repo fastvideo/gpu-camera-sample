@@ -11,14 +11,14 @@
 
 typedef std::vector< unsigned char > bytearray;
 
-class Image: public std::enable_shared_from_this<Image>{
+class RTSPImage: public std::enable_shared_from_this<RTSPImage>{
 public:
     enum TYPE{YUV, NV12, P010, RGB, GRAY, CUDA_RGB, CUDA_GRAY};
 
-	Image();
-	Image(int w, int h, TYPE tp);
-	Image(const Image& o);
-	~Image();
+    RTSPImage();
+    RTSPImage(int w, int h, TYPE tp);
+    RTSPImage(const RTSPImage& o);
+    ~RTSPImage();
 
 	void setYUV(uint8_t *data[], int linesize[], int w, int h);
 	void setNV12(uint8_t *data[], int linesize[], int w, int h);
@@ -46,7 +46,7 @@ private:
 
 };
 
-typedef std::shared_ptr<Image> PImage;
+typedef std::shared_ptr<RTSPImage> PImage;
 
 class AbstractReceiver{
 public:

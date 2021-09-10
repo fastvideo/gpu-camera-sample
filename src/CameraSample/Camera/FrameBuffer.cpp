@@ -39,13 +39,13 @@ bool CircularBuffer::allocate(int width, int height, fastSurfaceFormat_t format)
 {
     QMutexLocker lock(&mMutex);
 
-    int pitch = GetPitchFromSurface(format, width);
+    size_t pitch = GetPitchFromSurface(format, (unsigned)width);
     int bpc = GetBitsPerChannelFromSurface(format);
 
     //Sometimes XI API returns Not enough memory
     //if we allocate exact number of bytes
     //so we double buffer size just in case
-    int bytesAlloc = height * pitch * 2;
+    size_t bytesAlloc = height * pitch * 2;
 
     mImages.resize(numBuffers);
 
@@ -58,7 +58,7 @@ bool CircularBuffer::allocate(int width, int height, fastSurfaceFormat_t format)
         mImages[i].w = width;
         mImages[i].h = height;
         mImages[i].surfaceFmt = format;
-        mImages[i].wPitch = pitch;
+        mImages[i].wPitch = (int)pitch;
         mImages[i].bitsPerChannel = bpc;
         try
         {
@@ -90,7 +90,7 @@ int CircularBuffer::pitch()
     return  mImages.isEmpty() ? 0 : mImages.front().wPitch;
 }
 
-int CircularBuffer::size()
+size_t CircularBuffer::size()
 {
     return mAllocated;
 }
@@ -111,7 +111,7 @@ unsigned char* CircularBuffer::getBuffer()
     return mImages[mCurrent].data.get();
 }
 
-ImageT* CircularBuffer::getLastImage()
+GPUImage_t *CircularBuffer::getLastImage()
 {
     if(mImages.isEmpty() || mLast < 0)
         return nullptr;

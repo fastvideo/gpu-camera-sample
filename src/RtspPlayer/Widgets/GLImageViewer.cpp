@@ -613,21 +613,21 @@ void GLRenderer::loadImageInternal(PImage image)
 
 	void *img = m_cudaRgb;
 
-    if(image->type == Image::YUV || image->type == Image::NV12 || image->type == Image::P010){
+    if(image->type == RTSPImage::YUV || image->type == RTSPImage::NV12 || image->type == RTSPImage::P010){
 		if(!m_sdiConverter.convertToRgb(image, m_cudaRgb)){
 			return;
 		}
-	}else if(image->type == Image::RGB){
+        }else if(image->type == RTSPImage::RGB){
 		error = cudaMemcpy(m_cudaRgb, image->rgb.data(), image->rgb.size(), cudaMemcpyHostToDevice);
 		if(error != cudaSuccess){
 			return;
 		}
-	}else if(image->type == Image::GRAY){
+        }else if(image->type == RTSPImage::GRAY){
 		// not yet supported
 		return;
-	}else if(image->type == Image::CUDA_RGB){
+        }else if(image->type == RTSPImage::CUDA_RGB){
 		error = cudaMemcpy(m_cudaRgb, image->cudaRgb, image->cudaSize, cudaMemcpyDeviceToDevice);
-	}else if(image->type == Image::CUDA_GRAY){
+        }else if(image->type == RTSPImage::CUDA_GRAY){
 		// not yet support
 	}
 

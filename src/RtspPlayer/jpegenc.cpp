@@ -1,7 +1,3 @@
-//
-// Created by 1 on 28.11.2019.
-//
-
 #include "jpegenc.h"
 
 
@@ -209,7 +205,7 @@ bool jpegenc::decode(const bytearray &input, PImage &image)
     }
 
     if(!image.get() || image->width != w || image->height != h){
-        image.reset(new Image);
+        image.reset(new RTSPImage);
         image->setRGB(w, h);
     }
     int pixSize = cp == TJCS_GRAY? 1 : 3;
@@ -245,7 +241,7 @@ bool jpegenc::decode(const bytearray &input, PImage &image)
     int numEl = 3;
 
     if(!image.get() || image->width != w || image->height != h){
-        image.reset(new Image);
+        image.reset(new RTSPImage);
         image->setRGB(w, h);
     }
 
@@ -281,7 +277,7 @@ bool jpegenc::decode(const uint8_t *input, int len, PImage &image)
     }
 
     if(!image.get() || image->width != w || image->height != h){
-        image.reset(new Image);
+        image.reset(new RTSPImage);
 		if(cp == TJCS_GRAY){
 			image->setGray(w, h);
 		}else{
@@ -321,7 +317,7 @@ bool jpegenc::decode(const uint8_t *input, int len, PImage &image)
     int numEl = 3;
 
     if(!image.get() || image->width != w || image->height != h){
-        image.reset(new Image);
+        image.reset(new RTSPImage);
         image->setRGB(w, h);
     }
 

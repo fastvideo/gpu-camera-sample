@@ -92,15 +92,15 @@ MJPEGEncoder::MJPEGEncoder(int width,
 
     switch (fmt)
     {
-    case JPEG_Y:
+    case FAST_JPEG_Y:
         enc_ctx->pix_fmt = AV_PIX_FMT_GRAY8;
-    case JPEG_444:
+    case FAST_JPEG_444:
         enc_ctx->pix_fmt = AV_PIX_FMT_YUVJ444P;
         break;
-    case JPEG_422:
+    case FAST_JPEG_422:
         enc_ctx->pix_fmt = AV_PIX_FMT_YUVJ422P;
         break;
-    case JPEG_420:
+    case FAST_JPEG_420:
         enc_ctx->pix_fmt = AV_PIX_FMT_YUVJ420P;
         break;
     default:

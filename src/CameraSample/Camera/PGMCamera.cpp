@@ -30,6 +30,8 @@
 #include "MainWindow.h"
 #include "RawProcessor.h"
 
+extern int loadPPM(const char *file, void** data, BaseAllocator *alloc, unsigned int &width, unsigned &wPitch, unsigned int &height, unsigned &bitsPerPixel, unsigned &channels);
+
 PGMCamera::PGMCamera(const QString &fileName,
                      fastBayerPattern_t  pattern,
                      bool isColor) :
