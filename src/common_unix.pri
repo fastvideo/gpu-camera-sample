@@ -69,7 +69,7 @@ else {
     LIBS += -L$$NVCODECS/Lib/$$PLATFORM -lnvcuvid -lcuda
 
     unix{
-        LIBS += -L$$NVCODECS/Lib/linux/stubs/x86_64
+        LIBS += -L$$NVCODECS/Lib/linux/stubs/x86_64 -lv4l2
     }
 
     FFMPEG_LIB += -lavformat -lavcodec -lavutil -lswresample -lm -lz -lx264

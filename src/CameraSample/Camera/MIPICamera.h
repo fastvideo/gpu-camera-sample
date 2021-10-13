@@ -3,6 +3,10 @@
 
 #include "GPUCameraBase.h"
 
+#include <QSharedPointer>
+
+class CameraV4l2;
+
 class MIPICamera : public GPUCameraBase
 {
 public:
@@ -10,6 +14,9 @@ public:
     ~MIPICamera();
 
     void startStreaming();
+
+private:
+    QSharedPointer<CameraV4l2> mCamera;
 
     // GPUCameraBase interface
 public:
