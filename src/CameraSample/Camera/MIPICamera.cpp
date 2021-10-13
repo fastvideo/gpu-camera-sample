@@ -332,7 +332,20 @@ bool MIPICamera::open(uint32_t devID)
 {
     mCamera->setDev(devID);
     bool res = mCamera->open();
+    if(res){
+        mWidth = mCamera->width();
+        mHeight = mCamera->height();
+        mSurfaceFormat = FAST_I12;
+        mImageFormat = cif12bpp;
+        mWhite = 4095;
+        mIsColor = true;
+        mFPS = 25;
+        mPattern = FAST_BAYER_RGGB;
+    }
 
+    mDevID = devID;
+    mState = cstStopped;
+    emit stateChanged(cstStopped);
     return res;
 }
 
