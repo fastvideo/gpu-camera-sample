@@ -224,9 +224,13 @@ public:
 
         xioctl(mFd, VIDIOC_QBUF, &buf);
     }
+
+    int exposure() const { return mExposure; }
+
     void set_exposure(int val){
         if(!mIsOpen)
             return;
+        mExposure = val;
 
         std::lock_guard<std::mutex> guard(mMutex);
 
@@ -263,6 +267,7 @@ private:
     std::vector<buffer> mBuffrs;
     int mBytesPerLines = 0;
     std::mutex mMutex;
+    int mExposure = 0;
 
     int mResolutionId = 0;
 
@@ -316,7 +321,7 @@ void MIPICamera::startStreaming()
         tmr.restart();
         mCamera->get(image);
         unsigned char* dst = mInputBuffer.getBuffer();
-        cudaMemcpy(dst, frameData.data(), image.size(), cudaMemcpyHostToDevice);
+        cudaMemcpy(dst, image.ptr(0), image.size(), cudaMemcpyHostToDevice);
         mInputBuffer.release();
 
         {
@@ -338,9 +343,12 @@ bool MIPICamera::open(uint32_t devID)
         mSurfaceFormat = FAST_I12;
         mImageFormat = cif12bpp;
         mWhite = 4095;
+        mBblack = 0;
         mIsColor = true;
         mFPS = 25;
-        mPattern = FAST_BAYER_RGGB;
+        mPattern = FAST_BAYER_BGGR;
+        if(!mInputBuffer.allocate(mWidth, mHeight, mSurfaceFormat))
+            return false;
     }
 
     mDevID = devID;
@@ -382,9 +390,11 @@ bool MIPICamera::getParameter(GPUCameraBase::cmrCameraParameter param, float &va
     switch (param)
     {
     case prmFrameRate:
+        val = 25;
         break;
 
     case prmExposureTime:
+        val = mCamera->exposure();
         break;
 
     default:
@@ -427,20 +437,18 @@ bool MIPICamera::getParameterInfo(GPUCameraBase::cmrParameterInfo &info)
 {
     if(info.param < 0 || info.param > prmLast)
         return false;
-    int iv = 0;
-    float fv = 0;
     switch(info.param)
     {
     case prmFrameRate:
-        info.min = fv;
-        info.max = fv;
-        info.increment = fv;
+        info.min = 0;
+        info.max = 1000;
+        info.increment = 1;
         break;
 
     case prmExposureTime:
-        info.min = iv;
-        info.max = iv;
-        info.increment = iv;
+        info.min = 0;
+        info.max = 10000000000;
+        info.increment = 1;
         break;
 
     default:
