@@ -71,8 +71,8 @@ struct Res{
 };
 
 const Res Resolutions[] = {
-    Res(1920, 1080),
-    Res(1280, 720),
+    Res(2592, 1944),
+    Res(2592, 1458),
     Res(640, 480),
 };
 
@@ -106,6 +106,9 @@ public:
     int height() const{
         return mHeight;
     }
+    float fps() const{
+        return mFps;
+    }
 
     bool is_open() const{
         return mIsOpen;
@@ -134,6 +137,20 @@ public:
         mWidth = fmt.fmt.pix.width;
         mHeight = fmt.fmt.pix.height;
         mBytesPerLines =fmt.fmt.pix.bytesperline;
+
+        struct v4l2_frmivalenum temp;
+        CLEAR(temp);
+        temp.pixel_format = fmt.fmt.pix.pixelformat;
+        temp.width = mWidth;
+        temp.height = mHeight;
+        xioctl(mFd, VIDIOC_ENUM_FRAMEINTERVALS, &temp);
+        if (temp.type == V4L2_FRMIVAL_TYPE_DISCRETE) {
+             while (xioctl(mFd, VIDIOC_ENUM_FRAMEINTERVALS, &temp)) {
+                std::cout << float(temp.discrete.denominator)/temp.discrete.numerator << " fps" << endl;
+                mFps = float(temp.discrete.denominator)/temp.discrete.numerator;
+                temp.index += 1;
+            }
+        }
 
         BS bs;
         bs.ui = fmt.fmt.pix.pixelformat;
@@ -264,6 +281,7 @@ private:
     bool mIsOpen = false;
     int mWidth = 0;
     int mHeight = 0;
+    float mFps = 0;
     std::vector<buffer> mBuffrs;
     int mBytesPerLines = 0;
     std::mutex mMutex;
@@ -275,11 +293,11 @@ private:
         int r;
 
         do{
-            r = v4l2_ioctl(fd, request, args);
+            r = ioctl(fd, request, args);
         }while(r == -1 && ((errno == EINTR) || (errno == EAGAIN)));
 
         if(r == -1){
-            std::cout << r << std::endl;
+            std::cout << r << " " << errno << std::endl;
             return false;
         }
         return true;
@@ -345,7 +363,7 @@ bool MIPICamera::open(uint32_t devID)
         mWhite = 4095;
         mBblack = 0;
         mIsColor = true;
-        mFPS = 25;
+        mFPS = mCamera->fps();
         mPattern = FAST_BAYER_BGGR;
         if(!mInputBuffer.allocate(mWidth, mHeight, mSurfaceFormat))
             return false;
@@ -390,7 +408,7 @@ bool MIPICamera::getParameter(GPUCameraBase::cmrCameraParameter param, float &va
     switch (param)
     {
     case prmFrameRate:
-        val = 25;
+        val = mCamera->fps();
         break;
 
     case prmExposureTime:
@@ -440,9 +458,9 @@ bool MIPICamera::getParameterInfo(GPUCameraBase::cmrParameterInfo &info)
     switch(info.param)
     {
     case prmFrameRate:
-        info.min = 0;
-        info.max = 1000;
-        info.increment = 1;
+        info.min = mCamera->fps();
+        info.max = mCamera->fps();
+        info.increment = 0;
         break;
 
     case prmExposureTime:
