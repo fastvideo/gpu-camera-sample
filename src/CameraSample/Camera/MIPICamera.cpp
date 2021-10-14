@@ -275,7 +275,7 @@ private:
         int r;
 
         do{
-            r = v4l2_ioctl(fd, request, args);
+            r = ioctl(fd, request, args);
         }while(r == -1 && ((errno == EINTR) || (errno == EAGAIN)));
 
         if(r == -1){
