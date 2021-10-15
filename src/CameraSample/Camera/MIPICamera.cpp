@@ -242,7 +242,24 @@ public:
         xioctl(mFd, VIDIOC_QBUF, &buf);
     }
 
-    int exposure() const { return mExposure; }
+    float exposure() const {
+        struct v4l2_ext_control ctrl;
+        CLEAR(ctrl);
+        ctrl.id = 0x009a200a;
+        ctrl.value64 = mExposure;
+
+        v4l2_ext_controls ctrls;
+        CLEAR(ctrls);
+        ctrls.ctrl_class = V4L2_CTRL_ID2CLASS(ctrl.id);
+        ctrls.count = 1;
+        ctrls.controls = &ctrl;
+
+        if(xioctl(mFd, VIDIOC_G_EXT_CTRLS, &ctrls)){
+            std::cout << ctrls.count << std::endl;
+            return ctrl.value64;
+        }
+        return mExposure;
+    }
 
     void set_exposure(int val){
         if(!mIsOpen)
@@ -289,7 +306,7 @@ private:
 
     int mResolutionId = 0;
 
-    bool xioctl(int fd, int request, void *args){
+    bool xioctl(int fd, int request, void *args) const{
         int r;
 
         do{
@@ -409,11 +426,11 @@ bool MIPICamera::getParameter(GPUCameraBase::cmrCameraParameter param, float &va
     {
     case prmFrameRate:
         val = mCamera->fps();
-        break;
+        return true;
 
     case prmExposureTime:
         val = mCamera->exposure();
-        break;
+        return true;
 
     default:
         break;
@@ -441,13 +458,12 @@ bool MIPICamera::setParameter(GPUCameraBase::cmrCameraParameter param, float val
 
     case prmExposureTime:
         mCamera->set_exposure(val);
-        break;
+        return true;
 
     default:
         break;
     }
 
-    return false;
     return false;
 }
 
@@ -474,5 +490,4 @@ bool MIPICamera::getParameterInfo(GPUCameraBase::cmrParameterInfo &info)
     }
 
     return true;
-    return false;
 }
