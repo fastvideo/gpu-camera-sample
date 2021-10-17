@@ -19,6 +19,28 @@ union BS{
     char c[4];
 };
 
+/**
+  $ v4l2-ctl -d /dev/video0 --list-ctrls
+  fuse_id 0x009a2007 (str)    : min=0 max=16 step=2 value='9332a83b82c0919c' flags=read-only, has-payload
+                           gain 0x009a2009 (int64)  : min=10 max=160 step=1 default=10 value=10 flags=slider
+                       exposure 0x009a200a (int64)  : min=34 max=550385 step=1 default=33334 value=34 flags=slider
+                     frame_rate 0x009a200b (int64)  : min=1816577 max=30000000 step=1 default=30000000 value=1816577 flags=slider
+                 exposure_short 0x009a200c (int64)  : min=34 max=550385 step=1 default=33334 value=34 flags=slider
+                    bypass_mode 0x009a2064 (intmenu): min=0 max=1 default=0 value=0
+                override_enable 0x009a2065 (intmenu): min=0 max=1 default=0 value=0
+                   height_align 0x009a2066 (int)    : min=1 max=16 step=1 default=1 value=1
+                     size_align 0x009a2067 (intmenu): min=0 max=2 default=0 value=0
+               write_isp_format 0x009a2068 (int)    : min=1 max=1 step=1 default=1 value=1
+       sensor_signal_properties 0x009a2069 (u32)    : min=0 max=4294967295 step=1 default=0 [30][18] flags=read-only, has-payload
+        sensor_image_properties 0x009a206a (u32)    : min=0 max=4294967295 step=1 default=0 [30][16] flags=read-only, has-payload
+      sensor_control_properties 0x009a206b (u32)    : min=0 max=4294967295 step=1 default=0 [30][36] flags=read-only, has-payload
+              sensor_dv_timings 0x009a206c (u32)    : min=0 max=4294967295 step=1 default=0 [30][16] flags=read-only, has-payload
+               low_latency_mode 0x009a206d (bool)   : default=0 value=0
+               preferred_stride 0x009a206e (int)    : min=0 max=65535 step=1 default=0 value=0
+                   sensor_modes 0x009a2082 (int)    : min=0 max=30 step=1 default=30 value=3 flags=read-only
+
+*/
+
 struct Mem{
     int rows = 0;
     int cols = 0;
@@ -86,6 +108,10 @@ struct buffer{
 class CameraV4l2
 {
 public:
+    enum {
+        EXPOSURE = 0x009a200a,
+    };
+
     CameraV4l2(const std::string &dev = "/dev/video0"){
         mDev = dev;
     }
@@ -245,8 +271,8 @@ public:
     float exposure() const {
         struct v4l2_ext_control ctrl;
         CLEAR(ctrl);
-        ctrl.id = 0x009a200a;
-        ctrl.value64 = mExposure;
+        ctrl.id = EXPOSURE;
+        ctrl.value64 = 0;
 
         v4l2_ext_controls ctrls;
         CLEAR(ctrls);
@@ -270,7 +296,7 @@ public:
 
         struct v4l2_ext_control ctrl;
         CLEAR(ctrl);
-        ctrl.id = 0x009a200a;
+        ctrl.id = EXPOSURE;
         ctrl.value64 = val;
 
         v4l2_ext_controls ctrls;
