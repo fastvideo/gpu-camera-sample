@@ -11,6 +11,9 @@ sudo apt-get -y install autoconf automake build-essential nasm libass-dev libfre
   libxcb-xfixes0-dev pkg-config texi2html zlib1g-dev libx264-dev libx265-dev
 
 #Install nvidia SDK
+#Uncomment if you have certificate issues with gitlab
+#export GIT_SSL_NO_VERIFY=1
+
 echo "Installing the nVidia NVENC SDK."
 git clone https://git.videolan.org/git/ffmpeg/nv-codec-headers.git
 cd nv-codec-headers
