@@ -98,6 +98,13 @@ const Res Resolutions[] = {
     Res(640, 480),
 };
 
+inline uint32_t make_fmt(char* fmt)
+{
+    uint32_t res = fmt[0] | (fmt[1] << 8) | (fmt[2] << 16) | (fmt[3] << 24);
+    //memcpy(&res, fmt, 4);
+    return res;
+}
+
 #define CLEAR(fmt) memset(&(fmt), 0, sizeof(fmt))
 
 struct buffer{
@@ -145,7 +152,7 @@ public:
         if(mIsOpen)
             return true;
 
-        mFd = v4l2_open(mDev.c_str(), O_RDWR | O_NONBLOCK);
+        mFd = ::open(mDev.c_str(), O_RDWR | O_NONBLOCK);
 
         if(mFd < 0)
             return false;
@@ -157,7 +164,7 @@ public:
         fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         fmt.fmt.pix.width = r.w;
         fmt.fmt.pix.height = r.h;
-        fmt.fmt.pix.pixelformat = 0x30314742;//01GB;
+        fmt.fmt.pix.pixelformat = make_fmt("BG10");//0x30314742;//01GB;
         fmt.fmt.pix.field = V4L2_FIELD_ANY;
         xioctl(mFd, VIDIOC_S_FMT, &fmt);
         mWidth = fmt.fmt.pix.width;
@@ -235,7 +242,7 @@ public:
 
             v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
             xioctl(mFd, VIDIOC_STREAMOFF, &type);
-            v4l2_close(mFd);
+            ::close(mFd);
             mFd = 0;
         }
     }
