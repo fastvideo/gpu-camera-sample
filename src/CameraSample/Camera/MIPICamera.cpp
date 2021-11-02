@@ -162,9 +162,14 @@ public:
         struct v4l2_format      fmt;
         CLEAR(fmt);
         fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        xioctl(mFd, VIDIOC_G_FMT, &fmt);
+        uint32_t pixfmt = fmt.fmt.pix.pixelformat;
+        
+        CLEAR(fmt);
+        fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         fmt.fmt.pix.width = r.w;
         fmt.fmt.pix.height = r.h;
-        fmt.fmt.pix.pixelformat = make_fmt("BG10");//0x30314742;//01GB;
+        fmt.fmt.pix.pixelformat = pixfmt;//make_fmt("BG10");//0x30314742;//01GB;
         fmt.fmt.pix.field = V4L2_FIELD_ANY;
         xioctl(mFd, VIDIOC_S_FMT, &fmt);
         mWidth = fmt.fmt.pix.width;
