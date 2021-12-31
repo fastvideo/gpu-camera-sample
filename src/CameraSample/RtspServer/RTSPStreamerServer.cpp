@@ -188,7 +188,11 @@ RTSPStreamerServer::RTSPStreamerServer(int width, int height,
 
     if(mCodecId == AV_CODEC_ID_H264 || mCodecId == AV_CODEC_ID_HEVC || mCodecId == AV_CODEC_ID_INDEO3)
     {
-        av_dict_set(&dict, "tune", "zerolatency", 0);
+        if(std::string(mCodec->name) == "libx264"){
+            av_dict_set(&dict, "tune", "zerolatency", 0);
+        }else{
+            av_dict_set(&dict, "zerolatency", "1", 0);
+        }
         //av_dict_set(&dict, "preset", "fast", 0);
 		av_dict_set(&dict, "movflags", "+faststart", 0);
         av_dict_set(&dict, "delay", "0", 0);
