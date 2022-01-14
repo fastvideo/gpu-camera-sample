@@ -30,9 +30,9 @@ Processing is done on NVIDIA GPU to speedup the performance. The software could 
 
 From the benchmarks on <strong>NVIDIA Quadro RTX 6000</strong> or <strong>GeForce RTX 2080ti</strong> we can see that GPU-based raw image processing is very fast and it could offer high image quality at the same time. The total performance could reach <strong>4 GPix/s</strong> for color cameras. The performance strongly depends on complexity of the pipeline. Multiple GPU solutions could significantly improve the performance.
 
-Currently the software is working with <a href="https://www.ximea.com" target="_blank">XIMEA</a> cameras via XIMEA SDK. <a href="https://www.flir.com" target="_blank">FLIR</a> cameras are supported via Spinnaker SDK. We can work with <a href="https://www.imperx.com" target="_blank">Imperx</a> cameras via Imperx SDK.
+Currently the software is working with <a href="https://www.ximea.com" target="_blank">XIMEA</a> cameras via XIMEA SDK. <a href="https://www.flir.com" target="_blank">FLIR</a> cameras are supported via Spinnaker SDK. We can work with <a href="https://www.imperx.com" target="_blank">Imperx</a> cameras via Imperx SDK. <a href="https://thinklucid.com" target="_blank">LUCID Vision Labs</a> cameras are supported via Arena SDK.
 
-Via GenICam the software can work with <a href="https://www.ximea.com" target="_blank">XIMEA</a>, <a href="https://www.matrix-vision.com" target="_blank">MATRIX VISION</a>, <a href="https://www.baslerweb.com" target="_blank">Basler</a>, <a href="https://www.flir.com" target="_blank">FLIR</a>, <a href="https://www.imperx.com" target="_blank">Imperx</a>, <a href="https://www.jai.com" target="_blank">JAI</a>, <a href="https://dahengimaging.com/" target="_blank">Daheng Imaging</a> cameras. 
+Via GenICam the software can work with <a href="https://www.ximea.com" target="_blank">XIMEA</a>, <a href="https://www.matrix-vision.com" target="_blank">MATRIX VISION</a>, <a href="https://www.baslerweb.com" target="_blank">Basler</a>, <a href="https://www.flir.com" target="_blank">FLIR</a>, <a href="https://www.imperx.com" target="_blank">Imperx</a>, <a href="https://www.jai.com" target="_blank">JAI</a>, <a href="https://thinklucid.com" target="_blank">LUCID Vision Labs</a>, <a href="https://dahengimaging.com/" target="_blank">Daheng Imaging</a> cameras. 
 
 Soon we are going to add support for <a href="https://emergentvisiontec.com/" target="_blank">Emergent Vision Technologies</a>, <a href="https://en.ids-imaging.com/" target="_blank">IDS Imaging Development Systems</a>, <a href="https://www.baumer.com" target="_blank">Baumer</a>, <a href="https://kayainstruments.com/" target="_blank">Kaya Instruments</a> cameras. You can add support for desired cameras by yourself. The software is working with demo version of <a href="https://www.fastcompression.com/products/sdk.htm" target="_blank">Fastvideo SDK</a>, that is why you can see a watermark on the screen. To get a Fastvideo SDK license for development and for deployment, please contact <a href="https://www.fastcompression.com/" target="_blank">Fastvideo company</a>.
 
@@ -40,7 +40,7 @@ Soon we are going to add support for <a href="https://emergentvisiontec.com/" ta
 
 ### Requirements for Windows
 
-* Camera SDK or GenICam package + camera vendor GenTL producer (.cti). Сurrently XIMEA, MATRIX VISION, Basler, FLIR, Imperx, JAI, Daheng Imaging cameras are supported
+* Camera SDK or GenICam package + camera vendor GenTL producer (.cti). Сurrently XIMEA, MATRIX VISION, Basler, FLIR, Imperx, JAI, LUCID Vision Labs, Daheng Imaging cameras are supported
 * Fastvideo SDK (demo) ver.0.17.0.1
 * NVIDIA CUDA-11.4
 * Qt ver.5.13.1
@@ -84,7 +84,7 @@ git clone https://github.com/fastvideo/gpu-camera-sample.git
    * Install downloaded package.
    * Copy bin64, include and lib64 folders from c:/Program Files/FLIR System/Spinnaker to \<ProjectRoot\>/OtherLibs/FLIR
 * To work with Imperx cameras, download Imperx SDK (IpxCameraSdk) from https://www.imperx.com/downloads/. Unpack and copy archive content to \<ProjectRoot\>/OtherLibs/Imperx folder.
-* To work with Lucid Vision Labs cameras, download Arena SDK from https://thinklucid.com/downloads-hub/. Install it and copy "C:\Program Files\Lucid Vision Labs\Arena SDK" folder into \<ProjectRoot\>/OtherLibs.
+* To work with LUCID Vision Labs cameras, download Arena SDK from https://thinklucid.com/downloads-hub/. Install it and copy "C:\Program Files\Lucid Vision Labs\Arena SDK" folder into \<ProjectRoot\>/OtherLibs.
 * If you need GenICam support
    * Download GenICamTM Package Version 2019.11 from https://www.emva.org/wp-content/uploads/GenICam_Package_2019.11.zip
    * If you are going to use Imperx cameras, download GenICamTM Package Version 3.0.2 from https://www.emva.org/wp-content/uploads/GenICam_Package_v3_0_2.zip
@@ -127,7 +127,7 @@ cd ~/gpu-camera-sample/Scripts
    * Unpack GenICam_V3_2_0-Linux64_x64_gcc48-Runtime.tgz or GenICam_V3_2_0-Linux64_ARM_gcc49-Runtime.tgz into \<ProjectRoot\>/OtherLibsLinux/GenICam folder.
    * Unpack GenICam_V3_2_0-Linux64_x64_gcc48-SDK.tgz or GenICam_V3_2_0-Linux64_ARM_gcc49-SDK.tgz into \<ProjectRoot\>/OtherLibsLinux/GenICam/library/CPP
    * Ensure Qt uses gcc, not clang to build project.
-* If you need Lucid Vision Labs cameras support.
+* If you need LUCID Vision Labs cameras support.
     * Download Arena SDK for Linux from https://thinklucid.com/downloads-hub/ and unpack it into OtherLibsLinux/Arena SDK/ArenaSDK_Linux_x64/ for x64 platform and OtherLibsLinux/Arena SDK/ArenaSDK_Linux_ARM64 for arm64 platform.
     * Run
 ``` console
@@ -229,17 +229,17 @@ In general case, Fastvideo SDK can import/export data from/to SSD / CPU memory /
 
 * Windows-7/10, Ubuntu 18.04 64-bit
 * The latest NVIDIA driver
-* NVIDIA GPU with Kepler architecture, 6xx series minimum
+* NVIDIA GPU with Maxwell architecture, 9xx series minimum
 * NVIDIA GPU with 4-8-12 GB memory or better
 * Intel Core i5 or better
-* NVIDIA CUDA-10.2
+* NVIDIA CUDA-11.4
 * Compiler MSVC 2019 for Windows or gcc 7.4.0 for Linux
 
 We also recommend to check PCI-Express bandwidth for Host-to-Device and Device-to-Host transfers. For GPU with Gen3 x16 it should be in the range of 10-12 GB/s. GPU memory size could be a bottleneck for image processing from high resolution cameras, so please check GPU memory usage in the software.
 
 If you are working with images which reside on HDD, please place them on SSD or M2.
 
-For testing purposes you can utilize the latest NVIDIA GeForce RTX 2060, 2070, 2080ti or Jetson Nano, TX2, NX and AGX Xavier.
+For testing purposes you can utilize the latest NVIDIA GeForce RTX 2060/2070/2080ti, 3070/3080ti/3090 or Jetson Nano, TX2, NX and AGX Xavier.
 
 For continuous high performance applications we recommend professional NVIDIA Quadro and Tesla GPUs.
 
@@ -263,6 +263,7 @@ You can also create a software module to collect frames from different cameras a
 * Benchmarks for Jetson Xavier NX - done
 * CUDA-11.4 support - done
 * Support for MIPI CSI-2 cameras - done
+* Support for LUCID Vision Labs cameras - done
 * Support for Emergent Vision Technologies, DALSA, IDS Imaging, Baumer, Kaya Instruments, SVS-Vistek cameras - in progress
 * Transforms to Rec.601 (SD), Rec.709 (HD), Rec.2020 (4K)
 * RAW Bayer codec
