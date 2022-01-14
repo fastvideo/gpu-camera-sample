@@ -227,7 +227,7 @@ In general case, Fastvideo SDK can import/export data from/to SSD / CPU memory /
 
 ## Minimum Hardware ans Software Requirements for desktop application
 
-* Windows-7/10, Ubuntu 18.04 64-bit
+* Windows-10, Ubuntu 18.04 64-bit
 * The latest NVIDIA driver
 * NVIDIA GPU with Maxwell architecture, 9xx series minimum
 * NVIDIA GPU with 4-8-12 GB memory or better
