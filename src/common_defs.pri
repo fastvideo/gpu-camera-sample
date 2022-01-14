@@ -1,7 +1,8 @@
-DEFINES += SUPPORT_XIMEA
+#DEFINES += SUPPORT_XIMEA
 #DEFINES += SUPPORT_FLIR
 #DEFINES += SUPPORT_IMPERX
 #DEFINES += SUPPORT_GENICAM
+#DEFINES += SUPPORT_LUCID
 
 TARGET_ARCH=$${QT_ARCH}
 BITS = 64
@@ -12,16 +13,18 @@ contains(TARGET_ARCH, arm64) {
     win32: {
         PLATFORM = x64
         GENAPIVER = VC141_v3_2
-
-        #For Imperx cameras support
-        #GENAPIVER = VC140_v3_0
+        contains(DEFINES, SUPPORT_IMPERX){
+            #For Imperx cameras support
+            GENAPIVER = VC140_v3_0
+        }
     }
     unix: {
         PLATFORM = Linux$$BITS
         GENAPIVER = gcc48_v3_2
-
-        # For Imperx cameras support
-        #GENAPIVER = gcc421_v3_0
+        contains(DEFINES, SUPPORT_IMPERX){
+            # For Imperx cameras support
+            GENAPIVER = gcc421_v3_0
+        }
     }
 }
 

@@ -25,6 +25,7 @@ INCLUDEPATH += $$PWD/RtspServer
 SOURCES += main.cpp\
     Camera/FLIRCamera.cpp \
     Camera/GPUCameraBase.cpp \
+    Camera/LucidCamera.cpp \
         MainWindow.cpp \
     Widgets/GLImageViewer.cpp \
     Globals.cpp \
@@ -94,6 +95,7 @@ win32: SOURCES += $$OTHER_LIB_PATH/FastvideoSDK/core_samples/SurfaceTraitsIntern
 HEADERS  += MainWindow.h \
     Camera/FLIRCamera.h \
     Camera/GPUCameraBase.h \
+    Camera/LucidCamera.h \
     Widgets/GLImageViewer.h \
     CUDASupport/CUDAProcessorOptions.h \
     Globals.h \

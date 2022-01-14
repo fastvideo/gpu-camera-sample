@@ -84,6 +84,7 @@ git clone https://github.com/fastvideo/gpu-camera-sample.git
    * Install downloaded package.
    * Copy bin64, include and lib64 folders from c:/Program Files/FLIR System/Spinnaker to \<ProjectRoot\>/OtherLibs/FLIR
 * To work with Imperx cameras, download Imperx SDK (IpxCameraSdk) from https://www.imperx.com/downloads/. Unpack and copy archive content to \<ProjectRoot\>/OtherLibs/Imperx folder.
+* To work with Lucid Vision Labs cameras, download Arena SDK from https://thinklucid.com/downloads-hub/. Install it and copy "C:\Program Files\Lucid Vision Labs\Arena SDK" folder into \<ProjectRoot\>/OtherLibs.
 * If you need GenICam support
    * Download GenICamTM Package Version 2019.11 from https://www.emva.org/wp-content/uploads/GenICam_Package_2019.11.zip
    * If you are going to use Imperx cameras, download GenICamTM Package Version 3.0.2 from https://www.emva.org/wp-content/uploads/GenICam_Package_v3_0_2.zip
@@ -92,14 +93,15 @@ git clone https://github.com/fastvideo/gpu-camera-sample.git
    * Unpack GenICam_V3_2_0-Win64_x64_VC141-Release-SDK.zip into \<ProjectRoot\>/OtherLibs/GenICam folder.
    * Unpack GenICam_V3_2_0-Win64_x64_VC141-Release-Runtime.zip into \<ProjectRoot\>/OtherLibs/GenICam/library/CPP
 
-You also can download precompiled libs from <a href="https://drive.google.com/file/d/1C-Qm2EMOwX_nqzC_IOXMKjdxKP-535um/view?usp=sharing" target="_blank">here</a>
+You also can download precompiled libs from <a href="https://drive.google.com/file/d/1oQ6XmRhS0Gv41BCIhC__SxSj2s2RNCuX/view?usp=sharing" target="_blank">here</a>
 * By default the application will be built with no camera support. The only option is camera simulator which is working with PGM files. 
 * Open \<ProjectRoot\>/src/GPUCameraSample.pro in Qt Creator.
 * Open common_defs.pri
 * To enable GenICam support, uncomment DEFINES += SUPPORT_GENICAM
 * To enable XIMEA camera support, uncomment DEFINES += SUPPORT_XIMEA
+* To enable Lucid Vision Labs camera support, uncomment DEFINES += SUPPORT_LUCID
 * To enable FLIR camera support, uncomment DEFINES += SUPPORT_FLIR
-* To enable Imperx camera support, uncomment DEFINES += SUPPORT_IMPERX. Since Imperx SDK uses GenApi version 3.0.2, please open common.pri, uncomment GENAPIVER = VC140_v3_0 and comment GENAPIVER = VC141_v3_2
+* To enable Imperx camera support, uncomment DEFINES += SUPPORT_IMPERX.
 * Build the project
 * Binaries will be placed into \<ProjectRoot\>/GPUCameraSample_x64 folder.
 
@@ -125,18 +127,45 @@ cd ~/gpu-camera-sample/Scripts
    * Unpack GenICam_V3_2_0-Linux64_x64_gcc48-Runtime.tgz or GenICam_V3_2_0-Linux64_ARM_gcc49-Runtime.tgz into \<ProjectRoot\>/OtherLibsLinux/GenICam folder.
    * Unpack GenICam_V3_2_0-Linux64_x64_gcc48-SDK.tgz or GenICam_V3_2_0-Linux64_ARM_gcc49-SDK.tgz into \<ProjectRoot\>/OtherLibsLinux/GenICam/library/CPP
    * Ensure Qt uses gcc, not clang to build project.
+* If you need Lucid Vision Labs cameras support.
+    * Download Arena SDK for Linux from https://thinklucid.com/downloads-hub/ and unpack it into OtherLibsLinux/Arena SDK/ArenaSDK_Linux_x64/ for x64 platform and OtherLibsLinux/Arena SDK/ArenaSDK_Linux_ARM64 for arm64 platform.
+    * Run
+``` console
+        sudo /.Arena_SDK_Linux_x64.conf
+```
+    for x64 platform and
+``` console
+        sudo /.Arena_SDK_ARM64.conf
+```
+    for arm64 platform
+    * cd to precompiledExamples and run
+``` console
+        ./IpConfigUtility /list
+```
+    if everything is OK you will see something like that
+``` console
+    Scanning for devices...
+    index MAC             IP              SUBNET          GATEWAY                 IP CONFIG
+    0     1C0FAF5A908A    169.254.139.144 255.255.0.0     0.0.0.0                 DHCP= 1 Persistent Ip= 0 LLA = 1
+```
+    run
+``` console
+        ./Cpp_Acquisition
+```
+    to test that camera is working.
 * By default the application will be built with no camera support. The only option is camera simulator which is working with PGM files. 
 * Open \<ProjectRoot\>/src/GPUCameraSample.pro in Qt Creator.
 * Open common_defs.pri
 * To enable GenICam support, uncomment DEFINES += SUPPORT_GENICAM. 
 * To enable XIMEA camera support, uncomment DEFINES += SUPPORT_XIMEA
-* To enable Imperx camera support, uncomment DEFINES += SUPPORT_IMPERX. Since Imperx SDK uses GenApi version 3.0.2, please open common.pri, uncomment GENAPIVER = VC140_v3_0 and comment GENAPIVER = VC141_v3_2
+* To enable Imperx camera support, uncomment DEFINES += SUPPORT_IMPERX.
+* To enable Lucid Vision Labs camera support, uncomment DEFINES += SUPPORT_LUCID
 * FLIR support is experimental at the moment. Use it on your own risk.
 * Build the project.
 * If GenICam support is enabled, set environment variable GENICAM_GENTL64_PATH with full path to the camera vendor GenTL producer (.cti) library, before run the application.
 * Binaries will be placed into \<ProjectRoot\>/GPUCameraSample_Arm64 or GPUCameraSample_Linux64 folder. To run the application from the terminal run GPUCameraSample.sh. Necessary symbolic links will be made during compile time.
 
-You also can download precompiled libs from <a href="https://drive.google.com/file/d/13ojk-idC9Qflzb4AlmFIo8GzD6EH1TLw/view?usp=sharing" target="_blank">here</a>
+You also can download precompiled libs from <a href="https://drive.google.com/file/d/1-lJbBXaamB80O5cDqml3-Ul_CVInq9J-/view?usp=sharing" target="_blank">here</a>
 
 ### How to work with NVIDIA Jetson to get maximum performance
 

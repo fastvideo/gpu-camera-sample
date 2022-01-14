@@ -114,27 +114,27 @@ LIBS += -L$$CUDA_TOOLKIT_PATH/lib/$$PLATFORM -lcudart -lcuda
 LIBS += -lglu32 -lopengl32 -lgdi32 -luser32 -lMscms -lShell32 -lOle32 -lWs2_32 -lstrmiids -lComdlg32
 LIBS += -L$$JPEGTURBO/lib -ljpeg-static -lturbojpeg-static
 
-contains( DEFINES, SUPPORT_XIMEA ){
+contains(DEFINES, SUPPORT_XIMEA){
     XI_API_PATH = $$OTHER_LIB_PATH/XIMEA/API
     INCLUDEPATH += $$XI_API_PATH
     LIBS += -L$$XI_API_PATH/x64 -lxiapi64
     FASTVIDEO_EXTRA_DLLS += $$XI_API_PATH/x64/xiapi64.dll
 }
 
-contains( DEFINES, SUPPORT_FLIR ){
+contains(DEFINES, SUPPORT_FLIR){
     INCLUDEPATH += $$FLIR_PATH/include
     LIBS += -L$$FLIR_PATH/lib64/vs2015 -lSpinnaker_v140
     FASTVIDEO_EXTRA_DLLS += $$FLIR_PATH/bin64/vs2015/Spinnaker_v140.dll
 }
 
-contains( DEFINES, SUPPORT_IMPERX ){
+contains(DEFINES, SUPPORT_IMPERX){
     INCLUDEPATH += $$IMPERX_PATH/inc
     LIBS += -L$$IMPERX_PATH/lib/win64_x64 -lIpxCameraApi
     FASTVIDEO_EXTRA_DLLS += $$IMPERX_PATH/bin/win64_x64/IpxCameraApi.dll
     FASTVIDEO_EXTRA_DLLS += $$IMPERX_PATH/bin/win64_x64/IpxCTI.cti
 }
 
-contains( DEFINES, SUPPORT_GENICAM ){
+contains(DEFINES, SUPPORT_GENICAM){
     DEFINES -= UNICODE
     DEFINES += GENICAM_NO_AUTO_IMPLIB
 
@@ -154,7 +154,49 @@ contains( DEFINES, SUPPORT_GENICAM ){
     LIBS += -llog4cpp_MD_$${GENAPIVER} -lLog_MD_$${GENAPIVER} -lXmlParser_MD_$${GENAPIVER}
 }
 
-contains( DEFINES, USE_NV_API ){
+contains(DEFINES, SUPPORT_LUCID){
+
+#    LUCID_ROOT = $$LUCID_DEV_ROOT
+    LUCID_ROOT = "$${OTHER_LIB_PATH}/Arena SDK"
+    LUCID_GENICAM = $${LUCID_ROOT}/GenICam
+
+    INCLUDEPATH += $${LUCID_ROOT}/include/Arena
+    INCLUDEPATH += $${LUCID_ROOT}/include/GenTL
+    INCLUDEPATH += $${LUCID_GENICAM}/library/CPP/include
+
+    LIBS += -L$${LUCID_ROOT}/lib64/Arena
+    LIBS += -L$${LUCID_GENICAM}/library/CPP/lib/Win64_x64
+
+CONFIG(debug, debug|release){
+    SUF = "d"
+    LUCID_DLL_PATH = $${LUCID_ROOT}/x64Debug
+}else:CONFIG(release, debug|release){
+    SUF = ""
+    LUCID_DLL_PATH = $${LUCID_ROOT}/x64Release
+}
+
+    LIBS += -lArena$${SUF}_v140
+    LIBS += -lGenTL_LUCID$${SUF}_v140
+    LIBS += -lGCBase_MD$${SUF}_VC140_v3_3_LUCID
+    LIBS += -lGenApi_MD$${SUF}_VC140_v3_3_LUCID
+    LIBS += -lLog_MD$${SUF}_VC140_v3_3_LUCID
+    LIBS += -lMathParser_MD$${SUF}_VC140_v3_3_LUCID
+    LIBS += -lNodeMapData_MD$${SUF}_VC140_v3_3_LUCID
+    LIBS += -lXmlParser_MD$${SUF}_VC140_v3_3_LUCID
+    LIBS += -llucidlog$${SUF}_v140
+
+    FASTVIDEO_EXTRA_DLLS += $${LUCID_DLL_PATH}\Arena$${SUF}_v140.dll
+    FASTVIDEO_EXTRA_DLLS += $${LUCID_DLL_PATH}\GCBase_MD$${SUF}_VC140_v3_3_LUCID.dll
+    FASTVIDEO_EXTRA_DLLS += $${LUCID_DLL_PATH}\GenApi_MD$${SUF}_VC140_v3_3_LUCID.dll
+    FASTVIDEO_EXTRA_DLLS += $${LUCID_DLL_PATH}\GenTL_LUCID$${SUF}_v140.dll
+    FASTVIDEO_EXTRA_DLLS += $${LUCID_DLL_PATH}\Log_MD$${SUF}_VC140_v3_3_LUCID.dll
+    FASTVIDEO_EXTRA_DLLS += $${LUCID_DLL_PATH}\MathParser_MD$${SUF}_VC140_v3_3_LUCID.dll
+    FASTVIDEO_EXTRA_DLLS += $${LUCID_DLL_PATH}\NodeMapData_MD$${SUF}_VC140_v3_3_LUCID.dll
+    FASTVIDEO_EXTRA_DLLS += $${LUCID_DLL_PATH}\XmlParser_MD$${SUF}_VC140_v3_3_LUCID.dll
+    FASTVIDEO_EXTRA_DLLS += $${LUCID_DLL_PATH}\lucidlog$${SUF}_v140.dll
+    }
+
+contains(DEFINES, USE_NV_API){
     NVAPI_PATH = "C:/Program Files (x86)/NVIDIA Corporation/Nsight Visual Studio Edition 5.6/Monitor/nvapi"
     INCLUDEPATH += $$NVAPI_PATH
     LIBS += -L$$NVAPI_PATH/amd64 -lnvapi64

@@ -139,7 +139,58 @@ else {
 
 }
 
-#
+contains(DEFINES, SUPPORT_LUCID){
+
+#    LUCID_ROOT = $$LUCID_DEV_ROOT
+
+contains(TARGET_ARCH, arm64 ) {
+    LUCID_ROOT = $$OTHER_LIB_PATH/Arena SDK/ArenaSDK_Linux_ARM64
+    LIBS += -L"$${LUCID_ROOT}/GenICam/library/lib/Linux64_ARM"
+    LIBS += -L"$${LUCID_ROOT}/lib"
+}
+else {
+    LUCID_ROOT = $$OTHER_LIB_PATH/Arena SDK/ArenaSDK_Linux_x64
+    LIBS += -L"$${LUCID_ROOT}/GenICam/library/lib/Linux64_x64"
+    LIBS += -L"$${LUCID_ROOT}/lib64"
+}
+
+    LUCID_GENICAM = $${LUCID_ROOT}/GenICam
+
+    INCLUDEPATH += "$${LUCID_ROOT}/include/Arena"
+    INCLUDEPATH += "$${LUCID_ROOT}/include/GenTL"
+    INCLUDEPATH += "$${LUCID_GENICAM}/library/CPP/include"
+
+
+
+
+#CONFIG(debug, debug|release){
+#    SUF = "d"
+##    LUCID_DLL_PATH = $${LUCID_ROOT}/x64Debug
+#}else:CONFIG(release, debug|release){
+    SUF = ""
+#    LUCID_DLL_PATH = $${LUCID_ROOT}/x64Release
+#}
+
+    LIBS += -larena$${SUF}
+#    LIBS += -lGCBase_gcc54_v3_3_LUCID
+#    LIBS += -lGenApi_gcc54_v3_3_LUCID
+
+    LIBS += -lGCBase_gcc54_v3_3_LUCID \
+              -lGenApi_gcc54_v3_3_LUCID \
+              -lLog_gcc54_v3_3_LUCID \
+              -llog4cpp_gcc54_v3_3_LUCID \
+              -lMathParser_gcc54_v3_3_LUCID \
+              -lNodeMapData_gcc54_v3_3_LUCID \
+              -lXmlParser_gcc54_v3_3_LUCID
+#    LIBS += -lGenTL_LUCID$${SUF}_v140
+#    LIBS += -lGCBase_MD$${SUF}_VC140_v3_3_LUCID
+#    LIBS += -lGenApi_MD$${SUF}_VC140_v3_3_LUCID
+#    LIBS += -lLog_MD$${SUF}_VC140_v3_3_LUCID
+#    LIBS += -lMathParser_MD$${SUF}_VC140_v3_3_LUCID
+#    LIBS += -lNodeMapData_MD$${SUF}_VC140_v3_3_LUCID
+#    LIBS += -lXmlParser_MD$${SUF}_VC140_v3_3_LUCID
+#    LIBS += -llucidlog$${SUF}_v140
+    }
 
 defineTest(copyQtIcuDllsToDestdir) {
     DLLS = $$1

@@ -634,7 +634,7 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
     cudaMemoryInfo("Created hDebayer");
 
     //Denoise
-    if(true)
+    if(false)
     {
         denoise_static_parameters_t denoiseParameters;
         memcpy(&denoiseParameters, &options.DenoiseStaticParams, sizeof(denoise_static_parameters_t));
