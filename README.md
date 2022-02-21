@@ -262,13 +262,14 @@ You can also create a software module to collect frames from different cameras a
 * <a href="https://imaginghub.com/projects/455-real-time-image-processing-on-nvidia-gpu-with-basler-pylon-and-fastvideo" target="_blank">Real-time Image Processing on NVIDIA GPU with Basler pylon</a> - done
 * Benchmarks for Jetson Xavier NX - done
 * CUDA-11.4 support - done
-* Support for MIPI CSI-2 cameras - done
+* Support for MIPI CSI-2 camera which is embedded into TX2 - done
 * Support for LUCID Vision Labs cameras - done
+* Support for other MIPI CSI-2 cameras - in progress
 * Support for Emergent Vision Technologies, DALSA, IDS Imaging, Baumer, Kaya Instruments, SVS-Vistek cameras - in progress
 * Transforms to Rec.601 (SD), Rec.709 (HD), Rec.2020 (4K)
 * RAW Bayer codec
 * JPEG2000 encoder and decoder on GPU for camera applications
-* Interoperability with FFmpeg, UltraGrid, and GStreamer
+* Interoperability with FFmpeg, UltraGrid, and gStreamer
 
 ## Info
 
@@ -290,7 +291,7 @@ You can also create a software module to collect frames from different cameras a
 ## Downloads
 
 * Download <a href="https://www.fastcinemadng.com/download/download.html" target="_blank">Fast CinemaDNG Processor</a> software for Windows or Linux, manual and test DNG and BRAW footages
-* Download <a href="https://drive.google.com/file/d/1l6T8E4dbkjCAidvtuEtSUtXafBVPl50Q/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a> (valid till Aug. 17, 2022)
+* Download <a href="https://drive.google.com/file/d/1l6T8E4dbkjCAidvtuEtSUtXafBVPl50Q/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for Windows-10, 64-bit</a> (valid till Aug. 17, 2022)
 * Download <a href="https://drive.google.com/file/d/1skGW93QSnaa_MtjKBfKhIPDtcwh5vC4Z/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a> (valid till Aug. 05, 2022)
 * Download <a href="https://drive.google.com/file/d/1bcO32x-9cFduSnD_mYlNywa1yqGWL8xC/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> (valid till Aug. 20, 2022)
 * Download <a href="https://www.fastcompression.com/download/Fastvideo_SDK_manual.pdf" target="_blank">Fastvideo SDK Manual</a>
