@@ -126,6 +126,9 @@ cd ~/gpu-camera-sample/Scripts
    * Create \<ProjectRoot\>/OtherLibsLinux/GenICam folder.
    * Unpack GenICam_V3_2_0-Linux64_x64_gcc48-Runtime.tgz or GenICam_V3_2_0-Linux64_ARM_gcc49-Runtime.tgz into \<ProjectRoot\>/OtherLibsLinux/GenICam folder.
    * Unpack GenICam_V3_2_0-Linux64_x64_gcc48-SDK.tgz or GenICam_V3_2_0-Linux64_ARM_gcc49-SDK.tgz into \<ProjectRoot\>/OtherLibsLinux/GenICam/library/CPP
+   * Create  \<ProjectRoot\>OtherLibsLinux\GenICam\library\CPP\include\GenTL folder and copy there
+      * GenICam_Package_2019.11.zip\GenICam_Package_2019.11\GenTL\GenTL_v1_6.zip\GenTL.h
+      * GenICam_Package_2019.11.zip\GenICam_Package_2019.11\SFNC\PFNC.h
    * Ensure Qt uses gcc, not clang to build project.
 * If you need LUCID Vision Labs cameras support.
     * Download Arena SDK for Linux from https://thinklucid.com/downloads-hub/ and unpack it into OtherLibsLinux/Arena SDK/ArenaSDK_Linux_x64/ for x64 platform and OtherLibsLinux/Arena SDK/ArenaSDK_Linux_ARM64 for arm64 platform.
