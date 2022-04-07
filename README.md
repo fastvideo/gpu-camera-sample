@@ -267,7 +267,7 @@ You can also create a software module to collect frames from different cameras a
 * CUDA-11.4 support - done
 * Support for MIPI CSI-2 camera which is embedded into TX2 - done
 * Support for LUCID Vision Labs cameras - done
-* Support for other MIPI CSI-2 cameras - in progress
+* Support for Leopard Imaging MIPI CSI-2 camera with IMX477 image sensor - done
 * Support for Emergent Vision Technologies, DALSA, IDS Imaging, Baumer, Kaya Instruments, SVS-Vistek cameras - in progress
 * Transforms to Rec.601 (SD), Rec.709 (HD), Rec.2020 (4K)
 * RAW Bayer codec
