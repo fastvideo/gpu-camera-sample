@@ -270,7 +270,7 @@ You can also create a software module to collect frames from different cameras a
 * Support for MIPI CSI-2 camera which is embedded into TX2 - done
 * Support for LUCID Vision Labs cameras - done
 * Support for Leopard Imaging MIPI CSI-2 camera with IMX477 image sensor (4K/60fps) - done
-* HDR image processing on GPU for automotive 16/20/24-bit image sensors (IMX490 and IMalike) - in progress
+* HDR image processing on GPU for automotive 16/20/24-bit image sensors (IMX490, IMX728, AR0820, OX08, etc.) - in progress
 * High performance JPEG-XS codec on GPU - in progress
 * New demosaicing algorithm with improved image quality - in progress
 * Support for Emergent Vision Technologies, DALSA, IDS Imaging, Baumer, Kaya Instruments, SVS-Vistek cameras - in progress
