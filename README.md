@@ -32,7 +32,9 @@ From the benchmarks on <strong>NVIDIA Quadro RTX 6000</strong> or <strong>GeForc
 
 Currently the software is working with <a href="https://www.ximea.com" target="_blank">XIMEA</a> cameras via XIMEA SDK. <a href="https://www.flir.com" target="_blank">FLIR</a> cameras are supported via Spinnaker SDK. We can work with <a href="https://www.imperx.com" target="_blank">Imperx</a> cameras via Imperx SDK. <a href="https://thinklucid.com" target="_blank">LUCID Vision Labs</a> cameras are supported via Arena SDK.
 
-Via GenICam the software can work with <a href="https://www.ximea.com" target="_blank">XIMEA</a>, <a href="https://www.matrix-vision.com" target="_blank">MATRIX VISION</a>, <a href="https://www.baslerweb.com" target="_blank">Basler</a>, <a href="https://www.flir.com" target="_blank">FLIR</a>, <a href="https://www.imperx.com" target="_blank">Imperx</a>, <a href="https://www.jai.com" target="_blank">JAI</a>, <a href="https://thinklucid.com" target="_blank">LUCID Vision Labs</a>, <a href="https://dahengimaging.com/" target="_blank">Daheng Imaging</a> cameras. 
+Via GenICam the software can work with <a href="https://www.ximea.com" target="_blank">XIMEA</a>, <a href="https://www.matrix-vision.com" target="_blank">MATRIX VISION</a>, <a href="https://www.baslerweb.com" target="_blank">Basler</a>, <a href="https://www.flir.com" target="_blank">FLIR</a>, <a href="https://www.imperx.com" target="_blank">Imperx</a>, <a href="https://www.jai.com" target="_blank">JAI</a>, <a href="https://thinklucid.com" target="_blank">LUCID Vision Labs</a>, <a href="https://dahengimaging.com/" target="_blank">Daheng Imaging</a> cameras.
+
+The software is also working with <a href="https://www.leopardimaging.com" target="_blank">Leopard Imaging</a> mipi csi cameras on Jetson. You need to have a proper dirver to be able to acquire raw frames for further image processing on the GPU with 16/32-bit precision. The software doesn't use NVIDIA ISP via libargus.
 
 Soon we are going to add support for <a href="https://emergentvisiontec.com/" target="_blank">Emergent Vision Technologies</a>, <a href="https://en.ids-imaging.com/" target="_blank">IDS Imaging Development Systems</a>, <a href="https://www.baumer.com" target="_blank">Baumer</a>, <a href="https://kayainstruments.com/" target="_blank">Kaya Instruments</a> cameras. You can add support for desired cameras by yourself. The software is working with demo version of <a href="https://www.fastcompression.com/products/sdk.htm" target="_blank">Fastvideo SDK</a>, that is why you can see a watermark on the screen. To get a Fastvideo SDK license for development and for deployment, please contact <a href="https://www.fastcompression.com/" target="_blank">Fastvideo company</a>.
 
@@ -268,7 +270,7 @@ You can also create a software module to collect frames from different cameras a
 * Support for MIPI CSI-2 camera which is embedded into TX2 - done
 * Support for LUCID Vision Labs cameras - done
 * Support for Leopard Imaging MIPI CSI-2 camera with IMX477 image sensor (4K/60fps) - done
-* HDR image processing on GPU for automotive 16/20/24-bit image sensors (IMX490 and alike) - in progress
+* HDR image processing on GPU for automotive 16/20/24-bit image sensors (IMX490 and IMalike) - in progress
 * High performance JPEG-XS codec on GPU - in progress
 * New demosaicing algorithm with improved image quality - in progress
 * Support for Emergent Vision Technologies, DALSA, IDS Imaging, Baumer, Kaya Instruments, SVS-Vistek cameras - in progress
