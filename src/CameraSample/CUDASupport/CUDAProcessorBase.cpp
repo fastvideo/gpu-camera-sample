@@ -95,6 +95,14 @@ void CUDAProcessorBase::freeFilters()
         cudaMemoryInfo("Destroyed hRawUnpacker");
     }
 
+#ifdef LEOPARD_IMX477
+    if( hBitShiftTransform != nullptr )
+    {
+        fastSurfaceConverterDestroy( hBitShiftTransform );
+        hBitShiftTransform = nullptr;
+        cudaMemoryInfo("Destroyed hBitShiftTransform");
+    }
+#endif
 
     if( hSam != nullptr )
     {
@@ -302,7 +310,6 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
 
     fastSdkParametersHandle_t handle = nullptr;
     ret = fastGetSdkParametersHandle(&handle);
-    ret = fastDenoiseLibraryInit(handle);
 
     if(Globals::gEnableLog)
     {
@@ -365,6 +372,36 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
     }
     bufferPtr = &srcBuffer;
 
+
+    cudaMemoryInfo("Created hDeviceToHostRawAdapter");
+
+#ifdef LEOPARD_IMX477
+    fastBitDepthConverter_t b_shift;
+    b_shift.targetBitsPerChannel = 12;
+    b_shift.isOverrideSourceBitsPerChannel = false;
+    ret = fastSurfaceConverterCreate(
+                &hBitShiftTransform,
+                FAST_BIT_DEPTH,
+
+                &b_shift,
+
+                maxWidth,
+                maxHeight,
+
+                *bufferPtr,
+                &bitShiftBuffer
+                );
+
+    bufferPtr = &bitShiftBuffer;
+    fastDeviceSurfaceBufferInfo_t bufferInfo;
+    fastGetDeviceSurfaceBufferInfo(bitShiftBuffer, &bufferInfo);
+
+    if(ret != FAST_OK)
+        return InitFailed("hBitShiftTransform failed",ret);
+    options.SurfaceFmt = FAST_I12;
+    cudaMemoryInfo("Created hBitShiftTransform");
+#endif
+
     //Raw data export
     ret = fastExportToHostCreate(
                 &hDeviceToHostRawAdapter,
@@ -375,67 +412,65 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
     if(ret != FAST_OK)
         return InitFailed("fastExportToHostCreate for Raw data failed",ret);
 
-    cudaMemoryInfo("Created hDeviceToHostRawAdapter");
+//    //SAM
+//    if(options.SurfaceFmt == FAST_I8)
+//    {
+//        fastSam_t samParameter;
+//        samParameter.correctionMatrix = options.MatrixA;
+//        samParameter.blackShiftMatrix = (char*)options.MatrixB;
+//        ret = fastImageFilterCreate(
+//                    &hSam,
 
-    //SAM
-    if(options.SurfaceFmt == FAST_I8)
-    {
-        fastSam_t samParameter;
-        samParameter.correctionMatrix = options.MatrixA;
-        samParameter.blackShiftMatrix = (char*)options.MatrixB;
-        ret = fastImageFilterCreate(
-                    &hSam,
+//                    FAST_SAM,
+//                    &samParameter,
 
-                    FAST_SAM,
-                    &samParameter,
+//                    maxWidth,
+//                    maxHeight,
 
-                    maxWidth,
-                    maxHeight,
+//                    *bufferPtr,
+//                    &samBuffer
+//                    );
+//    }
+//    else
+//    {
+//        fastSam16_t samParameter;
+//        samParameter.correctionMatrix = options.MatrixA;
+//        samParameter.blackShiftMatrix = (short*)options.MatrixB;
+//        ret = fastImageFilterCreate(
+//                    &hSam,
 
-                    *bufferPtr,
-                    &samBuffer
-                    );
-    }
-    else
-    {
-        fastSam16_t samParameter;
-        samParameter.correctionMatrix = options.MatrixA;
-        samParameter.blackShiftMatrix = (short*)options.MatrixB;
-        ret = fastImageFilterCreate(
-                    &hSam,
+//                    FAST_SAM16,
+//                    &samParameter,
 
-                    FAST_SAM16,
-                    &samParameter,
+//                    maxWidth,
+//                    maxHeight,
 
-                    maxWidth,
-                    maxHeight,
+//                    *bufferPtr,
+//                    &samBuffer
+//                    );
+//    }
+//    if(ret != FAST_OK)
+//        return InitFailed("fastImageFilterCreate for MAD failed",ret);
 
-                    *bufferPtr,
-                    &samBuffer
-                    );
-    }
-    if(ret != FAST_OK)
-        return InitFailed("fastImageFilterCreate for MAD failed",ret);
+//    cudaMemoryInfo("Created SAM");
 
-    cudaMemoryInfo("Created SAM");
+//    if(samBuffer)
+//    {
+//        fastDeviceSurfaceBufferHandle_t srcBuffers[2] = {*bufferPtr, samBuffer};
 
-    if(samBuffer)
-    {
-        fastDeviceSurfaceBufferHandle_t srcBuffers[2] = {*bufferPtr, samBuffer};
+//        ret = fastMuxCreate(
+//                    &hSamMux,
+//                    srcBuffers,
+//                    2,
+//                    &samMuxBuffer
+//                    );
+//    }
 
-        ret = fastMuxCreate(
-                    &hSamMux,
-                    srcBuffers,
-                    2,
-                    &samMuxBuffer
-                    );
-    }
+//    bufferPtr = &samMuxBuffer;
 
-    bufferPtr = &samMuxBuffer;
-
-    if(ret != FAST_OK)
-        return InitFailed("fastMuxCreate hSamMux failed",ret);
-    cudaMemoryInfo("Created hSamMux");
+//    if(ret != FAST_OK)
+//        return InitFailed("fastMuxCreate hSamMux failed",ret);
+//    cudaMemoryInfo("Created hSamMux");
 
     unsigned short whiteLevel = options.WhiteLevel;
     unsigned short blackLevel = options.BlackLevel;
@@ -529,11 +564,11 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
     bufferPtr = &linearizationLutBuffer;
 
     //Linearized raw data export
-    ret = (fastExportToHostCreate(
+    ret = fastExportToHostCreate(
                &hDeviceToHostLinRawAdapter,
                &srcSurfaceFmt,
                linearizationLutBuffer
-               ));
+               );
 
     if(ret != FAST_OK)
         return InitFailed("fastExportToHostCreate for RAW linearized data failed",ret);
@@ -636,8 +671,8 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
     //Denoise
     if(true)
     {
-        denoise_static_parameters_t denoiseParameters;
-        memcpy(&denoiseParameters, &options.DenoiseStaticParams, sizeof(denoise_static_parameters_t));
+        fastDenoiseStaticParameters_t denoiseParameters;
+        memcpy(&denoiseParameters, &options.DenoiseStaticParams, sizeof(fastDenoiseStaticParameters_t));
 
         ret = fastDenoiseCreate(
                     &hDenoise,
@@ -895,6 +930,14 @@ fastStatus_t CUDAProcessorBase::Init(CUDAProcessorOptions &options)
         requestedMemSpace += tmp;
     }
 
+#ifdef LEOPARD_IMX477
+    if( hBitShiftTransform != nullptr )
+    {
+        fastSurfaceConverterGetAllocatedGpuMemorySize( hBitShiftTransform, &tmp );
+        requestedMemSpace += tmp;
+    }
+#endif
+
     if( hBpc != nullptr )
     {
         fastImageFiltersGetAllocatedGpuMemorySize( hBpc, &tmp );
@@ -1055,7 +1098,7 @@ fastStatus_t CUDAProcessorBase::Transform(GPUImage_t *image, CUDAProcessorOption
     unsigned imgHeight = image->h;
 
     if(imgWidth > opts.MaxWidth || imgHeight > opts.MaxHeight )
-        return TransformFailed("Unsupported image size",FAST_INVALID_FORMAT,profileTimer);
+        return TransformFailed("Unsupported image size",FAST_INVALID_FORMAT, profileTimer);
 
     stats[QStringLiteral("inputWidth")] = imgWidth;
     stats[QStringLiteral("inputHeight")] = imgHeight;
@@ -1066,20 +1109,29 @@ fastStatus_t CUDAProcessorBase::Transform(GPUImage_t *image, CUDAProcessorOption
     if(info)
         fastGpuTimerStart(profileTimer);
     QString key;
+    fastSurfaceFormat_t fmt = image->surfaceFmt;
     if(hDeviceToDeviceAdapter != nullptr)
     {
         key = QStringLiteral("hHostToDeviceAdapter");
-        ret = fastImportFromDeviceCopy(
-                    hDeviceToDeviceAdapter,
+//        ret = fastImportFromDeviceCopy(
+//                    hDeviceToDeviceAdapter,
 
-                    image->data.get(),
-                    imgWidth,
-                    image->wPitch,
-                    imgHeight
-                    );
+//                    image->data.get(),
+//                    imgWidth,
+//                    image->wPitch,
+//                    imgHeight
+//                    );
 
-        if(ret != FAST_OK)
-            return TransformFailed("fastImportFromHostCopy failed", ret, profileTimer);
+//        if(ret != FAST_OK)
+//            return TransformFailed("fastImportFromHostCopy failed", ret, profileTimer);
+        fastSetExternalBufferToDeviceSurfaceBuffer(srcBuffer,
+                                                   fmt,
+                                                   image->data.get(),
+                                                   imgWidth,
+                                                   image->wPitch,
+                                                   imgHeight
+                                                   );
+
     }
     else if(hRawUnpacker != nullptr)
     {
@@ -1106,59 +1158,90 @@ fastStatus_t CUDAProcessorBase::Transform(GPUImage_t *image, CUDAProcessorOption
         stats[key] = elapsedTimeGpu;
     }
 
-    if(hSam && hSamMux)
+#ifdef LEOPARD_IMX477
+    if(hBitShiftTransform)
     {
-        if(opts.EnableSAM)
+        if(info)
+            fastGpuTimerStart(profileTimer);
+
+        fastBitDepthConverter_t conv;
+        conv.targetBitsPerChannel = 12;
+        conv.isOverrideSourceBitsPerChannel = false;
+        ret = fastSurfaceConverterTransform(
+                    hBitShiftTransform,
+                    &conv,
+
+                    imgWidth,
+                    imgHeight
+                    );
+
+        if(ret != FAST_OK)
+            return TransformFailed("hBitShiftTransform transform failed", ret, profileTimer);
+
+        if(info)
         {
-            if(info)
-            {
-                fastGpuTimerStart(profileTimer);
-            }
+            fastGpuTimerStop(profileTimer);
+            fastGpuTimerGetTime(profileTimer, &elapsedTimeGpu);
 
-            if(image->surfaceFmt == FAST_I8)
-            {
-                fastSam_t samParameter;
-                samParameter.correctionMatrix = nullptr;
-                samParameter.blackShiftMatrix = nullptr;
-                ret = fastImageFiltersTransform(
-                            hSam,
-                            &samParameter,
-                            imgWidth,
-                            imgHeight
-                            );
-            }
-            else
-            {
-                fastSam16_t samParameter;
-                samParameter.correctionMatrix = nullptr;
-                samParameter.blackShiftMatrix = nullptr;
-                ret = fastImageFiltersTransform(
-                            hSam,
-                            &samParameter,
-                            imgWidth,
-                            imgHeight
-                            );
-            }
-            if(ret != FAST_OK && info)
-                return TransformFailed("fastImageFiltersTransform for SAM failed",ret,profileTimer);
-
-            if(info)
-            {
-                fastGpuTimerStop(profileTimer);
-                fastGpuTimerGetTime(profileTimer, &elapsedTimeGpu);
-
-                fullTime += elapsedTimeGpu;
-                stats[QStringLiteral("hSAM")] = elapsedTimeGpu;
-            }
-
-            fastMuxSelect(hSamMux, 1);
-        }
-        else
-        {
-            stats[QStringLiteral("hSAM")] = -1;
-            fastMuxSelect(hSamMux, 0);
+            fullTime += elapsedTimeGpu;
+            stats[QStringLiteral("hBitShiftTransform")] = elapsedTimeGpu;
         }
     }
+#endif
+
+//    if(hSam && hSamMux)
+//    {
+//        if(opts.EnableSAM)
+//        {
+//            if(info)
+//            {
+//                fastGpuTimerStart(profileTimer);
+//            }
+
+//            if(image->surfaceFmt == FAST_I8)
+//            {
+//                fastSam_t samParameter;
+//                samParameter.correctionMatrix = nullptr;
+//                samParameter.blackShiftMatrix = nullptr;
+//                ret = fastImageFiltersTransform(
+//                            hSam,
+//                            &samParameter,
+//                            imgWidth,
+//                            imgHeight
+//                            );
+//            }
+//            else
+//            {
+//                fastSam16_t samParameter;
+//                samParameter.correctionMatrix = nullptr;
+//                samParameter.blackShiftMatrix = nullptr;
+//                ret = fastImageFiltersTransform(
+//                            hSam,
+//                            &samParameter,
+//                            imgWidth,
+//                            imgHeight
+//                            );
+//            }
+//            if(ret != FAST_OK && info)
+//                return TransformFailed("fastImageFiltersTransform for SAM failed",ret,profileTimer);
+
+//            if(info)
+//            {
+//                fastGpuTimerStop(profileTimer);
+//                fastGpuTimerGetTime(profileTimer, &elapsedTimeGpu);
+
+//                fullTime += elapsedTimeGpu;
+//                stats[QStringLiteral("hSAM")] = elapsedTimeGpu;
+//            }
+
+//            fastMuxSelect(hSamMux, 1);
+//        }
+//        else
+//        {
+//            stats[QStringLiteral("hSAM")] = -1;
+//            fastMuxSelect(hSamMux, 0);
+//        }
+//    }
 
     unsigned short whiteLevel = opts.WhiteLevel;
     unsigned short blackLevel = opts.BlackLevel;
@@ -1168,7 +1251,7 @@ fastStatus_t CUDAProcessorBase::Transform(GPUImage_t *image, CUDAProcessorOption
             fastGpuTimerStart(profileTimer);
 
         double scale = 1. / (double(whiteLevel - blackLevel));
-        fastSurfaceFormat_t fmt = image->surfaceFmt;
+
         if(fmt == FAST_I8)
         {
             fastLut_8_16_t lutParameter;

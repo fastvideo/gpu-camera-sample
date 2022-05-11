@@ -31,7 +31,6 @@
 
 #include "fastvideo_sdk.h"
 #include "fastvideo_nppGeometry.h"
-#include "fastvideo_denoise.h"
 
 #include <memory.h>
 #include <QVector>
@@ -160,8 +159,8 @@ public:
         ShowPicture = other.ShowPicture;
 
         EnableDenoise = other.EnableDenoise;
-        memcpy(&DenoiseParams, &other.DenoiseParams, sizeof(denoise_parameters_t));
-        memcpy(&DenoiseStaticParams, &other.DenoiseStaticParams, sizeof(denoise_static_parameters_t));
+        memcpy(&DenoiseParams, &other.DenoiseParams, sizeof(fastDenoiseParameters_t));
+        memcpy(&DenoiseStaticParams, &other.DenoiseStaticParams, sizeof(fastDenoiseStaticParameters_t));
 
         EnableBPC = other.EnableBPC;
     }
@@ -225,8 +224,8 @@ public:
     int  Angle;
 
     bool EnableDenoise;
-    denoise_parameters_t DenoiseParams{};
-    denoise_static_parameters_t DenoiseStaticParams{};
+    fastDenoiseParameters_t DenoiseParams{};
+    fastDenoiseStaticParameters_t DenoiseStaticParams{};
 
     bool EnableBPC;
 

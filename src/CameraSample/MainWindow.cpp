@@ -59,6 +59,10 @@
 #include "GeniCamCamera.h"
 #endif
 
+#ifdef SUPPORT_MIPI
+#include "MIPICamera.h"
+#endif
+
 QVector<unsigned short> gammaLin(16384);
 QVector<unsigned short> gammaSRGB(16384);
 
@@ -183,7 +187,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->txtRtspServer->setText("rtsp://0.0.0.0:1234/live.sdp"); // guess to use a global address on the jetson platform
 #endif
 
-#if defined SUPPORT_XIMEA || defined SUPPORT_GENICAM || defined SUPPORT_FLIR || defined SUPPORT_IMPERX
+#if defined SUPPORT_XIMEA || defined SUPPORT_GENICAM || defined SUPPORT_FLIR || defined SUPPORT_IMPERX || defined SUPPORT_MIPI
 
     ui->mainToolBar->insertAction(ui->actionOpenBayerPGM, ui->actionOpenCamera);
     ui->menuCamera->insertAction(ui->actionOpenBayerPGM, ui->actionOpenCamera);
@@ -268,7 +272,7 @@ void MainWindow::initNewCamera(GPUCameraBase* cmr, uint32_t devID)
     mOptions.BayerFormat = mCameraPtr->bayerPattern();
     mOptions.SurfaceFmt = mCameraPtr->surfaceFormat();
     mOptions.WhiteLevel = mCameraPtr->whiteLevel();
-    mOptions.BlackLevel = 0;
+    mOptions.BlackLevel = mCameraPtr->blackLevel();//0;
     mOptions.Packed = mCameraPtr->isPacked();
     updateOptions(mOptions);
 
@@ -319,6 +323,11 @@ void MainWindow::openCamera(uint32_t devID)
         mCameraPtr->stop();
 
     initNewCamera(new GeniCamCamera(), devID);
+#elif SUPPORT_MIPI
+    if(mCameraPtr)
+        mCameraPtr->stop();
+
+    initNewCamera(new MIPICamera(), devID);
 #else
     Q_UNUSED(devID)
 #endif
@@ -668,7 +677,7 @@ void MainWindow::on_cboBayerType_currentIndexChanged(int index)
 
 void MainWindow::on_actionOpenCamera_triggered()
 {
-#if defined SUPPORT_XIMEA || defined SUPPORT_GENICAM || defined SUPPORT_FLIR|| defined SUPPORT_IMPERX
+#if defined SUPPORT_XIMEA || defined SUPPORT_GENICAM || defined SUPPORT_FLIR|| defined SUPPORT_IMPERX || defined SUPPORT_MIPI
     openCamera(0);
 #endif
 }
@@ -788,8 +797,9 @@ void MainWindow::onGPUFinished()
     QString strInfo;
     if(!mProcessorPtr)
         return;
-    if(!ui->lblInfo->isVisible())
-        return;
+
+    float val = 0.f;
+
     fastStatus_t ret = mProcessorPtr->getLastError();
     if(ret != FAST_OK)
     {
@@ -802,9 +812,14 @@ void MainWindow::onGPUFinished()
     }
 
     QMap<QString, float> stats(mProcessorPtr->getStats());
+    val = stats[QStringLiteral("acqTime")];
+    if(val > 0)
+        mFpsLabel->setText( trUtf8("%1 fps").arg(1000000000. / double(val), 0, 'f', 0));
 
+    if(!ui->lblInfo->isVisible())
+        return;
 
-    float val = stats[QStringLiteral("allocatedMem")];
+    val = stats[QStringLiteral("allocatedMem")];
     float viewportMem = stats[QStringLiteral("totalViewportMemory")];
 
     if(val > 0 && viewportMem > 0)
@@ -825,8 +840,12 @@ void MainWindow::onGPUFinished()
         strInfo += trUtf8("Raw Unpacker = %1 ms\n").arg(double(val), 0, 'f', 2);
 
     val = stats[QStringLiteral("hHostToDeviceAdapter")];
-    if(val > 0)
+    if(val >= 0)
         strInfo += trUtf8("Host-to-device transfer = %1 ms\n").arg(double(val), 0, 'f', 2);
+
+    val = stats[QStringLiteral("hBitShiftTransform")];
+    if(val >= 0)
+        strInfo += trUtf8("Bit shift = %1 ms\n").arg(double(val), 0, 'f', 2);
 
     val = stats[QStringLiteral("hSAM")];
     if(val > 0)
@@ -908,10 +927,6 @@ void MainWindow::onGPUFinished()
 
     ui->lblInfo->setPlainText(strInfo);
     ui->lblInfo->moveCursor(QTextCursor::End);
-
-    val = stats[QStringLiteral("acqTime")];
-    if(val > 0)
-        mFpsLabel->setText( trUtf8("%1 fps").arg(1000000000. / double(val), 0, 'f', 0));
 
 }
 

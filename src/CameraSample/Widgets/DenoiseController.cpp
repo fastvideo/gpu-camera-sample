@@ -76,7 +76,7 @@ DenoiseController::~DenoiseController()
 }
 
 
-void DenoiseController::getDenoiseParams(denoise_parameters_t& params, bool& denoiseState)
+void DenoiseController::getDenoiseParams(fastDenoiseParameters_t &params, bool& denoiseState)
 {
     params.dwt_levels = ui->spnDecompLevel->value();
     params.threshold[0] = float(ui->sldYThreshold->value()) / 100;
@@ -120,7 +120,7 @@ void DenoiseController::getDenoiseParams(denoise_parameters_t& params, bool& den
     denoiseState = ui->chkUseDenoise->isChecked();
 }
 
-void DenoiseController::getStaticDenoiseParams(denoise_static_parameters_t &params)
+void DenoiseController::getStaticDenoiseParams(fastDenoiseStaticParameters_t &params)
 {
     Globals::validateStaticDenoiseParams(params);
 
@@ -128,7 +128,7 @@ void DenoiseController::getStaticDenoiseParams(denoise_static_parameters_t &para
     params.wavelet = fastWaveletType_t(ui->cboWaveletType->currentData().toInt());
 }
 
-void DenoiseController::setStaticDenoiseParams(denoise_static_parameters_t &params)
+void DenoiseController::setStaticDenoiseParams(fastDenoiseStaticParameters_t &params)
 {
     Globals::validateStaticDenoiseParams(params);
 
@@ -141,7 +141,7 @@ void DenoiseController::setStaticDenoiseParams(denoise_static_parameters_t &para
     ui->cboWaveletType->setCurrentIndex(idx);
 }
 
-void DenoiseController::setDenoiseParams(const denoise_parameters_t &params, bool denoiseState)
+void DenoiseController::setDenoiseParams(const fastDenoiseParameters_t &params, bool denoiseState)
 {
     QSignalBlocker b1(ui->spnDecompLevel);
     int val = params.dwt_levels;

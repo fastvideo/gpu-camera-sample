@@ -44,6 +44,8 @@ SOURCES += main.cpp\
     AsyncFileWriter.cpp \
     $$OTHER_LIB_PATH/FastvideoSDK/common/SurfaceTraits.cpp \
     $$OTHER_LIB_PATH/FastvideoSDK/common/alignment.cpp \
+    $$OTHER_LIB_PATH/FastvideoSDK/common/FastAllocator.cpp \
+    $$OTHER_LIB_PATH/FastvideoSDK/common/BaseAllocator.cpp \
     CUDASupport/CUDAProcessorGray.cpp \
     MJPEGEncoder.cpp \
     Camera/GeniCamCamera.cpp \
@@ -54,7 +56,9 @@ SOURCES += main.cpp\
     RtspServer/RTSPStreamerServer.cpp \
     RtspServer/TcpClient.cpp \
     RtspServer/vutils.cpp \
-    Camera/ImperxCamera.cpp
+    Camera/ImperxCamera.cpp \
+    Camera/MIPICamera.cpp
+
 
 contains( DEFINES, SUPPORT_GENICAM ){
     SOURCES += rc_genicam_api/buffer.cc \
@@ -87,6 +91,11 @@ contains( DEFINES, SUPPORT_GENICAM ){
 }
 contains( DEFINES, SUPPORT_XIMEA ){
    SOURCES += Camera/XimeaCamera.cpp
+}
+
+contains( DEFINES, SUPPORT_MIPI){
+    HEADERS +=
+    SOURCES +=
 }
 
 win32: SOURCES += $$OTHER_LIB_PATH/FastvideoSDK/core_samples/SurfaceTraitsInternal.cpp
@@ -126,7 +135,8 @@ HEADERS  += MainWindow.h \
     CUDASupport/CudaAllocator.h \
     CUDASupport/GPUImage.h \
     version.h \
-    Camera/ImperxCamera.h
+    Camera/ImperxCamera.h \
+    Camera/MIPICamera.h
 
 FORMS    += MainWindow.ui \
     Widgets/DenoiseController.ui \

@@ -37,7 +37,6 @@
 
 #include "fastvideo_sdk.h"
 #include "fastvideo_mjpeg.h"
-#include "fastvideo_denoise.h"
 #include "fastvideo_nppFilter.h"
 #include "fastvideo_nppResize.h"
 #include "fastvideo_nppGeometry.h"
@@ -149,6 +148,11 @@ protected:
 
     fastRawUnpackerHandle_t         hRawUnpacker = nullptr;
 
+#ifdef LEOPARD_IMX477
+    fastSurfaceConverterHandle_t    hBitShiftTransform = nullptr;
+    fastDeviceSurfaceBufferHandle_t bitShiftBuffer = nullptr;
+#endif
+
     fastImageFiltersHandle_t        hSam = nullptr;
     fastDeviceSurfaceBufferHandle_t samBuffer = nullptr;
     fastMuxHandle_t                 hSamMux = nullptr;
@@ -194,7 +198,7 @@ protected:
     //Denoise stuff
     fastDenoiseHandle_t             hDenoise = nullptr;
     fastDeviceSurfaceBufferHandle_t denoiseBuffer = nullptr;
-    denoise_static_parameters_t     denoiseParameters {};
+    fastDenoiseStaticParameters_t   denoiseParameters {};
     fastMuxHandle_t                 hDenoiseMux = nullptr;
     fastDeviceSurfaceBufferHandle_t denoiseMuxBuffer = nullptr;
 

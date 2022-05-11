@@ -31,7 +31,6 @@
 
 #include <QWidget>
 #include <QSlider>
-#include "fastvideo_denoise.h"
 #include "Globals.h"
 
 namespace Ui {
@@ -45,10 +44,10 @@ class DenoiseController : public QWidget
 public:
     explicit DenoiseController(QWidget *parent = nullptr);
     ~DenoiseController() override;
-    void getDenoiseParams(denoise_parameters_t &params, bool& denoiseState);
-    void setDenoiseParams(const denoise_parameters_t& params, bool denoiseState);
-    void getStaticDenoiseParams(denoise_static_parameters_t &params);
-    void setStaticDenoiseParams(denoise_static_parameters_t &params);
+    void getDenoiseParams(fastDenoiseParameters_t &params, bool& denoiseState);
+    void setDenoiseParams(const fastDenoiseParameters_t& params, bool denoiseState);
+    void getStaticDenoiseParams(fastDenoiseStaticParameters_t &params);
+    void setStaticDenoiseParams(fastDenoiseStaticParameters_t &params);
     int getBpp() const;
     void setBpp(int value);
 

@@ -34,13 +34,12 @@ FASTVIDEO_INC += $$FASTVIDEOPATH/libs/OpenGL/inc
 #
 FASTVIDEO_LIB += -L$$FASTVIDEOPATH/fastvideo_sdk/lib/$$PLATFORM
 #For ubuntu x64 we need to create the dir fastvideo_sdk/lib/Linux64
-FASTVIDEO_LIB += -lfastvideo_sdk -lfastvideo_denoise
+FASTVIDEO_LIB += -lfastvideo_sdk
 #
 # -lfastvideo_mjpeg -lfastvideo_denoise -lfastvideo_nppFilter -lfastvideo_nppResize -lfastvideo_nppGeometry
 #
 
-FASTVIDEO_EXTRA_DLLS += $$FASTVIDEO_SDK/lib/$$PLATFORM/libfastvideo_sdk.so.0.17.0.1.0170001
-FASTVIDEO_EXTRA_DLLS += $$FASTVIDEO_SDK/lib/$$PLATFORM/libfastvideo_denoise.so.1.0.0.0.0170001
+FASTVIDEO_EXTRA_DLLS += $$FASTVIDEO_SDK/lib/$$PLATFORM/libfastvideo_sdk.so.0.17.6.0.0170600
 
 # NVIDIA VIDEO CODEC SDK
 # https://developer.nvidia.com/nvidia-video-codec-sdk/download
@@ -54,10 +53,10 @@ contains(TARGET_ARCH, arm64){
     INCLUDEPATH += $$OTHER_LIB_PATH/libjpeg-turbo/include
     LIBS += -L/$$OTHER_LIB_PATH/libjpeg-turbo/lib64/aarch64 -ljpeg
 
-    FASTVIDEO_EXTRA_DLLS += $$FFMPEG_PATH/lib/linux/aarch64/libavcodec.so.58.18.100
-    FASTVIDEO_EXTRA_DLLS += $$FFMPEG_PATH/lib/linux/aarch64/libavformat.so.58.12.100
-    FASTVIDEO_EXTRA_DLLS += $$FFMPEG_PATH/lib/linux/aarch64/libavutil.so.56.14.100
-    FASTVIDEO_EXTRA_DLLS += $$FFMPEG_PATH/lib/linux/aarch64/libswresample.so.3.1.100
+    FASTVIDEO_EXTRA_DLLS += $$FFMPEG_PATH/lib/linux/aarch64/libavcodec.so.58.91.100
+    FASTVIDEO_EXTRA_DLLS += $$FFMPEG_PATH/lib/linux/aarch64/libavformat.so.58.45.100
+    FASTVIDEO_EXTRA_DLLS += $$FFMPEG_PATH/lib/linux/aarch64/libavutil.so.56.51.100
+    FASTVIDEO_EXTRA_DLLS += $$FFMPEG_PATH/lib/linux/aarch64/libswresample.so.3.7.100
 
     FASTVIDEO_EXTRA_DLLS += $$OTHER_LIB_PATH/libjpeg-turbo/lib64/aarch64/libjpeg.so.62.3.0
 
@@ -65,8 +64,13 @@ contains(TARGET_ARCH, arm64){
 }
 else {
     NVCODECS = $$OTHER_LIB_PATH/nvcodecs
-    INCLUDEPATH += $$NVCODECS/include
+    INCLUDEPATH += $$NVCODECS/Interface
     LIBS += -L$$NVCODECS/Lib/$$PLATFORM -lnvcuvid -lcuda
+
+    unix{
+        LIBS += -L$$NVCODECS/Lib/linux/stubs/x86_64 -lv4l2
+    }
+
     FFMPEG_LIB += -lavformat -lavcodec -lavutil -lswresample -lm -lz -lx264
 }
 

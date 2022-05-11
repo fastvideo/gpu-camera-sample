@@ -88,7 +88,6 @@ fastStatus_t CUDAProcessorGray::Init(CUDAProcessorOptions &options)
 
     fastSdkParametersHandle_t handle = nullptr;
     ret = fastGetSdkParametersHandle(&handle);
-    ret = fastDenoiseLibraryInit(handle);
 
     if(Globals::gEnableLog)
     {
@@ -360,8 +359,8 @@ fastStatus_t CUDAProcessorGray::Init(CUDAProcessorOptions &options)
     //Denoise
     if( true )
     {
-        denoise_static_parameters_t denoiseParameters;
-        memcpy(&denoiseParameters, &options.DenoiseStaticParams, sizeof(denoise_static_parameters_t));
+        fastDenoiseStaticParameters_t denoiseParameters;
+        memcpy(&denoiseParameters, &options.DenoiseStaticParams, sizeof(fastDenoiseStaticParameters_t));
 
         ret = fastDenoiseCreate(
                     &hDenoise,

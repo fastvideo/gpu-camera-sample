@@ -14,6 +14,7 @@ unix:  FASTVIDEO_EXTRA_DLLS += $$PWD/RtspPlayer.sh
 SOURCES = main.cpp \
     $$OTHER_LIB_PATH/FastvideoSDK/common/helper_jpeg/helper_jpeg_load.cpp \
     $$OTHER_LIB_PATH/FastvideoSDK/common/helper_jpeg/helper_jpeg_store.cpp \
+    $$OTHER_LIB_PATH/FastvideoSDK/common/BaseAllocator.cpp \
     SDIConverter.cpp \
     Widgets/GLImageViewer.cpp \
     Widgets/GtGWidget.cpp \
@@ -24,7 +25,8 @@ SOURCES = main.cpp \
     jpegenc.cpp \
     MainWindow.cpp \
     RTSPServer.cpp \
-    vdecoder.cpp
+    vdecoder.cpp \
+    ppm.cpp
 
 FORMS += \
     DialogOpenServer.ui \
@@ -43,7 +45,8 @@ HEADERS += \
     MainWindow.h \
     RTSPServer.h \
     common_utils.h \
-    vdecoder.h
+    vdecoder.h \
+    ppm.h
 
 FFMPEGDIR = $$OTHER_LIB_PATH/ffmpeg
 
@@ -56,6 +59,7 @@ INCLUDEPATH += $$FFMPEGDIR/include \
                 $$FASTVIDEO/fastvideo_sdk/inc \
                 $$FASTVIDEO/common \
                 $$PWD/Widgets
+INCLUDEPATH += $$OTHER_LIB_PATH/FastvideoSDK/core_samples
 
 LIBS += -L$$FFMPEGDIR/bin \
         -lavformat -lavcodec -lavutil

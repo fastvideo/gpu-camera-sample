@@ -5,6 +5,7 @@
 
 #include <QMapIterator>
 #include <QSettings>
+#include "ppm.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
