@@ -68,14 +68,14 @@ QString Globals::completePath(const QString& path)
     return path.endsWith(QChar('/')) ? path : path + QChar('/');
 }
 
-void Globals::initDenoiseParams(denoise_static_parameters_t& params)
+void Globals::initDenoiseParams(fastDenoiseStaticParameters_t &params)
 {
     memset(&params, 0, sizeof(params));
     params.function = FAST_THRESHOLD_FUNCTION_SOFT;
     params.wavelet = FAST_WAVELET_CDF97;
 }
 
-void Globals::validateDenoiseParams(denoise_parameters_t& params)
+void Globals::validateDenoiseParams(fastDenoiseParameters_t& params)
 {
     if(params.threshold[0] < 0)
         params.threshold[0] = 0;
@@ -97,7 +97,7 @@ void Globals::validateDenoiseParams(denoise_parameters_t& params)
         params.dwt_levels = 7;
 }
 
-void Globals::validateStaticDenoiseParams(denoise_static_parameters_t& params)
+void Globals::validateStaticDenoiseParams(fastDenoiseStaticParameters_t &params)
 {
 
     if(params.function <= FAST_THRESHOLD_FUNCTION_UNKNOWN)

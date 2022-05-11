@@ -37,7 +37,7 @@
 
 #include "fastvideo_sdk.h"
 #include "fastvideo_mjpeg.h"
-#include "fastvideo_denoise.h"
+//#include "fastvideo_denoise.h"
 #include "fastvideo_nppFilter.h"
 #include "fastvideo_nppResize.h"
 #include "fastvideo_nppGeometry.h"
@@ -194,7 +194,7 @@ protected:
     //Denoise stuff
     fastDenoiseHandle_t             hDenoise = nullptr;
     fastDeviceSurfaceBufferHandle_t denoiseBuffer = nullptr;
-    denoise_static_parameters_t     denoiseParameters {};
+    fastDenoiseStaticParameters_t   denoiseParameters {};
     fastMuxHandle_t                 hDenoiseMux = nullptr;
     fastDeviceSurfaceBufferHandle_t denoiseMuxBuffer = nullptr;
 

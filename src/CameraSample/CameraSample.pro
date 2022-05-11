@@ -55,7 +55,9 @@ SOURCES += main.cpp\
     RtspServer/RTSPStreamerServer.cpp \
     RtspServer/TcpClient.cpp \
     RtspServer/vutils.cpp \
-    Camera/ImperxCamera.cpp
+    Camera/ImperxCamera.cpp \
+    $$PWD/../../OtherLibs/fastvideoSDK/common/BaseAllocator.cpp \
+    $$PWD/../../OtherLibs/fastvideoSDK/common/FastAllocator.cpp
 
 contains( DEFINES, SUPPORT_GENICAM ){
     SOURCES += rc_genicam_api/buffer.cc \
@@ -128,7 +130,9 @@ HEADERS  += MainWindow.h \
     CUDASupport/CudaAllocator.h \
     CUDASupport/GPUImage.h \
     version.h \
-    Camera/ImperxCamera.h
+    Camera/ImperxCamera.h \
+    $$PWD/../../OtherLibs/fastvideoSDK/common/BaseAllocator.h \
+    $$PWD/../../OtherLibs/fastvideoSDK/common/FastAllocator.h
 
 FORMS    += MainWindow.ui \
     Widgets/DenoiseController.ui \

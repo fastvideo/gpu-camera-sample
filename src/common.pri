@@ -33,7 +33,7 @@ FASTVIDEO_DLL  = $$FASTVIDEO_DLL_PATH/fastvideo_sdk.dll
 FASTVIDEO_DLL += $$FASTVIDEO_DLL_PATH/fastvideo_mjpeg.dll
 
 #FASTVIDEO_DLL += $$FASTVIDEO_DLL_PATH/fastvideo_experimentalImageFilter.dll
-FASTVIDEO_DLL += $$FASTVIDEO_DLL_PATH/fastvideo_denoise.dll
+#FASTVIDEO_DLL += $$FASTVIDEO_DLL_PATH/fastvideo_denoise.dll
 
 FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/libs/senselock/$$PLATFORM/sense4.dll
 
@@ -43,7 +43,7 @@ FASTVIDEO_EXTRA_DLLS += $$FASTVIDEOPATH/libs/senselock/$$PLATFORM/sense4.dll
 
 FASTVIDEO_LIB += -lfastvideo_sdk \
 #        -lfastvideo_mjpeg \
-        -lfastvideo_denoise
+#        -lfastvideo_denoise
 #        -lfastvideo_experimentalImageFilter \
 #        -lfastvideo_nppFilter \
 #        -lfastvideo_nppResize \
@@ -63,7 +63,7 @@ FASTVIDEO_EXTRA_DLLS += $$FFMPEG_SRC
 #FASTVIDEO_EXTRA_DLLS += $$[QT_INSTALL_BINS]/icuuc58.dll
 #FASTVIDEO_EXTRA_DLLS += $$LIBTIFF_LIB/tiff.dll
 
-CUDA_TOOLKIT_PATH = "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.4"
+CUDA_TOOLKIT_PATH = "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.6"
 CUDAINC += $$CUDA_TOOLKIT_PATH/include
 CUDA_DLL_PATH = $$CUDA_TOOLKIT_PATH/bin
 CUDA_DLL += $$CUDA_DLL_PATH/cudart64_110.dll
