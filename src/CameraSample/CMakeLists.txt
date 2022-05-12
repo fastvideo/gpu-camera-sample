@@ -120,9 +120,8 @@ target_link_libraries(CameraSample PRIVATE
     ${ADDITIONAL_LIBS}
 )
 
-get_filename_component(QTBINPATH ${QT_QMAKE_EXECUTABLE} DIRECTORY)
-
 if(WIN32)
+    get_filename_component(QTBINPATH ${QT_QMAKE_EXECUTABLE} DIRECTORY)
     add_custom_command(
         TARGET CameraSample POST_BUILD
         COMMAND ${QTBINPATH}/windeployqt ${CMAKE_BINARY_DIR}/bin/CameraSample.exe
