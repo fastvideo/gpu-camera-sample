@@ -1,0 +1,116 @@
+cmake_minimum_required(VERSION 3.14)
+
+project(CameraSample VERSION 1.0 LANGUAGES CUDA)
+
+include_directories(${FastVideo_INC}
+                    ${FastVideo_INC}/../../common
+                    ${FastVideo_INC}/../../core_samples
+                    ${FFMPEG_INC}
+                    ${JPEG_INC}
+                    ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}
+                    avfilewriter
+                    Camera
+                    CUDASupport
+                    RtspServer
+                    Widgets
+                    .
+                )
+
+set(SRC
+    AppSettings.cpp
+    AsyncFileWriter.cpp
+    FFCReader.cpp
+    FPNReader.cpp
+    Globals.cpp
+    helper_jpeg_load.cpp
+    helper_jpeg_store.cpp
+    main.cpp
+    MainWindow.cpp
+    MJPEGEncoder.cpp
+    ppm.cpp
+    RawProcessor.cpp
+    quadFragment.frag
+    AppSettings.h
+    AsyncFileWriter.h
+    AsyncQueue.h
+    FFCReader.h
+    FPNReader.h
+    Globals.h
+    MainWindow.h
+    MJPEGEncoder.h
+    ppm.h
+    RawProcessor.h
+    resource.h
+    version.h
+    helper_jpeg.hpp
+    Resorces.qrc
+    #gpu-camera-sample.rc
+    resource.rc
+    MainWindow.ui
+    quadVertex.vert
+    avfilewriter/avfilewriter.cpp
+    avfilewriter/avfilewriter.h
+    Camera/FrameBuffer.cpp
+    Camera/FrameBuffer.h
+    Camera/GPUCameraBase.cpp
+    Camera/GPUCameraBase.h
+    Camera/PGMCamera.cpp
+    Camera/PGMCamera.h
+    Camera/XimeaCamera.cpp
+    Camera/XimeaCamera.h
+    CUDASupport/CudaAllocator.h
+    CUDASupport/CUDAProcessorBase.cpp
+    CUDASupport/CUDAProcessorBase.h
+    CUDASupport/CUDAProcessorGray.cpp
+    CUDASupport/CUDAProcessorGray.h
+    CUDASupport/CUDAProcessorOptions.h
+    CUDASupport/GPUImage.h
+    RtspServer/common_utils.h
+    RtspServer/CTPTransport.cpp
+    RtspServer/CTPTransport.h
+    RtspServer/JpegEncoder.cpp
+    RtspServer/JpegEncoder.h
+    RtspServer/RTSPStreamerServer.cpp
+    RtspServer/RTSPStreamerServer.h
+    RtspServer/TcpClient.cpp
+    RtspServer/TcpClient.h
+    RtspServer/vutils.cpp
+    RtspServer/vutils.h
+    Widgets/CameraSetupWidget.cpp
+    Widgets/CameraSetupWidget.h
+    Widgets/CameraSetupWidget.ui
+    Widgets/camerastatistics.cpp
+    Widgets/camerastatistics.h
+    Widgets/camerastatistics.ui
+    Widgets/DenoiseController.cpp
+    Widgets/DenoiseController.h
+    Widgets/DenoiseController.ui
+    Widgets/GLImageViewer.cpp
+    Widgets/GLImageViewer.h
+    Widgets/GtGWidget.cpp
+    Widgets/GtGWidget.h
+)
+
+set(SRC ${SRC}
+    ../../OtherLibs/fastvideoSDK/common/alignment.cpp
+    ../../OtherLibs/fastvideoSDK/common/alignment.hpp
+    ../../OtherLibs/fastvideoSDK/common/BaseAllocator.cpp
+    ../../OtherLibs/fastvideoSDK/common/BaseAllocator.h
+    ../../OtherLibs/fastvideoSDK/common/FastAllocator.cpp
+    ../../OtherLibs/fastvideoSDK/common/FastAllocator.h
+    ../../OtherLibs/fastvideoSDK/common/SurfaceTraits.cpp
+    ../../OtherLibs/fastvideoSDK/common/SurfaceTraits.hpp
+    ../../OtherLibs/fastvideoSDK/core_samples/SurfaceTraitsInternal.cpp
+    ../../OtherLibs/fastvideoSDK/core_samples/SurfaceTraitsInternal.hpp
+)
+
+add_executable(CameraSample WIN32 ${SRC})
+
+target_link_libraries(CameraSample PRIVATE
+    Qt5::Core Qt5::Widgets Qt5::Gui Qt5::OpenGL Qt5::Network
+    ${FastVideo_LIB}
+    ${FFMPEG_LIB}
+    ${JPEG_LIB}
+    CUDA::cudart
+    ${GL_LIBS}
+)
