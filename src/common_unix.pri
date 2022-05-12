@@ -34,7 +34,7 @@ FASTVIDEO_INC += $$FASTVIDEOPATH/libs/OpenGL/inc
 #
 FASTVIDEO_LIB += -L$$FASTVIDEOPATH/fastvideo_sdk/lib/$$PLATFORM
 #For ubuntu x64 we need to create the dir fastvideo_sdk/lib/Linux64
-FASTVIDEO_LIB += -lfastvideo_sdk -lfastvideo_denoise
+FASTVIDEO_LIB += -lfastvideo_sdk #-lfastvideo_denoise
 #
 # -lfastvideo_mjpeg -lfastvideo_denoise -lfastvideo_nppFilter -lfastvideo_nppResize -lfastvideo_nppGeometry
 #
@@ -64,9 +64,14 @@ contains(TARGET_ARCH, arm64){
     LIBS += -lGL
 }
 else {
+    FASTVIDEO_LIB += -L$$FASTVIDEOPATH/fastvideo_sdk/lib/
     NVCODECS = $$OTHER_LIB_PATH/nvcodecs
     INCLUDEPATH += $$NVCODECS/include
-    LIBS += -L$$NVCODECS/Lib/$$PLATFORM -lnvcuvid -lcuda
+    INCLUDEPATH += $$NVCODECS/Interface
+    LIBS += -L$$NVCODECS/Lib/$$PLATFORM
+    LIBS += -L$$NVCODECS/Lib/$$PLATFORM/stubs/x86_64
+
+    LIBS += -lnvcuvid -lcuda
     FFMPEG_LIB += -lavformat -lavcodec -lavutil -lswresample -lm -lz -lx264
 }
 

@@ -55,9 +55,7 @@ SOURCES += main.cpp\
     RtspServer/RTSPStreamerServer.cpp \
     RtspServer/TcpClient.cpp \
     RtspServer/vutils.cpp \
-    Camera/ImperxCamera.cpp \
-    $$PWD/../../OtherLibs/fastvideoSDK/common/BaseAllocator.cpp \
-    $$PWD/../../OtherLibs/fastvideoSDK/common/FastAllocator.cpp
+    Camera/ImperxCamera.cpp
 
 contains( DEFINES, SUPPORT_GENICAM ){
     SOURCES += rc_genicam_api/buffer.cc \
@@ -130,14 +128,26 @@ HEADERS  += MainWindow.h \
     CUDASupport/CudaAllocator.h \
     CUDASupport/GPUImage.h \
     version.h \
-    Camera/ImperxCamera.h \
-    $$PWD/../../OtherLibs/fastvideoSDK/common/BaseAllocator.h \
-    $$PWD/../../OtherLibs/fastvideoSDK/common/FastAllocator.h
+    Camera/ImperxCamera.h
 
 FORMS    += MainWindow.ui \
     Widgets/DenoiseController.ui \
     Widgets/CameraSetupWidget.ui \
     Widgets/camerastatistics.ui
+
+win32{
+    SOURCES += $$PWD/../../OtherLibs/fastvideoSDK/common/BaseAllocator.cpp \
+               $$PWD/../../OtherLibs/fastvideoSDK/common/FastAllocator.cpp
+
+    HEADERS += $$PWD/../../OtherLibs/fastvideoSDK/common/BaseAllocator.h \
+               $$PWD/../../OtherLibs/fastvideoSDK/common/FastAllocator.h
+}else{
+    SOURCES += $$PWD/../../OtherLibsLinux/FastvideoSDK/common/BaseAllocator.cpp \
+               $$PWD/../../OtherLibsLinux/FastvideoSDK/common/FastAllocator.cpp
+
+    HEADERS += $$PWD/../../OtherLibsLinux/FastvideoSDK/common/BaseAllocator.h \
+               $$PWD/../../OtherLibsLinux/FastvideoSDK/common/FastAllocator.h
+}
 
 RC_FILE = gpu-camera-sample.rc
 #resource.rc
