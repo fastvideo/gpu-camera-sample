@@ -48,12 +48,16 @@ SET(SRC
 )
 
 SET(SRC ${SRC}
-    ../../OtherLibs/fastvideoSDK/common/helper_jpeg/helper_jpeg_load.cpp
-    ../../OtherLibs/fastvideoSDK/common/helper_jpeg/helper_jpeg.hpp
-    ../../OtherLibs/fastvideoSDK/common/helper_jpeg/helper_jpeg_store.cpp
+    ../../${FASTLIB_DIR}/common/helper_jpeg/helper_jpeg_load.cpp
+    ../../${FASTLIB_DIR}/common/helper_jpeg/helper_jpeg.hpp
+    ../../${FASTLIB_DIR}/common/helper_jpeg/helper_jpeg_store.cpp
 )
 
-add_executable(RtpPlayer WIN32 ${SRC})
+if(WIN32)
+    add_executable(RtpPlayer WIN32 ${SRC})
+else()
+    add_executable(RtpPlayer ${SRC})
+endif()
 
 message("---> ${VideoCodec_LIB}")
 
@@ -65,6 +69,5 @@ target_link_libraries(RtpPlayer PRIVATE
     ${VideoCodec_LIB}
     #${VideoCodec2_LIB}
     CUDA::cudart
-    ${CUDAToolkit_LIBRARY_DIR}/cuda.lib
-    ${GL_LIBS}
+    ${ADDITIONAL_LIBS}
 )

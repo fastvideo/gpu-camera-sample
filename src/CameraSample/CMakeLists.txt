@@ -92,19 +92,23 @@ set(SRC
 )
 
 set(SRC ${SRC}
-    ../../OtherLibs/fastvideoSDK/common/alignment.cpp
-    ../../OtherLibs/fastvideoSDK/common/alignment.hpp
-    ../../OtherLibs/fastvideoSDK/common/BaseAllocator.cpp
-    ../../OtherLibs/fastvideoSDK/common/BaseAllocator.h
-    ../../OtherLibs/fastvideoSDK/common/FastAllocator.cpp
-    ../../OtherLibs/fastvideoSDK/common/FastAllocator.h
-    ../../OtherLibs/fastvideoSDK/common/SurfaceTraits.cpp
-    ../../OtherLibs/fastvideoSDK/common/SurfaceTraits.hpp
-    ../../OtherLibs/fastvideoSDK/core_samples/SurfaceTraitsInternal.cpp
-    ../../OtherLibs/fastvideoSDK/core_samples/SurfaceTraitsInternal.hpp
+    ../../${FASTLIB_DIR}/common/alignment.cpp
+    ../../${FASTLIB_DIR}/common/alignment.hpp
+    ../../${FASTLIB_DIR}/common/BaseAllocator.cpp
+    ../../${FASTLIB_DIR}/common/BaseAllocator.h
+    ../../${FASTLIB_DIR}/common/FastAllocator.cpp
+    ../../${FASTLIB_DIR}/common/FastAllocator.h
+    ../../${FASTLIB_DIR}/common/SurfaceTraits.cpp
+    ../../${FASTLIB_DIR}/common/SurfaceTraits.hpp
+    ../../${FASTLIB_DIR}/core_samples/SurfaceTraitsInternal.cpp
+    ../../${FASTLIB_DIR}/core_samples/SurfaceTraitsInternal.hpp
 )
 
-add_executable(CameraSample WIN32 ${SRC})
+if(WIN32)
+    add_executable(CameraSample WIN32 ${SRC})
+else()
+    add_executable(CameraSample ${SRC})
+endif()
 
 target_link_libraries(CameraSample PRIVATE
     Qt5::Core Qt5::Widgets Qt5::Gui Qt5::OpenGL Qt5::Network
@@ -112,5 +116,5 @@ target_link_libraries(CameraSample PRIVATE
     ${FFMPEG_LIB}
     ${JPEG_LIB}
     CUDA::cudart
-    ${GL_LIBS}
+    ${ADDITIONAL_LIBS}
 )
