@@ -1,8 +1,9 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.18)
 
 project(CameraSample VERSION 1.0 LANGUAGES CUDA)
 
-include_directories(${FastVideo_INC}
+include_directories(${ADDITIONAL_INCDIR}
+                    ${FastVideo_INC}
                     ${FastVideo_INC}/../../common
                     ${FastVideo_INC}/../../core_samples
                     ${FFMPEG_INC}
@@ -118,3 +119,26 @@ target_link_libraries(CameraSample PRIVATE
     CUDA::cudart
     ${ADDITIONAL_LIBS}
 )
+
+get_filename_component(QTBINPATH ${QT_QMAKE_EXECUTABLE} DIRECTORY)
+
+if(WIN32)
+    add_custom_command(
+        TARGET CameraSample POST_BUILD
+        COMMAND ${QTBINPATH}/windeployqt ${CMAKE_BINARY_DIR}/bin/CameraSample.exe
+    )
+endif()
+
+#add_custom_command(
+#    TARGET CameraSample POST_BUILD
+#    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+#        $<TARGET_FILE:Qt5::Widgets> ${CMAKE_BINARY_DIR}/bin/
+#    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+#        $<TARGET_FILE:Qt5::Core> ${CMAKE_BINARY_DIR}/bin/
+#    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+#        $<TARGET_FILE:Qt5::Gui> ${CMAKE_BINARY_DIR}/bin/
+#    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+#        $<TARGET_FILE:Qt5::Network> ${CMAKE_BINARY_DIR}/bin/
+#    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+#        $<TARGET_FILE:Qt5::OpenGL> ${CMAKE_BINARY_DIR}/bin/
+#)

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.18)
 
 if(NOT WIN32)
     set(CMAKE_CUDA_COMPILER "/usr/local/cuda/bin/nvcc")
@@ -9,13 +9,16 @@ project(gpu-camera-sample VERSION 1.0 LANGUAGES CUDA CXX)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
+option(USE_XIMEA ON)
+
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
 find_package(CUDAToolkit REQUIRED)
-
 find_package(Qt5 COMPONENTS Gui Widgets OpenGL Network REQUIRED)
+
+set(ADDITIONAL_INCDIR)
 
 if(WIN32)
     set(LIB_DIR OtherLibs)
@@ -27,6 +30,24 @@ else()
     set(FastVideo_PATH ${FASTLIB_DIR}/fastvideo_sdk)
 endif()
 
+if(USE_XIMEA)
+    add_definitions(-DSUPPORT_XIMEA)
+    set(Ximea_PATH D:/devs/XIMEA/API/xiAPI/)
+    find_path(Ximea_INC
+        NAMES xiApi.h
+        PATHS ${Ximea_PATH}
+        REQUIRED)
+    find_library(Ximea_LIB
+        NAMES xiapi64
+        PATHS ${Ximea_PATH}
+        REQUIRED)
+
+    if(WIN32)
+        set(THIRD_PARTY_DLLS ${THIRD_PARTY_DLLS} ${Ximea_PATH}/xiapi64.dll)
+    endif()
+    set(ADDITIONAL_INCDIR ${ADDITIONAL_INCDIR} ${Ximea_INC})
+endif()
+
 find_path(FastVideo_INC
     NAMES fastvideo_sdk.h
     PATHS ${FastVideo_PATH}/inc/
@@ -36,27 +57,38 @@ find_library(FastVideo_LIB
     PATHS ${FastVideo_PATH}/lib/x64 ${FastVideo_PATH}/lib/
     REQUIRED)
 
+set(FFMPEG_PATH OtherLibs/ffmpeg)
 find_path(FFMPEG_INC
     NAMES libavutil/opt.h
-    PATHS OtherLibs/ffmpeg/include
+    PATHS ${FFMPEG_PATH}/include
     REQUIRED)
 find_library(AVCODEC_LIB
     NAMES avcodec
-    PATHS OtherLibs/ffmpeg/lib
+    PATHS ${FFMPEG_PATH}/lib
     REQUIRED)
 find_library(AVUTIL_LIB
     NAMES avutil
-    PATHS OtherLibs/ffmpeg/lib
+    PATHS ${FFMPEG_PATH}/lib
     REQUIRED)
 find_library(AVFORMAT_LIB
     NAMES avformat
-    PATHS OtherLibs/ffmpeg/lib
+    PATHS ${FFMPEG_PATH}/lib
     REQUIRED)
 find_library(AVRESAMPLE_LIB
     NAMES swresample
-    PATHS OtherLibs/ffmpeg/lib
+    PATHS ${FFMPEG_PATH}/lib
     REQUIRED)
 set(FFMPEG_LIB ${AVCODEC_LIB} ${AVUTIL_LIB} ${AVFORMAT_LIB} ${AVRESAMPLE_LIB})
+
+if(WIN32)
+    set(THIRD_PARTY_DLLS ${THIRD_PARTY_DLLS}
+        OtherLibs/ffmpeg/bin/avcodec-57.dll
+        OtherLibs/ffmpeg/bin/avformat-57.dll
+        OtherLibs/ffmpeg/bin/avutil-55.dll
+        OtherLibs/ffmpeg/bin/swresample-2.dll
+        ${CUDAToolkit_LIBRARY_ROOT}/bin/cudart64_110.dll
+    )
+endif()
 
 find_path(JPEG_INC
     NAMES jpeglib.h
@@ -78,7 +110,12 @@ else()
     set(ADDITIONAL_LIBS cuda GL pthread)
 endif()
 
-find_Path(VideoCodec_INC
+set(ADDITIONAL_LIBS
+    ${ADDITIONAL_LIBS}
+    ${Ximea_LIB}
+)
+
+find_path(VideoCodec_INC
     NAMES cuviddec.h
     PATHS ${LIB_DIR}/nvcodecs/include/ ${LIB_DIR}/nvcodecs/Interface/
     REQUIRED)
@@ -93,3 +130,12 @@ find_library(VideoCodec_LIB
 
 add_subdirectory(src/CameraSample)
 add_subdirectory(src/RtspPlayer)
+
+# create a list of files to copy
+set(THIRD_PARTY_DLLS ${THIRD_PARTY_DLLS}
+    ${FASTLIB_DIR}/fastvideo_sdk/bin/x64/fastvideo_sdk.dll
+)
+
+install(FILES ${THIRD_PARTY_DLLS}
+    DESTINATION ${CMAKE_BINARY_DIR}/bin/
+)

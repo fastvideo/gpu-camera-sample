@@ -1,8 +1,9 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.18)
 
 project(RtpPlayer VERSION 1.0 LANGUAGES CXX CUDA)
 
-include_directories(${FastVideo_INC}
+include_directories(${ADDITIONAL_INCDIR}
+                    ${FastVideo_INC}
                     ${FastVideo_INC}/../../common
                     ${FastVideo_INC}/../../core_samples
                     ${FFMPEG_INC}
@@ -58,8 +59,6 @@ if(WIN32)
 else()
     add_executable(RtpPlayer ${SRC})
 endif()
-
-message("---> ${VideoCodec_LIB}")
 
 target_link_libraries(RtpPlayer PRIVATE
     Qt5::Core Qt5::Widgets Qt5::Gui Qt5::OpenGL Qt5::Network
