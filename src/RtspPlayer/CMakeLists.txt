@@ -3,18 +3,9 @@ cmake_minimum_required(VERSION 3.18)
 project(RtpPlayer VERSION 1.0 LANGUAGES CXX CUDA)
 
 include_directories(${ADDITIONAL_INCDIR}
-                    ${FastVideo_INC}
-                    ${FastVideo_INC}/../../common
-                    ${FastVideo_INC}/../../core_samples
-                    ${FFMPEG_INC}
-                    ${JPEG_INC}
-                    ${VideoCodec_INC}
-                    ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}
                     cuviddecoder
                     Widgets
-                    .
-                )
-
+                    .)
 
 SET(SRC
     common.cpp
@@ -40,13 +31,17 @@ SET(SRC
     SDIConverter.h
     vdecoder.cpp
     vdecoder.h
-    cuviddecoder/cuviddecoder.cpp
-    cuviddecoder/cuviddecoder.h
     Widgets/GLImageViewer.cpp
     Widgets/GLImageViewer.h
     Widgets/GtGWidget.cpp
     Widgets/GtGWidget.h
 )
+
+if(NOT ${ARCHITECTURE} STREQUAL "aarch64")
+    SET(SRC ${SRC}
+        cuviddecoder/cuviddecoder.cpp
+        cuviddecoder/cuviddecoder.h)
+endif()
 
 SET(SRC ${SRC}
     ../../${FASTLIB_DIR}/common/helper_jpeg/helper_jpeg_load.cpp
@@ -65,7 +60,6 @@ target_link_libraries(RtpPlayer PRIVATE
     ${FastVideo_LIB}
     ${FFMPEG_LIB}
     ${TURBOJPEG_LIB}
-    ${VideoCodec_LIB}
     #${VideoCodec2_LIB}
     CUDA::cudart
     ${ADDITIONAL_LIBS}

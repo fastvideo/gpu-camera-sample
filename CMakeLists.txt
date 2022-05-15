@@ -9,6 +9,14 @@ project(gpu-camera-sample VERSION 1.0 LANGUAGES CUDA CXX)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
+if(WIN32)
+    set(ARCHITECTURE WIN32)
+else()
+    EXECUTE_PROCESS( COMMAND uname -m COMMAND tr -d '\n' OUTPUT_VARIABLE ARCHITECTURE )
+endif()
+
+message("target architecture ${ARCHITECTURE}")
+
 option(USE_XIMEA ON)
 
 set(CMAKE_AUTOMOC ON)
@@ -115,18 +123,34 @@ set(ADDITIONAL_LIBS
     ${Ximea_LIB}
 )
 
-find_path(VideoCodec_INC
-    NAMES cuviddec.h
-    PATHS ${LIB_DIR}/nvcodecs/include/ ${LIB_DIR}/nvcodecs/Interface/
-    REQUIRED)
-find_library(VideoCodec_LIB
-    NAMES nvcuvid
-    PATHS ${LIB_DIR}/nvcodecs/Lib/x64/ ${LIB_DIR}/nvcodecs/Lib/linux/stubs/x86_64
-    REQUIRED)
+if(NOT ${ARCHITECTURE} STREQUAL "aarch64")
+    find_path(VideoCodec_INC
+        NAMES cuviddec.h
+        PATHS ${LIB_DIR}/nvcodecs/include/ ${LIB_DIR}/nvcodecs/Interface/
+        REQUIRED)
+    find_library(VideoCodec_LIB
+        NAMES nvcuvid
+        PATHS ${LIB_DIR}/nvcodecs/Lib/x64/ ${LIB_DIR}/nvcodecs/Lib/linux/stubs/x86_64
+        REQUIRED)
+
+    set(ADDITIONAL_INCDIR ${ADDITIONAL_INCDIR}
+        ${VideoCodec_INC})
+
+    set(ADDITIONAL_LIBS ${ADDITIONAL_LIBS}
+        ${VideoCodec_LIB})
+endif()
 #find_library(VideoCodec2_LIB
 #    NAMES nvencodeapi
 #    PATHS OtherLibs/nvcodecs/Lib/Win32/
 #    REQUIRED)
+
+set(ADDITIONAL_INCDIR ${ADDITIONAL_INCDIR}
+    ${FastVideo_INC}
+    ${FastVideo_INC}/../../common
+    ${FastVideo_INC}/../../core_samples
+    ${FFMPEG_INC}
+    ${JPEG_INC}
+    ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 
 add_subdirectory(src/CameraSample)
 add_subdirectory(src/RtspPlayer)

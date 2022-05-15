@@ -3,12 +3,6 @@ cmake_minimum_required(VERSION 3.18)
 project(CameraSample VERSION 1.0 LANGUAGES CUDA)
 
 include_directories(${ADDITIONAL_INCDIR}
-                    ${FastVideo_INC}
-                    ${FastVideo_INC}/../../common
-                    ${FastVideo_INC}/../../core_samples
-                    ${FFMPEG_INC}
-                    ${JPEG_INC}
-                    ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}
                     avfilewriter
                     Camera
                     CUDASupport
@@ -104,6 +98,32 @@ set(SRC ${SRC}
     ../../${FASTLIB_DIR}/core_samples/SurfaceTraitsInternal.cpp
     ../../${FASTLIB_DIR}/core_samples/SurfaceTraitsInternal.hpp
 )
+
+if(${ARCHITECTURE} STREQUAL "aarch64")
+    set(TEGRA_ARMABI aarch64-linux-gnu)
+
+    find_library(NVBUF_LIB
+        NAMES nvbuf_utils
+        PATHS /usr/lib/$${TEGRA_ARMABI}/ /usr/lib/${TEGRA_ARMABI}/tegra/
+        REQUIRED)
+    find_library(V4L2_LIB
+        NAMES v4l2 REQUIRED)
+    list(APPEND ADDITIONAL_LIBS
+        ${NVBUF_LIB}
+        ${V4L2_LIB})
+
+    include_directories(jetson_api)
+    SET(SRC ${SRC}
+        jetson_api/common_types.h
+        jetson_api/jetson_api.pri
+        jetson_api/nvbuf_utils.h
+        jetson_api/nvvideoencoder.cpp
+        jetson_api/nvvideoencoder.h
+        jetson_api/v4l2encoder.cpp
+        jetson_api/v4l2encoder.h
+        jetson_api/v4l2_nv_extensions.h
+        )
+endif()
 
 if(WIN32)
     add_executable(CameraSample WIN32 ${SRC})
