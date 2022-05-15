@@ -47,6 +47,7 @@ FASTVIDEO_EXTRA_DLLS += $$FASTVIDEO_SDK/lib/$$PLATFORM/libfastvideo_denoise.so.1
 
 contains(TARGET_ARCH, arm64){
     #to work with ffmpeg on nvidia jetson one need to compile it from source (default not work correctly)
+    FASTVIDEO_LIB += -L$$FASTVIDEOPATH/fastvideo_sdk/lib/
     FFMPEG_PATH = $$OTHER_LIB_PATH/ffmpeg
     FFMPEG_LIB = -L$$FFMPEG_PATH/lib/linux/aarch64
     FFMPEG_LIB += -lavformat -lavcodec -lavutil -lswresample -lm -lz -lx264
