@@ -147,6 +147,8 @@ contains(TARGET_ARCH, arm64 ) {
         HEADERS += Camera/MIPICamera.h
         SOURCES += Camera/MIPICamera.cpp
     }
+}else{
+    DEFINES -= SUPPORT_MIPI
 }
 
 FORMS    += MainWindow.ui \
