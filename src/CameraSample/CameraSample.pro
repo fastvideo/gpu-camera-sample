@@ -135,6 +135,20 @@ FORMS    += MainWindow.ui \
     Widgets/CameraSetupWidget.ui \
     Widgets/camerastatistics.ui
 
+win32{
+    SOURCES += $$PWD/../../OtherLibs/fastvideoSDK/common/BaseAllocator.cpp \
+               $$PWD/../../OtherLibs/fastvideoSDK/common/FastAllocator.cpp
+
+    HEADERS += $$PWD/../../OtherLibs/fastvideoSDK/common/BaseAllocator.h \
+               $$PWD/../../OtherLibs/fastvideoSDK/common/FastAllocator.h
+}else{
+    SOURCES += $$PWD/../../OtherLibsLinux/FastvideoSDK/common/BaseAllocator.cpp \
+               $$PWD/../../OtherLibsLinux/FastvideoSDK/common/FastAllocator.cpp
+
+    HEADERS += $$PWD/../../OtherLibsLinux/FastvideoSDK/common/BaseAllocator.h \
+               $$PWD/../../OtherLibsLinux/FastvideoSDK/common/FastAllocator.h
+}
+
 RC_FILE = gpu-camera-sample.rc
 #resource.rc
 

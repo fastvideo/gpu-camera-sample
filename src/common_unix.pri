@@ -34,7 +34,7 @@ FASTVIDEO_INC += $$FASTVIDEOPATH/libs/OpenGL/inc
 #
 FASTVIDEO_LIB += -L$$FASTVIDEOPATH/fastvideo_sdk/lib/$$PLATFORM
 #For ubuntu x64 we need to create the dir fastvideo_sdk/lib/Linux64
-FASTVIDEO_LIB += -lfastvideo_sdk -lfastvideo_denoise
+FASTVIDEO_LIB += -lfastvideo_sdk #-lfastvideo_denoise
 #
 # -lfastvideo_mjpeg -lfastvideo_denoise -lfastvideo_nppFilter -lfastvideo_nppResize -lfastvideo_nppGeometry
 #
@@ -47,6 +47,7 @@ FASTVIDEO_EXTRA_DLLS += $$FASTVIDEO_SDK/lib/$$PLATFORM/libfastvideo_denoise.so.1
 
 contains(TARGET_ARCH, arm64){
     #to work with ffmpeg on nvidia jetson one need to compile it from source (default not work correctly)
+    FASTVIDEO_LIB += -L$$FASTVIDEOPATH/fastvideo_sdk/lib/
     FFMPEG_PATH = $$OTHER_LIB_PATH/ffmpeg
     FFMPEG_LIB = -L$$FFMPEG_PATH/lib/linux/aarch64
     FFMPEG_LIB += -lavformat -lavcodec -lavutil -lswresample -lm -lz -lx264
@@ -64,14 +65,14 @@ contains(TARGET_ARCH, arm64){
     LIBS += -lGL
 }
 else {
+    FASTVIDEO_LIB += -L$$FASTVIDEOPATH/fastvideo_sdk/lib/
     NVCODECS = $$OTHER_LIB_PATH/nvcodecs
+    INCLUDEPATH += $$NVCODECS/include
     INCLUDEPATH += $$NVCODECS/Interface
-    LIBS += -L$$NVCODECS/Lib/$$PLATFORM -lnvcuvid -lcuda
+    LIBS += -L$$NVCODECS/Lib/$$PLATFORM
+    LIBS += -L$$NVCODECS/Lib/$$PLATFORM/stubs/x86_64
 
-    unix{
-        LIBS += -L$$NVCODECS/Lib/linux/stubs/x86_64 -lv4l2
-    }
-
+    LIBS += -lnvcuvid -lcuda
     FFMPEG_LIB += -lavformat -lavcodec -lavutil -lswresample -lm -lz -lx264
 }
 

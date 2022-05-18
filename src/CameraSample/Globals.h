@@ -31,7 +31,7 @@
 
 #include <QThread>
 
-#include "fastvideo_denoise.h"
+//#include "fastvideo_denoise.h"
 #include "fastvideo_sdk.h"
 #include "AppSettings.h"
 #include <limits>
@@ -56,9 +56,9 @@ public:
 
     static bool gEnableLog;
 
-    static void initDenoiseParams(denoise_static_parameters_t &params);
-    static void validateDenoiseParams(denoise_parameters_t &params);
-    static void validateStaticDenoiseParams(denoise_static_parameters_t& params);
+    static void initDenoiseParams(fastDenoiseStaticParameters_t &params);
+    static void validateDenoiseParams(fastDenoiseParameters_t &params);
+    static void validateStaticDenoiseParams(fastDenoiseStaticParameters_t &params);
 
     static qint64 MaxFileSize;
 
