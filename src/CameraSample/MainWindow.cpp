@@ -63,6 +63,10 @@
 #include "LucidCamera.h"
 #endif
 
+#ifdef SUPPORT_MIPI
+#include "MIPICamera.h"
+#endif
+
 QVector<unsigned short> gammaLin(16384);
 QVector<unsigned short> gammaSRGB(16384);
 
@@ -187,7 +191,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->txtRtspServer->setText("rtsp://0.0.0.0:1234/live.sdp"); // guess to use a global address on the jetson platform
 #endif
 
-#if defined SUPPORT_XIMEA || defined SUPPORT_GENICAM || defined SUPPORT_FLIR || defined SUPPORT_IMPERX || defined SUPPORT_LUCID
+#if defined SUPPORT_XIMEA || \
+    defined SUPPORT_GENICAM || \
+    defined SUPPORT_FLIR || \
+    defined SUPPORT_IMPERX || \
+    defined SUPPORT_LUCID || \
+    defined SUPPORT_MIPI
 
     ui->mainToolBar->insertAction(ui->actionOpenBayerPGM, ui->actionOpenCamera);
     ui->menuCamera->insertAction(ui->actionOpenBayerPGM, ui->actionOpenCamera);
@@ -328,6 +337,11 @@ void MainWindow::openCamera(uint32_t devID)
         mCameraPtr->stop();
 
     initNewCamera(new LucidCamera(), devID);
+#elif SUPPORT_MIPI
+    if(mCameraPtr)
+        mCameraPtr->stop();
+
+    initNewCamera(new MIPICamera(), devID);
 #else
     Q_UNUSED(devID)
 #endif
@@ -681,7 +695,8 @@ void MainWindow::on_actionOpenCamera_triggered()
     defined SUPPORT_GENICAM || \
     defined SUPPORT_FLIR || \
     defined SUPPORT_IMPERX || \
-    defined SUPPORT_LUCID
+    defined SUPPORT_LUCID || \
+    defined SUPPORT_MIPI
     openCamera(0);
 #endif
 }

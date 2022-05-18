@@ -158,6 +158,7 @@ cd ~/gpu-camera-sample/Scripts
         ./Cpp_Acquisition
 ```
     to test that camera is working.
+* If you need built-in MIPI cameras support on Jetson TX2 or LI IMX477 MIPI camera support on Jetson AGX Xavier, read  [this guide](LI-IMX477-MIPI.md)  how to setup units and install required drivers.
 * By default the application will be built with no camera support. The only option is camera simulator which is working with PGM files. 
 * Open \<ProjectRoot\>/src/GPUCameraSample.pro in Qt Creator.
 * Open common_defs.pri

@@ -23,41 +23,88 @@ INCLUDEPATH += $$PWD/Camera
 INCLUDEPATH += $$PWD/RtspServer
 
 SOURCES += main.cpp\
-    Camera/FLIRCamera.cpp \
-    Camera/GPUCameraBase.cpp \
-    Camera/LucidCamera.cpp \
-        MainWindow.cpp \
-    Widgets/GLImageViewer.cpp \
+    MainWindow.cpp \
     Globals.cpp \
     AppSettings.cpp \
-    CUDASupport/CUDAProcessorBase.cpp \
     FFCReader.cpp \
     FPNReader.cpp \
-    Widgets/camerastatistics.cpp \
-    avfilewriter/avfilewriter.cpp \
     ppm.cpp \
     helper_jpeg_load.cpp \
     helper_jpeg_store.cpp \
-    Widgets/DenoiseController.cpp \
-    Camera/FrameBuffer.cpp \
-    Camera/PGMCamera.cpp \
     RawProcessor.cpp \
     AsyncFileWriter.cpp \
+    MJPEGEncoder.cpp \
+    avfilewriter/avfilewriter.cpp \
     $$OTHER_LIB_PATH/FastvideoSDK/common/SurfaceTraits.cpp \
     $$OTHER_LIB_PATH/FastvideoSDK/common/alignment.cpp \
+    Camera/GPUCameraBase.cpp \
+    Camera/FrameBuffer.cpp \
+    Camera/PGMCamera.cpp \
+    CUDASupport/CUDAProcessorBase.cpp \
     CUDASupport/CUDAProcessorGray.cpp \
-    MJPEGEncoder.cpp \
-    Camera/GeniCamCamera.cpp \
+    Widgets/DenoiseController.cpp \
+    Widgets/GLImageViewer.cpp \
     Widgets/GtGWidget.cpp \
     Widgets/CameraSetupWidget.cpp \
+    Widgets/camerastatistics.cpp \
     RtspServer/CTPTransport.cpp \
     RtspServer/JpegEncoder.cpp \
     RtspServer/RTSPStreamerServer.cpp \
     RtspServer/TcpClient.cpp \
-    RtspServer/vutils.cpp \
-    Camera/ImperxCamera.cpp
+    RtspServer/vutils.cpp
 
-contains( DEFINES, SUPPORT_GENICAM ){
+
+win32: SOURCES += $$OTHER_LIB_PATH/FastvideoSDK/core_samples/SurfaceTraitsInternal.cpp
+
+HEADERS  += MainWindow.h \
+    Globals.h \
+    AppSettings.h \
+    FFCReader.h \
+    FPNReader.h \
+    ppm.h \
+    helper_jpeg.hpp \
+    RawProcessor.h \
+    AsyncFileWriter.h \
+    AsyncQueue.h \
+    MJPEGEncoder.h \
+    avfilewriter/avfilewriter.h \
+    Camera/GPUCameraBase.h \
+    Camera/FrameBuffer.h \
+    Camera/PGMCamera.h \
+    CUDASupport/CUDAProcessorGray.h \
+    CUDASupport/CUDAProcessorBase.h \
+    CUDASupport/CUDAProcessorOptions.h \
+    CUDASupport/CudaAllocator.h \
+    CUDASupport/GPUImage.h \
+    Widgets/DenoiseController.h \
+    Widgets/GLImageViewer.h \
+    Widgets/camerastatistics.h \
+    Widgets/GtGWidget.h \
+    Widgets/CameraSetupWidget.h \
+    RtspServer/common_utils.h \
+    RtspServer/CTPTransport.h \
+    RtspServer/JpegEncoder.h \
+    RtspServer/RTSPStreamerServer.h \
+    RtspServer/TcpClient.h \
+    RtspServer/vutils.h \
+    version.h
+
+contains(DEFINES, SUPPORT_XIMEA ){
+   SOURCES += Camera/XimeaCamera.cpp
+   HEADERS += Camera/XimeaCamera.h
+}
+
+contains(DEFINES, SUPPORT_FLIR ){
+   SOURCES += Camera/FLIRCamera.cpp
+   HEADERS += Camera/FLIRCamera.h
+}
+
+contains(DEFINES, SUPPORT_IMPERX ){
+   SOURCES += Camera/ImperxCamera.cpp
+   HEADERS += Camera/ImperxCamera.h
+}
+
+contains(DEFINES, SUPPORT_GENICAM ){
     SOURCES += rc_genicam_api/buffer.cc \
     rc_genicam_api/config.cc \
     rc_genicam_api/cport.cc \
@@ -68,7 +115,9 @@ contains( DEFINES, SUPPORT_GENICAM ){
     rc_genicam_api/interface.cc \
     rc_genicam_api/pointcloud.cc \
     rc_genicam_api/stream.cc \
-    rc_genicam_api/system.cc
+    rc_genicam_api/system.cc \
+    Camera/GeniCamCamera.cpp
+
     unix:  SOURCES += rc_genicam_api/gentl_wrapper_linux.cc
     win32: SOURCES += rc_genicam_api/gentl_wrapper_win32.cc
 
@@ -84,51 +133,19 @@ contains( DEFINES, SUPPORT_GENICAM ){
     rc_genicam_api/pixel_formats.h \
     rc_genicam_api/pointcloud.h \
     rc_genicam_api/stream.h \
-    rc_genicam_api/system.h
-}
-contains( DEFINES, SUPPORT_XIMEA ){
-   SOURCES += Camera/XimeaCamera.cpp
+    rc_genicam_api/system.h \
+    Camera/GeniCamCamera.h
 }
 
-win32: SOURCES += $$OTHER_LIB_PATH/FastvideoSDK/core_samples/SurfaceTraitsInternal.cpp
+contains(DEFINES, SUPPORT_LUCID ){
+   SOURCES += Camera/LucidCamera.cpp
+   HEADERS += Camera/LucidCamera.h
+}
 
-HEADERS  += MainWindow.h \
-    Camera/FLIRCamera.h \
-    Camera/GPUCameraBase.h \
-    Camera/LucidCamera.h \
-    Widgets/GLImageViewer.h \
-    CUDASupport/CUDAProcessorOptions.h \
-    Globals.h \
-    AppSettings.h \
-    CUDASupport/CUDAProcessorBase.h \
-    FFCReader.h \
-    FPNReader.h \
-    Widgets/camerastatistics.h \
-    avfilewriter/avfilewriter.h \
-    ppm.h \
-    helper_jpeg.hpp \
-    Widgets/DenoiseController.h \
-    Camera/XimeaCamera.h \
-    Camera/FrameBuffer.h \
-    Camera/PGMCamera.h \
-    RawProcessor.h \
-    AsyncFileWriter.h \
-    AsyncQueue.h \
-    CUDASupport/CUDAProcessorGray.h \
-    MJPEGEncoder.h \
-    Camera/GeniCamCamera.h \
-    Widgets/GtGWidget.h \
-    Widgets/CameraSetupWidget.h \
-    RtspServer/common_utils.h \
-    RtspServer/CTPTransport.h \
-    RtspServer/JpegEncoder.h \
-    RtspServer/RTSPStreamerServer.h \
-    RtspServer/TcpClient.h \
-    RtspServer/vutils.h \
-    CUDASupport/CudaAllocator.h \
-    CUDASupport/GPUImage.h \
-    version.h \
-    Camera/ImperxCamera.h
+contains(DEFINES, SUPPORT_MIPI){
+    HEADERS += Camera/MIPICamera.cpp
+    SOURCES += Camera/MIPICamera.h
+}
 
 FORMS    += MainWindow.ui \
     Widgets/DenoiseController.ui \
