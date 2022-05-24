@@ -95,7 +95,7 @@ git clone https://github.com/fastvideo/gpu-camera-sample.git
    * Unpack GenICam_V3_2_0-Win64_x64_VC141-Release-SDK.zip into \<ProjectRoot\>/OtherLibs/GenICam folder.
    * Unpack GenICam_V3_2_0-Win64_x64_VC141-Release-Runtime.zip into \<ProjectRoot\>/OtherLibs/GenICam/library/CPP
 
-You also can download precompiled libs from <a href="https://drive.google.com/file/d/1oQ6XmRhS0Gv41BCIhC__SxSj2s2RNCuX/view?usp=sharing" target="_blank">here</a>
+You also can download precompiled libs from <a href="https://drive.google.com/file/d/1Ya4j-UmnUwq1_8ax8ajv37DIl5SlAviD/view?usp=sharing" target="_blank">here</a>
 * By default the application will be built with no camera support. The only option is camera simulator which is working with PGM files. 
 * Open \<ProjectRoot\>/src/GPUCameraSample.pro in Qt Creator.
 * Open common_defs.pri
@@ -171,7 +171,7 @@ cd ~/gpu-camera-sample/Scripts
 * If GenICam support is enabled, set environment variable GENICAM_GENTL64_PATH with full path to the camera vendor GenTL producer (.cti) library, before run the application.
 * Binaries will be placed into \<ProjectRoot\>/GPUCameraSample_Arm64 or GPUCameraSample_Linux64 folder. To run the application from the terminal run GPUCameraSample.sh. Necessary symbolic links will be made during compile time.
 
-You also can download precompiled libs from <a href="https://drive.google.com/file/d/1-lJbBXaamB80O5cDqml3-Ul_CVInq9J-/view?usp=sharing" target="_blank">here</a>
+You also can download precompiled libs from <a href="https://drive.google.com/file/d/15GQa9RWMEIpNNsISGG3m8U3X0uMwSBJm/view?usp=sharing" target="_blank">here</a>
 
 ### How to work with NVIDIA Jetson to get maximum performance
 
