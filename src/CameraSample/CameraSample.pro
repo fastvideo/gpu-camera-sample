@@ -142,9 +142,13 @@ contains(DEFINES, SUPPORT_LUCID ){
    HEADERS += Camera/LucidCamera.h
 }
 
-contains(DEFINES, SUPPORT_MIPI){
-    HEADERS += Camera/MIPICamera.cpp
-    SOURCES += Camera/MIPICamera.h
+contains(TARGET_ARCH, arm64 ) {
+    contains(DEFINES, SUPPORT_MIPI){
+        HEADERS += Camera/MIPICamera.h
+        SOURCES += Camera/MIPICamera.cpp
+    }
+}else{
+    DEFINES -= SUPPORT_MIPI
 }
 
 FORMS    += MainWindow.ui \

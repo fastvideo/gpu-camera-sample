@@ -116,6 +116,7 @@ private slots:
 
     //Camera
     void openCamera(uint32_t devID);
+    void openCameraObj(GPUCameraBase* camera);
     void openPGMFile(bool isBayer = true);
     void initNewCamera(GPUCameraBase* cmr, uint32_t devID);
     void onCameraStateChanged(GPUCameraBase::cmrCameraState newState);
@@ -162,6 +163,9 @@ private:
 
     void readSettings();
     void writeSettings();
+
+    template<typename T>
+    friend QAction* insertCamera(Ui::MainWindow *ui, MainWindow *mm, const QString &cameraName, QAction* prev);
 };
 
 #endif // MAINWINDOW_H
