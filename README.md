@@ -43,7 +43,7 @@ Soon we are going to add support for <a href="https://emergentvisiontec.com/" ta
 ### Requirements for Windows
 
 * Camera SDK or GenICam package + camera vendor GenTL producer (.cti). Сurrently XIMEA, MATRIX VISION, Basler, FLIR, Imperx, JAI, LUCID Vision Labs, Daheng Imaging cameras are supported
-* Fastvideo SDK (demo) ver.0.17.0.1
+* Fastvideo SDK (demo) ver.0.17.6.1
 * NVIDIA CUDA-11.4
 * Qt ver.5.13.1
 * Compiler MSVC 2017 or later
@@ -52,7 +52,7 @@ Soon we are going to add support for <a href="https://emergentvisiontec.com/" ta
 
 * Ubuntu 18.04 (x64 or Arm64)
 * Camera SDK or GenICam package + camera vendor GenTL producer (.cti). Currently XIMEA, MATRIX VISION, Basler, FLIR, Imperx, JAI, Daheng Imaging cameras are supported
-* Fastvideo SDK (demo) ver.0.17.0.1
+* Fastvideo SDK (demo) ver.0.17.6.1
 * NVIDIA CUDA-11.4 for x64 and CUDA-10.2 for ARM64 platform
 * Compiler gcc 7.4 or later
 * Qt 5 (qtbase5-dev)
@@ -158,7 +158,7 @@ cd ~/gpu-camera-sample/Scripts
         ./Cpp_Acquisition
 ```
     to test that camera is working.
-* If you need built-in MIPI cameras support on Jetson TX2 or LI IMX477 MIPI camera support on Jetson AGX Xavier, read  [this guide](LI-IMX477-MIPI.md)  how to setup units and install required drivers.
+* If you need built-in MIPI cameras support on Jetson TX2 or Leopard Imaging IMX477 MIPI SCI camera support on Jetson AGX Xavier, read  [this guide](LI-IMX477-MIPI.md)  how to setup units and install required drivers.
 * By default the application will be built with no camera support. The only option is camera simulator which is working with PGM files. 
 * Open \<ProjectRoot\>/src/GPUCameraSample.pro in Qt Creator.
 * Open common_defs.pri
@@ -274,8 +274,9 @@ You can also create a software module to collect frames from different cameras a
 * HDR image processing on GPU for automotive 16/20/24-bit image sensors (IMX490, IMX728, AR0820, OX08, etc.) - in progress
 * High performance JPEG-XS codec on GPU - in progress
 * New demosaicing algorithm with improved image quality - in progress
+* Defringe - in progress
+* Fast undistortion on GPU with precise and compact maps - in progress
 * Support for Emergent Vision Technologies, DALSA, IDS Imaging, Baumer, Kaya Instruments, SVS-Vistek cameras - in progress
-* Transforms to Rec.601 (SD), Rec.709 (HD), Rec.2020 (4K)
 * RAW Bayer codec
 * JPEG2000 encoder and decoder on GPU for camera applications
 * Interoperability with FFmpeg, UltraGrid, and gStreamer
@@ -300,8 +301,8 @@ You can also create a software module to collect frames from different cameras a
 ## Downloads
 
 * Download <a href="https://www.fastcinemadng.com/download/download.html" target="_blank">Fast CinemaDNG Processor</a> software for Windows or Linux, manual and test DNG and BRAW footages
-* Download <a href="https://drive.google.com/file/d/1l6T8E4dbkjCAidvtuEtSUtXafBVPl50Q/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for Windows-10, 64-bit</a> (valid till Aug. 17, 2022)
-* Download <a href="https://drive.google.com/file/d/1skGW93QSnaa_MtjKBfKhIPDtcwh5vC4Z/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a> (valid till Aug. 05, 2022)
-* Download <a href="https://drive.google.com/file/d/1bcO32x-9cFduSnD_mYlNywa1yqGWL8xC/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> (valid till Aug. 20, 2022)
+* Download <a href="https://drive.google.com/file/d/1l6T8E4dbkjCAidvtuEtSUtXafBVPl50Q/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for Windows-10, 64-bit</a> (valid till May 01, 2023)
+* Download <a href="https://drive.google.com/file/d/1skGW93QSnaa_MtjKBfKhIPDtcwh5vC4Z/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a> (valid till May 03, 2023)
+* Download <a href="https://drive.google.com/file/d/1HgfqboijA8VlQAulEm69a7ayx-hQVxuO/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> (valid till May 08, 2023)
 * Download <a href="https://www.fastcompression.com/download/Fastvideo_SDK_manual.pdf" target="_blank">Fastvideo SDK Manual</a>
 * <a href="https://imaginghub.com/projects/455-real-time-image-processing-on-nvidia-gpu-with-basler-pylon-and-fastvideo" target="_blank">Real-time Image Processing on NVIDIA GPU with Basler pylon</a>
