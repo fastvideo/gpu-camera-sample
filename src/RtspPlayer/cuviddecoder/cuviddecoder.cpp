@@ -61,9 +61,9 @@ public:
         params.ulMaxDisplayDelay = 0;
         params.ulMaxNumDecodeSurfaces = 2;
         params.pUserData = this;
-        params.pfnDecodePicture = decodeCallback;
-        params.pfnDisplayPicture = displayCallback;
-        params.pfnSequenceCallback = sequenceCallback;
+        params.pfnDecodePicture = (PFNVIDDECODECALLBACK)decodeCallback;
+        params.pfnDisplayPicture = (PFNVIDDISPLAYCALLBACK)displayCallback;
+        params.pfnSequenceCallback = (PFNVIDSEQUENCECALLBACK)sequenceCallback;
 
         res = cuvidCreateVideoParser(&mParser, &params);
         if(res != CUDA_SUCCESS){

@@ -531,11 +531,11 @@ void AVFileWriter::RGB2Yuv420p(unsigned char *yuv,
       }
 
       // U and V plane
-      for(size_t y = 0; y < height; y+=2)
+      for(int y = 0; y < height; y+=2)
       {
-          for(size_t x = 0; x < width; x+=2)
+          for(int x = 0; x < width; x+=2)
           {
-              const size_t i = y * width + x;
+              const int i = y * width + x;
               int r = rgb[3 * i];
               int g = rgb[3 * i + 1];
               int b = rgb[3 * i + 2];
@@ -560,11 +560,11 @@ void AVFileWriter::Gray2Yuv420p(unsigned char *yuv, unsigned char *gray, int wid
       }
 
       // U and V plane
-      for(size_t y = 0; y < height; y+=2)
+      for(int y = 0; y < height; y+=2)
       {
-          for(size_t x = 0; x < width; x+=2)
+          for(int x = 0; x < width; x+=2)
           {
-              const size_t i = y * width + x;
+              const int i = y * width + x;
               int r = gray[i];
               *dst_u++ = ((-38856 * r - 76282 * r + 115138 * r ) >> 18 ) + 128;
               *dst_v++ = ((115138 * r - 96414 * r - 18724 * r) >> 18 ) + 128;

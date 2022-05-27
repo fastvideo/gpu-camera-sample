@@ -446,11 +446,11 @@ void RTSPStreamerServer::RGB2Yuv420p(unsigned char *yuv,
 	}
 
 	// U and V plane
-	for(size_t y = 0; y < height; y+=2)
+    for(int y = 0; y < height; y+=2)
 	{
-		for(size_t x = 0; x < width; x+=2)
+        for(int x = 0; x < width; x+=2)
 		{
-			const size_t i = y * width + x;
+            const int i = y * width + x;
 			int r = rgb[3 * i];
 			int g = rgb[3 * i + 1];
 			int b = rgb[3 * i + 2];
