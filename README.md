@@ -79,7 +79,7 @@ git clone https://github.com/fastvideo/gpu-camera-sample.git
 ### For Windows users
 
 * Create OtherLibs folder in the project root folder. This folder will contains external libraries, used in gpu-camera-sample application.
-* Download Fastvideo SDK from <a href="https://drive.google.com/file/d/1l6T8E4dbkjCAidvtuEtSUtXafBVPl50Q/view?usp=sharing">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a>, unpack it into \<ProjectRoot\>/OtherLibs/FastvideoSDK folder. If the trial period is expired, please send an inquiry to Fastvideo to obtain the latest version.
+* Download Fastvideo SDK from <a href="https://drive.google.com/file/d/1e4lMN1gOOL9M8zPI_tFHCHM5sWFKL4YE/view?usp=sharing">Fastvideo SDK (demo) for Windows-7/10, 64-bit</a>, unpack it into \<ProjectRoot\>/OtherLibs/FastvideoSDK folder. If the trial period is expired, please send an inquiry to Fastvideo to obtain the latest version.
 * If you need direct XIMEA camera support, download XiAPI from https://www.ximea.com/support/wiki/apis/XIMEA_Windows_Software_Package. Install downloaded package (by default into C:\XIMEA). Copy API folder from XIAPI installation folder into \<ProjectRoot\>/OtherLibs folder.
 * To work with FLIR cameras
    * Download Spinnaker SDK from https://www.flir.com/support-center/iis/machine-vision/downloads/spinnaker-sdk-and-firmware-download/. 
@@ -115,7 +115,7 @@ Here and after we assume you put source code into home directory, so project roo
 chmod 755 ~/gpu-camera-sample/Scripts/make_links.sh
 ```
 * Create OtherLibsLinux folder in the project root folder. This folder will contain external libraries, used in gpu-camera-sample application.
-* Download Fastvideo SDK x64 platform from <a href="https://drive.google.com/file/d/1skGW93QSnaa_MtjKBfKhIPDtcwh5vC4Z/view?usp=sharing">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a>, or Fastvideo SDK Arm64 platform from <a href="https://drive.google.com/file/d/1bcO32x-9cFduSnD_mYlNywa1yqGWL8xC/view?usp=sharing">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> and unpack it into \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK folder. Copy all files from \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib to \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib/Linux64 for x64 platform and to \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib/Arm64 for Arm64 platform.
+* Download Fastvideo SDK x64 platform from <a href="https://drive.google.com/file/d/14YwjKvooRos1yKFzlRtdKr5RfS_vUnnZ/view?usp=sharing">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a>, or Fastvideo SDK Arm64 platform from <a href="https://drive.google.com/file/d/1HgfqboijA8VlQAulEm69a7ayx-hQVxuO/view?usp=sharing">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> and unpack it into \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK folder. Copy all files from \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib to \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib/Linux64 for x64 platform and to \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib/Arm64 for Arm64 platform.
 * Create links to Fastvideo SDK *.so files
 ``` console
 cd ~/gpu-camera-sample/Scripts
@@ -138,26 +138,26 @@ cd ~/gpu-camera-sample/Scripts
 ``` console
         sudo /.Arena_SDK_Linux_x64.conf
 ```
-    for x64 platform and
+for x64 platform and
 ``` console
         sudo /.Arena_SDK_ARM64.conf
 ```
-    for arm64 platform
-    * cd to precompiledExamples and run
+for arm64 platform
+cd to precompiledExamples and run
 ``` console
         ./IpConfigUtility /list
 ```
-    if everything is OK you will see something like that
+if everything is OK you will see something like that
 ``` console
     Scanning for devices...
     index MAC             IP              SUBNET          GATEWAY                 IP CONFIG
     0     1C0FAF5A908A    169.254.139.144 255.255.0.0     0.0.0.0                 DHCP= 1 Persistent Ip= 0 LLA = 1
 ```
-    run
+run
 ``` console
         ./Cpp_Acquisition
 ```
-    to test that camera is working.
+to test that camera is working.
 * If you need built-in MIPI cameras support on Jetson TX2 or Leopard Imaging IMX477 MIPI SCI camera support on Jetson AGX Xavier, read  [this guide](LI-IMX477-MIPI.md)  how to setup units and install required drivers.
 * By default the application will be built with no camera support. The only option is camera simulator which is working with PGM files. 
 * Open \<ProjectRoot\>/src/GPUCameraSample.pro in Qt Creator.
@@ -301,8 +301,8 @@ You can also create a software module to collect frames from different cameras a
 ## Downloads
 
 * Download <a href="https://www.fastcinemadng.com/download/download.html" target="_blank">Fast CinemaDNG Processor</a> software for Windows or Linux, manual and test DNG and BRAW footages
-* Download <a href="https://drive.google.com/file/d/1l6T8E4dbkjCAidvtuEtSUtXafBVPl50Q/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for Windows-10, 64-bit</a> (valid till May 01, 2023)
-* Download <a href="https://drive.google.com/file/d/1skGW93QSnaa_MtjKBfKhIPDtcwh5vC4Z/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a> (valid till May 03, 2023)
+* Download <a href="https://drive.google.com/file/d/1e4lMN1gOOL9M8zPI_tFHCHM5sWFKL4YE/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for Windows-10, 64-bit</a> (valid till May 01, 2023)
+* Download <a href="https://drive.google.com/file/d/14YwjKvooRos1yKFzlRtdKr5RfS_vUnnZ/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a> (valid till May 03, 2023)
 * Download <a href="https://drive.google.com/file/d/1HgfqboijA8VlQAulEm69a7ayx-hQVxuO/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> (valid till May 08, 2023)
 * Download <a href="https://www.fastcompression.com/download/Fastvideo_SDK_manual.pdf" target="_blank">Fastvideo SDK Manual</a>
 * <a href="https://imaginghub.com/projects/455-real-time-image-processing-on-nvidia-gpu-with-basler-pylon-and-fastvideo" target="_blank">Real-time Image Processing on NVIDIA GPU with Basler pylon</a>
