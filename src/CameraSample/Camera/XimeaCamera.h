@@ -54,6 +54,8 @@ private:
     HANDLE hDevice = 0;
     bool mStreaming = false;
     void startStreaming();
+
+    bool mPacked = false;
 };
 
 #endif // SUPPORT_XIMEA

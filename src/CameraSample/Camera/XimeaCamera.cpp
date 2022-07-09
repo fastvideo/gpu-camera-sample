@@ -34,6 +34,61 @@
 
 #include <QByteArray>
 
+///////////////////////////////////////////
+
+/**
+ * @brief getdata
+ * @param data - input bit stream
+ * @param offs - offset in bits stream
+ * @param bits - bits in value
+ * @return
+ */
+uint16_t getdata(char* data, int& offs, int bits)
+{
+    int off1 = offs / 8;
+    int off2 = offs % 8;
+    uint16_t res = *(uint16_t*)&data[off1];
+    res >>= (off2);
+    offs += bits;
+    return res & ((1 << bits) - 1);
+}
+
+/**
+ * @brief read_inputstream
+ * @param data - input bits stream
+ * @param szbits - size of input bitstream
+ * @param bits - bits in pixel
+ * @param out - ouput stream
+ */
+void read_inputstream(char* data, size_t szbits, int bits, uint16_t* out)
+{
+    int off = 0;
+    int id = 0;
+    uint16_t group[16];
+    int lowb = bits - 8;
+    int mask = (1 << lowb) - 1;
+    for(; off < szbits;){
+        for(int i = 0; i < 16; ++i){
+            group[i] = getdata(data, off, 8) << lowb;
+        }
+        for(int i = 0; i < 16; ++i){
+            group[i] = group[i] | ((getdata(data, off, lowb) & mask));
+        }
+        memcpy(&out[id], group, sizeof(group));
+        id += 16;
+    }
+}
+
+std::map<fastSurfaceFormat_t, int> Bits = {
+    {FAST_I8, 8},
+    {FAST_I10, 10},
+    {FAST_I12, 12},
+    {FAST_I14, 14},
+    {FAST_I16, 16},
+};
+
+///////////////////////////////////////////
+
 XimeaCamera::XimeaCamera() :
     GPUCameraBase()
 {
@@ -175,6 +230,8 @@ bool XimeaCamera::open(uint32_t devID)
     if(!mInputBuffer.allocate(mWidth, mHeight, mSurfaceFormat))
         return false;
 
+    mPacked = mModel.toUpper() == QString("MU181CR-ON");
+
     mDevID = devID;
     mState = cstStopped;
     emit stateChanged(cstStopped);
@@ -217,6 +274,14 @@ void XimeaCamera::startStreaming()
 
     QByteArray frameData;
     frameData.resize((int)mInputBuffer.size());
+    QByteArray packedData;
+    size_t sizeBits = 0;
+    int bits = Bits[mSurfaceFormat];
+    if(mPacked){
+        sizeBits = mWidth * mHeight * bits;
+        packedData.resize((int)mInputBuffer.size());
+    }
+
     XI_IMG image = {0};
     image.size = sizeof(XI_IMG);
     image.bp_size = frameData.size();
@@ -226,7 +291,14 @@ void XimeaCamera::startStreaming()
     while(mState == cstStreaming)
     {
         tmr.restart();
-        ret = xiGetImage(hDevice, 5000, &image);
+        if(mPacked){
+            image.bp = packedData.data();
+            ret = xiGetImage(hDevice, 5000, &image);
+            read_inputstream(packedData.data(), sizeBits, bits, (uint16_t*)frameData.data());
+        }else{
+            image.bp = frameData.data();
+            ret = xiGetImage(hDevice, 5000, &image);
+        }
         unsigned char* dst = mInputBuffer.getBuffer();
         cudaMemcpy(dst, frameData.data(), image.bp_size, cudaMemcpyHostToDevice);
         mInputBuffer.release();
