@@ -279,8 +279,8 @@ You can also create a software module to collect frames from different cameras a
 * High performance JPEG-XS decoder on GPU - done
 * New demosaicing algorithm MG2 with improved image quality - in progress
 * Fast undistortion on GPU with precise and compact maps - in progress
-* Support for Emergent Vision Technologies, DALSA, IDS Imaging, Baumer, Kaya Instruments, SVS-Vistek cameras - in progress
 * High performance chromatic aberration suppresion in RAW domain - in progress
+* Support for Emergent Vision Technologies, DALSA, IDS Imaging, Baumer, Kaya Instruments, SVS-Vistek cameras - in progress
 * RAW Bayer codec
 * JPEG2000 encoder and decoder on GPU for camera applications
 * Interoperability with FFmpeg, UltraGrid, and GStreamer
@@ -299,7 +299,7 @@ You can also create a software module to collect frames from different cameras a
 ## Fastvideo SDK Benchmarks
 
 * <a href="https://www.fastcompression.com/pub/2022/Fastvideo_SDK_benchmarks.pdf" target="_blank">Fastvideo SDK Benchmarks</a>
-* <a href="https://www.fastcompression.com/blog/jetson-benchmark-comparison.htm" target="_blank">Jetson Benchmark Comparison for Image Processing: Nano vs TX2 vs Xavier NX and AGX</a>
+* <a href="https://www.fastcompression.com/blog/jetson-benchmark-comparison.htm" target="_blank">Jetson Benchmark Comparison for Image Processing: TX2 vs Xavier NX vs Xavier AGX, vs Orin AGX</a>
 * JPEG2000 benchmarks for <a href="https://www.fastcompression.com/benchmarks/benchmarks-j2k.htm" target="_blank">encoding</a> and <a href="https://www.fastcompression.com/benchmarks/decoder-benchmarks-j2k.htm" target="_blank">decoding</a>
 
 ## Downloads
