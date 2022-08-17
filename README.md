@@ -272,17 +272,18 @@ You can also create a software module to collect frames from different cameras a
 * Support for LUCID Vision Labs cameras - done
 * Support for Leopard Imaging MIPI CSI-2 camera with IMX477 image sensor (4K/60fps) - done
 * Defringe - done
+* <a href="https://www.fastcompression.com/products/fastvcr-ximea-software.htm" target="_blank">FastVCR software for XIMEA cameras</a> - done
+* Support for Jetson AGX Orin and CUDA-11.4 - done
 * Support for XIMEA MU181CR-ON camera - in progress
-* FastVCR software for XIMEA cameras - in progress
-* HDR image processing on GPU for automotive 16/20/24-bit image sensors (IMX490, IMX728, AR0820, OX08, etc.) - in progress
-* High performance JPEG-XS decoder on GPU - in progress
+* HDR image processing on GPU for automotive 16/20/24-bit image sensors (IMX490, IMX728, AR0820, OX08, etc.) - done
+* High performance JPEG-XS decoder on GPU - done
 * New demosaicing algorithm MG2 with improved image quality - in progress
 * Fast undistortion on GPU with precise and compact maps - in progress
 * Support for Emergent Vision Technologies, DALSA, IDS Imaging, Baumer, Kaya Instruments, SVS-Vistek cameras - in progress
 * High performance chromatic aberration suppresion in RAW domain - in progress
 * RAW Bayer codec
 * JPEG2000 encoder and decoder on GPU for camera applications
-* Interoperability with FFmpeg, UltraGrid, and gStreamer
+* Interoperability with FFmpeg, UltraGrid, and GStreamer
 
 ## Info
 
