@@ -479,9 +479,9 @@ fastStatus_t CUDAProcessorGray::Init(CUDAProcessorOptions &options)
         qDebug("fastExportToHostCreate returned invalid format = %u", srcSurfaceFmt);
 
     //Gray 8 bit to RGB 8 bit
-    ret = ( fastSurfaceConverterCreate(
+    ret = fastSurfaceConverterCreate(
                 &hGrayToRGBTransform,
-                FAST_GRAYSCALE_TO_RGB,
+                FAST_GRAYSCALE_TO_GRAYSCALERGB,
 
                 &conv,
 
@@ -490,7 +490,7 @@ fastStatus_t CUDAProcessorGray::Init(CUDAProcessorOptions &options)
 
                 *bufferPtr,
                 &dstBuffer
-                ) );
+                );
 
     bufferPtr = &dstBuffer;
 
