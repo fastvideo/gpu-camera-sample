@@ -203,6 +203,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->txtRtspServer->setText("rtsp://0.0.0.0:1234/live.sdp"); // guess to use a global address on the jetson platform
 #endif
 
+    QMenu* menuPtr = createPopupMenu();
+    if(menuPtr != nullptr)
+    {
+        menuPtr->setTitle(QStringLiteral("View"));
+        ui->menuBar->insertMenu(ui->actionWB_picker, menuPtr);
+    }
+
 #if 0
 #if defined SUPPORT_XIMEA || \
     defined SUPPORT_GENICAM || \
@@ -217,29 +224,28 @@ MainWindow::MainWindow(QWidget *parent) :
 
 #else
 
-    QAction * next = ui->actionOpenBayerPGM;
 #ifdef SUPPORT_XIMEA
-    next = insertCamera<XimeaCamera>(ui, this, "Open Ximea Camera", next);
+    insertCamera<XimeaCamera>(ui, this, "Open Ximea Camera", ui->actionOpenBayerPGM);
 #endif
 
 #ifdef SUPPORT_GENICAM
-    next = insertCamera<GeniCamCamera>(ui, this, "Open Geni Camera", next);
+    insertCamera<GeniCamCamera>(ui, this, "Open Geni Camera", ui->actionOpenBayerPGM);
 #endif
 
 #ifdef SUPPORT_FLIR
-    next = insertCamera<FLIRCamera>(ui, this, "Open FLIR Camera", next);
+    insertCamera<FLIRCamera>(ui, this, "Open FLIR Camera", ui->actionOpenBayerPGM);
 #endif
 
 #ifdef SUPPORT_IMPERX
-    next = insertCamera<ImperxCamera>(ui, this, "Open Imperx Camera", next);
+    insertCamera<ImperxCamera>(ui, this, "Open Imperx Camera", ui->actionOpenBayerPGM);
 #endif
 
 #ifdef SUPPORT_LUCID
-    next = insertCamera<LucidCamera>(ui, this, "Open Lucid Camera", next);
+    insertCamera<LucidCamera>(ui, this, "Open Lucid Camera", ui->actionOpenBayerPGM);
 #endif
 
 #ifdef SUPPORT_MIPI
-    next = insertCamera<MIPICamera>(ui, this, "Open MIPI Camera", next);
+    insertCamera<MIPICamera>(ui, this, "Open MIPI Camera", next);
 #endif
 
 #endif
@@ -784,6 +790,12 @@ void MainWindow::on_actionExit_triggered()
 
 void MainWindow::on_actionWB_picker_toggled(bool arg1)
 {
+    if(!mCameraPtr)
+        return;
+
+    if(!mCameraPtr->isColor())
+        return;
+
     if(arg1)
     {
         mMediaViewer->setCurrentTool(GLImageViewer::tlWBPicker);

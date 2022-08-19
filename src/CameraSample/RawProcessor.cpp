@@ -471,7 +471,10 @@ QColor RawProcessor::getAvgRawColor(QPoint rawPoint)
     if(!mProcessorPtr)
         return retClr;
 
-    qDebug() << rawPoint;
+    if(!mCamera && !mCamera->isColor())
+        return retClr;
+
+    //qDebug() << rawPoint;
 
     unsigned int w = 0;
     unsigned int h = 0;
