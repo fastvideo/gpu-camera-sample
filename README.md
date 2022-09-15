@@ -274,9 +274,10 @@ You can also create a software module to collect frames from different cameras a
 * Defringe - done
 * <a href="https://www.fastcompression.com/products/fastvcr-ximea-software.htm" target="_blank">FastVCR software for XIMEA cameras</a> - done
 * Support for Jetson AGX Orin and CUDA-11.4 - done
-* Support for XIMEA MU181CR-ON camera - in progress
 * HDR image processing on GPU for automotive 16/20/24-bit image sensors (IMX490, IMX728, AR0820, OX08, etc.) - done
 * High performance JPEG-XS decoder on GPU - done
+* Support for XIMEA MU181CR-ON camera - done
+* Support for Jetson AGX Orin and CUDA-11.7 - in progress
 * New demosaicing algorithm MG2 with improved image quality - in progress
 * Fast undistortion on GPU with precise and compact maps - in progress
 * High performance chromatic aberration suppresion in RAW domain - in progress
