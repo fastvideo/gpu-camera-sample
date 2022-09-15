@@ -121,6 +121,7 @@ bool XimeaCamera::open(uint32_t devID)
         char str[256] = {0};
         ret = xiGetParamString(hDevice, XI_PRM_DEVICE_NAME, str, sizeof(str));
         mModel = QString::fromLocal8Bit(str);
+        mPacked = mModel.toUpper() == QString("MU181CR-ON");
 
         ret = xiGetParamString(hDevice, XI_PRM_DEVICE_SN, str, sizeof(str));
         mSerial = QString::fromLocal8Bit(str);
@@ -163,7 +164,11 @@ bool XimeaCamera::open(uint32_t devID)
         }
         else if(image_data_bit_depth == XI_BPP_12 && pack == XI_ON)
         {
-            mImageFormat = cif12bpp_p;
+            if(mPacked){
+                mImageFormat = cif12bpp;
+            }else{
+                mImageFormat = cif12bpp_p;
+            }
             mSurfaceFormat = FAST_I12;
         }
         else if(image_data_bit_depth == XI_BPP_12 && pack == XI_OFF)
@@ -230,8 +235,6 @@ bool XimeaCamera::open(uint32_t devID)
     if(!mInputBuffer.allocate(mWidth, mHeight, mSurfaceFormat))
         return false;
 
-    mPacked = mModel.toUpper() == QString("MU181CR-ON");
-
     mDevID = devID;
     mState = cstStopped;
     emit stateChanged(cstStopped);
@@ -295,6 +298,7 @@ void XimeaCamera::startStreaming()
             image.bp = packedData.data();
             ret = xiGetImage(hDevice, 5000, &image);
             read_inputstream(packedData.data(), sizeBits, bits, (uint16_t*)frameData.data());
+            image.bp_size = mWidth * mHeight * sizeof(uint16_t);
         }else{
             image.bp = frameData.data();
             ret = xiGetImage(hDevice, 5000, &image);
