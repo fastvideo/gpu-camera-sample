@@ -29,7 +29,6 @@
 #ifdef SUPPORT_XIMEA
 #include "XimeaCamera.h"
 
-#include "MainWindow.h"
 #include "RawProcessor.h"
 
 #include <QByteArray>
@@ -49,7 +48,6 @@ uint16_t getdata(char* data, int& offs, int bits)
     int off2 = offs % 8;
     uint16_t res = *(uint16_t*)&data[off1];
     res >>= (off2);
-    offs += bits;
     return res & ((1 << bits) - 1);
 }
 
@@ -70,12 +68,47 @@ void read_inputstream(char* data, size_t szbits, int bits, uint16_t* out)
     for(; off < szbits;){
         for(int i = 0; i < 16; ++i){
             group[i] = getdata(data, off, 8) << lowb;
+            off += 8;
         }
         for(int i = 0; i < 16; ++i){
             group[i] = group[i] | ((getdata(data, off, lowb) & mask));
+            off += lowb;
         }
         memcpy(&out[id], group, sizeof(group));
         id += 16;
+    }
+}
+
+/**
+ * @brief read_inputstreamP
+ * @param data - input bits stream
+ * @param szbits - size of input bitstream
+ * @param bits - bits in pixel
+ * @param out - ouput stream
+ */
+void read_inputstreamP(char* data, size_t szbits, int bits, uint16_t* out)
+{
+    //int off = 0;
+    //int id = 0;
+    int lowb = bits - 8;
+    int mask = (1 << lowb) - 1;
+    int cnto = bits * 16;
+    int cnt = static_cast<int>(szbits / cnto);
+#pragma omp parallel for
+    for(int i = 0; i < cnt; ++i){
+        uint16_t group[16];
+        int off = i * cnto;
+        int id = i * 16;
+        for(int i = 0; i < 16; ++i){
+            group[i] = getdata(data, off, 8) << lowb;
+            off += 8;
+        }
+        for(int i = 0; i < 16; ++i){
+            group[i] = group[i] | ((getdata(data, off, lowb) & mask));
+            off += lowb;
+        }
+        memcpy(&out[id], group, sizeof(group));
+        //id += 16;
     }
 }
 
@@ -297,7 +330,7 @@ void XimeaCamera::startStreaming()
         if(mPacked){
             image.bp = packedData.data();
             ret = xiGetImage(hDevice, 5000, &image);
-            read_inputstream(packedData.data(), sizeBits, bits, (uint16_t*)frameData.data());
+            read_inputstreamP(packedData.data(), sizeBits, bits, (uint16_t*)frameData.data());
             image.bp_size = mWidth * mHeight * sizeof(uint16_t);
         }else{
             image.bp = frameData.data();
