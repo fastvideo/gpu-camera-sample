@@ -355,6 +355,11 @@ void RawProcessor::startWriting()
         mFileWriterPtr.reset(writer);
     }
     else if(mCodec == CUDAProcessorOptions::vcH264 || mCodec == CUDAProcessorOptions::vcHEVC){
+        QString fileName = QDir::toNativeSeparators(
+                    QStringLiteral("%1/%2.avi").
+                    arg(mOutputPath).
+                    arg(QDateTime::currentDateTime().toString(QStringLiteral("dd_MM_yyyy_hh_mm_ss"))));
+
         AVFileWriter *writer = new AVFileWriter();
 
         auto funEncodeNv12 = [this](unsigned char* yuv, int ){
@@ -387,7 +392,8 @@ void RawProcessor::startWriting()
                      mCamera->height(),
                      mOptions.bitrate,
                      60,
-                     mCodec == CUDAProcessorOptions::vcHEVC);
+                     mCodec == CUDAProcessorOptions::vcHEVC,
+                     fileName);
         mFileWriterPtr.reset(writer);
     }
     else

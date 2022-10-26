@@ -30,7 +30,7 @@ extern "C" {
 #include "v4l2encoder.h"
 #endif
 
-class TSEncoder;
+//class TSEncoder;
 
 class AVFileWriter : public AsyncWriter
 {
@@ -56,12 +56,17 @@ public:
      */
     void setEncodeYUV420Fun(TEncodeFun fun);
 
-    bool open(int w, int h, int bitrate, int fps, bool isHEVC);
+    bool open(int w, int h, int bitrate, int fps, bool isHEVC, const QString &outFileName);
     void close();
 
     double duration() const {
         return mDuration;
     }
+
+    void restart(const QString& newFileName);
+    QString getLastError(){return mErrStr;}
+
+    int getFrameSizes(fastChannelDescription_t fs[3]);
 
 signals:
 
@@ -92,12 +97,14 @@ private:
     AVCodecID       mCodecId = AV_CODEC_ID_H264;
     AVPixelFormat   mPixFmt = AV_PIX_FMT_YUV420P;
 
+    AVFormatContext* mFmt = nullptr;
+    AVStream*       mStream = nullptr;
     AVCodecContext* mCtx = nullptr;
     AVCodec*        mCodec = nullptr;
     AVBufferRef*    mHwDeviceCtx = NULL;
 
     std::shared_ptr< std::thread > mFrameThread;
-    std::shared_ptr< std::thread > mPacketThread;
+//    std::shared_ptr< std::thread > mPacketThread;
 
 #ifdef __ARM_ARCH
     userbuffer mUserBuffer;
@@ -121,22 +128,25 @@ private:
     size_t mMaxFrameBuffers = 2;
     std::list<FrameBuffer> mFrameBuffers;
     size_t mMaxPackets = 5;
-    std::list<AVPacket*> mPackets;
-    std::mutex mPacketMutex;
+//    std::list<AVPacket*> mPackets;
+//    std::mutex mPacketMutex;
     std::mutex mFrameMutex;
     bool mDone = false;
     double mDuration = 0;
 
-    QScopedPointer<TSEncoder> mFileWriter;
+    //QScopedPointer<TSEncoder> mFileWriter;
 
     void doEncodeFrame();
     bool addInternalFrame();
 
-    void RGB2Yuv420p(unsigned char *destination, unsigned char *rgba, int width, int height);
-    void Gray2Yuv420p(unsigned char *destination, unsigned char *rgba, int width, int height);
-    void encodeWriteFrame(AVFrame *frame);
+    //void RGB2Yuv420p(unsigned char *destination, unsigned char *rgba, int width, int height);
+    //void Gray2Yuv420p(unsigned char *destination, unsigned char *rgba, int width, int height);
+    void encodeWriteFrame(AVFrame *frame, int *pgot = nullptr);
     void sendPkt(AVPacket *pkt);
-    void doPacketWrite();
+    //void doPacketWrite();
+    void restartAsync();
+
+    void write_pkt(AVPacket* enc_pkt, int stream_index = 0);
 };
 
 
