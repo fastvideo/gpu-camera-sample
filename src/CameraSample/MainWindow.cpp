@@ -353,6 +353,11 @@ void MainWindow::initNewCamera(GPUCameraBase* cmr, uint32_t devID)
     ui->cameraController->setCamera(mCameraPtr.data());
 
     ui->cameraStatistics->setCamera(mCameraPtr.data());
+
+//    QTimer::singleShot(1000, this, [this](){
+        //mCameraPtr->setParameter(GPUCameraBase::prmExposureTime, 30000);
+    ui->cameraController->setExposureCamera(30000);
+//    });
 }
 
 void MainWindow::openCamera(uint32_t devID)

@@ -46,6 +46,8 @@ public:
 
     void setCamera(GPUCameraBase* cameraPtr);
 
+    void setExposureCamera(float value);
+
 private slots:
     void on_spnFrameRate_valueChanged(double arg1);
     void on_spnExposureTime_valueChanged(int arg1);

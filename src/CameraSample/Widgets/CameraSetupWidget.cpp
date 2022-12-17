@@ -88,6 +88,11 @@ void CameraSetupWidget::setCamera(GPUCameraBase* cameraPtr)
         }
     }
 }
+
+void CameraSetupWidget::setExposureCamera(float value)
+{
+    ui->spnExposureTime->setValue(value);
+}
 void CameraSetupWidget::on_spnFrameRate_valueChanged(double arg1)
 {
     if(mCameraPtr == nullptr)
