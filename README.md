@@ -272,7 +272,7 @@ You can also create a software module to collect frames from different cameras a
 * Support for LUCID Vision Labs cameras - done
 * Support for Leopard Imaging MIPI CSI-2 camera with IMX477 image sensor (4K/60fps) - done
 * Defringe - done
-* <a href="https://www.fastcompression.com/products/fastvcr-ximea-software.htm" target="_blank">FastVCR software for XIMEA cameras</a> - done, <a href="https://www.fastcompression.com/download/FastVCR_Portable.7z">download link for Windows version</a>
+* <a href="https://www.fastcompression.com/products/fastvcr-ximea-software.htm" target="_blank">FastVCR software for XIMEA cameras</a> - done
 * Support for Jetson AGX Orin and CUDA-11.4 - done
 * HDR image processing on GPU for automotive 16/20/24-bit image sensors (IMX490, IMX728, AR0820, OX08, etc.) - done
 * High performance JPEG-XS decoder on GPU - done
@@ -305,7 +305,8 @@ You can also create a software module to collect frames from different cameras a
 
 ## Downloads
 
-* Download <a href="https://www.fastcinemadng.com/download/download.html" target="_blank">Fast CinemaDNG Processor</a> software for Windows or Linux, manual and test DNG and BRAW footages
+* Download <a href="https://www.fastcinemadng.com/download/download.html" target="_blank">Fast CinemaDNG Processor</a> software for Windows, manual and test DNG and BRAW footages
+* FastVCR software for XIMEA cameras with GPU-based image processing - <a href="https://www.fastcompression.com/download/FastVCR_Portable.7z">download link for Windows version</a> 
 * Download <a href="https://drive.google.com/file/d/1e4lMN1gOOL9M8zPI_tFHCHM5sWFKL4YE/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for Windows-10, 64-bit</a> (valid till May 01, 2023)
 * Download <a href="https://drive.google.com/file/d/14YwjKvooRos1yKFzlRtdKr5RfS_vUnnZ/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a> (valid till May 03, 2023)
 * Download <a href="https://drive.google.com/file/d/1HgfqboijA8VlQAulEm69a7ayx-hQVxuO/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> (valid till May 08, 2023)
