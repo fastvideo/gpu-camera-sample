@@ -257,8 +257,7 @@ You can also create a software module to collect frames from different cameras a
 
 Please bear in mind that this is just a <strong>sample application</strong>. It's intended to show how machine vision cameras can work with Fastvideo SDK to get high perfromance image processing on the NVIDIA GPU. 
 
-To test a real application with XIMEA cameras (USB3 or PCIe), please have a look at the following page and download the software - <a href="https://www.fastcompression.com/products/fastvcr-ximea-software.htm" target="_blank">FastVCR software</a>
-That software with GenICam (GenTL) support will be released soon.
+To test a real application with XIMEA cameras (USB3 or PCIe), please have a look at the following page and download <a href="https://www.fastcompression.com/products/fastvcr-ximea-software.htm" target="_blank">FastVCR software</a>. That software with GenICam (GenTL) support will be released soon.
 
 ## Roadmap
 
