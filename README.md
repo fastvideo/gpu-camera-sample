@@ -1,5 +1,5 @@
 # gpu-camera-sample
-Camera sample application with realtime GPU image processing (Windows, Linux, Jetson)
+Camera sample application with realtime GPU image processing performance (Windows, Linux, Jetson)
 
 <p><a target="_blank" href="https://www.fastcompression.com/blog/gpu-software-machine-vision-cameras.htm">
 <img src="https://www.fastcompression.com/img/blog/machine-vision/gpu-software-machine-vision-cameras.png" alt="gpu software machine vision genicam" style="max-width:100%"/></a></p>
@@ -26,7 +26,7 @@ That software is based on the following image processing pipeline for camera app
 * MJPEG and H.264/H.265 streaming
 * Storage of compressed images/video to SSD
 
-Processing is done on NVIDIA GPU to speedup the performance. The software could also work with raw bayer images in PGM format and you can utilize these images for testing or if you don't have a camera or if your camera is not supported. More info about that project you can find <a href="https://www.fastcompression.com/blog/gpu-software-machine-vision-cameras.htm" target="_blank">here</a>.
+Processing is done on NVIDIA GPU to speedup the performance. The software could also work with raw bayer images in PGM format and you can utilize these images for testing or if you don't have a camera, or if your camera is not supported. More info about that project you can find <a href="https://www.fastcompression.com/blog/gpu-software-machine-vision-cameras.htm" target="_blank">here</a>.
 
 From the benchmarks on <strong>NVIDIA Quadro RTX 6000</strong> or <strong>GeForce RTX 2080ti</strong> we can see that GPU-based raw image processing is very fast and it could offer high image quality at the same time. The total performance could reach <strong>4 GPix/s</strong> for color cameras. The performance strongly depends on complexity of the pipeline. Multiple GPU solutions could significantly improve the performance.
 
@@ -245,7 +245,7 @@ We also recommend to check PCI-Express bandwidth for Host-to-Device and Device-t
 
 If you are working with images which reside on HDD, please place them on SSD or M2.
 
-For testing purposes you can utilize the latest NVIDIA GeForce RTX 2060/2070/2080ti, 3070/3080ti/3090 or Jetson Nano, TX2, NX and AGX Xavier.
+For testing purposes you can utilize the latest NVIDIA GeForce RTX 2060/2070/2080ti, 3070/3080ti/3090, 4080/4090 or Jetson TX2, NX and AGX Xavier.
 
 For continuous high performance applications we recommend professional NVIDIA Quadro and Tesla GPUs.
 
@@ -282,9 +282,8 @@ To test a real application with XIMEA cameras (USB3 or PCIe), please have a look
 * High performance JPEG-XS decoder on GPU - done
 * Support for XIMEA MU181CR-ON camera - done
 * Support for Jetson AGX Orin (CUDA-11.4) and CUDA-11.7 - done
-* New demosaicing algorithm MG2 with improved image quality - in progress
 * Fast undistortion on GPU with precise and compact maps - in progress
-* High performance chromatic aberration suppresion in RAW domain - in progress
+* High performance chromatic aberration suppression in RAW domain - in progress
 * Support for Emergent Vision Technologies, DALSA, IDS Imaging, Baumer, Kaya Instruments, SVS-Vistek cameras - in progress
 * RAW Bayer codec
 * JPEG2000 encoder and decoder on GPU for camera applications
