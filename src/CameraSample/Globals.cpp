@@ -68,6 +68,12 @@ QString Globals::completePath(const QString& path)
     return path.endsWith(QChar('/')) ? path : path + QChar('/');
 }
 
+QString Globals::getPathOfFile(const QString &fileName)
+{
+    QFileInfo fi(fileName);
+    return fi.absolutePath();
+}
+
 void Globals::initDenoiseParams(fastDenoiseStaticParameters_t &params)
 {
     memset(&params, 0, sizeof(params));

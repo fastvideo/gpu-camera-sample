@@ -139,6 +139,8 @@ private slots:
     void on_actionShowImage_triggered(bool checked);
 
 
+    void on_actionClose_triggered();
+
 private:
     Ui::MainWindow *ui;
 
@@ -155,6 +157,8 @@ private:
     CUDAProcessorOptions mOptions;
     QVector<unsigned short> mGammaCurve;
     QTimer mTimerStatusRtsp;
+
+    QString mCurrentDir;
 
     void delayInit();
     void raw2Rgb(bool update = true, bool init = false);
