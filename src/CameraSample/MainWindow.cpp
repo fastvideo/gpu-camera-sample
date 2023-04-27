@@ -63,6 +63,10 @@
 #include "LucidCamera.h"
 #endif
 
+#ifdef SUPPORT_BASLER
+#include "BaslerCamera.h"
+#endif
+
 #ifdef SUPPORT_MIPI
 #include "MIPICamera.h"
 #endif
@@ -216,6 +220,7 @@ MainWindow::MainWindow(QWidget *parent) :
     defined SUPPORT_FLIR || \
     defined SUPPORT_IMPERX || \
     defined SUPPORT_LUCID || \
+    defined SUPPORT_BASLER || \
     defined SUPPORT_MIPI
 
     ui->mainToolBar->insertAction(ui->actionOpenBayerPGM, ui->actionOpenCamera);
@@ -242,6 +247,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
 #ifdef SUPPORT_LUCID
     insertCamera<LucidCamera>(ui, this, "Open Lucid Camera", ui->actionOpenBayerPGM);
+#endif
+
+#ifdef SUPPORT_BASLER
+    insertCamera<BaslerCamera>(ui, this, "Open Basler Camera", ui->actionOpenBayerPGM);
 #endif
 
 #ifdef SUPPORT_MIPI
@@ -391,6 +400,12 @@ void MainWindow::openCamera(uint32_t devID)
         mCameraPtr->stop();
 
     initNewCamera(new LucidCamera(), devID);
+#elif SUPPORT_BASLER
+    if(mCameraPtr)
+        mCameraPtr->stop();
+
+    initNewCamera(new BaslerCamera(), devID);
+
 #elif SUPPORT_MIPI
     if(mCameraPtr)
         mCameraPtr->stop();
@@ -758,6 +773,7 @@ void MainWindow::on_actionOpenCamera_triggered()
     defined SUPPORT_FLIR || \
     defined SUPPORT_IMPERX || \
     defined SUPPORT_LUCID || \
+    defined SUPPORT_BASLER || \
     defined SUPPORT_MIPI
     openCamera(0);
 #endif

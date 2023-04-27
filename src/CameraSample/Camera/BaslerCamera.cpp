@@ -1,95 +1,90 @@
-#include "GeniCamCamera.h"
+#include "BaslerCamera.h"
 
-#ifdef SUPPORT_GENICAM
-#include <QVector>
+#ifdef SUPPORT_BASLER
+#include <QDebug>
 #include <QElapsedTimer>
 
-#include <RawProcessor.h>
+#include "RawProcessor.h"
 
-using CameraStatEnum = GPUCameraBase::cmrCameraStatistic  ;
-
-GeniCamCamera::GeniCamCamera()
+BaslerCamera::BaslerCamera()
 {
-    mCameraThread.setObjectName(QStringLiteral("GeniCamThread"));
+    // Namespace for using pylon objects.
+    using namespace Pylon;
+
+    // Before using any pylon methods, the pylon runtime must be initialized.
+    PylonInitialize();
+
+    mCameraThread.setObjectName(QStringLiteral("BaslerCamThread"));
     moveToThread(&mCameraThread);
     mCameraThread.start();
 }
 
-GeniCamCamera::~GeniCamCamera()
+BaslerCamera::~BaslerCamera()
 {
+    // Namespace for using pylon objects.
+    using namespace Pylon;
+
     mCameraThread.quit();
     mCameraThread.wait(3000);
 
-    if(mDevice)
-        mDevice->close();
-    rcg::System::clearSystems();
+    // Releases all pylon resources.
+    PylonTerminate();
 }
 
-bool GeniCamCamera::open(uint32_t devID)
+bool BaslerCamera::open(uint32_t devID)
 {
-    using namespace GenApi;
-
-    std::vector<std::shared_ptr<rcg::System> > system=rcg::System::getSystems();
-    for (auto & i : system)
+    using namespace Pylon;
+    using namespace GENAPI_NAMESPACE;
+    bool res = true;
+    try
     {
-        if(mDevice)
-            break;
-
-        i->open();
-        std::vector<std::shared_ptr<rcg::Interface>> interf = i->getInterfaces();
-
-        for (auto & k : interf)
-        {
-            k->open();
-            std::vector<std::shared_ptr<rcg::Device>> device = k->getDevices();
-
-            for (const auto & j : device)
-            {
-                mDevice = j;
-                break;
-            }
-
-            if(!mDevice)
-                k->close();
-        }
-        if(!mDevice)
-            i->close();
+        // Create an instant camera object with the camera device found first.
+        mCamera.reset(new CInstantCamera(CTlFactory::GetInstance().CreateFirstDevice()));
+    }
+    catch(const GenericException& e)
+    {
+        // Error handling.
+        qDebug() << "An exception occurred." << e.GetDescription();
+        res = false;
     }
 
-    if(!mDevice)
+    if(!res)
         return false;
 
-    mManufacturer = QString::fromStdString(mDevice->getVendor());
-    mModel = QString::fromStdString(mDevice->getModel());
-    mSerial = QString::fromStdString(mDevice->getSerialNumber());
+    mManufacturer = QStringLiteral("Basler AG");
+    mModel = QString::fromLatin1(mCamera->GetDeviceInfo().GetModelName().c_str());
+    mSerial = QString::fromLatin1(mCamera->GetDeviceInfo().GetSerialNumber().c_str());
 
-    mDevice->open(rcg::Device::CONTROL);
-    std::shared_ptr<CNodeMapRef> nodeMap = mDevice->getRemoteNodeMap();
+    mCamera->Open();
 
-    CIntegerPtr ptrInt = nodeMap->_GetNode("Width");
-    if(IsAvailable(ptrInt))
+//    CIntegerParameter width(camera.GetNodeMap(), "Width");
+//    camera.GetNodeMap()
+
+    GenApi::INodeMap& nodemap = mCamera->GetNodeMap();
+
+    CIntegerParameter p(nodemap, "Width");
+    if(IsAvailable(p))
     {
-        mWidth = ptrInt->GetMax();
+        mWidth = p.GetValue();// .GetMax();
     }
 
-    ptrInt = nodeMap->_GetNode("Height");
-    if (IsAvailable(ptrInt))
+    p = CIntegerParameter(nodemap, "Height");
+    if(IsAvailable(p))
     {
-        mHeight =  ptrInt->GetMax();
+        mHeight =  p.GetValue();// .GetMax();
     }
 
     //Look for available pixel formats
-    CEnumerationPtr ptrPixelFormats = nodeMap->_GetNode("PixelFormat");
-    if(IsAvailable(ptrPixelFormats))
+    CEnumParameter formats(nodemap, "PixelFormat");
+    if(IsAvailable(formats))
     {
-
         StringList_t names;
-        ptrPixelFormats->GetSymbolics(names);
+        formats.GetSymbolics(names);
         QVector<int64_t> pixelFormats;
 
         for(const auto & name : names)
         {
-            IEnumEntry* entry = ptrPixelFormats->GetEntryByName(name);
+            GenApi::IEnumEntry* entry = formats.GetEntryByName(name);
             if(entry)
                 pixelFormats << entry->GetValue();
         }
@@ -101,7 +96,7 @@ bool GeniCamCamera::open(uint32_t devID)
         GenICam::gcstring fmtString;
 
         //12 bit packed
-        if(pixelFormats.contains(BayerRG12p))
+        if(pixelFormats.contains(EPixelType::PixelType_BayerRG12p))
         {
             mImageFormat = cif12bpp_p;
             mSurfaceFormat = FAST_I12;
@@ -110,7 +105,7 @@ bool GeniCamCamera::open(uint32_t devID)
             mWhite = 4095;
             mIsColor = true;
         }
-        else if(pixelFormats.contains(BayerGB12p))
+        else if(pixelFormats.contains(EPixelType::PixelType_BayerGB12p))
         {
             mImageFormat = cif12bpp_p;
             mSurfaceFormat = FAST_I12;
@@ -119,7 +114,7 @@ bool GeniCamCamera::open(uint32_t devID)
             mWhite = 4095;
             mIsColor = true;
         }
-        else if(pixelFormats.contains(BayerGR12p))
+        else if(pixelFormats.contains(EPixelType::PixelType_BayerGR12p))
         {
             mImageFormat = cif12bpp_p;
             mSurfaceFormat = FAST_I12;
@@ -128,7 +123,7 @@ bool GeniCamCamera::open(uint32_t devID)
             mWhite = 4095;
             mIsColor = true;
         }
-        else if(pixelFormats.contains(BayerBG12p))
+        else if(pixelFormats.contains(EPixelType::PixelType_BayerBG12p))
         {
             mImageFormat = cif12bpp_p;
             mSurfaceFormat = FAST_I12;
@@ -137,18 +132,18 @@ bool GeniCamCamera::open(uint32_t devID)
             mWhite = 4095;
             mIsColor = true;
         }
-        else if(pixelFormats.contains(Mono12p))
-        {
-            mImageFormat = cif12bpp_p;
-            mSurfaceFormat = FAST_I12;
-            mPattern = FAST_BAYER_NONE;
-            fmtString = "Mono12p";
-            mWhite = 4095;
-            mIsColor = false;
-        }
+//        else if(pixelFormats.contains(EPixelType::PixelType_Mono12p))
+//        {
+//            mImageFormat = cif12bpp_p;
+//            mSurfaceFormat = FAST_I12;
+//            mPattern = FAST_BAYER_NONE;
+//            fmtString = "Mono12p";
+//            mWhite = 4095;
+//            mIsColor = false;
+//        }
 
         //12 bit unpacked
-        else if(pixelFormats.contains(BayerRG12))
+        else if(pixelFormats.contains(EPixelType::PixelType_BayerRG12))
         {
             mImageFormat = cif12bpp;
             mSurfaceFormat = FAST_I12;
@@ -157,7 +152,7 @@ bool GeniCamCamera::open(uint32_t devID)
             mWhite = 4095;
             mIsColor = true;
         }
-        else if(pixelFormats.contains(BayerGB12))
+        else if(pixelFormats.contains(EPixelType::PixelType_BayerGB12))
         {
             mImageFormat = cif12bpp;
             mSurfaceFormat = FAST_I12;
@@ -166,7 +161,7 @@ bool GeniCamCamera::open(uint32_t devID)
             mWhite = 4095;
             mIsColor = true;
         }
-        else if(pixelFormats.contains(BayerGR12))
+        else if(pixelFormats.contains(EPixelType::PixelType_BayerGR12))
         {
             mImageFormat = cif12bpp;
             mSurfaceFormat = FAST_I12;
@@ -175,7 +170,7 @@ bool GeniCamCamera::open(uint32_t devID)
             mWhite = 4095;
             mIsColor = true;
         }
-        else if(pixelFormats.contains(BayerBG12))
+        else if(pixelFormats.contains(EPixelType::PixelType_BayerBG12))
         {
             mImageFormat = cif12bpp;
             mSurfaceFormat = FAST_I12;
@@ -184,18 +179,18 @@ bool GeniCamCamera::open(uint32_t devID)
             mWhite = 4095;
             mIsColor = true;
         }
-        else if(pixelFormats.contains(Mono12))
-        {
-            mImageFormat = cif12bpp;
-            mSurfaceFormat = FAST_I12;
-            mPattern = FAST_BAYER_NONE;
-            fmtString = "Mono12";
-            mWhite = 4095;
-            mIsColor = false;
-        }
+//        else if(pixelFormats.contains(EPixelType::PixelType_Mono12))
+//        {
+//            mImageFormat = cif12bpp;
+//            mSurfaceFormat = FAST_I12;
+//            mPattern = FAST_BAYER_NONE;
+//            fmtString = "Mono12";
+//            mWhite = 4095;
+//            mIsColor = false;
+//        }
 
         //8 bit
-        else if(pixelFormats.contains(BayerRG8))
+        else if(pixelFormats.contains(EPixelType::PixelType_BayerRG8))
         {
             mImageFormat = cif8bpp;
             mSurfaceFormat = FAST_I8;
@@ -204,7 +199,7 @@ bool GeniCamCamera::open(uint32_t devID)
             mWhite = 255;
             mIsColor = true;
         }
-        else if(pixelFormats.contains(BayerGB8))
+        else if(pixelFormats.contains(EPixelType::PixelType_BayerGB8))
         {
             mImageFormat = cif8bpp;
             mSurfaceFormat = FAST_I8;
@@ -213,7 +208,7 @@ bool GeniCamCamera::open(uint32_t devID)
             mWhite = 255;
             mIsColor = true;
         }
-        else if(pixelFormats.contains(BayerGR8))
+        else if(pixelFormats.contains(EPixelType::PixelType_BayerGR8))
         {
             mImageFormat = cif8bpp;
             mSurfaceFormat = FAST_I8;
@@ -222,7 +217,7 @@ bool GeniCamCamera::open(uint32_t devID)
             mWhite = 255;
             mIsColor = true;
         }
-        else if(pixelFormats.contains(BayerBG8))
+        else if(pixelFormats.contains(EPixelType::PixelType_BayerBG8))
         {
             mImageFormat = cif8bpp;
             mSurfaceFormat = FAST_I8;
@@ -231,7 +226,7 @@ bool GeniCamCamera::open(uint32_t devID)
             mWhite = 255;
             mIsColor = true;
         }
-        else if(pixelFormats.contains(Mono8))
+        else if(pixelFormats.contains(EPixelType::PixelType_Mono8))
         {
             mImageFormat = cif8bpp;
             mSurfaceFormat = FAST_I8;
@@ -241,56 +236,65 @@ bool GeniCamCamera::open(uint32_t devID)
             mIsColor = false;
         }
 
-        if (IsWritable(ptrPixelFormats))
+        if(IsWritable(formats))
         {
             // Retrieve the desired entry node from the enumeration node
-            CEnumEntryPtr ptrPixFmt = ptrPixelFormats->GetEntryByName(fmtString);
-            if (IsAvailable(ptrPixFmt) && IsReadable(ptrPixFmt))
+            CEnumEntryPtr ptrPixFmt = formats.GetEntryByName(fmtString);
+            if(IsAvailable(ptrPixFmt) && IsReadable(ptrPixFmt))
             {
                 // Retrieve the integer value from the entry node
                 int64_t nPixelFormat = ptrPixFmt->GetValue();
                 // Set integer as new value for enumeration node
-                ptrPixelFormats->SetIntValue(nPixelFormat);
+                formats.SetIntValue(nPixelFormat);
             }
         }
     }
 
-    CBooleanPtr ptrAcquisitionFrameRateEnable = nodeMap->_GetNode("AcquisitionFrameRateEnable");
-    if (IsAvailable(ptrAcquisitionFrameRateEnable) && IsWritable(ptrAcquisitionFrameRateEnable))
+    CBooleanParameter acquisitionFrameRateEnable(nodemap, "AcquisitionFrameRateEnable");
+    if (IsAvailable(acquisitionFrameRateEnable) && IsWritable(acquisitionFrameRateEnable))
     {
-        ptrAcquisitionFrameRateEnable->SetValue(true);
+        acquisitionFrameRateEnable.SetValue(true);
     }
 
-    CFloatPtr ptrFloat = nodeMap->_GetNode("AcquisitionFrameRate");
-    if(IsAvailable(ptrInt))
+    CFloatParameter fps(nodemap, "AcquisitionFrameRate");
+    if(IsAvailable(fps))
     {
-        mFPS =  ptrFloat->GetValue();
+        mFPS =  fps.GetValue();
     }
 
-    CEnumerationPtr ptrLineSel = nodeMap->_GetNode("LineSelector");
-    if(IsAvailable(ptrLineSel) && IsWritable(ptrLineSel))
-    {
-         CEnumEntryPtr ptrLineSelVal = ptrLineSel->GetEntryByName("Line2");
-         ptrLineSel->SetIntValue(ptrLineSelVal->GetValue());
-
-    }
-
-    CEnumerationPtr ptrLineMode = nodeMap->_GetNode("LineMode");
-    if(IsAvailable(ptrLineMode) && IsWritable(ptrLineMode))
-    {
-         CEnumEntryPtr ptrLineModeOut = ptrLineMode->GetEntryByName("Output");
-         ptrLineMode->SetIntValue(ptrLineModeOut->GetValue());
-    }
-
-//    camera.LineSelector.SetValue(LineSelector_Line2);
-//    camera.LineMode.SetValue(LineMode_Output);
-//    LineModeEnums e = camera.LineMode.GetValue();
 
 
+//    CEnumParameter lineSel(nodemap, "LineSelector");
+//    if(IsAvailable(lineSel) && IsWritable(lineSel))
+//    {
+//         CEnumEntryPtr ptrLineSelVal = lineSel.GetEntryByName("Line2");
+//         if(IsAvailable(ptrLineSelVal))
+//         {
+//             lineSel.SetIntValue(ptrLineSelVal->GetValue());
+//         }
+
+//    }
+
+//    CBooleanParameter lineInv(nodemap, "LineInverter");
+//    if(IsAvailable(lineInv) && IsWritable(lineInv))
+//    {
+//        lineInv.SetValue(true);
+//    }
+
+//    CEnumParameter(nodemap, "LineSource").SetValue("ExposureActive");
+
+//    CEnumParameter lineMode(nodemap, "LineMode");
+//    if(IsAvailable(lineMode) && IsWritable(lineMode))
+//    {
+//         CEnumEntryPtr ptrLineModeOut = lineMode.GetEntryByName("Output");
+//         if(IsAvailable(ptrLineModeOut))
+//         {
+//             lineMode.SetIntValue(ptrLineModeOut->GetValue());
+//         }
+//    }
 
     if(!mInputBuffer.allocate(mWidth, mHeight, mSurfaceFormat))
         return false;
-
 
     mDevID = devID;
     mState = cstStopped;
@@ -298,7 +302,7 @@ bool GeniCamCamera::open(uint32_t devID)
     return true;
 }
 
-bool GeniCamCamera::start()
+bool BaslerCamera::start()
 {
     mState = cstStreaming;
     emit stateChanged(cstStreaming);
@@ -306,7 +310,7 @@ bool GeniCamCamera::start()
     return true;
 }
 
-bool GeniCamCamera::stop()
+bool BaslerCamera::stop()
 {
     mState = cstStopped;
     emit stateChanged(cstStopped);
@@ -314,94 +318,88 @@ bool GeniCamCamera::stop()
     return true;
 }
 
-void GeniCamCamera::close()
+void BaslerCamera::close()
 {
     stop();
-    mDevice->close();
+    mCamera->Close();
     mState = cstClosed;
     emit stateChanged(cstClosed);
 }
 
-void GeniCamCamera::startStreaming()
+void BaslerCamera::startStreaming()
 {
+    using namespace Pylon;
+    using namespace GENAPI_NAMESPACE;
+
     if(mState != cstStreaming)
         return;
 
-    std::vector<std::shared_ptr<rcg::Stream>> streams = mDevice->getStreams();
-    if(streams.empty())
-        return;
-    streams[0]->open();
-    streams[0]->startStreaming();
-    QElapsedTimer tmr;
-
     // Reset the camera statistics
-    UpdateStatistics(nullptr);
+    UpdateStatistics(CGrabResultPtr());
+
+    CGrabResultPtr ptrGrabResult;
+
+    mCamera->StartGrabbing();
+
+//    uint64_t cnt = 0;
+//    float expTime[] = {8000, 8000};
 
     while(mState == cstStreaming)
     {
-        tmr.restart();
-        const rcg::Buffer* buffer = streams[0]->grab(3000);
-        if(buffer == nullptr)
+//        tmr.restart();
+        // Wait for an image and then retrieve it. A timeout of 5000 ms is used.
+        mCamera->RetrieveResult(5000, ptrGrabResult, TimeoutHandling_Return);
+
+
+        // Image grabbed successfully?
+        if(!ptrGrabResult->GrabSucceeded())
             continue;
 
-        UpdateStatistics(buffer);
+//        setParameter(prmExposureTime, expTime[cnt % 2]);
+//        cnt++;
 
-        if(buffer->getIsIncomplete())
-            continue;
+        UpdateStatistics(ptrGrabResult);
 
-        //Multy part images not supported
-        uint32_t npart = buffer->getNumberOfParts();
-        if(npart > 1)
-            continue;
+        const uint8_t* in = (uint8_t*) ptrGrabResult->GetBuffer();
+        unsigned char* out = mInputBuffer.getBuffer();
+        size_t sz = ptrGrabResult->GetImageSize();
+        cudaMemcpy(out, in, sz, cudaMemcpyHostToDevice);
+        mInputBuffer.release();
 
-        //if(buffer->getImagePresent(1))
-        {
-            const unsigned char* in = static_cast<const unsigned char *>(buffer->getBase(1));
-            unsigned char* out = mInputBuffer.getBuffer();
-            size_t sz = buffer->getSize(1);
-            cudaMemcpy(out, in, sz, cudaMemcpyHostToDevice);
-            mInputBuffer.release();
-        }
-
-        {
-            QMutexLocker l(&mLock);
-            mRawProc->acqTimeNsec = tmr.nsecsElapsed();
-            mRawProc->wake();
-        }
+        mRawProc->wake();
     }
-
-    streams[0]->stopStreaming();
-    streams[0]->close();
+    mCamera->StopGrabbing();
 }
 
-bool GeniCamCamera::getParameter(cmrCameraParameter param, float& val)
+bool BaslerCamera::getParameter(cmrCameraParameter param, float& val)
 {
-    using namespace GenApi;
+    using namespace Pylon;
+    using namespace GENAPI_NAMESPACE;
 
     if(param < 0 || param > prmLast)
         return false;
 
-    if(!mDevice)
+    if(!mCamera)
         return false;
 
-    CFloatPtr ptrFloat;
-    CIntegerPtr ptrInt;
-    std::shared_ptr<CNodeMapRef> nodeMap = mDevice->getRemoteNodeMap();
+    CFloatParameter prFloat;
+    CIntegerParameter prInt;
+    GenApi::INodeMap& nodeMap = mCamera->GetNodeMap();
     switch (param)
     {
     case prmFrameRate:
-        ptrFloat = nodeMap->_GetNode("AcquisitionFrameRate");
-        if (IsAvailable(ptrFloat))
+        prFloat = CFloatParameter(nodeMap, "AcquisitionFrameRate");
+        if(IsAvailable(prFloat))
         {
-            val = (float)ptrFloat->GetValue();
+            val = (float)prFloat.GetValue();
             return true;
         }
         else
         {
-            ptrInt = nodeMap->_GetNode("AcquisitionFrameRate");
-            if(IsAvailable(ptrInt))
+            prInt = CIntegerParameter(nodeMap, "AcquisitionFrameRate");
+            if(IsAvailable(prInt))
             {
-                val = (float)ptrInt->GetValue();
+                val = (float)prInt.GetValue();
                 return true;
             }
             else
@@ -413,18 +411,18 @@ bool GeniCamCamera::getParameter(cmrCameraParameter param, float& val)
 
 
     case prmExposureTime:
-        ptrFloat = nodeMap->_GetNode("ExposureTime");
-        if (IsAvailable(ptrFloat))
+        prFloat = CFloatParameter(nodeMap, "ExposureTime");
+        if(IsAvailable(prFloat))
         {
-            val = (float)ptrFloat->GetValue();
+            val = (float)prFloat.GetValue();
             return true;
         }
         else
         {
-            ptrInt = nodeMap->_GetNode("ExposureTime");
-            if(IsAvailable(ptrInt))
+            prInt = CIntegerParameter(nodeMap, "ExposureTime");
+            if(IsAvailable(prInt))
             {
-                val = (float)ptrInt->GetValue();
+                val = (float)prInt.GetValue();
                 return true;
             }
             else
@@ -442,28 +440,29 @@ bool GeniCamCamera::getParameter(cmrCameraParameter param, float& val)
     return false;
 }
 
-bool GeniCamCamera::setParameter(cmrCameraParameter param, float val)
+bool BaslerCamera::setParameter(cmrCameraParameter param, float val)
 {
-    using namespace GenApi;
+    using namespace Pylon;
+    using namespace GENAPI_NAMESPACE;
 
     if(param < 0 || param > prmLast)
         return false;
 
-    if(!mDevice)
+    if(!mCamera)
         return false;
 
     try
     {
-
+        GenApi::INodeMap& nodeMap = mCamera->GetNodeMap();
         CFloatPtr ptrFloat;
         CIntegerPtr ptrInt;
         CBooleanPtr ptrAcquisitionFrameRateEnable;
-        std::shared_ptr<CNodeMapRef> nodeMap = mDevice->getRemoteNodeMap();
+
         switch (param)
         {
         case prmFrameRate:
-            ptrFloat = nodeMap->_GetNode("AcquisitionFrameRate");
-            ptrAcquisitionFrameRateEnable = nodeMap->_GetNode("AcquisitionFrameRateEnable");
+            ptrFloat = nodeMap.GetNode("AcquisitionFrameRate");
+            ptrAcquisitionFrameRateEnable = nodeMap.GetNode("AcquisitionFrameRateEnable");
             if(IsAvailable(ptrAcquisitionFrameRateEnable) && IsWritable(ptrAcquisitionFrameRateEnable))
             {
                 ptrAcquisitionFrameRateEnable->SetValue(true);
@@ -476,7 +475,7 @@ bool GeniCamCamera::setParameter(cmrCameraParameter param, float val)
             }
             else
             {
-                ptrInt = nodeMap->_GetNode("AcquisitionFrameRate");
+                ptrInt = nodeMap.GetNode("AcquisitionFrameRate");
                 if(IsAvailable(ptrInt) && IsWritable(ptrInt))
                 {
                     ptrInt->SetValue(val);
@@ -488,11 +487,11 @@ bool GeniCamCamera::setParameter(cmrCameraParameter param, float val)
         case prmExposureTime:
         {
             // Set ExposureMode=Timed to make ExposureTime writable
-            CEnumerationPtr ptrExpMode = nodeMap->_GetNode("ExposureMode");
+            CEnumerationPtr ptrExpMode = nodeMap.GetNode("ExposureMode");
             if(IsAvailable(ptrExpMode) && IsWritable(ptrExpMode))
                 ptrExpMode->FromString("Timed");
 
-            ptrFloat = nodeMap->_GetNode("ExposureTime");
+            ptrFloat = nodeMap.GetNode("ExposureTime");
             if (IsAvailable(ptrFloat))
             {
                 if(IsWritable(ptrFloat))
@@ -503,7 +502,7 @@ bool GeniCamCamera::setParameter(cmrCameraParameter param, float val)
             }
             else
             {
-                ptrInt = nodeMap->_GetNode("ExposureTime");
+                ptrInt = nodeMap.GetNode("ExposureTime");
                 if(IsAvailable(ptrInt))
                 {
                     if(IsWritable(ptrInt))
@@ -522,31 +521,32 @@ bool GeniCamCamera::setParameter(cmrCameraParameter param, float val)
     catch(GenICam::GenericException &ex)
     {
         // Show error here
-        std::cout << "GenericException: " << ex.GetDescription() << std::endl;
+        qDebug() << "GenericException: " << ex.GetDescription();
     }
 
     return false;
 }
 
-bool GeniCamCamera::getParameterInfo(cmrParameterInfo& info)
+bool BaslerCamera::getParameterInfo(cmrParameterInfo& info)
 {
-    using namespace GenApi;
+    using namespace Pylon;
+    using namespace GENAPI_NAMESPACE;
 
     if(info.param < 0 || info.param > prmLast)
         return false;
 
-    if(!mDevice)
+    if(!mCamera)
         return false;
 
     try {
 
         CFloatPtr ptrFloat;
         CIntegerPtr ptrInt;
-        std::shared_ptr<CNodeMapRef> nodeMap = mDevice->getRemoteNodeMap();
+        GenApi::INodeMap& nodeMap = mCamera->GetNodeMap();
         switch (info.param)
         {
         case prmFrameRate:
-            ptrFloat = nodeMap->_GetNode("AcquisitionFrameRate");
+            ptrFloat = nodeMap.GetNode("AcquisitionFrameRate");
             if (IsAvailable(ptrFloat))
             {
                 info.min = (float)ptrFloat->GetMin();
@@ -560,7 +560,7 @@ bool GeniCamCamera::getParameterInfo(cmrParameterInfo& info)
             }
             else
             {
-                ptrInt = nodeMap->_GetNode("AcquisitionFrameRate");
+                ptrInt = nodeMap.GetNode("AcquisitionFrameRate");
                 if(IsAvailable(ptrInt))
                 {
                     info.min = (float)ptrInt->GetMin();
@@ -577,11 +577,11 @@ bool GeniCamCamera::getParameterInfo(cmrParameterInfo& info)
         case prmExposureTime:
         {
             // Set ExposureMode=Timed to make ExposureTime writable
-            CEnumerationPtr ptrExpMode = nodeMap->_GetNode("ExposureMode");
+            CEnumerationPtr ptrExpMode = nodeMap.GetNode("ExposureMode");
             if(IsAvailable(ptrExpMode) && IsWritable(ptrExpMode))
                 ptrExpMode->FromString("Timed");
 
-            ptrFloat = nodeMap->_GetNode("ExposureTime");
+            ptrFloat = nodeMap.GetNode("ExposureTime");
             if (IsAvailable(ptrFloat))
             {
                 info.min = (float)ptrFloat->GetMin();
@@ -594,7 +594,7 @@ bool GeniCamCamera::getParameterInfo(cmrParameterInfo& info)
             }
             else
             {
-                ptrInt = nodeMap->_GetNode("ExposureTime");
+                ptrInt = nodeMap.GetNode("ExposureTime");
                 if(IsAvailable(ptrInt))
                 {
                     info.min = (float)ptrInt->GetMin();
@@ -615,37 +615,37 @@ bool GeniCamCamera::getParameterInfo(cmrParameterInfo& info)
     catch(GenICam::GenericException &ex)
     {
         // Show error here
-        std::cout << "GenericException: " << ex.GetDescription() << std::endl;
+        qDebug() << "GenericException: " << ex.GetDescription();
     }
     return false;
 }
 
-void GeniCamCamera::UpdateStatistics(const rcg::Buffer*  pBuff)
+void BaslerCamera::UpdateStatistics(const Pylon::CGrabResultPtr pBuff)
 {
-    if(pBuff)
+    if(pBuff.IsValid())
     {
-        if(pBuff->getIsIncomplete())
+        if(!pBuff->GrabSucceeded())
         {
             // Update statFramesIncomplete statistics
-            mStatistics[CameraStatEnum::statFramesIncomplete]++;
+            mStatistics[cmrCameraStatistic::statFramesIncomplete]++;
         }
         else
         {
             // Update statistics
             // Total number of frames
-            mStatistics[CameraStatEnum::statFramesTotal]++;
+            mStatistics[cmrCameraStatistic::statFramesTotal]++;
             // Timestamp (we do not know the frequency!)
-            mStatistics[CameraStatEnum::statCurrTimestamp] = pBuff->getTimestamp();
+            mStatistics[cmrCameraStatistic::statCurrTimestamp] = pBuff->GetTimeStamp();
 
             // new frame ID
-            uint64_t newFrameId = pBuff->getFrameID();
-            mStatistics[CameraStatEnum::statCurrFrameID] = newFrameId;
+            uint64_t newFrameId = pBuff->GetID();
+            mStatistics[cmrCameraStatistic::statCurrFrameID] = newFrameId;
 
             // Check if frames were dropped in the Camera
-            if(mCurrFrameID!=0 && mCurrFrameID+1!=newFrameId)
+            if(mCurrFrameID != 0 && mCurrFrameID + 1 != newFrameId)
             {
-                mDropFramesNum+=(newFrameId>mCurrFrameID)?(newFrameId-mCurrFrameID-1):0;
-                mStatistics[CameraStatEnum::statFramesDropped] = mDropFramesNum;
+                mDropFramesNum += (newFrameId > mCurrFrameID) ? (newFrameId - mCurrFrameID - 1):0;
+                mStatistics[cmrCameraStatistic::statFramesDropped] = mDropFramesNum;
             }
             mCurrFrameID = newFrameId;
 
@@ -664,11 +664,11 @@ void GeniCamCamera::UpdateStatistics(const rcg::Buffer*  pBuff)
                     auto usT = micorsecTotal.count();
 
                     // FPS - average per grabbing session
-                    mStatistics[CameraStatEnum::statCurrFps100] = ((mStatistics[CameraStatEnum::statFramesTotal]-1)*100000000)/usT;
+                    mStatistics[cmrCameraStatistic::statCurrFps100] = ((mStatistics[cmrCameraStatistic::statFramesTotal] - 1) * 100000000) / usT;
 
                     // Throughput
-                    mTotalBytesTransferred+=pBuff->getDataSize();
-                    mStatistics[CameraStatEnum::statCurrTroughputMbs100] = (mTotalBytesTransferred*800)/usT;
+                    mTotalBytesTransferred += pBuff->GetImageSize();
+                    mStatistics[cmrCameraStatistic::statCurrTroughputMbs100] = (mTotalBytesTransferred * 800) / usT;
                 }
                 else
                 {
@@ -678,11 +678,11 @@ void GeniCamCamera::UpdateStatistics(const rcg::Buffer*  pBuff)
                     auto usT = micorsecTotal.count();
 
                     // FPS - average per grabbing session
-                    mStatistics[CameraStatEnum::statCurrFps100] = 100000000/usT;
+                    mStatistics[cmrCameraStatistic::statCurrFps100] = 100000000/usT;
 
                     // Throughput
-                    auto bytesTransferred=pBuff->getDataSize();
-                    mStatistics[CameraStatEnum::statCurrTroughputMbs100] = (bytesTransferred*800)/usT;
+                    auto bytesTransferred = pBuff->GetImageSize();
+                    mStatistics[cmrCameraStatistic::statCurrTroughputMbs100] = (bytesTransferred*800)/usT;
 
                     mPrevFrameTime = currTime;
                 }
@@ -693,13 +693,13 @@ void GeniCamCamera::UpdateStatistics(const rcg::Buffer*  pBuff)
     else
     {
         // Reset the statistics
-        mStatistics[CameraStatEnum::statCurrFps100] = 0;
-        mStatistics[CameraStatEnum::statCurrFrameID] =0;
-        mStatistics[CameraStatEnum::statCurrTimestamp] = 0;
-        mStatistics[CameraStatEnum::statCurrTroughputMbs100] = 0;
-        mStatistics[CameraStatEnum::statFramesDropped] = 0;
-        mStatistics[CameraStatEnum::statFramesIncomplete] = 0;
-        mStatistics[CameraStatEnum::statFramesTotal] = 0;
+        mStatistics[cmrCameraStatistic::statCurrFps100] = 0;
+        mStatistics[cmrCameraStatistic::statCurrFrameID] =0;
+        mStatistics[cmrCameraStatistic::statCurrTimestamp] = 0;
+        mStatistics[cmrCameraStatistic::statCurrTroughputMbs100] = 0;
+        mStatistics[cmrCameraStatistic::statFramesDropped] = 0;
+        mStatistics[cmrCameraStatistic::statFramesIncomplete] = 0;
+        mStatistics[cmrCameraStatistic::statFramesTotal] = 0;
 
         mCurrFrameID = 0;
         mDropFramesNum = 0;
@@ -707,5 +707,6 @@ void GeniCamCamera::UpdateStatistics(const rcg::Buffer*  pBuff)
         mPrevFrameTime = kZeroTime;
         mTotalBytesTransferred=0;
     }
-};
+}
+
 #endif

@@ -23,6 +23,7 @@ INCLUDEPATH += $$PWD/Camera
 INCLUDEPATH += $$PWD/RtspServer
 
 SOURCES += main.cpp\
+    Camera/BaslerCamera.cpp \
     MainWindow.cpp \
     Globals.cpp \
     AppSettings.cpp \
@@ -57,6 +58,7 @@ SOURCES += main.cpp\
 win32: SOURCES += $$OTHER_LIB_PATH/FastvideoSDK/core_samples/SurfaceTraitsInternal.cpp
 
 HEADERS  += MainWindow.h \
+    Camera/BaslerCamera.h \
     Globals.h \
     AppSettings.h \
     FFCReader.h \

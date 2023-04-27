@@ -153,7 +153,15 @@ contains(DEFINES, SUPPORT_GENICAM){
     LIBS += -L$$GENAPIPATH/lib/Win64_x64 -lGCBase_MD_$${GENAPIVER} -lGenApi_MD_$${GENAPIVER} -lGenCP_MD_$${GENAPIVER}
     LIBS += -llog4cpp_MD_$${GENAPIVER} -lLog_MD_$${GENAPIVER} -lXmlParser_MD_$${GENAPIVER}
 }
+contains(DEFINES, SUPPORT_BASLER){
+    BASLER_PATH = $$OTHER_LIB_PATH/Basler
 
+    FASTVIDEO_EXTRA_DLLS += $${BASLER_PATH}/Runtime/$$PLATFORM/GCBase_MD_VC141_v3_1_Basler_pylon.dll
+    FASTVIDEO_EXTRA_DLLS += $${BASLER_PATH}/Runtime/$$PLATFORM/PylonC_v7_1.dll
+
+    INCLUDEPATH += $$BASLER_PATH/Development/include
+    LIBS += -L$$BASLER_PATH/Development/lib/$$PLATFORM -lGCBase_MD_VC141_v3_1_Basler_pylon -lPylonC_v7_1
+}
 contains(DEFINES, SUPPORT_LUCID){
 
 #    LUCID_ROOT = $$LUCID_DEV_ROOT

@@ -193,7 +193,8 @@ void Stream::startStreaming(int na)
       break;
     }
 
-    if (!err && gentl->DSQueueBuffer(stream, p) != GenTL::GC_ERR_SUCCESS)
+    GenTL::GC_ERROR ret = gentl->DSQueueBuffer(stream, p);
+    if (!err && ret != GenTL::GC_ERR_SUCCESS)
     {
       err=true;
       break;
