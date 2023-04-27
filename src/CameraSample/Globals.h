@@ -53,6 +53,7 @@ public:
 
     static QString getUnicFileName(const QString& fileName);
     static QString completePath(const QString& path);
+    static QString getPathOfFile(const QString& fileName);
 
     static bool gEnableLog;
 

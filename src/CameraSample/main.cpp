@@ -101,14 +101,14 @@ int main(int argc, char *argv[])
     if(err != cudaSuccess)
     {
         QMessageBox::critical(nullptr, QCoreApplication::applicationName(),
-                              QObject::trUtf8("No CUDA driver installed.\nProcessing is impossible."));
+                              QObject::tr("No CUDA driver installed.\nProcessing is impossible."));
         return 0;
     }
     //
     if(drvVer < MIN_DRIVER_VERSION)
     {
         QMessageBox::critical(nullptr, QCoreApplication::applicationName(),
-                              QObject::trUtf8("CUDA 10.0 compatible driver required.\nPlease update NVidia drivers to the latest version."));
+                              QObject::tr("CUDA 10.0 compatible driver required.\nPlease update NVidia drivers to the latest version."));
         return 0;
     }
 
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
     if(devCount == 0)
     {
         QMessageBox::critical(nullptr, QCoreApplication::applicationName(),
-                              QObject::trUtf8("No CUDA device found.\nProcessing is impossible."));
+                              QObject::tr("No CUDA device found.\nProcessing is impossible."));
         return 0;
     }
 
@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
     if(!found)
     {
         QMessageBox::critical(nullptr, QCoreApplication::applicationName(),
-                              QObject::trUtf8("Kepler architecture or later GPU required.\nProcessing is impossible."));
+                              QObject::tr("Kepler architecture or later GPU required.\nProcessing is impossible."));
         return 0;
     }
 
