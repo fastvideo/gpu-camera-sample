@@ -43,7 +43,7 @@ Soon we are going to add support for <a href="https://emergentvisiontec.com/" ta
 ### Requirements for Windows
 
 * Camera SDK or GenICam package + camera vendor GenTL producer (.cti). Сurrently XIMEA, MATRIX VISION, Basler, FLIR, Imperx, JAI, LUCID Vision Labs, Daheng Imaging cameras are supported
-* Fastvideo SDK (demo) ver.0.17.6.1
+* Fastvideo SDK (demo) ver.0.18.1.0
 * NVIDIA CUDA-12.1
 * Qt ver.5.13.1
 * Compiler MSVC 2022 or later
