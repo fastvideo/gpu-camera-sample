@@ -278,7 +278,7 @@ To test a real application with XIMEA cameras (USB3 or PCIe), please have a look
 * Defringe - done
 * <a href="https://www.fastcompression.com/products/fastvcr-ximea-software.htm" target="_blank">FastVCR software for XIMEA cameras</a> - done
 * Support for Jetson AGX Orin and CUDA-11.4 - done
-* HDR image processing on GPU for automotive 16/20/24-bit image sensors (IMX490, IMX728, AR0820, OX08, etc.) - done
+* HDR image processing on GPU for automotive 16/20/24-bit image sensors (IMX490, IMX728, AR0820, OX08) - done
 * High performance JPEG-XS decoder on GPU - done
 * Support for XIMEA MU181CR-ON camera - done
 * Support for Jetson AGX Orin (CUDA-11.4) and CUDA-11.7 - done
@@ -311,7 +311,7 @@ To test a real application with XIMEA cameras (USB3 or PCIe), please have a look
 
 * Download <a href="https://www.fastcinemadng.com/download/download.html" target="_blank">Fast CinemaDNG Processor</a> software for Windows, manual and test DNG and BRAW footages
 * FastVCR software for XIMEA cameras with GPU-based image processing - <a href="https://www.fastcompression.com/download/FastVCR_Portable.7z">download link for Windows version</a> 
-* Download <a href=https://drive.google.com/file/d/1s56wzH3xZg9lrXW-w1NyrHcmlZpoZzTW/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for Windows-10, 64-bit</a> (valid till June 15, 2024)
+* Download <a href="https://drive.google.com/file/d/1s56wzH3xZg9lrXW-w1NyrHcmlZpoZzTW/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for Windows-10, 64-bit</a> (valid till June 15, 2024)
 * Download <a href="https://drive.google.com/file/d/1ezAPWKz_ovLsmQiID-mlVIvRD2p0FQKI/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for Linux Ubuntu 22.04, 64-bit</a> (valid till June 30, 2024)
 * Download <a href="https://drive.google.com/file/d/1TgB1A0Yz8BEHZKsgo9d80ntEJd0hLjsf/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, NX</a> (valid till June 25, 2024)
 * Download <a href="https://drive.google.com/file/d/1jw9QfdKs4nw18ZwIiNTjwifjWyDnyzwu/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for NVIDIA Jetson Xavier, Orin</a> (valid till July 06, 2024)
