@@ -309,11 +309,10 @@ To test a real application with XIMEA cameras (USB3 or PCIe), please have a look
 
 ## Downloads
 
-* Download <a href="https://www.fastcinemadng.com/download/download.html" target="_blank">Fast CinemaDNG Processor</a> software for Windows, manual and test DNG and BRAW footages
 * FastVCR software for XIMEA cameras with GPU-based image processing - <a href="https://www.fastcompression.com/download/FastVCR_Portable.7z">download link for Windows version</a> 
+* Download <a href="https://www.fastcinemadng.com/download/download.html" target="_blank">Fast CinemaDNG Processor</a> software for Windows, manual and test DNG and BRAW footages
 * Download <a href="https://drive.google.com/file/d/1s56wzH3xZg9lrXW-w1NyrHcmlZpoZzTW/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for Windows-10, 64-bit</a> (valid till June 15, 2024)
 * Download <a href="https://drive.google.com/file/d/1ezAPWKz_ovLsmQiID-mlVIvRD2p0FQKI/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for Linux Ubuntu 22.04, 64-bit</a> (valid till June 30, 2024)
 * Download <a href="https://drive.google.com/file/d/1TgB1A0Yz8BEHZKsgo9d80ntEJd0hLjsf/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, NX</a> (valid till June 25, 2024)
 * Download <a href="https://drive.google.com/file/d/1jw9QfdKs4nw18ZwIiNTjwifjWyDnyzwu/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for NVIDIA Jetson Xavier, Orin</a> (valid till July 06, 2024)
 * Download <a href="https://www.fastcompression.com/download/Fastvideo_SDK_manual.pdf" target="_blank">Fastvideo SDK Manual</a>
-* <a href="https://imaginghub.com/projects/455-real-time-image-processing-on-nvidia-gpu-with-basler-pylon-and-fastvideo" target="_blank">Real-time Image Processing on NVIDIA GPU with Basler pylon</a>
