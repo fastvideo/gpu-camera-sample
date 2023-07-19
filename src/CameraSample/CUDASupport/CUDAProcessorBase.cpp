@@ -1044,7 +1044,7 @@ fastStatus_t CUDAProcessorBase::Transform(GPUImage_t *image, CUDAProcessorOption
     stats[QStringLiteral("hCrop")] = -1;
     stats[QStringLiteral("hDeviceToHostAdapter")] = -1;
     stats[QStringLiteral("hExportToDevice")] = -1;
-    stats[QStringLiteral("hMjpegEncoder")] = -1;
+    //stats[QStringLiteral("hMjpegEncoder")] = -1;
     stats[QStringLiteral("totalTime")] = -1;
     stats[QStringLiteral("totalFps")] = -1;
     stats[QStringLiteral("totalGPUTime")] = -1;

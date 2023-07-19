@@ -77,7 +77,7 @@ bool PGMCamera::open(uint32_t devID)
     if(samples != 1)
         return false;
 
-    mFPS = 30;
+    mFPS = 60;
 
     if(sampleSize == 8)
     {
@@ -167,7 +167,6 @@ void PGMCamera::startStreaming()
             QMutexLocker l(&mLock);
             mRawProc->wake();
         }
-
     }
 
 }

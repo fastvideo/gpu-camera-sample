@@ -63,15 +63,23 @@ FASTVIDEO_EXTRA_DLLS += $$FFMPEG_SRC
 #FASTVIDEO_EXTRA_DLLS += $$[QT_INSTALL_BINS]/icuuc58.dll
 #FASTVIDEO_EXTRA_DLLS += $$LIBTIFF_LIB/tiff.dll
 
-CUDA_TOOLKIT_PATH = "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.4"
+CUDA_TOOLKIT_PATH = "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.1"
 CUDAINC += $$CUDA_TOOLKIT_PATH/include
 CUDA_DLL_PATH = $$CUDA_TOOLKIT_PATH/bin
-CUDA_DLL += $$CUDA_DLL_PATH/cudart64_110.dll
+CUDA_DLL += $$CUDA_DLL_PATH/cudart64_12.dll
 
-CUDA_DLL += $$CUDA_DLL_PATH/nppc64_11.dll
-CUDA_DLL += $$CUDA_DLL_PATH/nppif64_11.dll
-CUDA_DLL += $$CUDA_DLL_PATH/nppicc64_11.dll
-CUDA_DLL += $$CUDA_DLL_PATH/nppig64_11.dll
+CUDA_DLL += $$CUDA_DLL_PATH/nppc64_12.dll
+CUDA_DLL += $$CUDA_DLL_PATH/nppif64_12.dll
+CUDA_DLL += $$CUDA_DLL_PATH/nppicc64_12.dll
+CUDA_DLL += $$CUDA_DLL_PATH/nppig64_12.dll
+
+CUDA_LIB += -lnppicc
+CUDA_LIB += -lnppig
+CUDA_LIB += -lnppif
+CUDA_LIB += -lnpps
+CUDA_LIB += -lnppc
+CUDA_LIB += -lcudart
+CUDA_LIB += -lnvml
 
 # NVIDIA VIDEO CODEC SDK
 # https://developer.nvidia.com/nvidia-video-codec-sdk/download
@@ -153,7 +161,15 @@ contains(DEFINES, SUPPORT_GENICAM){
     LIBS += -L$$GENAPIPATH/lib/Win64_x64 -lGCBase_MD_$${GENAPIVER} -lGenApi_MD_$${GENAPIVER} -lGenCP_MD_$${GENAPIVER}
     LIBS += -llog4cpp_MD_$${GENAPIVER} -lLog_MD_$${GENAPIVER} -lXmlParser_MD_$${GENAPIVER}
 }
+contains(DEFINES, SUPPORT_BASLER){
+    BASLER_PATH = $$OTHER_LIB_PATH/Basler
 
+    FASTVIDEO_EXTRA_DLLS += $${BASLER_PATH}/Runtime/$$PLATFORM/GCBase_MD_VC141_v3_1_Basler_pylon.dll
+    FASTVIDEO_EXTRA_DLLS += $${BASLER_PATH}/Runtime/$$PLATFORM/PylonC_v7_1.dll
+
+    INCLUDEPATH += $$BASLER_PATH/Development/include
+    LIBS += -L$$BASLER_PATH/Development/lib/$$PLATFORM -lGCBase_MD_VC141_v3_1_Basler_pylon -lPylonC_v7_1
+}
 contains(DEFINES, SUPPORT_LUCID){
 
 #    LUCID_ROOT = $$LUCID_DEV_ROOT

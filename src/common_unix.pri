@@ -5,10 +5,15 @@ IMPERX_PATH = $$OTHER_LIB_PATH/Imperx
 
 # CUDA
 contains(TARGET_ARCH, arm64){
+    #For Jetson Tx2, NX
     CUDA_TOOLKIT_PATH = "/usr/local/cuda-10.2"
+
+    #For Jetson Xavier, Orin
+    #CUDA_TOOLKIT_PATH = "/usr/local/cuda-11.4"
+
 }
 else {
-    CUDA_TOOLKIT_PATH = "/usr/local/cuda-11"
+    CUDA_TOOLKIT_PATH = "/usr/local/cuda-12"
 }
 INCLUDEPATH += $${CUDA_TOOLKIT_PATH}/include
 CUDA_LIB  = -L$${CUDA_TOOLKIT_PATH}/lib64
@@ -39,8 +44,7 @@ FASTVIDEO_LIB += -lfastvideo_sdk #-lfastvideo_denoise
 # -lfastvideo_mjpeg -lfastvideo_denoise -lfastvideo_nppFilter -lfastvideo_nppResize -lfastvideo_nppGeometry
 #
 
-FASTVIDEO_EXTRA_DLLS += $$FASTVIDEO_SDK/lib/$$PLATFORM/libfastvideo_sdk.so.0.17.0.1.0170001
-FASTVIDEO_EXTRA_DLLS += $$FASTVIDEO_SDK/lib/$$PLATFORM/libfastvideo_denoise.so.1.0.0.0.0170001
+FASTVIDEO_EXTRA_DLLS += $$FASTVIDEO_SDK/lib/$$PLATFORM/libfastvideo_sdk.so.0.18.1.0.0180100
 
 # NVIDIA VIDEO CODEC SDK
 # https://developer.nvidia.com/nvidia-video-codec-sdk/download

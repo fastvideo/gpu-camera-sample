@@ -44,16 +44,16 @@ Soon we are going to add support for <a href="https://emergentvisiontec.com/" ta
 
 * Camera SDK or GenICam package + camera vendor GenTL producer (.cti). Сurrently XIMEA, MATRIX VISION, Basler, FLIR, Imperx, JAI, LUCID Vision Labs, Daheng Imaging cameras are supported
 * Fastvideo SDK (demo) ver.0.17.6.1
-* NVIDIA CUDA-11.4
+* NVIDIA CUDA-12.1
 * Qt ver.5.13.1
-* Compiler MSVC 2017 or later
+* Compiler MSVC 2022 or later
 
 ### Requirements for Linux
 
-* Ubuntu 18.04 (x64 or Arm64)
+* Ubuntu 22.04 for x64 platform, Ubuntu 20.04 for Arm64 platform with CUDA 11, Ubuntu 18.04 for Arm64 platform with CUDA 10
 * Camera SDK or GenICam package + camera vendor GenTL producer (.cti). Currently XIMEA, MATRIX VISION, Basler, FLIR, Imperx, JAI, Daheng Imaging cameras are supported
-* Fastvideo SDK (demo) ver.0.17.6.1
-* NVIDIA CUDA-11.4 for x64 and CUDA-10.2 for ARM64 platform
+* Fastvideo SDK (demo) ver.0.18.1.0
+* NVIDIA CUDA-12.1 for x64, CUDA-11.4 (Jetson AGX Xavier, Orin) or CUDA-10.2 (Jetson Tx2, NX) for ARM64 platform 
 * Compiler gcc 7.4 or later
 * Qt 5 (qtbase5-dev)
 ``` console
@@ -95,7 +95,7 @@ git clone https://github.com/fastvideo/gpu-camera-sample.git
    * Unpack GenICam_V3_2_0-Win64_x64_VC141-Release-SDK.zip into \<ProjectRoot\>/OtherLibs/GenICam folder.
    * Unpack GenICam_V3_2_0-Win64_x64_VC141-Release-Runtime.zip into \<ProjectRoot\>/OtherLibs/GenICam/library/CPP
 
-You also can download precompiled libs from <a href="https://drive.google.com/file/d/1Ya4j-UmnUwq1_8ax8ajv37DIl5SlAviD/view?usp=sharing" target="_blank">here</a>
+You also can download precompiled libs from <a href="https://drive.google.com/file/d/1NTcWsZdT1fhSlf6yljMNpSxAwyTIlCYZ/view?usp=drive_link" target="_blank">here</a>
 * By default the application will be built with no camera support. The only option is camera simulator which is working with PGM files. 
 * Open \<ProjectRoot\>/src/GPUCameraSample.pro in Qt Creator.
 * Open common_defs.pri
@@ -171,7 +171,7 @@ to test that camera is working.
 * If GenICam support is enabled, set environment variable GENICAM_GENTL64_PATH with full path to the camera vendor GenTL producer (.cti) library, before run the application.
 * Binaries will be placed into \<ProjectRoot\>/GPUCameraSample_Arm64 or GPUCameraSample_Linux64 folder. To run the application from the terminal run GPUCameraSample.sh. Necessary symbolic links will be made during compile time.
 
-You also can download precompiled libs from <a href="https://drive.google.com/file/d/15GQa9RWMEIpNNsISGG3m8U3X0uMwSBJm/view?usp=sharing" target="_blank">here</a>
+You also can download precompiled libs from <a href="https://drive.google.com/file/d/1h5EeCLHjmDxBSKo5usXbATOYXlurrRO1/view?usp=drive_link" target="_blank">here</a>
 
 ### How to work with NVIDIA Jetson to get maximum performance
 
@@ -310,8 +310,9 @@ To test a real application with XIMEA cameras (USB3 or PCIe), please have a look
 
 * Download <a href="https://www.fastcinemadng.com/download/download.html" target="_blank">Fast CinemaDNG Processor</a> software for Windows, manual and test DNG and BRAW footages
 * FastVCR software for XIMEA cameras with GPU-based image processing - <a href="https://www.fastcompression.com/download/FastVCR_Portable.7z">download link for Windows version</a> 
-* Download <a href="https://drive.google.com/file/d/1e4lMN1gOOL9M8zPI_tFHCHM5sWFKL4YE/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for Windows-10, 64-bit</a> (valid till May 01, 2023)
-* Download <a href="https://drive.google.com/file/d/14YwjKvooRos1yKFzlRtdKr5RfS_vUnnZ/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a> (valid till May 03, 2023)
-* Download <a href="https://drive.google.com/file/d/1HgfqboijA8VlQAulEm69a7ayx-hQVxuO/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> (valid till May 08, 2023)
+* Download <a href=https://drive.google.com/file/d/1s56wzH3xZg9lrXW-w1NyrHcmlZpoZzTW/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for Windows-10, 64-bit</a> (valid till June 15, 2024)
+* Download <a href="https://drive.google.com/file/d/1ezAPWKz_ovLsmQiID-mlVIvRD2p0FQKI/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for Linux Ubuntu 22.04, 64-bit</a> (valid till June 30, 2024)
+* Download <a href="https://drive.google.com/file/d/1TgB1A0Yz8BEHZKsgo9d80ntEJd0hLjsf/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, NX</a> (valid till June 25, 2024)
+* Download <a href="https://drive.google.com/file/d/1jw9QfdKs4nw18ZwIiNTjwifjWyDnyzwu/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for NVIDIA Jetson Xavier, Orin</a> (valid till July 06, 2024)
 * Download <a href="https://www.fastcompression.com/download/Fastvideo_SDK_manual.pdf" target="_blank">Fastvideo SDK Manual</a>
 * <a href="https://imaginghub.com/projects/455-real-time-image-processing-on-nvidia-gpu-with-basler-pylon-and-fastvideo" target="_blank">Real-time Image Processing on NVIDIA GPU with Basler pylon</a>
