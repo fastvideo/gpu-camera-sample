@@ -93,7 +93,7 @@ void RawProcessor::stop()
     }
 
     //Wait up to 1 sec until mWorking == false
-    QTime tm;
+    QElapsedTimer tm;
     tm.start();
     while(mWorking && tm.elapsed() <= 1000)
     {

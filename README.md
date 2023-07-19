@@ -283,8 +283,9 @@ To test a real application with XIMEA cameras (USB3 or PCIe), please have a look
 * Support for XIMEA MU181CR-ON camera - done
 * Support for Jetson AGX Orin (CUDA-11.4) and CUDA-11.7 - done
 * Fast undistortion on GPU with precise and compact maps - in progress
+* Support for Jetson Orin (CUDA-11.8) and CUDA-12.1 - in progress
 * High performance chromatic aberration suppression in RAW domain - in progress
-* Support for Emergent Vision Technologies, DALSA, IDS Imaging, Baumer, Kaya Instruments, SVS-Vistek cameras - in progress
+* Support for Emergent Vision Technologies, DALSA, Baumer, Kaya Instruments, SVS-Vistek cameras - in progress
 * RAW Bayer codec
 * JPEG2000 encoder and decoder on GPU for camera applications
 * Interoperability with FFmpeg, UltraGrid, and GStreamer

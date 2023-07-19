@@ -267,6 +267,27 @@ bool GeniCamCamera::open(uint32_t devID)
         mFPS =  ptrFloat->GetValue();
     }
 
+    CEnumerationPtr ptrLineSel = nodeMap->_GetNode("LineSelector");
+    if(IsAvailable(ptrLineSel) && IsWritable(ptrLineSel))
+    {
+         CEnumEntryPtr ptrLineSelVal = ptrLineSel->GetEntryByName("Line2");
+         ptrLineSel->SetIntValue(ptrLineSelVal->GetValue());
+
+    }
+
+    CEnumerationPtr ptrLineMode = nodeMap->_GetNode("LineMode");
+    if(IsAvailable(ptrLineMode) && IsWritable(ptrLineMode))
+    {
+         CEnumEntryPtr ptrLineModeOut = ptrLineMode->GetEntryByName("Output");
+         ptrLineMode->SetIntValue(ptrLineModeOut->GetValue());
+    }
+
+//    camera.LineSelector.SetValue(LineSelector_Line2);
+//    camera.LineMode.SetValue(LineMode_Output);
+//    LineModeEnums e = camera.LineMode.GetValue();
+
+
+
     if(!mInputBuffer.allocate(mWidth, mHeight, mSurfaceFormat))
         return false;
 

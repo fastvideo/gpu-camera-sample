@@ -311,7 +311,7 @@ void MainWindow::initNewCamera(GPUCameraBase* cmr, uint32_t devID)
     if(!mCameraPtr->open(devID))
     {
         QMessageBox::critical(this, QCoreApplication::applicationName(),
-                              QObject::trUtf8("Cannot open camera\nor no camera is connected."));
+                              QObject::tr("Cannot open camera\nor no camera is connected."));
 
         return;
     }
@@ -428,11 +428,13 @@ void MainWindow::openPGMFile(bool isBayer)
 {
     QString fileName = QFileDialog::getOpenFileName(this,
                                                     QStringLiteral("Select pgm file"),
-                                                    QDir::homePath(),
+                                                    mCurrentDir,
                                                     QStringLiteral("Images (*.pgm)"));
 
     if(fileName.isEmpty())
         return;
+
+    mCurrentDir = Globals::getPathOfFile(fileName);
 
     if(mCameraPtr)
         mCameraPtr->stop();
@@ -662,6 +664,8 @@ void MainWindow::readSettings()
     ui->txtOutPath->setText(settings.value("Record/OutPath", def).toString());
     ui->txtFilePrefix->setText(settings.value("Record/FilePrefix", QStringLiteral("Frame_")).toString());
 
+    mCurrentDir = settings.value("Common/CurrentDirectory", QDir::homePath()).toString();
+
     {
         QSignalBlocker b(ui->cboOutFormat);
         ui->cboOutFormat->setCurrentIndex(ui->cboOutFormat->findData(
@@ -679,6 +683,22 @@ void MainWindow::readSettings()
         ui->spnJpegQty->setValue(settings.value("Record/JpegQty", 90).toInt());
     }
 
+    {
+        QSignalBlocker b(ui->chkZoomFit);
+        ui->chkZoomFit->setChecked(settings.value("Params/Zoom", true).toBool());
+    }
+    {
+        QSignalBlocker b(ui->sldZoom);
+        ui->sldZoom->setValue(settings.value("Params/ZoomVal", 99).toInt());
+    }
+    {
+        QSignalBlocker b(ui->cboBayerPattern);
+        ui->cboBayerPattern->setCurrentIndex(settings.value("Params/Bayer", 0).toInt());
+    }
+    {
+        QSignalBlocker b(ui->cboBayerType);
+        ui->cboBayerType->setCurrentIndex(settings.value("Params/BayerType", 0).toInt());
+    }
 }
 
 void MainWindow::writeSettings()
@@ -692,6 +712,13 @@ void MainWindow::writeSettings()
     settings.setValue("Record/OutFormat", ui->cboOutFormat->currentData());
     settings.setValue("Record/SamplingFormat", ui->cboOutFormat->currentData());
     settings.setValue("Record/JpegQty", ui->spnJpegQty->value());
+
+    settings.setValue("Common/CurrentDirectory", mCurrentDir);
+
+    settings.setValue("Params/Zoom", ui->chkZoomFit->isChecked());
+    settings.setValue("Params/ZoomVal", ui->sldZoom->value());
+    settings.setValue("Params/Bayer", ui->cboBayerPattern->currentIndex());
+    settings.setValue("Params/BayerType", ui->cboBayerType->currentIndex());
 }
 
 void MainWindow::on_cboGamma_currentIndexChanged(int index)
@@ -836,7 +863,7 @@ void MainWindow::onGPUError()
     fastStatus_t ret = mProcessorPtr->getLastError();
     if(ret != FAST_OK)
     {
-        strInfo = trUtf8("Error occured:\n%1\nCode: %2 (%3)").
+        strInfo = tr("Error occured:\n%1\nCode: %2 (%3)").
                 arg(mProcessorPtr->getLastErrorDescription()).
                 arg(ret).
                 arg(getErrDescription(ret));
@@ -905,7 +932,7 @@ void MainWindow::onGPUFinished()
     fastStatus_t ret = mProcessorPtr->getLastError();
     if(ret != FAST_OK)
     {
-        strInfo = trUtf8("Error occured:\n%1\nCode: %2 (%3)").
+        strInfo = tr("Error occured:\n%1\nCode: %2 (%3)").
                 arg(mProcessorPtr->getLastErrorDescription()).
                 arg(ret).
                 arg(getErrDescription(ret));
@@ -922,7 +949,7 @@ void MainWindow::onGPUFinished()
     if(val > 0 && viewportMem > 0)
         val += viewportMem;
 
-    strInfo = trUtf8("Total memory %1 MB, free %2 MB, allocated %3 MB\n").
+    strInfo = tr("Total memory %1 MB, free %2 MB, allocated %3 MB\n").
             arg(double(stats[QStringLiteral("totalMem")] / 1048576), 0, 'f', 0).
             arg(double(stats[QStringLiteral("freeMem")] / 1048576), 0, 'f', 0).
             arg(val > 0 ? double(val) / 1048576 : 0, 0, 'f', 0);
@@ -930,92 +957,92 @@ void MainWindow::onGPUFinished()
     int w = int(stats[QStringLiteral("inputWidth")]);
     int h = int(stats[QStringLiteral("inputHeight")]);
     if(w > 0 && h > 0)
-        strInfo += trUtf8("Input image: %1x%2 pixels\n").arg(w).arg(h);
+        strInfo += tr("Input image: %1x%2 pixels\n").arg(w).arg(h);
 
     val = stats[QStringLiteral("hRawUnpacker")];
     if(val > 0)
-        strInfo += trUtf8("Raw Unpacker = %1 ms\n").arg(double(val), 0, 'f', 2);
+        strInfo += tr("Raw Unpacker = %1 ms\n").arg(double(val), 0, 'f', 2);
 
     val = stats[QStringLiteral("hHostToDeviceAdapter")];
     if(val > 0)
-        strInfo += trUtf8("Host-to-device transfer = %1 ms\n").arg(double(val), 0, 'f', 2);
+        strInfo += tr("Host-to-device transfer = %1 ms\n").arg(double(val), 0, 'f', 2);
 
     val = stats[QStringLiteral("hSAM")];
     if(val > 0)
-        strInfo += trUtf8("Dark frame and flat field correction = %1 ms\n").arg(double(val), 0, 'f', 2);
+        strInfo += tr("Dark frame and flat field correction = %1 ms\n").arg(double(val), 0, 'f', 2);
 
     val = stats[QStringLiteral("hLinearizationLut")];
     if(val > 0)
-        strInfo += trUtf8("Linearization LUT = %1 ms\n").arg(double(val), 0, 'f', 2);
+        strInfo += tr("Linearization LUT = %1 ms\n").arg(double(val), 0, 'f', 2);
 
     val = stats[QStringLiteral("hBpc")];
     if(val > 0)
-        strInfo += trUtf8("Bad pixels correction = %1 ms\n").arg(double(val), 0, 'f', 2);
+        strInfo += tr("Bad pixels correction = %1 ms\n").arg(double(val), 0, 'f', 2);
 
     val = stats[QStringLiteral("hWhiteBalance")];
     if(val > 0)
-        strInfo += trUtf8("White balance = %1 ms\n").arg(double(val), 0, 'f', 2);
+        strInfo += tr("White balance = %1 ms\n").arg(double(val), 0, 'f', 2);
 
     val = stats[QStringLiteral("hDebayer")];
     if(val > 0)
-        strInfo += trUtf8("Debayer = %1 ms\n").arg(double(val), 0, 'f', 2);
+        strInfo += tr("Debayer = %1 ms\n").arg(double(val), 0, 'f', 2);
 
     val = stats[QStringLiteral("hDenoise")];
     if(val > 0)
-        strInfo += trUtf8("Denoise = %1 ms\n").arg(double(val), 0, 'f', 2);
+        strInfo += tr("Denoise = %1 ms\n").arg(double(val), 0, 'f', 2);
 
 
     val = stats[QStringLiteral("hOutLut")];
     if(val > 0)
-        strInfo += trUtf8("Output gamma = %1 ms\n").arg(double(val), 0, 'f', 2);
+        strInfo += tr("Output gamma = %1 ms\n").arg(double(val), 0, 'f', 2);
 
     val = stats[QStringLiteral("h16to8Transform")];
     if(val > 0)
-        strInfo += trUtf8("16 to 8 bit transform = %1 ms\n").arg(double(val), 0, 'f', 2);
+        strInfo += tr("16 to 8 bit transform = %1 ms\n").arg(double(val), 0, 'f', 2);
 
 //    val = stats[QStringLiteral("hHistogram")];
 //    if(val > 0)
-//        strInfo += trUtf8("Histogram = %1 ms\n").arg(double(val), 0, 'f', 2);
+//        strInfo += tr("Histogram = %1 ms\n").arg(double(val), 0, 'f', 2);
 
     val = stats[QStringLiteral("hMjpegEncoder")];
     if(val > 0)
-        strInfo += trUtf8("JPEG encoder time: %1 ms\n").arg(double(val), 0, 'f', 2);
+        strInfo += tr("JPEG encoder time: %1 ms\n").arg(double(val), 0, 'f', 2);
 
     val = stats[QStringLiteral("hDeviceToHostAdapter")];
     if(val > 0)
-        strInfo += trUtf8("Device-to-host transfer = %1 ms\n").arg(double(val), 0, 'f', 2);
+        strInfo += tr("Device-to-host transfer = %1 ms\n").arg(double(val), 0, 'f', 2);
 
     val = stats[QStringLiteral("hExportToDevice")];
     if(val > 0)
-        strInfo += trUtf8("Viewport texture copy = %1 ms\n").arg(double(val), 0, 'f', 2);
+        strInfo += tr("Viewport texture copy = %1 ms\n").arg(double(val), 0, 'f', 2);
 
     val = stats[QStringLiteral("procFrames")];
     if(val >= 0)
-        strInfo += trUtf8("Frames written = %1\n").arg(int(val));
+        strInfo += tr("Frames written = %1\n").arg(int(val));
 
     val = stats[QStringLiteral("droppedFrames")];
     if(val >= 0)
-        strInfo += trUtf8("Frames dropped = %1\n").arg(int(val));
+        strInfo += tr("Frames dropped = %1\n").arg(int(val));
 
 
     float totalGPU = stats[QStringLiteral("totalGPUTime")];
     if(totalGPU > 0)
     {
         totalGPU += stats[QStringLiteral("totalViewportTime")] > 0 ? stats[QStringLiteral("totalViewportTime")] : 0;
-        strInfo += trUtf8("Total GPU = %1 ms\n").arg(double(totalGPU), 0, 'f', 2);
+        strInfo += tr("Total GPU = %1 ms\n").arg(double(totalGPU), 0, 'f', 2);
     }
 
     float encoding = stats[QStringLiteral("encoding")];
     if(encoding > 0){
         //totalGPU += stats[QStringLiteral("encoding")] > 0 ? stats[QStringLiteral("encoding")] : 0;
-        strInfo += trUtf8("Encoding duration = %1 ms\n").arg(double(encoding), 0, 'f', 2);
+        strInfo += tr("Encoding duration = %1 ms\n").arg(double(encoding), 0, 'f', 2);
     }
 
     totalGPU = stats[QStringLiteral("totalGPUCPUTime")];
     if(totalGPU > 0)
     {
         totalGPU += stats[QStringLiteral("totalViewportTime")] > 0 ? stats[QStringLiteral("totalViewportTime")] : 0;
-        strInfo += trUtf8("\nTotal GPU + CPU = %1 ms\n").arg(double(totalGPU), 0, 'f', 2);
+        strInfo += tr("\nTotal GPU + CPU = %1 ms\n").arg(double(totalGPU), 0, 'f', 2);
     }
 
     ui->lblInfo->setPlainText(strInfo);
@@ -1023,7 +1050,7 @@ void MainWindow::onGPUFinished()
 
     val = stats[QStringLiteral("acqTime")];
     if(val > 0)
-        mFpsLabel->setText( trUtf8("%1 fps").arg(1000000000. / double(val), 0, 'f', 0));
+        mFpsLabel->setText( tr("%1 fps").arg(1000000000. / double(val), 0, 'f', 0));
 
 }
 
@@ -1043,7 +1070,7 @@ void MainWindow::on_btnGetOutPath_clicked()
     if(def.isEmpty())
         def = QDir::homePath() + "/FastMV/Record";
 
-    QString str = QFileDialog::getExistingDirectory(this, trUtf8("Choose output path"), def);
+    QString str = QFileDialog::getExistingDirectory(this, tr("Choose output path"), def);
     if(str.isNull() || str.isEmpty())
         return;
 
@@ -1144,7 +1171,7 @@ void MainWindow::on_actionPlay_toggled(bool arg1)
     if(!mCameraPtr || !mProcessorPtr)
     {
         QMessageBox::critical(this, QCoreApplication::applicationName(),
-                              QObject::trUtf8("No camera connected.\nor CUDA processor is not initialized."));
+                              QObject::tr("No camera connected.\nor CUDA processor is not initialized."));
 
         QSignalBlocker b(ui->actionPlay);
         ui->actionPlay->setChecked(false);
@@ -1301,5 +1328,26 @@ void MainWindow::on_actionShowImage_triggered(bool checked)
     updateOptions(mOptions);
     mOptions.ShowPicture = checked;
     mProcessorPtr->updateOptions(mOptions);
+}
+
+
+void MainWindow::on_actionClose_triggered()
+{
+    if(mCameraPtr)
+        mCameraPtr->stop();
+
+    if(mProcessorPtr){
+        mProcessorPtr->stop();
+    }
+    ui->cameraStatistics->setCamera(nullptr);
+    ui->cameraController->setCamera(nullptr);
+
+    mCameraPtr.reset(nullptr);
+    mProcessorPtr.reset(nullptr);
+
+    if(mRendererPtr){
+        mRendererPtr->setImageSize({});
+        mRendererPtr->update();
+    }
 }
 
