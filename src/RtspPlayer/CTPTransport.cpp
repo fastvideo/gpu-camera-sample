@@ -1,4 +1,5 @@
 #include "CTPTransport.h"
+#include <QIODevice>
 
 CTPTransport::CTPTransport()
 {
@@ -12,8 +13,11 @@ void CTPTransport::createPacket(const uchar *dataPtr, int len, std::vector<QByte
     char *pos = (char*)(dataPtr);
     while(size > 0){
         QByteArray data;
+#if QT_MAJOR_VERSION >= 6
+        QDataStream stream(&data, QDataStream::WriteOnly);
+#else
         QDataStream stream(&data, QIODevice::WriteOnly);
-
+#endif
         quint32 l = std::min(max_packet_data_size, static_cast<quint32>(size));
 
         stream << (quint32)headerId;

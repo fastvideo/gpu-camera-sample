@@ -33,7 +33,6 @@
 #include <QOpenGLFunctions>
 #include <QOpenGLShaderProgram>
 #include <QApplication>
-#include <QDesktopWidget>
 #include <QMouseEvent>
 #include <QThread>
 #include <QWaitCondition>
@@ -42,6 +41,9 @@
 #include <QTimer>
 #include <QElapsedTimer>
 #include <QEvent>
+#if QT_VERSION_MAJOR < 6
+#include <QDesktopWidget>
+#endif
 
 #include <cuda_runtime.h>
 #include <cuda_gl_interop.h>
@@ -179,11 +181,19 @@ public:
     void setCurrentTool(const Tool &tool);
 
     //Patch for high dpi display
+#if QT_VERSION_MAJOR >= 6
+    inline int width() const { return QOpenGLWindow::geometry().width() * screen()->devicePixelRatio(); }
+    inline int height() const { return QOpenGLWindow::geometry().height() * screen()->devicePixelRatio(); }
+    QSize size() const  override { return QOpenGLWindow::geometry().size() * screen()->devicePixelRatio(); }
+    QRect geometry()const { return { QOpenGLWindow::geometry().topLeft() * screen()->devicePixelRatio(),
+                QOpenGLWindow::geometry().size() * screen()->devicePixelRatio()}; }
+#else
     inline int width() const { return QOpenGLWindow::geometry().width() * QApplication::desktop()->devicePixelRatio(); }
     inline int height() const { return QOpenGLWindow::geometry().height() * QApplication::desktop()->devicePixelRatio(); }
     QSize size() const  override { return QOpenGLWindow::geometry().size() * QApplication::desktop()->devicePixelRatio(); }
     QRect geometry()const { return { QOpenGLWindow::geometry().topLeft() * QApplication::desktop()->devicePixelRatio(),
-                    QOpenGLWindow::geometry().size() * QApplication::desktop()->devicePixelRatio()}; }
+                QOpenGLWindow::geometry().size() * QApplication::desktop()->devicePixelRatio()}; }
+#endif
 
 protected:
     void exposeEvent(QExposeEvent *event) Q_DECL_OVERRIDE;

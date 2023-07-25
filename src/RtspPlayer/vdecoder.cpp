@@ -1,6 +1,7 @@
 #include "vdecoder.h"
 #include <thread>
 #include <QTime>
+#include <QElapsedTimer>
 #include <mutex>
 
 #include "fastvideo_decoder.h"
@@ -400,7 +401,7 @@ void VDecoder::getImage(AVFrame *frame, PImage &obj)
 void VDecoder::waitUntilStopStreaming()
 {
     if(m_is_open){
-        QTime time;
+        QElapsedTimer time;
         time.start();
         m_doStop = true;
         while(m_is_open && time.elapsed() < MAXIMUM_WAIT){

@@ -78,16 +78,16 @@ bool CircularBuffer::allocate(int width, int height, fastSurfaceFormat_t format)
 
 int CircularBuffer::width()
 {
-    return mImages.isEmpty() ? 0 : mImages.front().w;
+    return mImages.empty() ? 0 : mImages.front().w;
 }
 
 int CircularBuffer::height()
 {
-    return  mImages.isEmpty() ? 0 : mImages.front().h;
+    return  mImages.empty() ? 0 : mImages.front().h;
 }
 int CircularBuffer::pitch()
 {
-    return  mImages.isEmpty() ? 0 : mImages.front().wPitch;
+    return  mImages.empty() ? 0 : mImages.front().wPitch;
 }
 
 size_t CircularBuffer::size()
@@ -96,12 +96,12 @@ size_t CircularBuffer::size()
 }
 fastSurfaceFormat_t CircularBuffer::surfaceFmt()
 {
-    return  mImages.isEmpty() ? FAST_I8 : mImages.front().surfaceFmt;
+    return  mImages.empty() ? FAST_I8 : mImages.front().surfaceFmt;
 }
 
 unsigned char* CircularBuffer::getBuffer()
 {
-    if(mImages.isEmpty())
+    if(mImages.empty())
         return nullptr;
 
     int num = (mCurrent + 1) % numBuffers;
@@ -113,7 +113,7 @@ unsigned char* CircularBuffer::getBuffer()
 
 GPUImage_t *CircularBuffer::getLastImage()
 {
-    if(mImages.isEmpty() || mLast < 0)
+    if(mImages.empty() || mLast < 0)
         return nullptr;
     mRead++;
 //    qDebug("Reading image = %d, ts = %u", mLast, QDateTime::currentDateTime().toMSecsSinceEpoch());

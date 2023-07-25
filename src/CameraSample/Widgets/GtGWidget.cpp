@@ -31,12 +31,16 @@
 #include <QApplication>
 #include <QList>
 #include <QScreen>
-#include <QDesktopWidget>
+#include <QScreen>
 #include <QDateTime>
 #include <QImage>
 #include <QPainter>
 #include <QTimer>
 #include <QPainterPath>
+
+#if QT_VERSION_MAJOR < 6
+#include <QDesktopWidget>
+#endif
 
 GtGWidget::GtGWidget(QWidget* parent) :
     QWidget(parent)
@@ -44,7 +48,12 @@ GtGWidget::GtGWidget(QWidget* parent) :
     mLastTime = QDateTime::currentMSecsSinceEpoch();
     mStartTime = mLastTime;
 
-    QScreen* screen = QGuiApplication::screens().at(QApplication::desktop()->screenNumber());
+#if QT_VERSION_MAJOR >= 6
+    QScreen *screen = window()->screen();
+#else
+    QScreen* screen = QGuiApplication::screens().at( QApplication::desktop()->screenNumber());
+#endif
+
     if(screen)
     {
         mTimerInterval = 1000. / screen->refreshRate();

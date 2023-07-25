@@ -40,14 +40,14 @@ template<class T>
 class GPUImage {
 public:
     std::unique_ptr<T, CudaAllocator> data;
-    unsigned w;
-    unsigned h;
-    unsigned wPitch;
-    unsigned bitsPerChannel;
+    unsigned w = 0;
+    unsigned h = 0;
+    unsigned wPitch = 0;
+    unsigned bitsPerChannel = 8;
 
-    fastSurfaceFormat_t surfaceFmt;
+    fastSurfaceFormat_t surfaceFmt = FAST_RGB8;
 
-    GPUImage(void) {
+    explicit GPUImage(void) {
         w = h = wPitch = 0;
         bitsPerChannel = 8;
     };
@@ -63,7 +63,7 @@ public:
 
         try
         {
-			data.reset((T*)CudaAllocator::allocate(fullSize));
+            data.reset((T*)CudaAllocator::allocate(fullSize));
         }
         catch (std::bad_alloc& ba)
         {

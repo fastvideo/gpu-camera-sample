@@ -201,7 +201,7 @@ void GLImageViewer::mouseReleaseEvent(QMouseEvent* event)
 
     if(currentTool == tlWBPicker)
     {
-        QPoint pt(screenToBitmap(event->pos() * QApplication::desktop()->devicePixelRatio()));
+        QPoint pt(screenToBitmap(event->pos() * screen()->devicePixelRatio()));
             emit newWBFromPoint(pt);
     }
 
@@ -234,14 +234,19 @@ void GLImageViewer::wheelEvent(QWheelEvent * event)
     if(mViewMode == vmZoomFit)
         return;
 
-    float numDegrees = event->delta() / 8.;
+    float numDegrees = event->angleDelta().x() / 8.;
     float numSteps = numDegrees / 15.;
 
     Qt::KeyboardModifiers keyState = QApplication::queryKeyboardModifiers();
     if(keyState.testFlag(Qt::ControlModifier))
     {
         qreal newZoom = getZoom() * std::pow(1.125, numSteps);
+#if QT_VERSION_MAJOR >= 6
+        QPointF p(event->position());
+        setZoomInternal(newZoom,  QPoint(p.x(), p.y()));
+#else
         setZoomInternal(newZoom, event->pos());
+#endif
         update();
     }
 }

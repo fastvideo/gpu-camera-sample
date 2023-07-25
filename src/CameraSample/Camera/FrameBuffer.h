@@ -72,7 +72,7 @@ private:
     //Last written buffer
     int mLast = -1;
 
-    QVector<GPUImage_t> mImages;
+    std::vector<GPUImage_t> mImages;
     QMutex mMutex;
     size_t mAllocated = 0;
 

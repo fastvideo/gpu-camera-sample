@@ -53,7 +53,7 @@
 #include <QThread>
 #include <QSharedMemory>
 #include <QApplication>
-#include <QDesktopWidget>
+//#include <QDesktopWidget>
 #include <QDir>
 #include <QFileInfo>
 #include <QDateTime>
