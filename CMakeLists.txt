@@ -6,8 +6,15 @@ endif()
 
 project(gpu-camera-sample VERSION 1.0 LANGUAGES CUDA CXX)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(SUFFIX "")
+if(WIN32)
+    set(SUFFIX "x64")
+else()
+    set(SUFFIX "Linux64")
+endif()
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/GPUCameraSample_${SUFFIX}/${CMAKE_BUILD_TYPE})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/GPUCameraSample_${SUFFIX}/${CMAKE_BUILD_TYPE})
 
 if(WIN32)
     set(ARCHITECTURE WIN32)
@@ -24,7 +31,13 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
 find_package(CUDAToolkit REQUIRED)
-find_package(Qt5 COMPONENTS Gui Widgets OpenGL Network REQUIRED)
+
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Gui OpenGL Widgets Svg Network REQUIRED)
+if(Qt6_FOUND)
+    find_package(Qt6 COMPONENTS Core5Compat REQUIRED)
+endif()
+#find_package(Qt5 COMPONENTS Gui Widgets OpenGL Network REQUIRED)
 
 set(ADDITIONAL_INCDIR)
 
@@ -40,14 +53,14 @@ endif()
 
 if(USE_XIMEA)
     add_definitions(-DSUPPORT_XIMEA)
-    set(Ximea_PATH D:/devs/XIMEA/API/xiAPI/)
+    set(Ximea_PATH ${CMAKE_SOURCE_DIR}/OtherLibs/XIMEA/API)
     find_path(Ximea_INC
         NAMES xiApi.h
         PATHS ${Ximea_PATH}
         REQUIRED)
     find_library(Ximea_LIB
         NAMES xiapi64
-        PATHS ${Ximea_PATH}
+        PATHS ${Ximea_PATH}/x64
         REQUIRED)
 
     if(WIN32)

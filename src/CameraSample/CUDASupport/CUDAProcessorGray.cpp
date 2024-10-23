@@ -118,7 +118,7 @@ fastStatus_t CUDAProcessorGray::Init(CUDAProcessorOptions &options)
         ret = fastRawImportFromDeviceCreate(
                     &hRawUnpacker,
 
-                    FAST_RAW_XIMEA12,
+                    FAST_RAW_MONO12P,
 
                     &p,
                     maxWidth,

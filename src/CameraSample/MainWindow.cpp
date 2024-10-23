@@ -1249,7 +1249,7 @@ int getBitrate(const QString& text, int minimum)
 		}
 	}
 
-	return std::max(minimum, res);
+    return std::max<int>(minimum, res);
 }
 
 void setBitrate(QComboBox* cb, int bitrate)

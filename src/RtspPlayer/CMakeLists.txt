@@ -56,7 +56,7 @@ else()
 endif()
 
 target_link_libraries(RtpPlayer PRIVATE
-    Qt5::Core Qt5::Widgets Qt5::Gui Qt5::OpenGL Qt5::Network
+    Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::OpenGL Qt${QT_VERSION_MAJOR}::Network
     ${FastVideo_LIB}
     ${FFMPEG_LIB}
     ${TURBOJPEG_LIB}

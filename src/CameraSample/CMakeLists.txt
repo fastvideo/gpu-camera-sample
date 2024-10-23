@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.18)
 
-project(CameraSample VERSION 1.0 LANGUAGES CUDA)
+set(PROJECT_NAME CameraSample)
+
+project(${PROJECT_NAME} VERSION 1.0 LANGUAGES CUDA)
 
 include_directories(${ADDITIONAL_INCDIR}
                     avfilewriter
@@ -126,13 +128,19 @@ if(${ARCHITECTURE} STREQUAL "aarch64")
 endif()
 
 if(WIN32)
-    add_executable(CameraSample WIN32 ${SRC})
+    add_executable(${PROJECT_NAME} WIN32 ${SRC})
 else()
-    add_executable(CameraSample ${SRC})
+    add_executable(${PROJECT_NAME} ${SRC})
 endif()
 
-target_link_libraries(CameraSample PRIVATE
-    Qt5::Core Qt5::Widgets Qt5::Gui Qt5::OpenGL Qt5::Network
+if(USE_XIMEA)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE
+        -DSUPPORT_XIMEA=1
+    )
+endif()
+
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::OpenGL Qt${QT_VERSION_MAJOR}::Network
     ${FastVideo_LIB}
     ${FFMPEG_LIB}
     ${JPEG_LIB}
@@ -143,21 +151,84 @@ target_link_libraries(CameraSample PRIVATE
 if(WIN32)
     get_filename_component(QTBINPATH ${QT_QMAKE_EXECUTABLE} DIRECTORY)
     add_custom_command(
-        TARGET CameraSample POST_BUILD
+        TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${QTBINPATH}/windeployqt ${CMAKE_BINARY_DIR}/bin/CameraSample.exe
     )
 endif()
 
-#add_custom_command(
-#    TARGET CameraSample POST_BUILD
-#    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-#        $<TARGET_FILE:Qt5::Widgets> ${CMAKE_BINARY_DIR}/bin/
-#    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-#        $<TARGET_FILE:Qt5::Core> ${CMAKE_BINARY_DIR}/bin/
-#    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-#        $<TARGET_FILE:Qt5::Gui> ${CMAKE_BINARY_DIR}/bin/
-#    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-#        $<TARGET_FILE:Qt5::Network> ${CMAKE_BINARY_DIR}/bin/
-#    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-#        $<TARGET_FILE:Qt5::OpenGL> ${CMAKE_BINARY_DIR}/bin/
-#)
+if(WIN32)
+
+    set(OTHER_LIB_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../OtherLibs)
+    set(FASTVIDEOPATH ${OTHER_LIB_PATH}/FastvideoSDK)
+    set(FASTVIDEO_SDK ${FASTVIDEOPATH}/fastvideo_sdk)
+
+    set(COPYFILES
+        ${OTHER_LIB_PATH}/ffmpeg/bin/avcodec-57.dll
+        ${OTHER_LIB_PATH}/ffmpeg/bin/avdevice-57.dll
+        ${OTHER_LIB_PATH}/ffmpeg/bin/avformat-57.dll
+        ${OTHER_LIB_PATH}/ffmpeg/bin/avutil-55.dll
+        ${OTHER_LIB_PATH}/ffmpeg/bin/swresample-2.dll
+        ${OTHER_LIB_PATH}/ffmpeg/bin/swscale-4.dll
+        ${FASTVIDEO_SDK}/bin/x64/fastvideo_sdk.dll
+    )
+
+    if(USE_XIMEA)
+        set(COPYFILES ${COPYFILES}
+            ${Ximea_PATH}/x64/xiapi64.dll
+        )
+    endif()
+
+    function(copy_file PATH FILE)
+        add_custom_command( TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${PROJECT_NAME}>/${PATH}
+            COMMAND ${CMAKE_COMMAND} -E copy
+                ${FILE}
+                $<TARGET_FILE_DIR:${PROJECT_NAME}>
+            )
+    endfunction()
+
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}>
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>
+        COMMAND_EXPAND_LISTS)
+
+    foreach(IT ${COPYFILES})
+        message(NOTICE "--> ${IT}")
+        copy_file("./" ${IT})
+    endforeach()
+
+    add_custom_command( TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${PROJECT_NAME}>/platforms
+        COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${PROJECT_NAME}>/styles/
+        COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${PROJECT_NAME}>/iconengines/
+        COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${PROJECT_NAME}>/imageformats/
+        COMMAND ${CMAKE_COMMAND} -E copy
+            $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}>
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::Svg>
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::QWindowsIntegrationPlugin>
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>/platforms/
+        # COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        #     $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::QWindowsVistaStylePlugin>
+        #     $<TARGET_FILE_DIR:${PROJECT_NAME}>/styles/
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::QSvgPlugin>
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>/imageformats/
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::QJpegPlugin>
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>/imageformats/
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::QTiffPlugin>
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>/imageformats/
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::QTgaPlugin>
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>/imageformats/
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::QSvgIconPlugin>
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>/iconengines/
+        COMMAND_EXPAND_LISTS)
+endif()
