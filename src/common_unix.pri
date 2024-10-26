@@ -10,13 +10,15 @@ contains(TARGET_ARCH, arm64){
 
     #For Jetson Xavier, Orin
     #CUDA_TOOLKIT_PATH = "/usr/local/cuda-11.4"
-
+    message("target arm64")
 }
 else {
     CUDA_TOOLKIT_PATH = "/usr/local/cuda-12"
+    message("target x86")
 }
 INCLUDEPATH += $${CUDA_TOOLKIT_PATH}/include
 CUDA_LIB  = -L$${CUDA_TOOLKIT_PATH}/lib64
+CUDA_LIB += -L$${CUDA_TOOLKIT_PATH}/targets/x86_64-linux/lib/stubs # the place of libcuda on ubuntu 22.04(x86 WSL)
 CUDA_LIB += -lnppicc
 CUDA_LIB += -lnppig
 CUDA_LIB += -lnppif
