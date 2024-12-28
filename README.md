@@ -43,17 +43,17 @@ Soon we are going to add support for <a href="https://emergentvisiontec.com/" ta
 ### Requirements for Windows
 
 * Camera SDK or GenICam package + camera vendor GenTL producer (.cti). Сurrently XIMEA, MATRIX VISION, Basler, FLIR, Imperx, JAI, LUCID Vision Labs, Daheng Imaging cameras are supported
-* Fastvideo SDK (demo) ver.0.18.1.0
-* NVIDIA CUDA-12.1
+* Fastvideo SDK (demo) ver.0.19.5.0
+* NVIDIA CUDA-12.6
 * Qt ver.5.13.1
 * Compiler MSVC 2022 or later
 
 ### Requirements for Linux
 
-* Ubuntu 22.04 for x64 platform, Ubuntu 20.04 for Arm64 platform with CUDA 11.4, Ubuntu 18.04 for Arm64 platform with CUDA 10.2
+* Ubuntu 22.04 for x64 platform, Ubuntu 20.04 for Arm64 platform with CUDA 11.4 / CUDA 12.2, Ubuntu 18.04 for Arm64 platform with CUDA 10.2
 * Camera SDK or GenICam package + camera vendor GenTL producer (.cti). Currently XIMEA, MATRIX VISION, Basler, FLIR, Imperx, JAI, Daheng Imaging cameras are supported
-* Fastvideo SDK (demo) ver.0.18.1.0
-* NVIDIA CUDA-12.1 for x64, CUDA-11.4 (Jetson AGX Xavier, Orin) or CUDA-10.2 (Jetson TX2, NX) for ARM64 platform 
+* Fastvideo SDK (demo) ver.0.19.5.0
+* NVIDIA CUDA-12.1 for x64, CUDA-11.4/12.2 (Jetson AGX Xavier, Orin) or CUDA-10.2 (Jetson TX2, NX) for ARM64 platform 
 * Compiler gcc 7.4 or later
 * Qt 5 (qtbase5-dev)
 ``` console
@@ -235,19 +235,19 @@ In general case, Fastvideo SDK can import/export data from/to SSD / CPU memory /
 
 * Windows-10, Ubuntu 18.04 64-bit
 * The latest NVIDIA driver
-* NVIDIA GPU with Maxwell architecture, 9xx series minimum
+* NVIDIA GPU 10xx series minimum
 * NVIDIA GPU with 4-8-12 GB memory or better
 * Intel Core i5 or better
-* NVIDIA CUDA-12.1
+* NVIDIA CUDA-12.6
 * Compiler MSVC 2019 for Windows or gcc 7.4.0 for Linux
 
 We also recommend to check PCI-Express bandwidth for Host-to-Device and Device-to-Host transfers. For GPU with Gen3 x16 it should be in the range of 10-12 GB/s, and for GPU with Gen4 x16 it should be in the range of 20-24 GB/s. GPU memory size could be a bottleneck for image processing from high resolution cameras, so please check GPU memory usage in the software.
 
 If you are working with images which reside on HDD, please place them on SSD or M2.
 
-For testing purposes you can utilize the latest NVIDIA GeForce RTX 2060/2070/2080ti, 3070/3080ti/3090, 4080/4090 or Jetson TX2, NX and AGX Xavier.
+For testing purposes you can utilize the latest NVIDIA GeForce RTX 2060/2070/2080ti, 3070/3080ti/3090, 4080/4090 or Jetson TX2, NX and AGX Xavier / Orin.
 
-For continuous high performance applications we recommend professional NVIDIA Quadro and Tesla GPUs.
+For continuous high performance applications we recommend professional NVIDIA Quadro RTX Ada GPUs.
 
 ## Multi-camera applications
 
@@ -264,7 +264,7 @@ To test a real application with XIMEA cameras (USB3 or PCIe), please have a look
 * GPU pipeline for monochrome cameras - done
 * GenICam Standard support - done
 * Linux version - done
-* Software for NVIDIA Jetson hardware and L4T for CUDA-10.2 (Jetson Nano, TX2, Xavier AGX and NX) - done
+* Software for NVIDIA Jetson hardware and L4T for CUDA-10.2 (Jetson Nano, TX2, Xavier/Orin AGX and NX) - done
 * Glass-to-Glass (G2G) test for latency measurements - done
 * Support for XIMEA, MATRIX VISION, Basler, FLIR, Imperx, JAI, Daheng Imaging cameras - done
 * MJPEG and H.264 streaming with or without FFmpeg RTSP - done
@@ -281,8 +281,8 @@ To test a real application with XIMEA cameras (USB3 or PCIe), please have a look
 * HDR image processing on GPU for automotive 16/20/24-bit image sensors (IMX490, IMX728, AR0820, OX08) - done
 * High performance JPEG-XS decoder on GPU - done
 * Support for XIMEA MU181CR-ON camera - done
-* Support for Jetson AGX Orin (CUDA-11.4) and CUDA-11.7 - done
-* CUDA-12.1 support - done
+* Support for Jetson AGX Orin CUDA-11.4 and CUDA-12.2 - done
+* CUDA-12.6 support - done
 * Fast undistortion on GPU with precise and compact maps - in progress
 * High performance chromatic aberration suppression in RAW domain - in progress
 * Support for Emergent Vision Technologies, DALSA, Baumer, Kaya Instruments, SVS-Vistek, IO Industries, MindVision cameras - in progress
