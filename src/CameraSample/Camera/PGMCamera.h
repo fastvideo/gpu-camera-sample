@@ -47,6 +47,7 @@ public:
     virtual bool getParameter(cmrCameraParameter param, float& val);
     virtual bool setParameter(cmrCameraParameter param, float val);
     virtual bool getParameterInfo(cmrParameterInfo& info);
+    GPUImage_t *getLastFrame();
 
 private:
     void startStreaming();

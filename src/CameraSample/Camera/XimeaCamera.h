@@ -34,20 +34,23 @@
 #include "GPUCameraBase.h"
 #include <xiApi.h>
 
+#include <FastAllocator.h>
+
 class XimeaCamera : public GPUCameraBase
 {
     Q_OBJECT
 public:
     XimeaCamera();
     ~XimeaCamera();
-    virtual bool open(uint32_t devID);
-    virtual bool start();
-    virtual bool stop();
-    virtual void close();
+    virtual bool open(uint32_t devID) override;
+    virtual bool start() override;
+    virtual bool stop() override;
+    virtual void close() override;
 
-    bool getParameter(cmrCameraParameter param, float& val);
-    bool setParameter(cmrCameraParameter param, float val);
-    bool getParameterInfo(cmrParameterInfo& info);
+    bool getParameter(cmrCameraParameter param, float& val) override;
+    bool setParameter(cmrCameraParameter param, float val) override;
+    bool getParameterInfo(cmrParameterInfo& info) override;
+    GPUImage_t *getLastFrame() override;
 protected:
 
 private:
@@ -56,6 +59,37 @@ private:
     void startStreaming();
 
     bool mPacked = false;
+
+    struct FastMemory{
+        std::unique_ptr<unsigned char, FastAllocator> _data;
+        unsigned _size{};
+
+        void resize(unsigned newsize){
+            if(_size == newsize){
+                return;
+            }
+            if(newsize == 0){
+                release();
+                return;
+            }
+            _size = newsize;
+            FastAllocator alloc;
+            _data.reset((unsigned char*)alloc.allocate(_size));
+        }
+        void release(){
+            _data.reset();
+            _size = 0;
+        }
+        unsigned size() const {
+            return _size;
+        }
+        unsigned char *data(){
+            return _data.get();
+        }
+    };
+
+    FastMemory frameData;
+    QByteArray packedData;
 };
 
 #endif // SUPPORT_XIMEA

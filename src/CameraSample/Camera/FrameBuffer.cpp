@@ -120,6 +120,11 @@ GPUImage_t *CircularBuffer::getLastImage()
     return &(mImages[mLast]);
 }
 
+GPUImage_t *CircularBuffer::getFirstImage()
+{
+    return mImages.empty()? nullptr : &mImages[0];
+}
+
 void CircularBuffer::release()
 {
     mLast = mCurrent;

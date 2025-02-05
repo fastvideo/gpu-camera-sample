@@ -272,22 +272,34 @@ bool VDecoder::decodePacket(PImage& image, QString& decodeName, quint64 &sizeRea
 
     if(m_idCodec != CODEC_JPEG){
         int ret = 0;
-        int got = 0;
 
         if(!mUseNvDecoder){
             if(!m_cdcctx)
                 return false;
             AVFrame *frame = av_frame_alloc();
+            //ret = avcodec_decode_video2(m_cdcctx, frame, &got, &m_pkt);
+            ret = avcodec_send_packet(m_cdcctx, &m_pkt);
 
-            ret = avcodec_decode_video2(m_cdcctx, frame, &got, &m_pkt);
+            static int framecnt = 0;
 
-            if(got > 0){
-                analyzeFrame(frame, image);
-                av_frame_unref(frame);
+            while(ret >= 0 && m_is_open){
+                ret = avcodec_receive_frame(m_cdcctx, frame);
+                if(ret >= 0){
+                    qDebug("decode %d: pts %d framecnt=%d",
+                           QDateTime::currentMSecsSinceEpoch(), frame->pts, framecnt);
+                    //auto dur = getDuration(start);
+                    //std::cout << counter << " " << dur << std::endl;
+                    analyzeFrame(frame, image);
+                    av_frame_unref(frame);
 
-                decodeName = m_cdcctx->codec->name;
+                    decodeName = m_cdcctx->codec->name;
+                    //break;
+                }
+                //                if(ret == AVERROR(EAGAIN)){
+                //                    ret = avcodec_send_packet(m_cdcctx, &m_pkt);
+                //                }
             }
-
+            framecnt++;
             av_frame_free(&frame);
         }else{
             if(!mCuvidDecoder.get()){

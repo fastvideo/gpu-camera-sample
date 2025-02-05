@@ -84,7 +84,7 @@ void GtGWidget::paintEvent(QPaintEvent *event)
     if(mAnimating)
     {
         mLastTime = lastTime;
-        QTimer::singleShot(mTimerInterval, this, [this](){update();});
+        QTimer::singleShot(1, this, [this](){update();});
     }
 }
 

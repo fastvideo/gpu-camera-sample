@@ -58,7 +58,9 @@ public:
     QOpenGLContext* context() const {return m_context;}
     void setRenderWnd(GLImageViewer* wnd){mRenderWnd = wnd;}
     void loadImage(void* img, int width, int height);
+    void loadImageForward(void* img, int width, int height);
     void showImage(bool show = true);
+    void setPlay(bool val);
     void update();
     QSize imageSize(){return mImageSize;}
     void setImageSize(const QSize& sz){mImageSize = sz;}
@@ -87,8 +89,9 @@ private:
     GLuint m_vertPosAttr;
     GLuint m_texPosAttr;
 
-    bool mStreaming;
-    bool mShowImage;
+    bool mStreaming{};
+    bool mShowImage{};
+    bool mPlay{true};
 
     QWaitCondition mCond;
     QMutex mMutex;

@@ -733,6 +733,9 @@ void RTSPStreamerServer::encodeWriteFrame(uint8_t *buf, int width, int height)
 }
 #endif
 
+#pragma warning(push)
+#pragma warning(disable : 4996)
+
 void RTSPStreamerServer::encodeWriteFrame(AVFrame *frame)
 {
     int ret = 0, got;
@@ -749,6 +752,8 @@ void RTSPStreamerServer::encodeWriteFrame(AVFrame *frame)
         av_packet_unref(&enc_pkt);
     }
 }
+
+#pragma warning(pop)
 
 void RTSPStreamerServer::sendPkt(AVPacket *pkt)
 {

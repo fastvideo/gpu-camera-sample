@@ -50,6 +50,13 @@
 #define RTSP_RTP_PORT_MIN 5000
 #define RTSP_RTP_PORT_MAX 65000
 
+inline void print_averror(int ret)
+{
+    char buf[100];
+    av_make_error_string(buf, sizeof(buf), ret);
+    qDebug("error: %s", buf);
+}
+
 TcpClient::TcpClient(QTcpSocket *sock, const QString &url, AVCodecContext *codec, EncoderType encType, QObject *parent)
 	: QObject(parent)
 	, m_socket(sock)
@@ -80,6 +87,8 @@ TcpClient::TcpClient(QTcpSocket *sock, const QString &url, AVCodecContext *codec
 
 TcpClient::~TcpClient()
 {
+    std::lock_guard<std::mutex> lg(mMut);
+
     m_done = true;
 
 	if(m_thread.get()){
@@ -99,7 +108,7 @@ TcpClient::~TcpClient()
 
 void TcpClient::sendpkt(AVPacket *pkt)
 {
-	std::lock_guard<std::mutex> lg(m_mutex);
+    std::lock_guard<std::mutex> lg(mMut);
 
 	auto starttime = getNow();
 
@@ -138,17 +147,10 @@ void TcpClient::connected()
 
 void TcpClient::disconnected()
 {
-    m_mutex.lock();
+    std::lock_guard<std::mutex> lg(mMut);
     m_isInit = false;
-    m_mutex.unlock();
 
-    if(m_fmt){
-        //ret = avio_open(&m_fmt->pb, m_fmt->filename, AVIO_FLAG_WRITE);
-        avio_close(m_fmt->pb);
-        avcodec_close(m_fmt->streams[0]->codec);
-        avformat_free_context(m_fmt);
-        m_fmt = nullptr;
-    }
+    release();
 
 	emit removeClient(this);
 }
@@ -439,6 +441,15 @@ void TcpClient::sendRequiredReply()
     m_socket->waitForBytesWritten();
 }
 
+int interr_callback(void* opaque)
+{
+    TcpClient* c = static_cast<TcpClient*>(opaque);
+    if(!c->isWork()){
+        qDebug("stop");
+    }
+    return !c->isWork();
+}
+
 void TcpClient::setPlay()
 {
     QString addr = m_socket->peerAddress().toString();
@@ -458,10 +469,6 @@ void TcpClient::setPlay()
 
         int opt = buffersize_udp;
         setsockopt(m_udpSocket->socketDescriptor(), SOL_SOCKET, SO_SNDBUF, (char*)&opt, sizeof(opt));
-
-        m_mutex.lock();
-        m_isInit = true;
-        m_mutex.unlock();
     }else{
 
         AVOutputFormat *videoFmt = av_guess_format("rtp", url.toLocal8Bit().data(), nullptr);
@@ -470,6 +477,10 @@ void TcpClient::setPlay()
             return;
 
         int ret = avformat_alloc_output_context2(&m_fmt, videoFmt, nullptr, nullptr);
+
+        mIsWork = true;
+        m_fmt->interrupt_callback.callback = interr_callback;
+        m_fmt->interrupt_callback.opaque = this;
 
         av_strlcpy(m_fmt->filename, url.toLocal8Bit().data(), sizeof(m_fmt->filename));
 
@@ -482,36 +493,42 @@ void TcpClient::setPlay()
 
         ret = avio_open(&m_fmt->pb, m_fmt->filename, AVIO_FLAG_WRITE);
 
-        AVStream* stream = avformat_new_stream(m_fmt, m_codec);
-        if(stream){
-            stream->id = m_fmt->nb_streams - 1;
-        }
+        mStream = avformat_new_stream(m_fmt, m_codec);
+        // if(stream){
+        //     stream->id = m_fmt->nb_streams - 1;
+        // }
 
-        stream->codecpar->bit_rate = m_ctx_main->bit_rate;
-        stream->codecpar->width = m_ctx_main->width;
-        stream->codecpar->height = m_ctx_main->height;
-        stream->codecpar->codec_id = m_codec->id;
-        stream->codecpar->codec_type = AVMEDIA_TYPE_VIDEO;
-        stream->codecpar->format = m_ctx_main->pix_fmt;
-        stream->codec->flags = m_ctx_main->flags;
-        stream->codec->flags2 = m_ctx_main->flags2;
-        stream->time_base = m_ctx_main->time_base;
+        mStream->codecpar->bit_rate = m_ctx_main->bit_rate;
+        mStream->codecpar->width = m_ctx_main->width;
+        mStream->codecpar->height = m_ctx_main->height;
+        mStream->codecpar->codec_id = m_codec->id;
+        mStream->codecpar->codec_type = AVMEDIA_TYPE_VIDEO;
+        mStream->codecpar->format = m_ctx_main->pix_fmt;
+        //stream->codec->flags = m_ctx_main->flags;
+        //stream->codec->flags2 = m_ctx_main->flags2;
+        mStream->time_base = m_ctx_main->time_base;
 
     //    ret = avcodec_open2(c, m_codec, nullptr);
     //    if(ret < 0){
     //        return;
     //    }
 
-        AVDictionary *opt = nullptr;
-        ret = avformat_write_header(m_fmt, &opt);
-        if(ret < 0){
-            char buf[100];
-            av_make_error_string(buf, sizeof(buf), ret);
-            qDebug("error: %s", buf);
-		}else{
-			m_mutex.lock();
-			m_isInit = true;
-			m_mutex.unlock();
+        try{
+            AVDictionary *opt = nullptr;
+            //av_dict_set(&opt, "nobuffer", "1", 0);
+            //av_dict_set(&opt, "buffer_size", "5M", 0);
+            //av_dict_set(&opt, "flush_packets", "1", 0);
+            ret = avformat_write_header(m_fmt, &opt);
+            if(ret < 0){
+                print_averror(ret);
+                m_isInit = false;
+            }else{
+                m_isInit = true;
+                mStartPoint = getNow();
+            }
+        }catch(...){
+            release();
+            m_isInit = false;
         }
     }
 }
@@ -594,4 +611,17 @@ QString TcpClient::generateSDP(ushort portudp)
         return sdp;
     }
     return "";
+}
+
+void TcpClient::release()
+{
+    if(m_fmt){
+        mIsWork = false;
+        m_isInit = false;
+        //ret = avio_open(&m_fmt->pb, m_fmt->filename, AVIO_FLAG_WRITE);
+        avio_close(m_fmt->pb);
+        //avcodec_close(m_fmt->streams[0]->codec);
+        avformat_free_context(m_fmt);
+        m_fmt = nullptr;
+    }
 }

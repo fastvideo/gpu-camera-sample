@@ -190,7 +190,7 @@ void GLImageViewer::mousePressEvent(QMouseEvent* event)
     if(event->buttons() == Qt::LeftButton)
         mPtDown = event->pos();
     else
-        emit contextMenu(event->globalPos());
+        emit contextMenu(event->globalPosition().toPoint());
 }
 
 void GLImageViewer::mouseReleaseEvent(QMouseEvent* event)

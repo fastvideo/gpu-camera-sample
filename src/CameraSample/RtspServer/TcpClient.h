@@ -100,6 +100,10 @@ public:
 	 */
 	bool isInit() const;
 
+    bool isWork() const { return mIsWork; }
+
+    bool done() const { return m_done; }
+
 signals:
 	void removeClient(TcpClient *);
 
@@ -114,7 +118,9 @@ private:
 	QByteArray m_buffer;
 	QStringList m_gets;
     bool m_isInit = false;
+    std::mutex mMut;
     bool m_done = false;
+    bool mIsWork = false;
 
     bool m_isCustomTransport = false;
     std::unique_ptr<QUdpSocket> m_udpSocket;
@@ -151,8 +157,8 @@ private:
 	AVFormatContext *m_fmt = nullptr;
 	AVCodec *m_codec = nullptr;
 	AVCodecContext *m_ctx_main = nullptr;
-
-    std::mutex m_mutex;
+    AVStream* mStream{};
+    std::chrono::steady_clock::time_point mStartPoint;
 
 	void parseBuffer();
 	void parseLines();
@@ -170,6 +176,8 @@ private:
 	void parseTransport(const QString& transport);
 
     QString generateSDP(ushort portudp = 0);
+
+    void release();
 };
 
 #endif // TCPCLIENT_H

@@ -120,6 +120,8 @@ public:
     ///Get camera parameter information. Return true on success, false otherwise.
     virtual bool getParameterInfo(cmrParameterInfo& info) = 0;
 
+    virtual GPUImage_t *getLastFrame() = 0;
+
 
     ///Get current camera state
     cmrCameraState state() {return mState;}

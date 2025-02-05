@@ -34,6 +34,7 @@
 #include "fastvideo_sdk.h"
 
 struct AVFormatContext;
+struct AVCodecContext;
 struct AVFrame;
 
 class MJPEGEncoder
@@ -50,6 +51,7 @@ public:
     void close();
 private:
     AVFormatContext* mFmtCtx = nullptr;
+    AVCodecContext* enc_ctx{};
     int mFramesProcessed = 0;
     int mErr = 0;
 

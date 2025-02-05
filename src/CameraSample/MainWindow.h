@@ -148,7 +148,7 @@ private:
     QLabel* mFpsLabel;
 
     QScopedPointer<RawProcessor> mProcessorPtr;
-    QScopedPointer<GPUCameraBase> mCameraPtr;
+    QSharedPointer<GPUCameraBase> mCameraPtr;
 
     QScopedPointer<QWidget> mContainerPtr;
     QScopedPointer<GLImageViewer> mMediaViewer;

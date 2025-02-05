@@ -191,7 +191,7 @@ void GLImageViewer::mousePressEvent(QMouseEvent* event)
     if(event->buttons() == Qt::LeftButton)
         mPtDown = event->pos();
     else
-        emit contextMenu(event->globalPos());
+        emit contextMenu(event->globalPosition().toPoint());
 }
 
 void GLImageViewer::mouseReleaseEvent(QMouseEvent* event)
@@ -333,6 +333,8 @@ GLRenderer::GLRenderer(QObject *parent):
 
 GLRenderer::~GLRenderer()
 {
+    QMutexLocker<QMutex> _(&mMutex);
+
 #ifndef __aarch64__
     mRenderThread.quit();
     mRenderThread.wait(3000);
@@ -369,6 +371,11 @@ void GLRenderer::initialize()
 void GLRenderer::showImage(bool show)
 {
     mShowImage = show;
+}
+
+void GLRenderer::setPlay(bool val)
+{
+    mPlay = val;
 }
 
 void GLRenderer::update()
@@ -539,11 +546,22 @@ void GLRenderer::render()
 
 void GLRenderer::loadImage(void* img, int width, int height)
 {
+    if(!mPlay)
+        return;
     QTimer::singleShot(0, this, [this, img,width,height](){loadImageInternal(img, width, height);});
+}
+
+void GLRenderer::loadImageForward(void *img, int width, int height)
+{
+    loadImageInternal(img, width, height);
 }
 
 void GLRenderer::loadImageInternal(void* img, int width, int height)
 {
+    QMutexLocker<QMutex> _(&mMutex);
+    if(!mPlay || !img)
+        return;
+
     unsigned char *data = NULL;
     size_t pboBufferSize = 0;
 

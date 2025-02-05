@@ -159,17 +159,34 @@ void PGMCamera::startStreaming()
 
     while(mState == cstStreaming)
     {
-        cudaMemcpy(mInputBuffer.getBuffer(), mInputImage.data.get(), mInputImage.wPitch * mInputImage.h, cudaMemcpyHostToDevice);
-        mInputBuffer.release();
+        // cudaMemcpy(mInputBuffer.getBuffer(), mInputImage.data.get(), mInputImage.wPitch * mInputImage.h, cudaMemcpyHostToDevice);
+        // mInputBuffer.release();
         QThread::msleep(1000 / mFPS);
 
-        {
-            QMutexLocker l(&mLock);
-            mRawProc->wake();
-        }
+        // {
+        //     QMutexLocker l(&mLock);
+        //     mRawProc->wake();
+        // }
+    }
+}
+
+GPUImage_t *PGMCamera::getLastFrame()
+{
+    if(mState != cstStreaming){
+        return {};
     }
 
+    auto zeroFrame = mInputBuffer.getFirstImage();
+    if(!zeroFrame)
+        return {};
+    unsigned char* dst = zeroFrame->data.get();
+
+    cudaMemcpy(dst, mInputImage.data.get(), mInputImage.wPitch * mInputImage.h, cudaMemcpyHostToDevice);
+    mInputBuffer.release();
+
+    return zeroFrame;
 }
+
 bool PGMCamera::getParameter(cmrCameraParameter param, float& val)
 {
     if(param < 0 || param > prmLast)
@@ -204,3 +221,4 @@ bool PGMCamera::getParameterInfo(cmrParameterInfo& info)
     Q_UNUSED(info)
     return false;
 }
+

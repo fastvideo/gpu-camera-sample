@@ -34,7 +34,7 @@
 
 int main(int argc, char *argv[])
 {
-#if QT_VERSION >= 0x050600
+#if QT_VERSION >= 0x050600 && QT_VERSION < 0x060000
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
 

@@ -51,7 +51,7 @@ class RawProcessor : public QObject
 {
     Q_OBJECT
 public:
-    explicit RawProcessor(GPUCameraBase* camera, GLRenderer* renderer);
+    explicit RawProcessor(QSharedPointer<GPUCameraBase> camera, QSharedPointer<GLRenderer> renderer);
     ~RawProcessor();
 
     fastStatus_t init();
@@ -87,7 +87,7 @@ signals:
 public slots:
 
 private:
-    bool                 mWorking = false;
+    std::atomic_bool     mWorking = false;
     bool                 mWriting = false;
     CUDAProcessorOptions mOptions;
     CUDAProcessorOptions::VideoCodec mCodec = CUDAProcessorOptions::vcNone;
@@ -100,8 +100,8 @@ private:
     QMutex               mWaitMutex;
     QWaitCondition       mWaitCond;
     bool                 mWake = false;
-    GPUCameraBase*          mCamera = nullptr;
-    GLRenderer*          mRenderer = nullptr;
+    QSharedPointer<GPUCameraBase>  mCamera;
+    QSharedPointer<GLRenderer>     mRenderer = nullptr;
     QThread              mCUDAThread;
     float                mRenderFps = 30;
     QString              mOutputPath;

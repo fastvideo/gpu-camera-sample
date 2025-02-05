@@ -49,9 +49,8 @@ MJPEGEncoder::MJPEGEncoder(int width,
                            fastJpegFormat_t fmt,
                            const QString& outFileName)
 {
-    AVStream*       out_stream;
-    AVCodecContext* enc_ctx;
-    AVCodec*        encoder;
+    AVStream*       out_stream{};
+    AVCodec*        encoder{};
     unsigned int    i = 0;
 
     av_register_all();
@@ -77,8 +76,9 @@ MJPEGEncoder::MJPEGEncoder(int width,
     out_stream->time_base.den = fps;
     out_stream->time_base.num = 1;
 
-    enc_ctx = out_stream->codec;
+    //enc_ctx = out_stream->codec;
     encoder = avcodec_find_encoder(AV_CODEC_ID_MJPEG);
+    enc_ctx = avcodec_alloc_context3(encoder);
 
     enc_ctx->height = height;
     enc_ctx->width = width;
@@ -130,6 +130,8 @@ MJPEGEncoder::MJPEGEncoder(int width,
         mErr = avio_open(&mFmtCtx->pb, outFileName.toStdString().c_str(), AVIO_FLAG_WRITE);
         if(mErr < 0)
         {
+            avcodec_free_context(&enc_ctx);
+            enc_ctx = {};
             qDebug("Could not open output file '%s'", outFileName.toLocal8Bit().data());
             return;
         }
@@ -139,6 +141,8 @@ MJPEGEncoder::MJPEGEncoder(int width,
     mErr = avformat_write_header(mFmtCtx, nullptr);
     if(mErr < 0)
     {
+        avcodec_free_context(&enc_ctx);
+        enc_ctx = {};
         qDebug("Error occurred when opening output file");
         return;
     }
@@ -158,7 +162,7 @@ bool MJPEGEncoder::addJPEGFrame(unsigned char *jpgPtr, int jpgSize)
     QMutexLocker l(&mLock);
 
     bool ret = false;
-    AVCodecContext* pVideoCodec = mFmtCtx->streams[0]->codec;
+    AVCodecContext* pVideoCodec = enc_ctx;
     if(pVideoCodec->codec_id != AV_CODEC_ID_MJPEG )
         return ret;
 
@@ -189,7 +193,7 @@ bool MJPEGEncoder::addJPEGFrame(unsigned char *jpgPtr, int jpgSize)
         pVideoCodec->frame_number++;
         ret = true;
     }
-    av_free_packet(&videoPkt);
+    av_packet_unref(&videoPkt);
 
 
     return ret;
@@ -207,9 +211,14 @@ void MJPEGEncoder::close()
     {
         for(unsigned i = 0; i < mFmtCtx->nb_streams; i++)
         {
-            if(mFmtCtx->streams[i] && mFmtCtx->streams[i]->codec)
-                avcodec_close(mFmtCtx->streams[i]->codec);
+            if(mFmtCtx->streams[i] && enc_ctx)
+                avcodec_close(enc_ctx);
         }
+    }
+
+    if(enc_ctx){
+        avcodec_free_context(&enc_ctx);
+        enc_ctx = {};
     }
 
 

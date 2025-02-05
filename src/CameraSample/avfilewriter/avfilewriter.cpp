@@ -42,6 +42,9 @@ void AVFileWriter::setEncodeYUV420Fun(TEncodeFun fun)
     mYUV420Encode = fun;
 }
 
+#pragma warning(push)
+#pragma warning(disable : 4996)
+
 bool AVFileWriter::open(int w, int h, int bitrate, int fps, bool isHEVC, const QString& outFileName)
 {
     //av_log_set_level(AV_LOG_TRACE);
@@ -270,6 +273,8 @@ void AVFileWriter::close()
     }
     mIsInitialized = false;
 }
+
+#pragma warning(pop)
 
 void AVFileWriter::processTask(FileWriterTask *task)
 {

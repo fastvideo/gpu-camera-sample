@@ -308,9 +308,62 @@ void XimeaCamera::startStreaming()
     if(ret != XI_OK)
         return;
 
-    QByteArray frameData;
+    // QByteArray frameData;
+    // frameData.resize((int)mInputBuffer.size());
+    // QByteArray packedData;
+    // size_t sizeBits = 0;
+    // int bits = Bits[mSurfaceFormat];
+    // if(mPacked){
+    //     sizeBits = mWidth * mHeight * bits;
+    //     packedData.resize((int)mInputBuffer.size());
+    // }
+
+    // XI_IMG image = {0};
+    // image.size = sizeof(XI_IMG);
+    // image.bp_size = frameData.size();
+    // image.bp = frameData.data();
+
+    //QElapsedTimer tmr;
+    while(mState == cstStreaming)
+    {
+        // tmr.restart();
+        // if(mPacked){
+        //     image.bp = packedData.data();
+        //     ret = xiGetImage(hDevice, 5000, &image);
+        //     read_inputstreamP(packedData.data(), sizeBits, bits, (uint16_t*)frameData.data());
+        //     image.bp_size = mWidth * mHeight * sizeof(uint16_t);
+        // }else{
+        //     image.bp = frameData.data();
+        //     ret = xiGetImage(hDevice, 5000, &image);
+        // }
+        // unsigned char* dst = mInputBuffer.getBuffer();
+        // cudaMemcpy(dst, frameData.data(), image.bp_size, cudaMemcpyHostToDevice);
+        // mInputBuffer.release();
+
+        // {
+        //     QMutexLocker l(&mLock);
+        //     mRawProc->acqTimeNsec = tmr.nsecsElapsed();
+        //     mRawProc->wake();
+        // }
+        QThread::msleep(1000 / mFPS);
+    }
+    xiStopAcquisition(hDevice);
+}
+
+GPUImage_t *XimeaCamera::getLastFrame()
+{
+    if(mState != cstStreaming){
+        return {};
+    }
+    XI_RETURN ret = XI_OK;
+
     frameData.resize((int)mInputBuffer.size());
-    QByteArray packedData;
+
+    XI_IMG image = {0};
+    image.size = sizeof(XI_IMG);
+    image.bp_size = frameData.size();
+    image.bp = frameData.data();
+
     size_t sizeBits = 0;
     int bits = Bits[mSurfaceFormat];
     if(mPacked){
@@ -318,35 +371,23 @@ void XimeaCamera::startStreaming()
         packedData.resize((int)mInputBuffer.size());
     }
 
-    XI_IMG image = {0};
-    image.size = sizeof(XI_IMG);
-    image.bp_size = frameData.size();
-    image.bp = frameData.data();
+    auto zeroFrame = mInputBuffer.getFirstImage();
+    if(!zeroFrame)
+        return {};
+    unsigned char* dst = zeroFrame->data.get();
 
-    QElapsedTimer tmr;
-    while(mState == cstStreaming)
-    {
-        tmr.restart();
-        if(mPacked){
-            image.bp = packedData.data();
-            ret = xiGetImage(hDevice, 5000, &image);
-            read_inputstreamP(packedData.data(), sizeBits, bits, (uint16_t*)frameData.data());
-            image.bp_size = mWidth * mHeight * sizeof(uint16_t);
-        }else{
-            image.bp = frameData.data();
-            ret = xiGetImage(hDevice, 5000, &image);
-        }
-        unsigned char* dst = mInputBuffer.getBuffer();
-        cudaMemcpy(dst, frameData.data(), image.bp_size, cudaMemcpyHostToDevice);
-        mInputBuffer.release();
-
-        {
-            QMutexLocker l(&mLock);
-            mRawProc->acqTimeNsec = tmr.nsecsElapsed();
-            mRawProc->wake();
-        }
+    if(mPacked){
+        image.bp = packedData.data();
+        ret = xiGetImage(hDevice, 5000, &image);
+        read_inputstreamP(packedData.data(), sizeBits, bits, (uint16_t*)frameData.data());
+        image.bp_size = mWidth * mHeight * sizeof(uint16_t);
+    }else{
+        image.bp = frameData.data();
+        ret = xiGetImage(hDevice, 5000, &image);
     }
-    xiStopAcquisition(hDevice);
+    cudaMemcpy(dst, frameData.data(), image.bp_size, cudaMemcpyHostToDevice);
+
+    return zeroFrame;
 }
 
 bool XimeaCamera::getParameter(cmrCameraParameter param, float& val)

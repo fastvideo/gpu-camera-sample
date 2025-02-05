@@ -701,7 +701,8 @@ void RTSPServer::doPlay()
 
     sockaddr_in addr;
     addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = inet_addr("0.0.0.0");
+    addr.sin_addr.s_addr = 0;//inet_addr("0.0.0.0");
+
     addr.sin_port = htons(m_clientPort1);
     int res = bind(mHSocket, (sockaddr*)&addr, sizeof(addr));
     if(res == SOCKET_ERROR){

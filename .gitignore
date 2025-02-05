@@ -6,7 +6,7 @@ src/**/x64
 
 GPUCameraSample*
 OtherLibs*
-build-*
+build*
 # bin/**/*.lib
 # bin/**/*.iobj
 # bin/**/*.ipdb

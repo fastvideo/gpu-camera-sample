@@ -51,6 +51,7 @@ public:
     bool allocate(int width, int height, fastSurfaceFormat_t format = FAST_I16);
     unsigned char* getBuffer();
     GPUImage_t* getLastImage();
+    GPUImage_t *getFirstImage();
     void release();
 
     int width();

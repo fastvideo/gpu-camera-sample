@@ -264,6 +264,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    mProcessorPtr.reset();
+    mRendererPtr.reset();
+    mMediaViewer.reset();
     delete ui;
 }
 
@@ -321,7 +324,7 @@ void MainWindow::initNewCamera(GPUCameraBase* cmr, uint32_t devID)
             this,
             SLOT(onCameraStateChanged(GPUCameraBase::cmrCameraState)));
 
-    mProcessorPtr.reset(new RawProcessor(mCameraPtr.data(), mRendererPtr.data()));
+    mProcessorPtr.reset(new RawProcessor(mCameraPtr, mRendererPtr));
 
     connect(mProcessorPtr.data(), SIGNAL(finished()), this, SLOT(onGPUFinished()));
     connect(mProcessorPtr.data(), SIGNAL(error()), this, SLOT(onGPUError()));
@@ -1177,6 +1180,8 @@ void MainWindow::on_actionPlay_toggled(bool arg1)
         ui->actionPlay->setChecked(false);
         return;
     }
+
+    mRendererPtr->setPlay(arg1);
 
     if(arg1)
     {

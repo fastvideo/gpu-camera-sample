@@ -42,7 +42,7 @@
 #include <QDebug>
 #include <QPoint>
 
-RawProcessor::RawProcessor(GPUCameraBase *camera, GLRenderer *renderer):QObject(nullptr),
+RawProcessor::RawProcessor(QSharedPointer<GPUCameraBase> camera, QSharedPointer<GLRenderer> renderer):QObject(nullptr),
     mCamera(camera),
     mRenderer(renderer)
 {
@@ -61,6 +61,7 @@ RawProcessor::RawProcessor(GPUCameraBase *camera, GLRenderer *renderer):QObject(
 RawProcessor::~RawProcessor()
 {
     stop();
+    mWorking = false;
     mCUDAThread.quit();
     mCUDAThread.wait(3000);
 }
@@ -134,20 +135,23 @@ void RawProcessor::startWorking()
 
     while(mWorking)
     {
-        if(!mWake)
-        {
-            mWaitMutex.lock();
-            mWaitCond.wait(&mWaitMutex);
-            mWaitMutex.unlock();
-        }
-        mWake = false;
+        // if(!mWake)
+        // {
+        //     mWaitMutex.lock();
+        //     mWaitCond.wait(&mWaitMutex);
+        //     mWaitMutex.unlock();
+        // }
+        // mWake = false;
         if(!mWorking)
             break;
 
         if(!mProcessorPtr || mCamera == nullptr)
             continue;
 
-        GPUImage_t* img = mCamera->getFrameBuffer()->getLastImage();
+        GPUImage_t* img = mCamera->getLastFrame();//mCamera->getFrameBuffer()->getLastImage();
+        if(!img)
+            continue;
+
         mProcessorPtr->Transform(img, mOptions);
         if(mRenderer)
         {
