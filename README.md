@@ -300,6 +300,7 @@ To test a real application with XIMEA cameras (USB3 or PCIe), please have a look
 * <a href="https://www.fastcompression.com/blog/fastvideo-sdk-vs-nvidia-npp.htm" target="_blank">Fastvideo SDK vs NVIDIA NPP Library</a>
 * <a href="https://www.fastcompression.com/blog/gpu-vs-cpu-fast-image-processing.htm" target="_blank">GPU vs CPU at Image Processing. Why GPU is much faster than CPU?</a>
 * <a href="https://www.fastcompression.com/blog/jetson-image-processing-framework.htm" target="_blank">Image Processing Framework on Jetson</a>
+* <a href="https://www.fastcompression.com/fastvideo.md" target="_blank">Fastvideo Products</a>
 
 ## Fastvideo SDK Benchmarks
 
