@@ -285,6 +285,7 @@ To test a real application with XIMEA cameras (USB3 or PCIe), please have a look
 * High performance chromatic aberration suppression in RAW domain - in progress
 * Support for Emergent Vision Technologies, DALSA, Baumer, Kaya Instruments, SVS-Vistek, IO Industries, MindVision cameras - in progress
 * RAW Bayer codec - in progress
+* <a href="https://www.fastcompression.com/products/gpu-denoiser.htm" target="_blank">GPU denoiser</a> (NLM and Bilateral algorithms) - in progress
 * <a href="https://www.fastcompression.com/products/gpu-tone-mapping.htm" target="_blank">ALTMapper software</a> (adaptive local tone mapping algorithm) - in progress
 * JPEG2000 encoder and decoder on GPU for camera applications
 * Interoperability with FFmpeg, UltraGrid, and GStreamer
