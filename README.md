@@ -281,12 +281,13 @@ To test a real application with XIMEA cameras (USB3 or PCIe), please have a look
 * Support for XIMEA MU181CR-ON camera - done
 * Support for Jetson AGX Orin CUDA-11.4 and CUDA-12.6 - done
 * CUDA-12.6 support - done
+* Support for cameras from Emergent Vision Technologies, IO Industries, Hikrobot - done
 * Fast undistortion on GPU with precise and compact maps - in progress
 * High performance chromatic aberration suppression in RAW domain - in progress
-* Support for Emergent Vision Technologies, DALSA, Baumer, Kaya Instruments, SVS-Vistek, IO Industries, MindVision cameras - in progress
+* Support for DALSA, Baumer, Kaya Instruments, SVS-Vistek, MindVision cameras - in progress
 * RAW Bayer codec - in progress
-* <a href="https://www.fastcompression.com/products/gpu-denoiser.htm" target="_blank">GPU denoiser</a> (NLM and Bilateral algorithms) - in progress
-* <a href="https://www.fastcompression.com/products/gpu-tone-mapping.htm" target="_blank">ALTMapper software</a> (adaptive local tone mapping algorithm) - in progress
+* <a href="https://www.fastcompression.com/products/gpu-denoiser.htm">GPU denoiser</a> (NLM and Bilateral algorithms) - in progress
+* <a href="https://www.fastcompression.com/products/gpu-tone-mapping.htm">ALTMapper software</a> (adaptive local tone mapping algorithm) - in progress
 * JPEG2000 encoder and decoder on GPU for camera applications
 * Interoperability with FFmpeg, UltraGrid, and GStreamer
 
@@ -296,11 +297,13 @@ To test a real application with XIMEA cameras (USB3 or PCIe), please have a look
 * <a href="https://www.fastcinemadng.com/" target="_blank">Full image processing pipeline on GPU for digital cinema applications</a>
 * <a href="https://en.wikipedia.org/wiki/Nvidia_NVENC#Versions" target="_blank">Parameters and restrictions of NVIDIA NVENC</a> 
 * <a href="https://en.wikipedia.org/wiki/Nvidia_NVDEC#GPU_support" target="_blank">Parameters and restrictions of NVIDIA NVDEC</a>
+* <a href="https://www.fastcompression.com/fastvideo.md" target="_blank">Fastvideo Products</a>
 * <a href="https://www.fastcompression.com/blog/content.htm" target="_blank">Fastvideo Blog</a>
 * <a href="https://www.fastcompression.com/blog/fastvideo-sdk-vs-nvidia-npp.htm" target="_blank">Fastvideo SDK vs NVIDIA NPP Library</a>
 * <a href="https://www.fastcompression.com/blog/gpu-vs-cpu-fast-image-processing.htm" target="_blank">GPU vs CPU at Image Processing. Why GPU is much faster than CPU?</a>
 * <a href="https://www.fastcompression.com/blog/jetson-image-processing-framework.htm" target="_blank">Image Processing Framework on Jetson</a>
 * <a href="https://www.fastcompression.com/fastvideo.md" target="_blank">Fastvideo Products</a>
+* <a href="https://www.fastcompression.com/cn/products.htm" target="_blank">GPU软件</a>
 
 ## Fastvideo SDK Benchmarks
 
