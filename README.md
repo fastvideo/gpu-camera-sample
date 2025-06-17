@@ -115,7 +115,7 @@ Here and after we assume you put source code into home directory, so project roo
 chmod 755 ~/gpu-camera-sample/Scripts/make_links.sh
 ```
 * Create OtherLibsLinux folder in the project root folder. This folder will contain external libraries, used in gpu-camera-sample application.
-* Download Fastvideo SDK x64 platform from <a href="https://drive.google.com/file/d/14YwjKvooRos1yKFzlRtdKr5RfS_vUnnZ/view?usp=sharing">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a>, or Fastvideo SDK Arm64 platform from <a href="https://drive.google.com/file/d/1HgfqboijA8VlQAulEm69a7ayx-hQVxuO/view?usp=sharing">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> and unpack it into \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK folder. Copy all files from \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib to \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib/Linux64 for x64 platform and to \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib/Arm64 for Arm64 platform.
+* Download Fastvideo SDK x64 platform for Windows-10/11, Linux Ubuntu 22.04, or Arm64 for NVIDIA Jetson Nano, TX2, Xavier, Orin and unpack it into \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK folder. Copy all files from \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib to \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib/Linux64 for x64 platform and to \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib/Arm64 for Arm64 platform.
 * Create links to Fastvideo SDK *.so files
 ``` console
 cd ~/gpu-camera-sample/Scripts
@@ -170,8 +170,6 @@ to test that camera is working.
 * Build the project.
 * If GenICam support is enabled, set environment variable GENICAM_GENTL64_PATH with full path to the camera vendor GenTL producer (.cti) library, before run the application.
 * Binaries will be placed into \<ProjectRoot\>/GPUCameraSample_Arm64 or GPUCameraSample_Linux64 folder. To run the application from the terminal run GPUCameraSample.sh. Necessary symbolic links will be made during compile time.
-
-You also can download precompiled libs from <a href="https://drive.google.com/file/d/1h5EeCLHjmDxBSKo5usXbATOYXlurrRO1/view?usp=drive_link" target="_blank">here</a>
 
 ### How to work with NVIDIA Jetson to get maximum performance
 
@@ -233,7 +231,7 @@ In general case, Fastvideo SDK can import/export data from/to SSD / CPU memory /
 
 ## Minimum Hardware ans Software Requirements for desktop application
 
-* Windows-10, Ubuntu 20.04 64-bit
+* Windows-10/11, Ubuntu 20.04 or 22.04 64-bit
 * The latest NVIDIA driver
 * NVIDIA GPU 10xx series minimum
 * NVIDIA GPU with 4-8-12 GB memory or better
@@ -266,7 +264,7 @@ To test a real application with XIMEA cameras (USB3 or PCIe), please have a look
 * Linux version - done
 * Software for NVIDIA Jetson hardware and L4T for CUDA-10.2 (Jetson Nano, TX2, Xavier/Orin AGX and NX) - done
 * Glass-to-Glass (G2G) test for latency measurements - done
-* Support for XIMEA, MATRIX VISION, Basler, FLIR, Imperx, JAI, Daheng Imaging cameras - done
+* Support for XIMEA, Bulluf (MATRIX VISION), Basler, FLIR, Imperx, JAI, Daheng Imaging cameras - done
 * MJPEG and H.264 streaming with or without FFmpeg RTSP - done
 * HEVC (H.265) encoder/decoder - done
 * Real-time Image Processing on NVIDIA GPU with Basler pylon - done
@@ -287,6 +285,7 @@ To test a real application with XIMEA cameras (USB3 or PCIe), please have a look
 * High performance chromatic aberration suppression in RAW domain - in progress
 * Support for Emergent Vision Technologies, DALSA, Baumer, Kaya Instruments, SVS-Vistek, IO Industries, MindVision cameras - in progress
 * RAW Bayer codec - in progress
+* <a href="https://www.fastcompression.com/products/gpu-tone-mapping.htm" target="_blank">ALTMapper software</a> (adaptive local tone mapping algorithm) - in progress
 * JPEG2000 encoder and decoder on GPU for camera applications
 * Interoperability with FFmpeg, UltraGrid, and GStreamer
 
