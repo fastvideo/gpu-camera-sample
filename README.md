@@ -2,7 +2,7 @@
 Camera sample application with realtime GPU image processing performance (Windows, Linux, Jetson)
 
 <p><a target="_blank" href="https://www.fastcompression.com/blog/gpu-software-machine-vision-cameras.htm">
-<img src="https://www.fastcompression.com/img/blog/machine-vision/gpu-software-machine-vision-cameras.png" alt="gpu software machine vision genicam" style="max-width:100%"/></a></p>
+<img src="https://www.fastcompression.com/img/blog/machine-vision/gpu-software-machine-vision-cameras.png" alt="gpu software machine vision" style="max-width:100%"/></a></p>
 
 That software is based on the following image processing pipeline for camera applications that includes:
 * Raw image capture (monochrome or bayer 8-bit, 12-bit packed/unpacked, 16-bit)
@@ -302,7 +302,6 @@ To test a real application with XIMEA cameras (USB3 or PCIe), please have a look
 * <a href="https://www.fastcompression.com/blog/fastvideo-sdk-vs-nvidia-npp.htm" target="_blank">Fastvideo SDK vs NVIDIA NPP Library</a>
 * <a href="https://www.fastcompression.com/blog/gpu-vs-cpu-fast-image-processing.htm" target="_blank">GPU vs CPU at Image Processing. Why GPU is much faster than CPU?</a>
 * <a href="https://www.fastcompression.com/blog/jetson-image-processing-framework.htm" target="_blank">Image Processing Framework on Jetson</a>
-* <a href="https://www.fastcompression.com/fastvideo.md" target="_blank">Fastvideo Products</a>
 * <a href="https://www.fastcompression.com/cn/products.htm" target="_blank">用于高速图像处理的GPU软件</a>
 
 ## Fastvideo SDK Benchmarks
