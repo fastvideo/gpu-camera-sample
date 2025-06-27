@@ -2,7 +2,7 @@
 Camera sample application with realtime GPU image processing performance (Windows, Linux, Jetson)
 
 <p><a target="_blank" href="https://www.fastcompression.com/blog/gpu-software-machine-vision-cameras.htm">
-<img src="https://www.fastcompression.com/img/blog/machine-vision/gpu-software-machine-vision-cameras.png" alt="gpu software machine vision genicam" style="max-width:100%"/></a></p>
+<img src="https://www.fastcompression.com/img/blog/machine-vision/gpu-software-machine-vision-cameras.png" alt="gpu software machine vision" style="max-width:100%"/></a></p>
 
 That software is based on the following image processing pipeline for camera applications that includes:
 * Raw image capture (monochrome or bayer 8-bit, 12-bit packed/unpacked, 16-bit)
@@ -43,7 +43,7 @@ Soon we are going to add support for <a href="https://emergentvisiontec.com/" ta
 ### Requirements for Windows
 
 * Camera SDK or GenICam package + camera vendor GenTL producer (.cti). Сurrently XIMEA, MATRIX VISION, Basler, FLIR, Imperx, JAI, LUCID Vision Labs, Daheng Imaging cameras are supported
-* Fastvideo SDK (demo) ver.0.19.5.0
+* Fastvideo SDK (demo) ver.0.19.6.0
 * NVIDIA CUDA-12.6
 * Qt ver.5.13.1
 * Compiler MSVC 2022 or later
@@ -53,7 +53,7 @@ Soon we are going to add support for <a href="https://emergentvisiontec.com/" ta
 * Ubuntu 22.04 for x64 platform, Ubuntu 20.04 for Arm64 platform with CUDA 11.4 / CUDA 12.2, Ubuntu 18.04 for Arm64 platform with CUDA 10.2
 * Camera SDK or GenICam package + camera vendor GenTL producer (.cti). Currently XIMEA, MATRIX VISION, Basler, FLIR, Imperx, JAI, Daheng Imaging cameras are supported
 * Fastvideo SDK (demo) ver.0.19.5.0
-* NVIDIA CUDA-12.1 for x64, CUDA-11.4/12.2 (Jetson AGX Xavier, Orin) or CUDA-10.2 (Jetson TX2, NX) for ARM64 platform 
+* NVIDIA CUDA-12.6 for x64, CUDA-11.4/12.6 (Jetson AGX Xavier, Orin) or CUDA-10.2 (Jetson TX2, NX) for ARM64 platform 
 * Compiler gcc 7.4 or later
 * Qt 5 (qtbase5-dev)
 ``` console
@@ -115,7 +115,7 @@ Here and after we assume you put source code into home directory, so project roo
 chmod 755 ~/gpu-camera-sample/Scripts/make_links.sh
 ```
 * Create OtherLibsLinux folder in the project root folder. This folder will contain external libraries, used in gpu-camera-sample application.
-* Download Fastvideo SDK x64 platform from <a href="https://drive.google.com/file/d/14YwjKvooRos1yKFzlRtdKr5RfS_vUnnZ/view?usp=sharing">Fastvideo SDK (demo) for Linux Ubuntu 18.04, 64-bit</a>, or Fastvideo SDK Arm64 platform from <a href="https://drive.google.com/file/d/1HgfqboijA8VlQAulEm69a7ayx-hQVxuO/view?usp=sharing">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, Xavier</a> and unpack it into \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK folder. Copy all files from \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib to \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib/Linux64 for x64 platform and to \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib/Arm64 for Arm64 platform.
+* Download Fastvideo SDK x64 platform for Windows-10/11, Linux Ubuntu 22.04, or Arm64 for NVIDIA Jetson Nano, TX2, Xavier, Orin and unpack it into \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK folder. Copy all files from \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib to \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib/Linux64 for x64 platform and to \<ProjectRoot\>/OtherLibsLinux/FastvideoSDK/fastvideo_sdk/lib/Arm64 for Arm64 platform.
 * Create links to Fastvideo SDK *.so files
 ``` console
 cd ~/gpu-camera-sample/Scripts
@@ -170,8 +170,6 @@ to test that camera is working.
 * Build the project.
 * If GenICam support is enabled, set environment variable GENICAM_GENTL64_PATH with full path to the camera vendor GenTL producer (.cti) library, before run the application.
 * Binaries will be placed into \<ProjectRoot\>/GPUCameraSample_Arm64 or GPUCameraSample_Linux64 folder. To run the application from the terminal run GPUCameraSample.sh. Necessary symbolic links will be made during compile time.
-
-You also can download precompiled libs from <a href="https://drive.google.com/file/d/1h5EeCLHjmDxBSKo5usXbATOYXlurrRO1/view?usp=drive_link" target="_blank">here</a>
 
 ### How to work with NVIDIA Jetson to get maximum performance
 
@@ -233,7 +231,7 @@ In general case, Fastvideo SDK can import/export data from/to SSD / CPU memory /
 
 ## Minimum Hardware ans Software Requirements for desktop application
 
-* Windows-10, Ubuntu 18.04 64-bit
+* Windows-10/11, Ubuntu 20.04 or 22.04 64-bit
 * The latest NVIDIA driver
 * NVIDIA GPU 10xx series minimum
 * NVIDIA GPU with 4-8-12 GB memory or better
@@ -266,10 +264,10 @@ To test a real application with XIMEA cameras (USB3 or PCIe), please have a look
 * Linux version - done
 * Software for NVIDIA Jetson hardware and L4T for CUDA-10.2 (Jetson Nano, TX2, Xavier/Orin AGX and NX) - done
 * Glass-to-Glass (G2G) test for latency measurements - done
-* Support for XIMEA, MATRIX VISION, Basler, FLIR, Imperx, JAI, Daheng Imaging cameras - done
+* Support for XIMEA, Bulluf (MATRIX VISION), Basler, FLIR, Imperx, JAI, Daheng Imaging cameras - done
 * MJPEG and H.264 streaming with or without FFmpeg RTSP - done
 * HEVC (H.265) encoder/decoder - done
-* <a href="https://imaginghub.com/projects/455-real-time-image-processing-on-nvidia-gpu-with-basler-pylon-and-fastvideo" target="_blank">Real-time Image Processing on NVIDIA GPU with Basler pylon</a> - done
+* Real-time Image Processing on NVIDIA GPU with Basler pylon - done
 * Benchmarks for Jetson Xavier NX - done
 * CUDA-11.4 support - done
 * Support for MIPI CSI-2 camera which is embedded into TX2 - done
@@ -281,12 +279,15 @@ To test a real application with XIMEA cameras (USB3 or PCIe), please have a look
 * HDR image processing on GPU for automotive 16/20/24-bit image sensors (IMX490, IMX728, AR0820, OX08) - done
 * High performance JPEG-XS decoder on GPU - done
 * Support for XIMEA MU181CR-ON camera - done
-* Support for Jetson AGX Orin CUDA-11.4 and CUDA-12.2 - done
+* Support for Jetson AGX Orin CUDA-11.4 and CUDA-12.6 - done
 * CUDA-12.6 support - done
+* Support for cameras from Emergent Vision Technologies, IO Industries, Hikrobot - done
 * Fast undistortion on GPU with precise and compact maps - in progress
 * High performance chromatic aberration suppression in RAW domain - in progress
-* Support for Emergent Vision Technologies, DALSA, Baumer, Kaya Instruments, SVS-Vistek, IO Industries, MindVision cameras - in progress
+* Support for DALSA, Baumer, Kaya Instruments, SVS-Vistek, MindVision cameras - in progress
 * RAW Bayer codec - in progress
+* <a href="https://www.fastcompression.com/products/gpu-denoiser.htm">GPU denoiser</a> (NLM and Bilateral algorithms) - in progress
+* <a href="https://www.fastcompression.com/products/gpu-tone-mapping.htm">ALTMapper software</a> (adaptive local tone mapping algorithm) - in progress
 * JPEG2000 encoder and decoder on GPU for camera applications
 * Interoperability with FFmpeg, UltraGrid, and GStreamer
 
@@ -296,11 +297,12 @@ To test a real application with XIMEA cameras (USB3 or PCIe), please have a look
 * <a href="https://www.fastcinemadng.com/" target="_blank">Full image processing pipeline on GPU for digital cinema applications</a>
 * <a href="https://en.wikipedia.org/wiki/Nvidia_NVENC#Versions" target="_blank">Parameters and restrictions of NVIDIA NVENC</a> 
 * <a href="https://en.wikipedia.org/wiki/Nvidia_NVDEC#GPU_support" target="_blank">Parameters and restrictions of NVIDIA NVDEC</a>
+* <a href="https://www.fastcompression.com/fastvideo.md" target="_blank">Fastvideo Products</a>
 * <a href="https://www.fastcompression.com/blog/content.htm" target="_blank">Fastvideo Blog</a>
 * <a href="https://www.fastcompression.com/blog/fastvideo-sdk-vs-nvidia-npp.htm" target="_blank">Fastvideo SDK vs NVIDIA NPP Library</a>
 * <a href="https://www.fastcompression.com/blog/gpu-vs-cpu-fast-image-processing.htm" target="_blank">GPU vs CPU at Image Processing. Why GPU is much faster than CPU?</a>
 * <a href="https://www.fastcompression.com/blog/jetson-image-processing-framework.htm" target="_blank">Image Processing Framework on Jetson</a>
-* <a href="https://www.fastcompression.com/fastvideo.md" target="_blank">Fastvideo Products</a>
+* <a href="https://www.fastcompression.com/cn/products.htm" target="_blank">用于高速图像处理的GPU软件</a>
 
 ## Fastvideo SDK Benchmarks
 
@@ -312,8 +314,7 @@ To test a real application with XIMEA cameras (USB3 or PCIe), please have a look
 
 * FastVCR software for XIMEA cameras with GPU-based image processing - <a href="https://www.fastcompression.com/download/FastVCR_Portable.7z">download link for Windows version</a> 
 * Download <a href="https://www.fastcinemadng.com/download/download.html" target="_blank">Fast CinemaDNG Processor</a> software for Windows, manual and test DNG and BRAW footages
-* Download <a href="https://www.fastcompression.com/download/trial/fvSDK-0.19.6.0-Win64-CUDA-12.6-Demo-Exp-2026-05-09.7z" target="_blank">Fastvideo SDK (demo) for Windows-10, 64-bit</a> (valid till August 30, 2024)
-* Download <a href="https://drive.google.com/file/d/1ezAPWKz_ovLsmQiID-mlVIvRD2p0FQKI/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for Linux Ubuntu 22.04, 64-bit</a> (valid till June 30, 2024)
-* Download <a href="https://drive.google.com/file/d/1TgB1A0Yz8BEHZKsgo9d80ntEJd0hLjsf/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for NVIDIA Jetson Nano, TX2, NX</a> (valid till June 25, 2024)
-* Download <a href="https://drive.google.com/file/d/1jw9QfdKs4nw18ZwIiNTjwifjWyDnyzwu/view?usp=sharing" target="_blank">Fastvideo SDK (demo) for NVIDIA Jetson Xavier, Orin</a> (valid till July 06, 2024)
+* Download <a href="https://www.fastcompression.com/download/trial/fvSDK-0.19.6.0-Win64-CUDA-12.6-Demo-Exp-2026-05-09.7z" target="_blank">Fastvideo SDK (demo) for Windows-10, 64-bit</a> (valid till May 09, 2026)
 * Download <a href="https://www.fastcompression.com/download/Fastvideo_SDK_manual.pdf" target="_blank">Fastvideo SDK Manual</a>
+* Download Fastvideo SDK (demo) for Linux Ubuntu 22.04, 64-bit - available upon request
+* Download Fastvideo SDK (demo) for NVIDIA Jetson Xavier, Orin - available upon request
