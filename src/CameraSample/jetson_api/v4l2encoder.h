@@ -40,6 +40,8 @@ public:
     // 3 get encoded data
     bool getEncodedData(userbuffer& output);
 
+    bool isInit() const;
+
 private:
     std::unique_ptr<v4l2EncoderPrivate> mD;
 };

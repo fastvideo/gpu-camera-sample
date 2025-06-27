@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020, NVIDIA CORPORATION.  All rights reserved.
+ * Copyright (c) 2016-2021, NVIDIA CORPORATION.  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions
@@ -84,6 +84,16 @@
  * Defines the V4L2 pixel format for representing semi-planar 12-bit Y/CbCr 4:2:0 decoder data.
  */
 #define V4L2_PIX_FMT_P012M   v4l2_fourcc('P', 'M', '1', '2') /* Y/CbCr 4:2:0, 12 bits per channel */
+
+/**
+ * Defines the V4L2 pixel format for representing semi-planar 8-bit Y/CbCr 4:4:4 decoder data.
+ */
+#define V4L2_PIX_FMT_NV24M   v4l2_fourcc('N', 'M', '2', '4') /* Y/CbCr 4:4:4, 8 bits per channel */
+
+/**
+ * Defines the V4L2 pixel format for representing semi-planar 10-bit Y/CbCr 4:4:4 decoder data.
+ */
+#define V4L2_PIX_FMT_NV24_10LE   v4l2_fourcc('N', 'V', '1', '0') /* Y/CbCr 4:4:4, 10 bits per channel */
 
 
 /** @cond UNUSED */
@@ -416,8 +426,8 @@ struct v4l2_ctrl_vp8_frame_hdr {
  * MEMORY               | OUTPUT PLANE | CAPTURE PLANE
  * :------------------: | :----------: | :-----------:
  * V4L2_MEMORY_MMAP     | Y            | Y
- * V4L2_MEMORY_DMABUF   | N            | N
- * V4L2_MEMORY_USERPTR  | N            | N
+ * V4L2_MEMORY_DMABUF   | N            | Y
+ * V4L2_MEMORY_USERPTR  | Y            | N
  *
  * ### Supported Controls
  * - #V4L2_CID_MPEG_VIDEO_DISABLE_COMPLETE_FRAME_INPUT
@@ -565,6 +575,26 @@ struct v4l2_ctrl_vp8_frame_hdr {
  *
  */
 #define V4L2_CID_VIDEODEC_HDR_MASTERING_DISPLAY_DATA (V4L2_CID_MPEG_BASE+522)
+
+/**
+ * Defines the Control ID to get Sample Aspect Ratio width for decoding.
+ *
+ * This control returns unsigned integer of Sample Aspect Ratio width.
+ *
+ * @attention This control must be set after receiving V4L2_EVENT_RESOLUTION_CHANGE.
+ *
+ */
+#define V4L2_CID_MPEG_VIDEODEC_SAR_WIDTH (V4L2_CID_MPEG_BASE+569)
+
+/**
+ * Defines the Control ID to get Sample Aspect Ratio height for decoding.
+ *
+ * This control returns unsigned integer of Sample Aspect Ratio height.
+ *
+ * @attention This control must be set after receiving V4L2_EVENT_RESOLUTION_CHANGE.
+ *
+ */
+#define V4L2_CID_MPEG_VIDEODEC_SAR_HEIGHT (V4L2_CID_MPEG_BASE+570)
 
 /** @} */
 
@@ -944,7 +974,8 @@ struct v4l2_ctrl_vp8_frame_hdr {
  * with this control.
  *
  * @attention This control must be set after requesting buffers on both the
- * planes.
+ * planes. The value for V4L2_CID_MPEG_VIDEOENC_NUM_REFERENCE_FRAMES, if being entered,
+ * must be set after this control.
  */
 #define V4L2_CID_MPEG_VIDEOENC_ENABLE_EXTERNAL_RPS_CONTROL (V4L2_CID_MPEG_BASE+542)
 
@@ -1161,37 +1192,306 @@ struct v4l2_ctrl_vp8_frame_hdr {
 #define V4L2_CID_MPEG_VIDEOENC_ENABLE_SLICE_LEVEL_ENCODE (V4L2_CID_MPEG_BASE+562)
 
 /**
- * Defines the possible levels for H.265 encoder.
+ * Defines the Control ID to set Picture Order Count property in frames.
+ *
+ * This works only with H.264 encoder. An integer value must be supplied with this
+ * control.
+ *
+ * @attention This control should be set after setting formats on both the planes
+ * and before requesting buffers on either plane.
  */
-enum v4l2_mpeg_video_h265_level {
+#define V4L2_CID_MPEG_VIDEOENC_POC_TYPE (V4L2_CID_MPEG_BASE+563)
 
-    V4L2_MPEG_VIDEO_H265_LEVEL_1_0_MAIN_TIER = 0,
-    V4L2_MPEG_VIDEO_H265_LEVEL_1_0_HIGH_TIER,
-    V4L2_MPEG_VIDEO_H265_LEVEL_2_0_MAIN_TIER,
-    V4L2_MPEG_VIDEO_H265_LEVEL_2_0_HIGH_TIER,
-    V4L2_MPEG_VIDEO_H265_LEVEL_2_1_MAIN_TIER,
-    V4L2_MPEG_VIDEO_H265_LEVEL_2_1_HIGH_TIER,
-    V4L2_MPEG_VIDEO_H265_LEVEL_3_0_MAIN_TIER,
-    V4L2_MPEG_VIDEO_H265_LEVEL_3_0_HIGH_TIER,
-    V4L2_MPEG_VIDEO_H265_LEVEL_3_1_MAIN_TIER,
-    V4L2_MPEG_VIDEO_H265_LEVEL_3_1_HIGH_TIER,
-    V4L2_MPEG_VIDEO_H265_LEVEL_4_0_MAIN_TIER,
-    V4L2_MPEG_VIDEO_H265_LEVEL_4_0_HIGH_TIER,
-    V4L2_MPEG_VIDEO_H265_LEVEL_4_1_MAIN_TIER,
-    V4L2_MPEG_VIDEO_H265_LEVEL_4_1_HIGH_TIER,
-    V4L2_MPEG_VIDEO_H265_LEVEL_5_0_MAIN_TIER,
-    V4L2_MPEG_VIDEO_H265_LEVEL_5_0_HIGH_TIER,
-    V4L2_MPEG_VIDEO_H265_LEVEL_5_1_MAIN_TIER,
-    V4L2_MPEG_VIDEO_H265_LEVEL_5_1_HIGH_TIER,
-    V4L2_MPEG_VIDEO_H265_LEVEL_5_2_MAIN_TIER,
-    V4L2_MPEG_VIDEO_H265_LEVEL_5_2_HIGH_TIER,
-    V4L2_MPEG_VIDEO_H265_LEVEL_6_0_MAIN_TIER,
-    V4L2_MPEG_VIDEO_H265_LEVEL_6_0_HIGH_TIER,
-    V4L2_MPEG_VIDEO_H265_LEVEL_6_1_MAIN_TIER,
-    V4L2_MPEG_VIDEO_H265_LEVEL_6_1_HIGH_TIER,
-    V4L2_MPEG_VIDEO_H265_LEVEL_6_2_MAIN_TIER,
-    V4L2_MPEG_VIDEO_H265_LEVEL_6_2_HIGH_TIER,
-};
+/**
+ * Defines the Control ID to set Sample Aspect Ratio width for H265 VUI encoding.
+ *
+ * An integer value must be supplied with this control.
+ * The VUI Sample Aspect Ratio indicator for H265 follows the standard enum defined for
+ * v4l2_mpeg_video_h264_vui_sar_idc.
+ *
+ * @attention This control should be set after setting formats on both the planes
+ * and before requesting buffers on either plane.
+ */
+#define V4L2_CID_MPEG_VIDEOENC_H265_VUI_EXT_SAR_WIDTH (V4L2_CID_MPEG_BASE+564)
+
+/**
+ * Defines the Control ID to set Sample Aspect Ratio height for H265 VUI encoding.
+ *
+ * An integer value must be supplied with this control.
+ * The VUI Sample Aspect Ratio indicator for H265 follows the standard enum defined
+ * for v4l2_mpeg_video_h264_vui_sar_idc.
+ *
+ * @attention This control should be set after setting formats on both the planes
+ * and before requesting buffers on either plane.
+ */
+#define V4L2_CID_MPEG_VIDEOENC_H265_VUI_EXT_SAR_HEIGHT (V4L2_CID_MPEG_BASE+565)
+
+/**
+ * Defines the Control ID to force INTRA frame.
+ *
+ * This control can be used by encoder to force encoding an intra frame.
+ *
+ * @attention This control should be set after setting formats on both the planes
+ * and before requesting buffers on either plane.
+ */
+#define V4L2_CID_MPEG_VIDEOENC_FORCE_INTRA_FRAME (V4L2_CID_MPEG_BASE+566)
+
+/**
+ * Defines the Control ID to force IDR frame.
+ *
+ * This control can be used by encoder to force encoding an idr frame.
+ *
+ * @attention This control should be set after setting formats on both the planes
+ * and before requesting buffers on either plane.
+ */
+#define V4L2_CID_MPEG_VIDEOENC_FORCE_IDR_FRAME (V4L2_CID_MPEG_BASE+567)
+
+ /**
+ * Defines the Control ID to set low latency to be used by decoder.
+ *
+ * This control can be used by decoder to set low latency for streams having
+ * I and IPPP frames.
+ *
+ * @attention This control must be set before requesting buffers on either plane.
+ */
+#define V4L2_CID_MPEG_VIDEO_CUDA_LOW_LATENCY (V4L2_CID_MPEG_BASE+568)
+
+/**
+ * Defines the Control ID to enable lossless H.264/H.265 encoding.
+ *
+ * An boolean value must be supplied with this control. Default is 0.
+ * Lossless encoding is supported only for YUV444 8/10-bit format.
+ * @note This control must be set in case of H.264 YUV444 encoding as
+ * it does not support lossy encoding.
+ *
+ * @attention This control should be set after setting formats on both the planes
+ * and before requesting buffers on either plane.
+ */
+#define V4L2_CID_MPEG_VIDEOENC_ENABLE_LOSSLESS (V4L2_CID_MPEG_BASE+569)
+
+/**
+ * Defines the Control ID to set chroma_factor_idc for H.265 encoding.
+ *
+ * An integer value must be supplied with this control. Default is 1, and
+ * 3 for YUV444 8/10-bit format.
+ *
+ * @attention This control should be set after setting formats on both the planes
+ * and before requesting buffers on either plane.
+ */
+#define V4L2_CID_MPEG_VIDEOENC_H265_CHROMA_FACTOR_IDC (V4L2_CID_MPEG_BASE+570)
+
+/** @} */
+
+/**
+ * @defgroup V4L2Argus V4L2 Video Camera
+ *
+ * @brief NVIDIA V4L2 Camera Description and Extensions
+ *
+ * The camera device node is \c "/dev/video%d".
+ *
+ * ### Supported Pixelformats
+ * CAPTURE PLANE
+ * :---------------------
+ * V4L2_PIX_FMT_NV12M
+ *           -
+ *
+ * ### Supported Memory Types
+ * MEMORY               | CAPTURE PLANE
+ * :------------------: | :-----------:
+ * V4L2_MEMORY_MMAP     | Y
+ * V4L2_MEMORY_DMABUF   | Y
+ * V4L2_MEMORY_USERPTR  | N
+ * \attention For the camera, it is necessary that the capture plane
+ *  format be set and only then request buffers.
+ *
+ * ### Supported Controls
+ * The following sections describe the supported controls.
+ *
+ * #### Controls From the Open Source V4L2-Controls Header
+ * Control ID                       | Purpose              | Runtime Configurable
+ * -------------------------------- | -------------------- | :------------------:
+ * - #V4L2_CID_3A_LOCK              | AWB/AE Lock          | Y
+ *
+ * All non-runtime configurable options must be set after setting format on
+ * the capture planes and before requesting buffers.
+ *
+ *
+ * ### NVIDIA-Specific Controls
+ * - #V4L2_CID_ARGUS_AUTO_WHITE_BALANCE_MODE
+ * - #V4L2_CID_ARGUS_SENSOR_MODE
+ * - #V4L2_CID_ARGUS_DENOISE_STRENGTH
+ * - #V4L2_CID_ARGUS_DENOISE_MODE
+ * - #V4L2_CID_ARGUS_EE_STRENGTH
+ * - #V4L2_CID_ARGUS_EE_MODE
+ * - #V4L2_CID_ARGUS_AE_ANTIBANDING_MODE
+ * - #V4L2_CID_ARGUS_ISP_DIGITAL_GAIN_RANGE
+ * - #V4L2_CID_ARGUS_COLOR_SATURATION
+ * - #V4L2_CID_ARGUS_GAIN_RANGE
+ * - #V4L2_CID_ARGUS_EXPOSURE_TIME_RANGE
+ * - #V4L2_CID_ARGUS_METADATA
+ *
+ * ### Setting Framerate
+ * The camera framerate can be set with \c VIDIOC_S_PARM IOCTL by setting the numerator
+ * and denominator in `v4l2_streamparm.parm.output.timeperframe`.
+ * Selection of camera mode can override this setting. If the camera mode is to be
+ * selected along with the specified framerate, then camera mode must be selected before
+ * setting the framerate.
+ *
+ * ### Camera Capture Metadata
+ * The camera can be queried to report frame related metadata. See \c V4L2_CID_ARGUS_METADATA
+ * for more information.
+ *
+ * ### EOS Handling
+ * Camera outputs all the queued empty buffers with data and TIME_OUT if no more empty buffers
+ * are queued. If error is encountered, am empty buffer is queued to the output with
+ * V4L2_BUF_FLAG_LAST flag.
+ * @{
+ * @ingroup ee_extensions_group
+ */
+/**
+ * Defines the Control ID to set auto white balance mode for camera.
+ *
+ * A value of type \c v4l2_argus_ac_awb_mode must be supplied
+ * with this control.
+ *
+ * @attention This control should be set after setting format
+ * on the capture plane.
+ */
+#define V4L2_CID_ARGUS_AUTO_WHITE_BALANCE_MODE (V4L2_CID_CAMERA_CLASS_BASE+20)
+
+/**
+ * Defines the Control ID to set sensor mode for camera.
+ *
+ * A non-negative integer value must be supplied with this control.
+ *
+ * @attention This control should be set after setting format
+ * and before requesting buffers on the capture plane.
+ */
+#define V4L2_CID_ARGUS_SENSOR_MODE (V4L2_CID_CAMERA_CLASS_BASE+32)
+
+/**
+ * Defines the Control ID to set denoise strength for camera.
+ *
+ * A pointer to a valid structure \c v4l2_argus_denoise_strength must be
+ * supplied with this control.
+ *
+ * @attention This control should be set after setting format
+ * on the capture plane.
+ */
+#define V4L2_CID_ARGUS_DENOISE_STRENGTH (V4L2_CID_CAMERA_CLASS_BASE+33)
+
+/**
+ * Defines the Control ID to set denoise mode for camera.
+ *
+ * A value of type \c v4l2_argus_denoise_mode must be
+ * supplied with this control.
+ *
+ * @attention This control should be set after setting format
+ * on the capture plane.
+ */
+#define V4L2_CID_ARGUS_DENOISE_MODE (V4L2_CID_CAMERA_CLASS_BASE+34)
+
+/**
+ * Defines the Control ID to set edge enhancement strength for camera.
+ *
+ * A pointer to a valid structure \c v4l2_argus_edge_enhance_strength
+ * must be supplied with this control.
+ *
+ * @attention This control should be set after setting format
+ * on the capture plane.
+ */
+#define V4L2_CID_ARGUS_EE_STRENGTH (V4L2_CID_CAMERA_CLASS_BASE+35)
+
+/**
+ * Defines the Control ID to set edge enhancement mode for camera.
+ *
+ * A value of type \c v4l2_argus_edge_enhance_mode
+ * must be supplied with this control.
+ *
+ * @attention This control should be set after setting format
+ * on the capture plane.
+ */
+#define V4L2_CID_ARGUS_EE_MODE (V4L2_CID_CAMERA_CLASS_BASE+36)
+
+/**
+ * Defines the Control ID to set Auto Exposure antibanding mode for camera.
+ *
+ * A value of type \c v4l2_argus_ac_ae_antibanding_mode must be supplied
+ * with this control.
+ *
+ * @attention This control should be set after setting format
+ * on the capture plane.
+ */
+#define V4L2_CID_ARGUS_AE_ANTIBANDING_MODE (V4L2_CID_CAMERA_CLASS_BASE+37)
+
+/**
+ * Defines the Control ID to set edge enhancement settings for camera.
+ *
+ * A pointer to a valid structure \c v4l2_argus_exposure_compensation
+ * must be supplied with this control.
+ *
+ * @attention This control should be set after setting format
+ * on the capture plane.
+ */
+#define V4L2_CID_ARGUS_EXPOSURE_COMPENSATION (V4L2_CID_CAMERA_CLASS_BASE+38)
+
+/**
+ * Defines the Control ID to set edge enhancement settings for camera.
+ *
+ * A pointer to a valid structure \c v4l2_argus_ispdigital_gainrange
+ * must be supplied with this control.
+ *
+ * @attention This control should be set after setting format
+ * on the capture plane.
+ */
+#define V4L2_CID_ARGUS_ISP_DIGITAL_GAIN_RANGE (V4L2_CID_CAMERA_CLASS_BASE+39)
+
+/**
+ * Defines the Control ID to set sensor mode for camera.
+ *
+ * A pointer to a valid structure \c v4l2_argus_color_saturation
+ * must be supplied with this control.
+ * The flag `EnableSaturation` must be set to true to enable setting
+ * the specified color saturation
+ *
+ * @attention This control should be set after setting format
+ * and before requesting buffers on the capture plane.
+ */
+#define V4L2_CID_ARGUS_COLOR_SATURATION (V4L2_CID_CAMERA_CLASS_BASE+40)
+
+/**
+ * Defines the Control ID to set edge enhancement settings for camera.
+ *
+ * A pointer to a valid structure \c v4l2_argus_gainrange
+ * must be supplied with this control.
+ *
+ * @attention This control should be set after setting format
+ * on the capture plane.
+ */
+#define V4L2_CID_ARGUS_GAIN_RANGE (V4L2_CID_CAMERA_CLASS_BASE+41)
+
+/**
+ * Defines the Control ID to set edge enhancement settings for camera.
+ *
+ * A pointer to a valid structure \c v4l2_argus_exposure_timerange
+ * must be supplied with this control.
+ *
+ * @attention This control should be set after setting format
+ * on the capture plane.
+ */
+#define V4L2_CID_ARGUS_EXPOSURE_TIME_RANGE (V4L2_CID_CAMERA_CLASS_BASE+42)
+
+/**
+ * Defines the Control ID to get the camera argus output metadata.
+ *
+ * A pointer to a valid structure \c v4l2_argus_ctrl_metadata must be supplied
+ * with this control.
+ *
+ * @attention This control must be read after dequeueing a buffer successfully from
+ * the capture plane. The values in the structure are valid until the buffer is queued
+ * again.
+ */
+#define V4L2_CID_ARGUS_METADATA (V4L2_CID_CAMERA_CLASS_BASE+43)
 
 /** @} */
 
@@ -1449,6 +1749,39 @@ enum v4l2_enc_input_metadata_param {
     V4L2_ENC_INPUT_RC_PARAM_FLAG = 1 << 3,
     /** Input metadata structure contains ReconCRC parameters.  */
     V4L2_ENC_INPUT_RECONCRC_PARAM_FLAG = 1 << 4,
+};
+
+/**
+ * Defines the possible levels for H.265 encoder.
+ */
+enum v4l2_mpeg_video_h265_level {
+
+    V4L2_MPEG_VIDEO_H265_LEVEL_1_0_MAIN_TIER = 0,
+    V4L2_MPEG_VIDEO_H265_LEVEL_1_0_HIGH_TIER,
+    V4L2_MPEG_VIDEO_H265_LEVEL_2_0_MAIN_TIER,
+    V4L2_MPEG_VIDEO_H265_LEVEL_2_0_HIGH_TIER,
+    V4L2_MPEG_VIDEO_H265_LEVEL_2_1_MAIN_TIER,
+    V4L2_MPEG_VIDEO_H265_LEVEL_2_1_HIGH_TIER,
+    V4L2_MPEG_VIDEO_H265_LEVEL_3_0_MAIN_TIER,
+    V4L2_MPEG_VIDEO_H265_LEVEL_3_0_HIGH_TIER,
+    V4L2_MPEG_VIDEO_H265_LEVEL_3_1_MAIN_TIER,
+    V4L2_MPEG_VIDEO_H265_LEVEL_3_1_HIGH_TIER,
+    V4L2_MPEG_VIDEO_H265_LEVEL_4_0_MAIN_TIER,
+    V4L2_MPEG_VIDEO_H265_LEVEL_4_0_HIGH_TIER,
+    V4L2_MPEG_VIDEO_H265_LEVEL_4_1_MAIN_TIER,
+    V4L2_MPEG_VIDEO_H265_LEVEL_4_1_HIGH_TIER,
+    V4L2_MPEG_VIDEO_H265_LEVEL_5_0_MAIN_TIER,
+    V4L2_MPEG_VIDEO_H265_LEVEL_5_0_HIGH_TIER,
+    V4L2_MPEG_VIDEO_H265_LEVEL_5_1_MAIN_TIER,
+    V4L2_MPEG_VIDEO_H265_LEVEL_5_1_HIGH_TIER,
+    V4L2_MPEG_VIDEO_H265_LEVEL_5_2_MAIN_TIER,
+    V4L2_MPEG_VIDEO_H265_LEVEL_5_2_HIGH_TIER,
+    V4L2_MPEG_VIDEO_H265_LEVEL_6_0_MAIN_TIER,
+    V4L2_MPEG_VIDEO_H265_LEVEL_6_0_HIGH_TIER,
+    V4L2_MPEG_VIDEO_H265_LEVEL_6_1_MAIN_TIER,
+    V4L2_MPEG_VIDEO_H265_LEVEL_6_1_HIGH_TIER,
+    V4L2_MPEG_VIDEO_H265_LEVEL_6_2_MAIN_TIER,
+    V4L2_MPEG_VIDEO_H265_LEVEL_6_2_HIGH_TIER,
 };
 
 /**
@@ -1821,6 +2154,203 @@ typedef struct _v4l2_ctrl_video_qp_range
     /** Maximum QP value for B frame. */
     __u32 MaxQpB;
 } v4l2_ctrl_video_qp_range;
+/** @} */
+
+/** @addtogroup V4L2Argus */
+/** @{ */
+
+/**
+ * Enum specifying types of denoise modes.
+ */
+enum v4l2_argus_denoise_mode {
+    V4L2_ARGUS_DENOISE_MODE_UNKNOWN         = 0,
+    V4L2_ARGUS_DENOISE_MODE_OFF             = 1,
+    V4L2_ARGUS_DENOISE_MODE_FAST            = 2,
+    V4L2_ARGUS_DENOISE_MODE_HIGH_QUALITY    = 3,
+};
+
+/**
+ * Enum specifying types of edge enhancement modes.
+ */
+enum v4l2_argus_edge_enhance_mode {
+    V4L2_ARGUS_EDGE_ENHANCE_MODE_UNKNOWN        = 0,
+    V4L2_ARGUS_EDGE_ENHANCE_MODE_OFF            = 1,
+    V4L2_ARGUS_EDGE_ENHANCE_MODE_FAST           = 2,
+    V4L2_ARGUS_EDGE_ENHANCE_MODE_HIGH_QUALITY   = 3,
+};
+
+/**
+ * Enum specifying types of AE antibanding modes.
+ */
+enum v4l2_argus_ac_ae_antibanding_mode {
+    V4L2_ARGUS_AE_ANTIBANDING_MODE_UNKNOWN  = 0,
+    V4L2_ARGUS_AE_ANTIBANDING_MODE_OFF      = 1,
+    V4L2_ARGUS_AE_ANTIBANDING_MODE_AUTO     = 2,
+    V4L2_ARGUS_AE_ANTIBANDING_MODE_50HZ     = 3,
+    V4L2_ARGUS_AE_ANTIBANDING_MODE_60HZ     = 4,
+};
+
+/**
+ * Enum specifying types of AC AWB modes.
+ */
+enum v4l2_argus_ac_awb_mode {
+    V4L2_ARGUS_AWB_MODE_OFF               = 1,
+    V4L2_ARGUS_AWB_MODE_AUTO              = 2,
+    V4L2_ARGUS_AWB_MODE_INCANDESCENT      = 3,
+    V4L2_ARGUS_AWB_MODE_FLUORESCENT       = 4,
+    V4L2_ARGUS_AWB_MODE_WARM_FLUORESCENT  = 5,
+    V4L2_ARGUS_AWB_MODE_DAYLIGHT          = 6,
+    V4L2_ARGUS_AWB_MODE_CLOUDY_DAYLIGHT   = 7,
+    V4L2_ARGUS_AWB_MODE_TWILIGHT          = 8,
+    V4L2_ARGUS_AWB_MODE_SHADE             = 9,
+    V4L2_ARGUS_AWB_MODE_MANUAL            = 10,
+};
+
+/**
+ * Enum specifying types of AE states.
+ */
+enum v4l2_argus_ae_state {
+    V4L2_ARGUS_AeState_Unknown            = 0,
+    V4L2_ARGUS_AE_STATE_INACTIVE          = 1,
+    V4L2_ARGUS_AE_STATE_SEARCHING         = 2,
+    V4L2_ARGUS_AE_STATE_CONVERGED         = 3,
+    V4L2_ARGUS_AE_STATE_FLASH_REQUIRED    = 4,
+    V4L2_ARGUS_AE_STATE_TIMEOUT           = 5,
+};
+
+/**
+ * Enum specifying types of AWB states.
+ */
+enum v4l2_argus_awb_state {
+    V4L2_ARGUS_AwbState_Unknown           = 0,
+    V4L2_ARGUS_AWB_STATE_INACTIVE         = 1,
+    V4L2_ARGUS_AWB_STATE_SEARCHING        = 2,
+    V4L2_ARGUS_AWB_STATE_CONVERGED        = 3,
+    V4L2_ARGUS_AWB_STATE_LOCKED           = 4,
+};
+
+/**
+ * Holds the strength value for denoise operation.
+ *
+ * Must be used with #V4L2_CID_ARGUS_DENOISE_STRENGTH ioctl.
+ */
+typedef struct _v4l2_argus_denoise_strength
+{
+    /** Denoise Strength. Range: {-1.0f, 1.0f} **/
+    float DenoiseStrength;
+}v4l2_argus_denoise_strength;
+
+/**
+ * Holds the strength value for edge enhancement operation.
+ *
+ * Must be used with #V4L2_CID_ARGUS_EE_STRENGTH ioctl.
+ */
+typedef struct _v4l2_argus_edge_enhance_strength
+{
+    /** Edge Enhance Strength. Range: {-1.0f, 1.0f} **/
+    float EdgeEnhanceStrength;
+}v4l2_argus_edge_enhance_strength;
+
+/**
+ * Holds the value for exposure compensation.
+ *
+ * Must be used with #V4L2_CID_ARGUS_EXPOSURE_COMPENSATION ioctl.
+ */
+typedef struct _v4l2_argus_exposure_compensation
+{
+    /** Exposure Compensation. Range: {-2.0f, 2.0f} **/
+    float ExposureCompensation;
+}v4l2_argus_exposure_compensation;
+
+/**
+ * Holds the value for Isp Digital gain range.
+ *
+ * Must be used with #V4L2_CID_ARGUS_ISP_DIGITAL_GAIN_RANGE ioctl.
+ */
+typedef struct _v4l2_argus_ispdigital_gainrange
+{
+    /** Range: {1, 256} **/
+    /** Digital Gain Range start limit **/
+    float MinISPDigitalGainRange;
+    /** Digital Gain Range end limit **/
+    float MaxISPDigitalGainRange;
+}v4l2_argus_ispdigital_gainrange;
+
+/**
+ * Holds the value for absolute color saturation.
+ *
+ * Must be used with #V4L2_CID_ARGUS_COLOR_SATURATION ioctl.
+ */
+typedef struct _v4l2_argus_color_saturation
+{
+    /** Boolean value to indicate enable of user-specified absolute color saturation **/
+    __u8 EnableSaturation;
+    /** Specified absolute color saturation **/
+    float ColorSaturation;
+}v4l2_argus_color_saturation;
+
+/**
+ * Holds the value for gain range.
+ *
+ * Must be used with #V4L2_CID_ARGUS_GAIN_RANGE ioctl.
+ */
+typedef struct _v4l2_argus_gainrange
+{
+    /** Analog Gain Range start limit **/
+    float MinGainRange;
+    /** Analog Gain Range end limit **/
+    float MaxGainRange;
+}v4l2_argus_gainrange;
+
+/**
+ * Holds the value for exposure range.
+ *
+ * Must be used with #V4L2_CID_ARGUS_EXPOSURE_TIME_RANGE ioctl.
+ */
+typedef struct _v4l2_argus_exposure_timerange
+{
+    /** Exposure Time Range start limit **/
+    __u64 MinExposureTimeRange;
+    /** Exposure Time Range end limit **/
+    __u64 MaxExposureTimeRange;
+}v4l2_argus_exposure_timerange;
+
+/**
+ * Holds the value for camera output metadata.
+ *
+ * Must be used with #V4L2_CID_ARGUS_METADATA ioctl.
+ */
+typedef struct _v4l2_argus_ctrl_metadata
+{
+    /** Boolean value to indicate if AE was locked for this capture **/
+    __u8 AeLocked;
+    /** Boolean value to indicate if metadata has valid contents **/
+    __u8 ValidFrameStatus;
+    /** Index of the buffer captured **/
+    __u32 BufferIndex;
+    /** Focuser Position used for capture**/
+    __u32 FocuserPosition;
+    /** CCT value calculated by AWB **/
+    __u32 AwbCCT;
+    /** ISO value used for capture **/
+    __u32 SensorSensitivity;
+    /** Time (nanoseconds) taken to integrate the capture **/
+    __u64 FrameDuration;
+    /** Frame readout time for the capture **/
+    __u64 FrameReadoutTime;
+    /** Sensor Exposure time value for the capture **/
+    __u64 SensorExposureTime;
+    /** ISP Digital gain value for the capture **/
+    float IspDigitalGain;
+    /** Estimated scene brightness for the capture **/
+    float SceneLux;
+    /** Sensor analog gain for the capture **/
+    float SensorAnalogGain;
+    /** AE state ran for capture **/
+    enum v4l2_argus_ae_state AEState;
+    /** AWB state ran for capture **/
+    enum v4l2_argus_awb_state AWBState;
+}v4l2_argus_ctrl_metadata;
 /** @} */
 
 /** @addtogroup V4L2Conv */

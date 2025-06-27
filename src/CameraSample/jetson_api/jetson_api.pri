@@ -1,11 +1,12 @@
 INCLUDEPATH += $$PWD
 
 HEADERS += \
+    $$PWD/NvBufSurface.h \
     $$PWD/v4l2_nv_extensions.h \
     $$PWD/nvvideoencoder.h \
     $$PWD/v4l2encoder.h \
     $$PWD/common_types.h \
-    $$PWD/nvbuf_utils.h
+    #$$PWD/nvbuf_utils.h
 
 SOURCES += \
     $$PWD/nvvideoencoder.cpp \
@@ -19,6 +20,7 @@ contains(TARGET_ARCH, "arm64"){
 }
 LIBS += -L/usr/lib/$$TEGRA_ARMABI/  \
         -L/usr/lib/$$TEGRA_ARMABI/tegra/ \
-        -lnvbuf_utils -lv4l2
+        -lnvbufsurface \
+        -lv4l2 #-lnvbuf_utils
 
 

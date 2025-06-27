@@ -15,7 +15,14 @@
 #include <linux/videodev2.h>
 #include <linux/v4l2-controls.h>
 #include <v4l2_nv_extensions.h>
+
+#include "cuda_runtime_api.h"
+
+#if CUDART_VERSION < 11040
 #include <nvbuf_utils.h>
+#else
+#include "NvBufSurface.h"
+#endif
 
 #include <string>
 
@@ -37,8 +44,8 @@ public:
     uint32_t mNumFrame = 0;
     uint32_t mIFrameInterval = 1;
     uint32_t mNumBFrames = 0;
-    uint32_t mNumCaptureBuffers = 4;
-    uint32_t mNumOutputBuffers = 4;
+    uint32_t mNumCaptureBuffers = 10;
+    uint32_t mNumOutputBuffers = 10;
     bool mEnableAllIFrameEncode = false;
     bool mInsertSpsPpsAtIdrEnabled = false;
     bool mInsertVuiEnabled = false;
@@ -181,11 +188,31 @@ public:
 
         int fd = buffer->planes[0].fd;
         for (uint32_t j = 0 ; j < buffer->n_planes ; j++){
+#if CUDART_VERSION < 11040
             void** dat = (void **)&buffer->planes[j].buf;
             ret = NvBufferMemSyncForDevice (fd, j, dat);
             if (ret < 0){
                 return ret;
             }
+#else
+            NvBufSurface *nvbuf_surf = 0;
+            ret = NvBufSurfaceFromFd (mBuffer->planes[j].fd, (void**)(&nvbuf_surf));
+            if (ret < 0)
+            {
+                std::cout << "Error while NvBufSurfaceFromFd" << std::endl;
+                //abort(&ctx);
+                //goto cleanup;
+                return -1;
+            }
+            ret = NvBufSurfaceSyncForDevice (nvbuf_surf, 0, j);
+            if (ret < 0)
+            {
+                std::cout << "Error while NvBufSurfaceSyncForDevice at output plane for V4L2_MEMORY_DMABUF" << std::endl;
+                //abort(&ctx);
+                //goto cleanup;
+                return -1;
+            }
+#endif
         }
 
         ret = plane->qBuffer(v4l2_buf);
@@ -290,7 +317,8 @@ public:
         if(mNumFrame < plane->getNumBuffers()){
             mBuffer = plane->getNthBuffer(mNumFrame);
             mV4l2_buf.index = mNumFrame;
-        }else{
+        }else
+        {
             ret = plane->dqBuffer(mV4l2_buf, &mBuffer);
             if(ret){
                 return ret;
@@ -321,11 +349,31 @@ public:
         NvPlane* plane = &mNVEncoder->output_plane;
         int fd = mBuffer->planes[0].fd;
         for (uint32_t j = 0 ; j < mBuffer->n_planes ; j++){
+#if CUDART_VERSION < 11040
             void** dat = (void **)&mBuffer->planes[j].buf;
             ret = NvBufferMemSyncForDevice (fd, j, dat);
             if (ret < 0){
                 return ret;
+
+#else
+            NvBufSurface *nvbuf_surf = 0;
+            ret = NvBufSurfaceFromFd (mBuffer->planes[j].fd, (void**)(&nvbuf_surf));
+            if (ret < 0)
+            {
+                std::cout << "Error while NvBufSurfaceFromFd" << std::endl;
+                //abort(&ctx);
+                //goto cleanup;
+                return -1;
             }
+            ret = NvBufSurfaceSyncForDevice (nvbuf_surf, 0, j);
+            if (ret < 0)
+            {
+                std::cout << "Error while NvBufSurfaceSyncForDevice at output plane for V4L2_MEMORY_DMABUF" << std::endl;
+                //abort(&ctx);
+                //goto cleanup;
+                return -1;
+            }
+#endif
         }
 
         ret = plane->qBuffer(mV4l2_buf);
@@ -348,6 +396,10 @@ public:
             }
         );
         return ret == 0;
+    }
+
+    bool isInit() const{
+        return mNVEncoder && mNVEncoder->isInit();
     }
 
     bool encode3(uint8_t** data, uint32_t width, uint32_t height, userbuffer& output){
@@ -594,4 +646,9 @@ bool v4l2Encoder::putInputBuffers3()
 bool v4l2Encoder::getEncodedData(userbuffer &output)
 {
     return mD->getEncodedData(output);
+}
+
+bool v4l2Encoder::isInit() const
+{
+    return mD && mD->isInit();
 }
