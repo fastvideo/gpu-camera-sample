@@ -1,25 +1,27 @@
 ---
 format: markdown
 title: Fastvideo GPU SDK: Real-Time Image Processing for Industrial Cameras
-description: Fastvideo GPU SDK: lightning fast denoising, HDR, and RAW processing for NVIDIA Jetson & XIMEA cameras. 1000+ FPS JPEG encoding, CUDA-optimized. Download free trial.
+description: Fastvideo GPU SDK: lightning fast denoising, HDR, and RAW processing for NVIDIA Jetson & XIMEA cameras. 2000+ FPS JPEG encoding, CUDA-optimized. Download free trial.
+url: https://www.fastcompression.com
 author: Fastvideo Team
 language: en
-keywords:
-  - High-performance GPU image processing
-  - Noise suppression at real-time: wavelet, NLM (Non-Local Means), bilateral
-  - HDR tone mapping (ALTMapper)
-  - JPEG and JPEG2000 codecs on NVIDIA GPU
-  - NVIDIA Jetson ISP for embedded vision and edge AI apps
-  - XIMEA camera integration
-  - Low-latency machine vision software
-  - Fastvideo SDK on CUDA with parallel processing architecture
-  - Industrial imaging solutions
-  - Real-time video processing
-  - Edge AI imaging
-  - AI-accelerated solutions
-last_updated: 2025-06-16
+keywords: >
+  GPU image processing, NVIDIA CUDA, JPEG codec, JPEG2000 codec, RAW codec, demosaicing, real-time denoising, HDR tone mapping, RAW processing, NVIDIA Jetson, XIMEA cameras, machine vision, medical imaging, aerial imaging, SDK, adaptive local contrast
+categories:
+  - ISP Software Development
+  - High-Performance Computing on GPU
+  - Computer Vision for camera applications
+tags:
+  - CUDA
+  - NVIDIA
+  - Image Processing
+  - ISP
+  - SDK
+  - Benchmark  
+last_updated: 2025-08-31
 ---
 # Fastvideo GPU SDK: Ultra-Fast Image Processing for NVIDIA Jetson & Industrial Cameras | Fastcompression
+**Fastvideo** is a leading developer of high-performance image and video processing solutions using the computing power of NVIDIA GPUs. Our technology provides unprecedented data processing speeds for industrial cameras, machine vision, medical imaging, and broadcasting, allowing thousands of frames per second to be achieved even when working with ultra-high resolution images.
 ## Overview
 Fastvideo offers next-gen NVIDIA GPU-accelerated image and video processing solutions for B2B applications, leveraging CUDA technology for high performance imaging applications.
 **GPU-accelerated image processing SDK** from Fastvideo enables:
@@ -30,40 +32,48 @@ for industries like **machine vision**, **medical imaging**, **broadcasting**, a
 **Key advantages**:
 ✓ CUDA-accelerated for all NVIDIA GPUs including Jetson  
 ✓ Optimized for XIMEA industrial cameras  
-✓ 1000+ FPS JPEG encoding at 24 MPix
+✓ 2000+ FPS JPEG encoding at 24 MPix
 ✓ 60 GPix/s performance for Bilateral denoising
+## Core Technologies & Algorithms
+**Fastvideo SDK leverages state-of-the-art algorithms optimized for NVIDIA CUDA:**
+- **Demosaicing:** High-Quality Linear Interpolation (HQLI), Directional Filtering with Posteriori Decision (DFPD), High quality MG algorithm
+- **Denoising:** Wavelet-based filtering, Non-Local Means (NLM), Bilateral filter
+- **Tone Mapping:** Proprietary Adaptive Local Tone Mapping (ALTMapper) technology
+- **Color Science:** Advanced 3D LUT interpolation, color correction matrices
+- **Image codecs on CUDA:** JPEG, JPEG2000, RAW Bayer Codec
+- **Entropy Coding:** Highly parallel implementations of Huffman coding (JPEG) and EBCOT (JPEG2000)
 ## GPU-Accelerated Image Processing Solutions
 ### Fastvideo Products
-- [GPU Image Processing Products](https://www.fastcompression.com/products/products.htm): Image processing products designed for high-performance GPU applications, including RAW ISP for demosaicing, denoising, color correction, HDR, JPEG and JPEG2000 encoding.
+- [GPU Image Processing Products](https://www.fastcompression.com/products/products.htm): Image processing products designed for high-performance GPU applications, including RAW ISP for demosaicing, denoising, color correction, HDR, JPEG and JPEG2000 encoding, RawZipper codec.
 - [GPU Denoiser](https://www.fastcompression.com/products/gpu-denoiser.htm): **Remove noise on GPU** in at maximum performance for industrial cameras.
 - [FastVCR software for XIMEA cameras](https://www.fastcompression.com/products/fastvcr-ximea-software.htm): High performance software for **low-latency GPU ISP for machine vision cameras**, designed for raw capture, processing, encoding, and streaming.
 - [GPU tone mapping](https://www.fastcompression.com/products/gpu-tone-mapping.htm): ALTMapper - Fast HDR **Tone Mapping on GPU**. Adaptive local tone mapping engine for a single shot HDR.
 - [MXF Player on GPU](https://www.fastcompression.com/products/mxf-player.htm): **Smooth MXF playback** on NVIDIA GPUs (Windows/Linux).
 ### High-Speed GPU Codecs
-- [CUDA JPEG codec from Fastvideo](https://www.fastcompression.com/products/cuda-jpeg.htm): *The **fastest JPEG encoder/decoder** for NVIDIA GPU (1000+ FPS for 24 MPix encoding).
+- [CUDA JPEG codec from Fastvideo](https://www.fastcompression.com/products/cuda-jpeg.htm): *The **fastest JPEG encoder/decoder** for NVIDIA GPU (2000+ FPS for 24 MPix encoding).
 - [GPU JPEG2000 codec from Fastvideo](https://www.fastcompression.com/products/gpu-jpeg2000.htm): High performance **JPEG2000 codec on GPU** for fast encoding and decoding of J2K images using NVIDIA CUDA. **Best-in-class lossless compression** for medical and aerial imaging. 
 - [CUDA RAW Bayer Codec](https://www.fastcompression.com/solutions/gpu-bayer-codec.htm): High performance **RAW image encoding** on NVIDIA GPU.
 ### CUDA Accelerated Libraries
 - [Image Processing SDK on GPU](https://www.fastcompression.com/products/sdk.htm): Fastvideo Image Processing SDK for CUDA and C++ for very fast imaging applications.
-- [CUDA MJPEG library](https://www.fastcompression.com/products/cuda-mjpeg.htm): Live MJPEG encoding on GPU.
+- [CUDA MJPEG library](https://www.fastcompression.com/products/cuda-mjpeg.htm): Long-term live MJPEG encoding on GPU.
 - [CUDA library for image processing](https://www.fastcompression.com/products/cuda-library.htm): CUDA Accelerated Imaging Library from Fastvideo.
 ### Converters
 - [Fast CinemaDNG Processor](https://www.fastcinemadng.com){:rel="nofollow"}: A specialized tool for high-performance processing of CinemaDNG files on GPU.
-- [Debayer on CUDA](https://www.fastcompression.com/products/debayer.htm): CUDA debayer software for high-quality image reconstruction on NVIDIA GPU.
+- [Debayer on CUDA](https://www.fastcompression.com/products/debayer.htm): Fast CUDA debayer software for high-quality color interpolation on NVIDIA GPU.
 - [MXF converter on GPU](https://www.fastcompression.com/products/mxf-converter.htm): A tool for high-performance conversion of MXF files on GPU.
 ### High-Performance GPU Processing Solutions for Industrial Applications
 - [GPU Image Processing Software Solutions](https://www.fastcompression.com/solutions/solutions.htm): Discover various high performance software solutions tailored for different image processing needs and industries.
-- [Fast demosaicing algorithms on CUDA: HQLI, DFPD, MG](https://www.fastcompression.com/solutions/demosaicing.htm): Overview of advanced demosaicing algorithms implemented on CUDA.
+- [Fast demosaicing algorithms on CUDA: HQLI, DFPD, MG](https://www.fastcompression.com/solutions/demosaicing.htm): Overview of advanced demosaicing algorithms from the Fastvideo SDK implemented on CUDA.
 - [Fast 3D LUT color grading on NVIDIA GPU](https://www.fastcompression.com/solutions/gpu-3dlut.htm): A tool for color grading using 3D LUTs on NVIDIA GPUs.
 ### Download Free Trials of Fastvideo products
-- [DOWNLOADS](https://www.fastcompression.com/download/download.htm): Access to software downloads and resources for high performance GPU solutions: Debayer, JPEG Codec, JPEG2000 Codec, GPU SDK, FastVCR software, Resizer, Denoiser, and ALTMapper.
+- [DOWNLOADS](https://www.fastcompression.com/download/download.htm): Access to software downloads and resources for high performance GPU solutions: Debayer, JPEG Codec, JPEG2000 Codec, GPU SDK, FastVCR software, Resizer, Denoiser, Fast CinemaDNG Processor, and ALTMapper.
 ## Services
-- [SERVICES](https://www.fastcompression.com/services/services.htm): Information on services provided by Fastvideo, including support, development, and consulting for image processing solutions.
+- [SERVICES](https://www.fastcompression.com/services/services.htm): Information on services provided by Fastvideo, including support, development, and consulting for high speed image processing solutions.
 - [ISP tuning: image quality improvement and performance acceleration on NVIDIA GPU](https://www.fastcompression.com/services/isp-tuning.htm): How to improve existing ISP to achieve better results? Image processing with Fastvideo SDK, CUDA, OpenCV, NPP, Libargus, FFmpeg.
 ## Projects
-- [GPU ISP PROJECTS](https://www.fastcompression.com/projects/projects.htm): Overview of various projects undertaken by Fastvideo, showcasing their expertise and experience in GPU image processing. Current GPU ISP software projects in development.
+- [GPU ISP PROJECTS](https://www.fastcompression.com/projects/projects.htm): Overview of various projects undertaken by Fastvideo, showcasing their expertise and experience in GPU image processing. Current GPU ISP software projects in development from Fastvideo.
 ## Applications
-- [APPLICATIONS](https://www.fastcompression.com/applications/applications.htm): A detailed look at the applications of Fastvideo software in various fields, including industrial, digital cinema, aerial imaging, broadcasting, medical, robotics, and machine vision.
+- [APPLICATIONS](https://www.fastcompression.com/applications/applications.htm): A detailed look at the applications of Fastvideo software in various fields, including industrial, digital cinema, aerial and aerospace imaging, broadcasting, medical, robotics, and machine vision.
 ### Industries Using Fastvideo GPU SDK  
 - **Machine Vision**: Live RAW processing with **GPU denoising** and **ultra-fast JPEG encoding**.  
 - **Medical Imaging**: High quality GPU processing of **12-bit Bayer data** for endoscopy and microscopy.
@@ -81,14 +91,24 @@ Street-view, outdoor mobile mapping, aerial imaging, AI-accelerated applications
 ### Broadcasting Solutions
 - [GPU RAW Processor](https://www.fastcompression.com/products/gpu-raw-processor.htm): High-quality and high-performance RAW processing with denoising, color correction, tone mapping, encoding and low-latency streaming.
 ## Latest Articles on GPU Image Processing
-- [Blog content](https://www.fastcompression.com/blog/content.htm): Insights, updates, and articles related to image processing and GPU technology.
+- [Blog content](https://www.fastcompression.com/blog/content.htm): Fastvideo blog: insights, updates, and articles related to ISP and GPU technologies.
 - [Jetson Image Processing: GPU vs CPU Benchmarks](https://www.fastcompression.com/blog/gpu-vs-cpu-fast-image-processing.htm): Performance comparison for GPU and CPU for high-speed imaging applications.
 - [Open Source GPU Software for Machine Vision Cameras](https://www.fastcompression.com/blog/gpu-software-machine-vision-cameras.htm): Software solutions for machine vision applications utilizing GPU technology.
-- [Fast web resize](https://www.fastcompression.com/blog/web-resize-on-the-fly-one-thousand-images-per-second-on-tesla-v100-gpu.htm): High-performance solution for quickly resizing images on the web using GPU technology.
+- [Fast web resize](https://www.fastcompression.com/blog/web-resize-on-the-fly-one-thousand-images-per-second-on-tesla-v100-gpu.htm): High-performance solution for fast jpeg resize for the web using GPU technology.
 - [Jetson TX2 vs NX vs Xavier vs Orin Benchmark Comparison](https://www.fastcompression.com/blog/jetson-benchmark-comparison.htm): A comparative analysis of performance benchmarks across different Jetson models.
+## System Requirements
+**Supported Platforms:**
+- **Operating Systems:** Windows 10/11 x64, Linux Ubuntu 22.04+, NVIDIA JetPack 6.0+
+- **GPU Architectures:** NVIDIA Pascal, Volta, Turing, Ampere, Lovelace
+- **CUDA Toolkit:** Versions 12.6
+- **Memory:** Minimum 8GB GPU RAM (24GB+ recommended for processing large images)
+- **Drivers:** Latest NVIDIA drivers recommended
+**Embedded Platform Support:**
+- NVIDIA Jetson NX, Xavier, Orin, Thor
+- Support for ARM64 architecture
 ## Technical Resources and Benchmarks
 - [Jetson framework](https://www.fastcompression.com/blog/jetson-image-processing-framework.htm): Information on the Jetson framework for developing GPU-accelerated applications.
-- [High quality Debayer library](https://www.fastcompression.com/products/debayer-library.htm): Techniques and software for high-quality debayering of images on GPU.
+- [High quality Debayer library](https://www.fastcompression.com/products/debayer-library.htm): Techniques and software for high-quality debayering on GPU.
 - [gpu-camera-sample software for Machine Vision Applications](https://github.com/fastvideo/gpu-camera-sample){:rel="nofollow"}: Open source camera sample app (**Windows/Linux/Jetson**) with real-time RAW image processing performance on Windows, Linux, Jetson (Fastvideo's GitHub organization)
 - [PGM to DNG converter](https://github.com/fastvideo/pgm2dng){:rel="nofollow"}: Open source command-line tool converting PGM files with raw CFA data into DNG format for processing in Adobe Camera Raw, Raw Therapee, or Fast CinemaDNG Processor.
 - [Benchmarks - Fastvideo GPU Image Processing](https://www.fastcompression.com/benchmarks/benchmarks.htm): Performance metrics for NVIDIA GPU processing.
@@ -99,11 +119,29 @@ Street-view, outdoor mobile mapping, aerial imaging, AI-accelerated applications
 ### Performance Benchmarks (NVIDIA RTX 4090)
 | Task                | Performance          | Resolution    |
 |---------------------|----------------------|---------------|
-| JPEG Encoding       | 1000+ FPS            | 24 MPix       |
+| JPEG Encoding       | 2000+ FPS            | 24 MPix       |
 | JPEG2000 Lossy      | 1200+ FPS            | 8 MPix        |
 | JPEG2000 Lossless   | 700+ FPS             | 8 MPix        |
-| RAW-to-RGB          | 60 FPS               | 4K (12-bit)   |
+| ALTMapper           | 300+ FPS             | 24 MPix       |
+| RAW-to-RGB          | 60+ FPS              | 4K (12-bit)   |
 | Denoising Throughput| 60 GPix/s            | 2K-8K (16-bit)|
+## Integration & Compatibility
+**Seamless integration with popular development frameworks and hardware:**
+- **Programming Languages:** C, C++, CUDA
+- **Camera Support:** XIMEA, Hikrobot, FLIR, Basler, Emergent Vision Technologies, IO Industries, Lucid Vision, and other machine vision cameras
+## Competitive Advantages
+**Why choose Fastvideo SDK over alternative solutions?**
+- **Performance:** Super fast GPU implementations for ISP
+- **Quality:** Advanced algorithms providing superior image quality
+- **Flexibility:** Modular architecture - use only the components you need
+- **Support:** Direct access to engineering team for technical support
+## Licensing Options
+**Flexible licensing models tailored to your needs:**
+- **Evaluation License:** Full-featured trial for 90 days
+- **Development License:** For prototyping and development
+- **Runtime (deployment) License:** For deployment in production systems
+- **OEM Licensing:** Volume discounts for large deployments
+**All licenses include:** Technical support, maintenance updates, and access to documentation.
 ## Chinese Version (中文版)
 - [用于高速图像处理的GPU软件](https://www.fastcompression.com/cn/products.htm): 用于高速图像处理的GPU软件. 快速JPEG，JPEG2000，JPEG XS，DCP播放器，GPU RAW处理器，Cuda上的FastVCR. WINDOWS/Linux/ARM GPU上的实时图像处理软件.
 - [快速JPEG. CUDA JPEG编码器和解码器. 最快的JPEG编解码器.](https://www.fastcompression.com/cn/cuda-jpeg.htm): CUDA上最快的JPEG编解码器. CUDA上图像压缩和解压缩的JPEG编码器和解码器基准. 适用于Windows/Linux/ARM的快速JPEG编解码器
