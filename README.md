@@ -16,7 +16,7 @@ That software is based on the following image processing pipeline for camera app
 * Exposure Correction (brightness control)
 * Debayer with HQLI (5×5 window), L7 (7×7 window), DFPD (11×11), MG (23×23) algorithms
 * Color correction with 3×3 matrix
-* Wavelet-based denoiser
+* Bilaterea or NLM denoiser
 * Crop / Resize / Flip / Flop / Rotate
 * Gamma (linear, sRGB)
 * JPEG / MJPEG encoding/decoding
@@ -62,7 +62,7 @@ The whole pipeline runs in **16/32-bit precision on the NVIDIA GPU**. The softwa
 ### Requirements for Windows
 
 * Camera SDK or GenICam package + camera vendor GenTL producer (.cti). Сurrently XIMEA, MATRIX VISION, Basler, FLIR, Imperx, JAI, LUCID Vision Labs, Daheng Imaging cameras are supported
-* Fastvideo SDK (demo) ver.0.19.6.0
+* Fastvideo SDK (demo) ver.0.22.0.0
 * NVIDIA CUDA-12.6
 * Qt ver.5.13.1
 * Compiler MSVC 2022 or later
@@ -71,7 +71,7 @@ The whole pipeline runs in **16/32-bit precision on the NVIDIA GPU**. The softwa
 
 * Ubuntu 22.04 for x64 platform, Ubuntu 20.04 for Arm64 platform with CUDA 11.4 / CUDA 12.2, Ubuntu 18.04 for Arm64 platform with CUDA 10.2
 * Camera SDK or GenICam package + camera vendor GenTL producer (.cti). Currently XIMEA, MATRIX VISION, Basler, FLIR, Imperx, JAI, Daheng Imaging cameras are supported
-* Fastvideo SDK (demo) ver.0.19.5.0
+* Fastvideo SDK (demo) ver.0.22.0.0
 * NVIDIA CUDA-12.6 for x64, CUDA-11.4/12.6 (Jetson AGX Xavier, Orin) or CUDA-10.2 (Jetson TX2, NX) for ARM64 platform 
 * Compiler gcc 7.4 or later
 * Qt 5 (qtbase5-dev)
@@ -98,7 +98,7 @@ git clone https://github.com/fastvideo/gpu-camera-sample.git
 ### For Windows users
 
 * Create OtherLibs folder in the project root folder. This folder will contains external libraries, used in gpu-camera-sample application.
-* Download Fastvideo SDK from <a href="https://www.fastcompression.com/download/trial/fvSDK-0.19.6.0-Win64-CUDA-12.6-Demo-Exp-2026-05-09.7z">Fastvideo SDK (demo) for Windows-10, 64-bit</a>, unpack it into \<ProjectRoot\>/OtherLibs/FastvideoSDK folder. If the trial period is expired, please send an inquiry to Fastvideo to obtain the latest version.
+* Download Fastvideo SDK from <a href="[https://www.fastcompression.com/download/trial/fvSDK-0.19.6.0-Win64-CUDA-12.6-Demo-Exp-2026-05-09.7z](https://www.fastcompression.com/download/demo/fvSDK-0.22.0.0-Win64-CUDA-12.6-Demo-Exp-2027-04-18.7z)">Fastvideo SDK (demo) for Windows-10, 64-bit</a>, unpack it into \<ProjectRoot\>/OtherLibs/FastvideoSDK folder. If the trial period is expired, please send an inquiry to Fastvideo to obtain the latest version.
 * If you need direct XIMEA camera support, download XiAPI from https://www.ximea.com/support/wiki/apis/XIMEA_Windows_Software_Package. Install downloaded package (by default into C:\XIMEA). Copy API folder from XIAPI installation folder into \<ProjectRoot\>/OtherLibs folder.
 * To work with FLIR cameras
    * Download Spinnaker SDK from https://www.flir.com/support-center/iis/machine-vision/downloads/spinnaker-sdk-and-firmware-download/. 
@@ -250,7 +250,7 @@ In general case, Fastvideo SDK can import/export data from/to SSD / CPU memory /
 
 ## Minimum Hardware ans Software Requirements for desktop application
 
-* Windows-10/11, Ubuntu 20.04 or 22.04 64-bit
+* Windows-10/11, Ubuntu 22.04 or 24.04 64-bit
 * The latest NVIDIA driver
 * NVIDIA GPU 10xx series minimum
 * NVIDIA GPU with 4-8-12 GB memory or better
@@ -262,7 +262,7 @@ We also recommend to check PCI-Express bandwidth for Host-to-Device and Device-t
 
 If you are working with images which reside on HDD, please place them on SSD or M2.
 
-For testing purposes you can utilize the latest NVIDIA GeForce RTX 2060/2070/2080ti, 3070/3080ti/3090, 4080/4090 or Jetson TX2, NX and AGX Xavier / Orin.
+For testing purposes you can utilize the latest NVIDIA GeForce RTX 3070/3080ti/3090, 4080/4090, 5080/5090 or Jetson TX2, NX and AGX Xavier / Orin.
 
 For continuous high performance applications we recommend professional NVIDIA Quadro RTX Ada GPUs.
 
