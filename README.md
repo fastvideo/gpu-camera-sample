@@ -14,8 +14,8 @@ That software is based on the following image processing pipeline for camera app
 * Flat-Field Correction
 * White Balance
 * Exposure Correction (brightness control)
-* Debayer with HQLI (5&times;5 window), L7 (7&times;7 window), DFPD (11&times;11), MG (23&times;23) algorithms
-* Color correction with 3&times;3 matrix
+* Debayer with HQLI (5×5 window), L7 (7×7 window), DFPD (11×11), MG (23×23) algorithms
+* Color correction with 3×3 matrix
 * Wavelet-based denoiser
 * Crop / Resize / Flip / Flop / Rotate
 * Gamma (linear, sRGB)
@@ -36,7 +36,26 @@ Via GenICam the software can work with <a href="https://www.ximea.com" target="_
 
 The software is also working with <a href="https://www.leopardimaging.com" target="_blank">Leopard Imaging</a> mipi csi cameras on Jetson. You need to have a proper driver to be able to acquire raw frames from mipi camera for further image processing on the GPU with 16/32-bit precision. The software doesn't use NVIDIA ISP via libargus.
 
-Soon we are going to add support for <a href="https://emergentvisiontec.com/" target="_blank">Emergent Vision Technologies</a>, <a href="https://en.ids-imaging.com/" target="_blank">IDS Imaging Development Systems</a>, <a href="https://www.baumer.com" target="_blank">Baumer</a>, <a href="https://kayainstruments.com/" target="_blank">Kaya Instruments</a> cameras. You can add support for desired cameras by yourself. The software is working with demo version of <a href="https://www.fastcompression.com/products/sdk.htm" target="_blank">Fastvideo SDK</a>, that is why you can see a watermark on the screen. To get a Fastvideo SDK license for development and for deployment, please contact <a href="https://www.fastcompression.com/" target="_blank">Fastvideo company</a>.
+Soon we are going to add support for <a href="https://www.baumer.com" target="_blank">Baumer</a>, <a href="https://kayainstruments.com/" target="_blank">Kaya Instruments</a>, <a href="https://en.ids-imaging.com/" target="_blank">IDS Imaging Development Systems</a> cameras. Cameras from <a href="https://emergentvisiontec.com/" target="_blank">Emergent Vision Technologies</a>, IO Industries and Hikrobot are already supported (see the roadmap below). You can add support for desired cameras by yourself. The software is working with demo version of <a href="https://www.fastcompression.com/products/sdk.htm" target="_blank">Fastvideo SDK</a>, that is why you can see a watermark on the screen. To get a Fastvideo SDK license for development and for deployment, please contact <a href="https://www.fastcompression.com/" target="_blank">Fastvideo company</a>.
+
+## Performance at a glance
+
+All figures below are on a single **NVIDIA GeForce RTX 4090** unless noted. They match the numbers published on Fastvideo's product and benchmark pages (linked in the last column).
+
+| Task | Performance | Source |
+|---|---|---|
+| Full color-camera ISP (this application) | up to **4 GPix/s** | this repository |
+| FastVCR, 65 MPix camera (9344×7000) | **70 fps** (8-bit) / 60 fps (10-bit) | [FastVCR for XIMEA](https://www.fastcompression.com/products/fastvcr-ximea-software.htm) |
+| Debayer, MG algorithm (62 MPix, 16-bit) | up to **20 GPix/s**, ~40.5 dB PSNR (Kodak) | [GPU Debayer](https://www.fastcompression.com/products/debayer.htm) |
+| Debayer, HQLI algorithm (fastest) | up to **69 GPix/s** | [GPU Debayer](https://www.fastcompression.com/products/debayer.htm) |
+| Motion JPEG encoding (Full HD) | up to **5500 fps** | [Motion JPEG on CUDA](https://www.fastcompression.com/products/cuda-mjpeg.htm) |
+| Bilateral denoiser (8.9 MPix, 16-bit RGB) | **0.13 ms** (61 GPix/s) | [GPU Denoiser](https://www.fastcompression.com/products/gpu-denoiser.htm) |
+| RawZipper RAW Bayer codec (12-bit, 12 MPix) | lossy compression ratio ~10 at up to **~1 GPix/s** | [RawZipper RAW codec](https://www.fastcompression.com/products/raw-bayer-codec.htm) |
+| Adaptive local tone mapping (65 MPix, 16-bit) | **6.3 ms** (10 GPix/s) | [ALTMapper](https://www.fastcompression.com/products/gpu-tone-mapping.htm) |
+| Fast CinemaDNG RAW-to-RGB (12 MPix DNG, on RTX 2080ti) | 3000 frames/min = **50 fps** | [Fast CinemaDNG Processor](https://www.fastcompression.com/applications/fastcinemadng.htm) |
+| Glass-to-glass latency (XIMEA USB3, 3 MPix, 120 fps, 144 Hz monitor) | **~35–40 ms** | [FastVCR](https://www.fastcompression.com/products/fastvcr-ximea-software.htm) |
+
+The whole pipeline runs in **16/32-bit precision on the NVIDIA GPU**. The software does **not** use the NVIDIA Jetson hardware ISP (libargus), so every stage of the ISP is tunable and quality-critical steps — demosaicing, denoising, and tone mapping — use high-quality algorithms rather than fixed-function approximations.
 
 ## How to build gpu-camera-sample
 
@@ -290,6 +309,31 @@ To test a real application with XIMEA cameras (USB3 or PCIe), please have a look
 * <a href="https://www.fastcompression.com/products/gpu-tone-mapping.htm">ALTMapper software</a> (adaptive local tone mapping algorithm) - in progress
 * JPEG2000 encoder and decoder on GPU for camera applications
 * Interoperability with FFmpeg, UltraGrid, and GStreamer
+
+## Frequently asked questions
+
+**What is gpu-camera-sample?**
+A cross-platform (Windows, Linux, NVIDIA Jetson) sample camera application that runs the full image signal processor (ISP) on the NVIDIA GPU in CUDA — from raw capture and debayer to denoising, tone mapping, JPEG / H.264 / H.265 encoding, OpenGL display and RTSP streaming. It is built on the [Fastvideo SDK](https://www.fastcompression.com/products/sdk.htm).
+
+**Which cameras does it support?**
+XIMEA (XIMEA SDK), FLIR (Spinnaker), Imperx, LUCID Vision Labs (Arena), and — via the GenICam (GenTL) standard — Basler, MATRIX VISION, JAI, Daheng Imaging and more; Leopard Imaging MIPI CSI-2 cameras on NVIDIA Jetson. Emergent Vision Technologies, IO Industries and Hikrobot cameras are supported as well. A PGM/RAW file simulator lets you test the pipeline without a camera.
+
+**How fast is GPU raw image processing?**
+The full color pipeline reaches up to 4 GPix/s, and a 65 MPix machine-vision camera is processed at 70 fps on a GeForce RTX 4090. See the table above and the [Fastvideo SDK benchmarks](https://www.fastcompression.com/benchmarks/benchmarks.htm).
+
+**Does it use the NVIDIA Jetson hardware ISP or libargus?**
+No. gpu-camera-sample / FastVCR implement a full software ISP in CUDA at 16/32-bit precision — a tunable alternative to the fixed-function hardware ISP and libargus. See [FastVCR for MIPI CSI2 cameras](https://www.fastcompression.com/products/fastvcr-mipi-camera-software.htm).
+
+**Is it free?**
+The application runs with a demo Fastvideo SDK (a watermark is shown on the image). For a development or deployment license, contact [Fastvideo](https://www.fastcompression.com/).
+
+## Related Fastvideo GPU software
+
+* [Fastvideo SDK](https://www.fastcompression.com/products/sdk.htm) — CUDA image &amp; video processing SDK (the core of this application)
+* FastVCR camera software — [XIMEA (USB3/PCIe)](https://www.fastcompression.com/products/fastvcr-ximea-software.htm), [MIPI CSI2 on Jetson](https://www.fastcompression.com/products/fastvcr-mipi-camera-software.htm), [Emergent Vision (10/25/50/100-GigE)](https://www.fastcompression.com/products/fastvcr-evt-software.htm), [Hikrobot](https://www.fastcompression.com/products/fastvcr-hikrobot-software.htm)
+* [Fast CinemaDNG Processor](https://www.fastcompression.com/applications/fastcinemadng.htm) — RAW / CinemaDNG / MLV processing on GPU · product site [fastcinemadng.com](https://www.fastcinemadng.com/)
+* Codecs &amp; modules — [GPU JPEG2000](https://www.fastcompression.com/products/gpu-jpeg2000.htm), [CUDA JPEG](https://www.fastcompression.com/products/cuda-jpeg.htm), [Motion JPEG](https://www.fastcompression.com/products/cuda-mjpeg.htm), [GPU Debayer](https://www.fastcompression.com/products/debayer.htm), [GPU Denoiser](https://www.fastcompression.com/products/gpu-denoiser.htm), [RawZipper RAW codec](https://www.fastcompression.com/products/raw-bayer-codec.htm), [ALTMapper tone mapping](https://www.fastcompression.com/products/gpu-tone-mapping.htm), [GPU Transcoder](https://www.fastcompression.com/products/gpu-transcoder.htm)
+* [All products](https://www.fastcompression.com/products/products.htm) &middot; [Solutions](https://www.fastcompression.com/solutions/solutions.htm) &middot; [Blog](https://www.fastcompression.com/blog/content.htm)
 
 ## Info
 
