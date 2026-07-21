@@ -358,7 +358,7 @@ The application runs with a demo Fastvideo SDK (a watermark is shown on the imag
 
 * FastVCR software for XIMEA cameras with GPU-based image processing - <a href="https://www.fastcompression.com/download/FastVCR_Portable.7z">download link for Windows version</a> 
 * Download <a href="https://www.fastcinemadng.com/download/download.html" target="_blank">Fast CinemaDNG Processor</a> software for Windows, manual and test DNG and BRAW footages
-* Download <a href="https://www.fastcompression.com/download/trial/fvSDK-0.19.6.0-Win64-CUDA-12.6-Demo-Exp-2026-05-09.7z" target="_blank">Fastvideo SDK (demo) for Windows-10, 64-bit</a> (valid till May 09, 2026)
+* Download <a href="https://www.fastcompression.com/download/demo/fvSDK-0.22.0.0-Win64-CUDA-12.6-Demo-Exp-2027-04-18.7z" target="_blank">Fastvideo SDK (demo) for Windows-10, 64-bit</a> (valid till April 18, 2027)
 * Download <a href="https://www.fastcompression.com/download/Fastvideo_SDK_manual.pdf" target="_blank">Fastvideo SDK Manual</a>
-* Download Fastvideo SDK (demo) for Linux Ubuntu 22.04, 64-bit - available upon request
+* Download Fastvideo SDK (demo) for Linux Ubuntu 24.04, 64-bit - available upon request
 * Download Fastvideo SDK (demo) for NVIDIA Jetson Xavier, Orin - available upon request
