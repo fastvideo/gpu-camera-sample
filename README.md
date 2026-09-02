@@ -353,6 +353,8 @@ The application runs with a demo Fastvideo SDK (a watermark is shown on the imag
 * <a href="https://www.fastcompression.com/pub/2022/Fastvideo_SDK_benchmarks.pdf" target="_blank">Fastvideo SDK Benchmarks</a>
 * <a href="https://www.fastcompression.com/blog/jetson-benchmark-comparison.htm" target="_blank">Jetson Benchmark Comparison for Image Processing: TX2 vs Xavier NX vs Xavier AGX, vs Orin AGX</a>
 * JPEG2000 benchmarks for <a href="https://www.fastcompression.com/benchmarks/benchmarks-j2k.htm" target="_blank">encoding</a> and <a href="https://www.fastcompression.com/benchmarks/decoder-benchmarks-j2k.htm" target="_blank">decoding</a>
+* [JPEG2000 benchmark: reproducible measurement of Fastvideo JPEG2000 vs nvJPEG2000 on RTX 4090](https://github.com/fastvideo/jpeg2000-benchmark) — code, raw logs and machine-readable results
+* [Benchmark comparison: Fastvideo JPEG2000 vs nvJPEG2000 on RTX 4090](https://www.fastcompression.com/blog/fastvideo-vs-nvjpeg2000.htm) — the article
 
 ## Downloads
 
